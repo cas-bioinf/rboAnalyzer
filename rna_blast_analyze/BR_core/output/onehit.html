@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+    {% macro create_onehit(data) %}
+    <div class="onehit" data-brna_sequence="{{data.sequence}}" data-brna_seqname="{{data.seqname}}">
+        <h3 class="onehit_heading">
+            Hit: {{data.source_seq_name}}
+        </h3>
+        <div class="blast_text">
+            <p class="header-bhname">{{data.blast_hit_name}}</p>
+            <pre>
+{{data.blast_text}}</pre>
+        </div>
+        <div class="onehit_report">
+            <p>
+                <u>Extension report:</u><br>
+                sequence start:    {{data.ext_start}} nt<br>
+                sequence end:      {{data.ext_end}} nt<br>
+                RSEARCH bit score: {{data.rsearchbitscore}}<br>
+            </p>
+            <div>
+                <!--<p class="header-textarea"><u>Extended sequence fasta:</u></p>-->
+                <label for="indivSequenceCheckbox"><u>Extended sequence fasta:</u></label>
+                <input type="checkbox" class="individualSequenceCheckbox" id="indivSequenceCheckbox">
+            </div>
+            <textarea readonly="true" rows="5" cols="65">{{data.formated_seq}}</textarea>
+        </div>
+        <div class="row">
+            {% for pic in data.pictures %}
+                <figure class="column" data-brna_secondary_structure="{{pic.secondary_structure}}">
+                    <a href onclick="mypicload(this)">
+                        <img class="rnapic" src="{{pic.pic}}" />
+                    </a>
+                    <figcaption>
+                        {{pic.picname}}
+                        <input type="checkbox" class="individualStructureCheckbox">
+                    </figcaption>
+                </figure>
+            {% endfor %}
+        </div>
+
+        {% if data.draw_seqview %}
+            <div id="{{data.seqvid}}" class="SeqViewerApp" data-autoload>
+                <a href="{{data.seqviewurl}}"></a>
+            </div>
+        {% endif %}
+
+    </div>
+    {% endmacro %}
+
+{% for ii in input_list %}
+    {{ create_onehit(ii) }}
+{% endfor %}
+{% endblock %}
+
+{% block footer %}
+<h3 class="onehit_heading">
+    command and parameters
+</h3>
+<div class="footerwrap">
+    <p class="header-command"><u>executed command:</u></p>
+    <textarea readonly="true" rows="3" cols="65">{{foo.command}}</textarea>
+    <p>
+        <u>date:</u>
+        {% if foo.exec_date %}
+            strftime("%H:%M:%S %d. %m. %Y", foo.exec_date)
+        {% else %}
+            Unknown date.
+        {% endif %}
+    </p>
+    <pre><u>parameters:</u>
+{% for par in foo.parameters %}
+    <u>{{par[0]}}:</u> {{par[1]}}
+{% endfor %}
+    </pre>
+</div>
+<div class="bottom-space"></div>
+{% endblock %}

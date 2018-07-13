@@ -1,0 +1,129 @@
+<style>
+    html {
+        font-family: "Lucida Sans", sans-serif;
+    }
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0 4px;
+    }
+
+    /* Create four equal columns that sits next to each other */
+    .column {
+        flex: 25%;
+        max-width: 25%;
+        padding: 0 4px;
+    }
+
+    .column img {
+        margin-top: 8px;
+        vertical-align: middle;
+    }
+
+    /* Responsive layout - makes a two column-layout instead of four columns */
+    @media screen and (max-width: 800px) {
+        .column {
+            flex: 50%;
+            max-width: 50%;
+        }
+    }
+
+    /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+    @media screen and (max-width: 600px) {
+        .column {
+            flex: 100%;
+            max-width: 100%;
+        }
+    }
+    [class*="header-"] {
+        margin: 5px 0;
+    }
+    .onehit_heading {
+        background: #ccc;
+        height: 50px;
+        line-height: 50px;
+        margin-top: 10px;
+        font-size: 30px;
+        padding-left: 10px;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0px;
+    }
+
+    /*.controls button {
+    //    position: fixed;
+    //    bottom: 20px;
+    //    z-index: 99;
+    //    font-size: 18px;
+    //    border: none;
+    //    outline: none;
+    //    background-color: red;
+    //    color: white;
+    //    cursor: pointer;
+    //    padding: 15px;
+    //    border-radius: 4px;
+    }
+    #exportStrBtn {
+        right: 30px
+    }
+
+    #exportSeqsBtn {
+        right: 250px
+    }*/
+
+    .controls button {
+        background-color: red;
+        color: white;
+        padding: 15px;
+        cursor: pointer;
+        float: left;
+        border-radius: 4px;
+        border: none;
+        outline: none;
+        font-size: 16px;
+        margin-left: 2px;
+        height: 46px;
+    }
+
+    /* Clear floats (clearfix hack) */
+    .controls:after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+
+    .controls button:not(:last-child) {
+        border-right: none; /* Prevent double borders */
+    }
+
+    .controls button:hover {
+        background-color: #555;
+    }
+
+    div.controls {
+        position: fixed;
+        bottom: 10px;
+        z-index: 99;
+    }
+    div.button-background {
+        position: fixed;
+        bottom: 0px;
+        z-index: 99;
+        background-color: #fff;
+        width: 100%;
+        height: 56px
+    }
+    div.bottom-space {
+        background-color: #fff;
+        width: 100%;
+        height: 56px
+    }
+    div.footerwrap {
+        font-family: Lucida Console, Lucida Sans Typewriter, monaco, Bitstream Vera Sans Mono, monospace;
+	    font-size: 13px;
+	    font-style: normal;
+	    font-variant: normal;
+	    font-weight: 400;
+	    line-height: 18.5667px;
+    }
+</style>

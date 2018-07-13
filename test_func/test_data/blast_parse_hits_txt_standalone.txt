@@ -1,0 +1,81 @@
+BLASTN 2.2.28+
+
+
+Reference: Stephen F. Altschul, Thomas L. Madden, Alejandro A.
+Schaffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J.
+Lipman (1997), "Gapped BLAST and PSI-BLAST: a new generation of
+protein database search programs", Nucleic Acids Res. 25:3389-3402.
+
+
+
+Database: /home/big-
+user/Documents/WORK/db_known_str/art_chr_from_cleaned_str/RF00230-
+art.blastdb
+           1 sequences; 987,580 total letters
+
+
+
+Query= AE017355.1_1226056-1226300 AE017355.1/1226056-1226300
+
+Length=245
+                                                                      Score     E
+Sequences producing significant alignments:                          (Bits)  Value
+
+tpe|RF00230|RF00230  TPA: artificial chr. from /home/big-user/Doc...  31.1    0.084
+
+
+>tpe|RF00230|RF00230 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_from_cleaned_str/RF00230-seqs_source.fasta, 
+shuffled 
+sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, 
+G:0.25]
+Length=987580
+
+ Score = 31.1 bits (20),  Expect = 0.084
+ Identities = 41/58 (71%), Gaps = 3/58 (5%)
+ Strand=Plus/Minus
+
+Query  146     CGCCGTTACAAGGATAAGGTATATATTTTGTACCTGAATAAAGCGGGATGCTTTTGCG  203
+               |||| | || ||||  | | |||||||||||   ||    |  ||||||||||| |||
+Sbjct  799389  CGCCTTGACTAGGA--ATG-ATATATTTTGTTATTGGTGCAGCCGGGATGCTTTCGCG  799335
+
+
+ Score = 25.4 bits (16),  Expect = 4.4
+ Identities = 26/36 (72%), Gaps = 0/36 (0%)
+ Strand=Plus/Plus
+
+Query  204   TCCAACATGAGGTGGTACCACGGTAAATTTATCGTC  239
+             || || | | ||||||| |||| || ||  || |||
+Sbjct  3280  TCGAAGAAGCGGTGGTATCACGCTAGATACATGGTC  3315
+
+
+ Score = 25.4 bits (16),  Expect = 4.4
+ Identities = 21/26 (81%), Gaps = 0/26 (0%)
+ Strand=Plus/Plus
+
+Query  207     AACATGAGGTGGTACCACGGTAAATT  232
+               ||||| ||||||| ||   |||||||
+Sbjct  335394  AACATAAGGTGGTGCCTACGTAAATT  335419
+
+
+
+Lambda      K        H
+    1.10    0.333    0.549 
+
+Gapped
+Lambda      K        H
+   0.990    0.170    0.300 
+
+Effective search space used: 195531534
+
+
+  Database: /home/big-
+user/Documents/WORK/db_known_str/art_chr_from_cleaned_str/RF00230-
+art.blastdb
+    Posted date:  Dec 14, 2017  1:38 PM
+  Number of letters in database: 987,580
+  Number of sequences in database:  1
+
+
+
+Matrix: blastn matrix 1 -1
+Gap Penalties: Existence: 2, Extension: 1

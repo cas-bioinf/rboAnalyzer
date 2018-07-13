@@ -1,0 +1,114 @@
+{
+  "alifold_refold": {
+    "pred_sim_threshold": 80,
+    "cmscore_percent": 70
+  }, 
+  "TurboFold": {
+    "cmscore_percent": 40
+  }, 
+  "rfam_subopt": {
+    "mfold": [10, 2, 60]
+  }, 
+  "tcoffee_rcoffee_alifold_refold_rnafoldc": {
+    "pred_sim_threshold": 70,
+    "cmscore_tr": 5
+  }, 
+  "rfam_rapidshapes": {
+    "shape_level": 5
+  }, 
+  "dh_clustal_alifold_conserved_ss_rnafoldc": {
+    "pred_sim_threshold": 60,
+    "conseq_conserved": 7,
+    "repred_unpaired": "*",
+    "cmscore_percent": 90
+  },
+  "dh_tcoffee_alifold_conserved_ss_rnafoldc": {
+    "repred_unpaired_tr": "*",
+    "pred_sim_threshold": 60,
+    "conseq_conserved": 5,
+    "cmscore_percent": 90
+  }, 
+  "muscle_alifold_unpaired_conserved_refold": {
+    "repred_unpaired_tr": "*",
+    "pred_sim_threshold": 95,
+    "conseq_conserved": 6,
+    "cmscore_percent": 90
+  }, 
+  "subopt_fold_muscle_alifold": {
+    "mfold": [5, 2, 10],
+    "cmscore_percent": 80
+  }, 
+  "subopt_fold_query": {
+    "mfold": [5, 2, 10]
+  }, 
+  "subopt_fold_clustal_alifold": {
+    "mfold": [5, 2, 10],
+    "cmscore_percent": 80
+  }, 
+  "rfam_rnafoldc": {}, 
+  "muscle_alifold_refold_rnafold_c": {
+    "pred_sim_threshold": 95,
+    "cmscore_tr": -2
+  }, 
+  "pairwise_centroid_homfold": {
+    "centroid_homfold": "--engine_s CONTRAfold", 
+    "pred_sim_threshold": 95, 
+    "cmscore_percent": 0
+  }, 
+  "alifold_unpaired_conserved_refold": {
+    "repred_unpaired_tr": "*",
+    "pred_sim_threshold": 70,
+    "conseq_conserved": 5,
+    "cmscore_percent": 80
+  }, 
+  "tcoffee_rcoffee_alifold_conserved_ss_rnafoldc": {
+    "repred_unpaired_tr": "*", 
+    "pred_sim_threshold": 60,
+    "conseq_conserved": 5, 
+    "cmscore_percent": 70
+  },
+  "clustalo_alifold_rapidshapes": {
+  "pred_sim_threshold": 90, 
+  "shape_level": 5,
+  "cmscore_percent": 20
+  }, 
+  "alifold_refold_rnafold_c": {
+    "pred_sim_threshold": 95, 
+    "cmscore_percent": 0
+  }, 
+  "muscle_alifold_refold": {
+    "pred_sim_threshold": 90, 
+    "cmscore_percent": 60
+  }, 
+  "dh_clustal_alifold_refold_rnafoldc": {
+    "pred_sim_threshold": 95,
+    "cmscore_percent": 10
+  },
+  "tcoffee_rcoffee_alifold_refold": {
+    "pred_sim_threshold": 60, 
+    "cmscore_percent": 70
+  }, 
+  "dh_tcoffee_alifold_refold_rnafoldc": {
+    "pred_sim_threshold": 95, 
+    "cmscore_tr": 10
+  }, 
+  "muscle_alifold_rapidshapes": {
+    "pred_sim_threshold": 90, 
+    "shape_level": 5,
+    "cmscore_percent": 30
+  }, 
+  "rcoffee_alifold_rapidshapes": {
+    "pred_sim_threshold": 90, 
+    "shape_level": 5, 
+    "cmscore_percent": 70
+  }, 
+  "rnafold": {}, 
+  "dh_tcoffee_alifold_refold": {
+    "pred_sim_threshold": 60
+    , "cmscore_percent": 60
+  }, 
+  "dh_clustal_alifold_refold": {
+    "pred_sim_threshold": 90,
+    "cmscore_percent": 90
+  }
+}

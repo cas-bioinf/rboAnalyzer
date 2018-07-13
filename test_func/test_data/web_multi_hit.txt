@@ -1,0 +1,6158 @@
+BLASTN 2.8.0+
+Reference: Stephen F. Altschul, Thomas L. Madden, Alejandro
+A. Schaffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and
+David J. Lipman (1997), "Gapped BLAST and PSI-BLAST: a new
+generation of protein database search programs", Nucleic
+Acids Res. 25:3389-3402.
+
+
+RID: 7UV2FXZU015
+
+
+Database: Nucleotide collection (nt)
+           46,575,796 sequences; 169,753,532,752 total letters
+Query= 
+Length=18
+
+
+                                                                   Score     E
+Sequences producing significant alignments:                       (Bits)  Value
+
+CP025435.1  Gordonia sp. YC-JH1 chromosome, complete genome        32.2    1.1  
+CP000580.1  Mycobacterium sp. JLS, complete genome                 32.2    1.1  
+CP000518.1  Mycobacterium sp. KMS, complete genome                 32.2    1.1  
+CP000384.1  Mycobacterium sp. MCS, complete genome                 32.2    1.1  
+CP023435.1  Mycobacterium sp. PYR15 chromosome, complete genome    30.2    4.3  
+CP010271.1  Mycobacterium sp. EPM10906, complete genome            30.2    4.3  
+CP018043.1  Mycobacterium sp. WY10, complete genome                30.2    4.3  
+CP015235.1  Rhodococcus fascians D188, complete genome             30.2    4.3  
+CP014958.1  Mycobacterium abscessus strain FLAC045, complete g...  30.2    4.3  
+CP014954.1  Mycobacterium abscessus strain FLAC008, complete g...  30.2    4.3  
+CP014953.1  Mycobacterium abscessus strain FLAC007, complete g...  30.2    4.3  
+CP014951.1  Mycobacterium abscessus strain FLAC004, complete g...  30.2    4.3  
+CP019066.1  Tsukamurella sp. MH1 chromosome, complete genome       28.2    17   
+AP014567.1  Mycobacterium leprae Kyoto-2 DNA, complete genome      28.2    17   
+CP009360.2  Mycobacterium avium subsp. hominissuis strain OCU4...  28.2    17   
+CP018020.1  Mycobacterium avium subsp. hominissuis strain OCU8...  28.2    17   
+CP018014.1  Mycobacterium avium subsp. hominissuis strain OCU9...  28.2    17   
+CP016818.1  Mycobacterium avium subsp. hominissuis strain HP17...  28.2    17   
+AP018410.1  Mycobacterium pseudoshottsii JCM 15466 DNA, comple...  28.2    17   
+LT899394.1  Mycobacterium aurum isolate liquid genome assembly...  28.2    17   
+CP022105.1  Mycobacterium avium subsp. paratuberculosis strain...  28.2    17   
+CP022095.1  Mycobacterium avium subsp. paratuberculosis strain...  28.2    17   
+CP020821.1  Mycobacterium colombiense CECT 3035, complete genome   28.2    17   
+CP018363.1  Mycobacterium avium subsp. hominissuis strain H87,...  28.2    17   
+CP017014.1  Rhodococcus sp. WMMA185, complete genome               28.2    17   
+AP017635.1  Mycobacterium ulcerans subsp. shinshuense DNA, nea...  28.2    17   
+AP017624.1  Mycobacterium ulcerans subsp. shinshuense DNA, com...  28.2    17   
+CP016396.1  Mycobacterium avium strain RCAD0278, complete genome   28.2    17   
+CP016189.1  Mycobacterium immunogenum strain FLAC016, complete...  28.2    17   
+LT549889.1  Mycobacterium aurum isolate liquid genome assembly...  28.2    17   
+CP015495.1  Mycobacterium avium subsp. paratuberculosis strain...  28.2    17   
+CP014952.1  Mycobacterium abscessus strain FLAC005, complete g...  28.2    17   
+CP011530.1  Mycobacterium immunogenum strain CCUG 47286, compl...  28.2    17   
+CP011269.1  Mycobacterium fortuitum strain CT6, complete genome    28.2    17   
+HG917972.2  Mycobacterium marinum E11 main chromosome genome       28.2    17   
+CP011541.1  Corynebacterium epidermidicanis strain DSM 45586, ...  28.2    17   
+CP010114.1  Mycobacterium avium subsp. paratuberculosis strain...  28.2    17   
+CP010113.1  Mycobacterium avium subsp. paratuberculosis strain...  28.2    17   
+CP009914.1  Mycobacterium sp. VKM Ac-1817D, complete genome        28.2    17   
+CP009614.1  Mycobacterium avium subsp. avium strain DJO-44271,...  28.2    17   
+CP009482.1  Mycobacterium avium subsp. avium 2285 (S), complet...  28.2    17   
+CP009493.1  Mycobacterium avium subsp. avium 2285 (R), complet...  28.2    17   
+CP009215.1  Corynebacterium ureicelerivorans strain IMMIB RIV-...  28.2    17   
+CP008947.1  Rhodococcus opacus strain R7 sequence                  28.2    17   
+CP008944.1  Corynebacterium atypicum strain R2070, complete ge...  28.2    17   
+CP004350.1  Corynebacterium casei LMG S-19264, complete genome     28.2    17   
+AP012555.1  Mycobacterium avium subsp. hominissuis TH135 chrom...  28.2    17   
+CP005928.1  Mycobacterium avium subsp. paratuberculosis MAP4, ...  28.2    17   
+CP003899.1  Mycobacterium liflandii 128FXT, complete genome        28.2    17   
+CP002917.1  Corynebacterium variabile DSM 44702, complete genome   28.2    17   
+CP002786.1  Hoyosella subflava DQS3-9A1, complete genome           28.2    17   
+CP001966.1  Tsukamurella paurometabola DSM 20162, complete genome  28.2    17   
+FM211192.1  Mycobacterium leprae Br4923, complete genome sequence  28.2    17   
+CP000854.1  Mycobacterium marinum M, complete genome               28.2    17   
+CP000325.1  Mycobacterium ulcerans Agy99, complete genome          28.2    17   
+CP000479.1  Mycobacterium avium 104, complete genome               28.2    17   
+AL583925.1  Mycobacterium leprae strain TN complete genome; se...  28.2    17   
+AL035480.1  Mycobacterium leprae cosmid B12                        28.2    17   
+AE016958.1  Mycobacterium avium subsp. paratuberculosis str. k...  28.2    17   
+CP025959.1  Rhodococcus sp. djl-6-2 chromosome, complete genome    26.3    68   
+CP024890.1  Rhodococcus ruber strain YYL chromosome, complete ...  26.3    68   
+CP024315.1  Rhodococcus ruber strain P14 chromosome, complete ...  26.3    68   
+CP023778.1  Nocardia terpenica strain NC_YFY_NT001 chromosome,...  26.3    68   
+CP023720.1  Rhodococcus sp. H-CA8f chromosome, complete genome     26.3    68   
+CP023405.1  Gordonia sp. 1D chromosome                             26.3    68   
+CP021238.1  Mycobacterium lepraemurium strain Hawaii chromosom...  26.3    68   
+CP023151.1  Mycobacterium chimaera strain FLAC0070, complete g...  26.3    68   
+CP023149.1  Mycobacterium intracellulare strain FLAC0181, comp...  26.3    68   
+CP023146.1  Mycobacterium intracellulare strain FLAC0133, comp...  26.3    68   
+CP022915.1  Rhodococcus pyridinivorans strain GF3, complete ge...  26.3    68   
+LT906473.1  Corynebacterium cystitidis strain NCTC11863 genome...  26.3    68   
+LT906469.1  Mycobacterium terrae strain NCTC10856 genome assem...  26.3    68   
+LT906450.1  Rhodococcus rhodochrous strain NCTC10210 genome as...  26.3    68   
+LT906443.1  Corynebacterium ulcerans strain NCTC7910 genome as...  26.3    68   
+CP019888.1  Mycobacterium kansasii strain 9MK genome               26.3    68   
+CP019887.1  Mycobacterium kansasii strain 11MK genome              26.3    68   
+CP019886.1  Mycobacterium kansasii strain 10MK genome              26.3    68   
+CP019885.1  Mycobacterium kansasii strain 6MK genome               26.3    68   
+CP019884.1  Mycobacterium kansasii strain 4MK genome               26.3    68   
+CP019883.1  Mycobacterium kansasii strain 1MK genome               26.3    68   
+CP014941.1  Rhodococcus sp. BH4, complete genome                   26.3    68   
+CP019705.1  Corynebacterium ammoniagenes strain KCCM 40472, co...  26.3    68   
+CP019572.1  Rhodococcus sp. MTM3W5.2, complete genome              26.3    68   
+CP019420.1  Mycobacterium sp. MS1601, complete genome              26.3    68   
+CP007220.1  Mycobacterium chelonae CCUG 47445, complete genome     26.3    68   
+CP015220.1  Rhodococcus sp. PBTS2, complete genome                 26.3    68   
+CP015219.1  Rhodococcus sp. PBTS1, complete genome                 26.3    68   
+CP010071.1  Mycobacterium sp. QIA-37, complete genome              26.3    68   
+CP014961.1  Mycobacterium abscessus strain FLAC054, complete g...  26.3    68   
+CP014960.1  Mycobacterium abscessus strain FLAC049, complete g...  26.3    68   
+CP014959.1  Mycobacterium abscessus strain FLAC048, complete g...  26.3    68   
+CP014957.1  Mycobacterium abscessus strain FLAC031, complete g...  26.3    68   
+CP014956.1  Mycobacterium abscessus strain FLAC029, complete g...  26.3    68   
+CP014955.1  Mycobacterium abscessus strain FLAC013, complete g...  26.3    68   
+CP014950.1  Mycobacterium abscessus strain FLAC003, complete g...  26.3    68   
+CP003491.1  Mycobacterium sp. MOTT36Y, complete genome             26.3    68   
+CP003324.1  Mycobacterium intracellulare MOTT-64, complete genome  26.3    68   
+CP003323.1  Mycobacterium intracellulare MOTT-02, complete genome  26.3    68   
+CP003322.1  Mycobacterium intracellulare ATCC 13950, complete ...  26.3    68   
+CP003169.1  Mycobacterium rhodesiae NBB3, complete genome          26.3    68   
+
+ALIGNMENTS
+>CP025435.1 Gordonia sp. YC-JH1 chromosome, complete genome
+Length=4101557
+
+ Score = 32.2 bits (16),  Expect = 1.1
+ Identities = 16/16 (100%), Gaps = 0/16 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGTCGT  16
+                ||||||||||||||||
+Sbjct  3023295  ACGTACGTGCAGTCGT  3023310
+
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTC  14
+                ||||||||||||||
+Sbjct  3603553  ACGTACGTGCAGTC  3603540
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  2413855  ACGTGCAGTCGTC  2413867
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  670302  CGTGCAGTCGTC  670291
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3       GTACGTGCAGTC  14
+               ||||||||||||
+Sbjct  749468  GTACGTGCAGTC  749479
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  790042  CGTGCAGTCGTC  790053
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1530280  ACGTGCAGTCGT  1530269
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  3474756  TACGTGCAGTCG  3474745
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  3603352  GTGCAGTCGTCA  3603341
+
+
+>CP000580.1 Mycobacterium sp. JLS, complete genome
+Length=6048425
+
+ Score = 32.2 bits (16),  Expect = 1.1
+ Identities = 16/16 (100%), Gaps = 0/16 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                ||||||||||||||||
+Sbjct  5401698  CGTACGTGCAGTCGTC  5401683
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  1       ACGTACGTGCAGT  13
+               |||||||||||||
+Sbjct  143009  ACGTACGTGCAGT  143021
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  5915934  GTACGTGCAGTCG  5915922
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1881374  ACGTACGTGCAG  1881385
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2002061  GTGCAGTCGTCA  2002050
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  4793089  GTACGTGCAGTC  4793078
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  5139410  CGTGCAGTCGTC  5139399
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  5446354  CGTGCAGTCGTC  5446365
+
+
+>CP000518.1 Mycobacterium sp. KMS, complete genome
+Length=5737227
+
+ Score = 32.2 bits (16),  Expect = 1.1
+ Identities = 16/16 (100%), Gaps = 0/16 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                ||||||||||||||||
+Sbjct  5087330  CGTACGTGCAGTCGTC  5087315
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  1       ACGTACGTGCAGT  13
+               |||||||||||||
+Sbjct  167050  ACGTACGTGCAGT  167062
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  1156041  ACGTGCAGTCGTC  1156029
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  5609287  GTACGTGCAGTCG  5609275
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1960405  ACGTACGTGCAG  1960416
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2081128  GTGCAGTCGTCA  2081117
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4829317  CGTGCAGTCGTC  4829306
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  5131997  CGTGCAGTCGTC  5132008
+
+
+>CP000384.1 Mycobacterium sp. MCS, complete genome
+Length=5705448
+
+ Score = 32.2 bits (16),  Expect = 1.1
+ Identities = 16/16 (100%), Gaps = 0/16 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                ||||||||||||||||
+Sbjct  5049672  CGTACGTGCAGTCGTC  5049657
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  1       ACGTACGTGCAGT  13
+               |||||||||||||
+Sbjct  159710  ACGTACGTGCAGT  159722
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  1151732  ACGTGCAGTCGTC  1151720
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  5571665  GTACGTGCAGTCG  5571653
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1941421  ACGTACGTGCAG  1941432
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2062144  GTGCAGTCGTCA  2062133
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4790177  CGTGCAGTCGTC  4790166
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  5094339  CGTGCAGTCGTC  5094350
+
+
+>CP023435.1 Mycobacterium sp. PYR15 chromosome, complete genome
+Length=6037017
+
+ Score = 30.2 bits (15),  Expect = 4.3
+ Identities = 15/15 (100%), Gaps = 0/15 (0%)
+ Strand=Plus/Minus
+
+Query  3       GTACGTGCAGTCGTC  17
+               |||||||||||||||
+Sbjct  739939  GTACGTGCAGTCGTC  739925
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  3472476  GTACGTGCAGTCG  3472464
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7       GTGCAGTCGTCA  18
+               ||||||||||||
+Sbjct  820604  GTGCAGTCGTCA  820615
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  3951778  GTGCAGTCGTCA  3951767
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                |||| |||||||||||
+Sbjct  5384777  CGTAGGTGCAGTCGTC  5384762
+
+
+>CP010271.1 Mycobacterium sp. EPM10906, complete genome
+Length=4649175
+
+ Score = 30.2 bits (15),  Expect = 4.3
+ Identities = 15/15 (100%), Gaps = 0/15 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTCGT  16
+                |||||||||||||||
+Sbjct  2535282  CGTACGTGCAGTCGT  2535268
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  2       CGTACGTGCAGTC  14
+               |||||||||||||
+Sbjct  445376  CGTACGTGCAGTC  445388
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  1845098  GTACGTGCAGTC  1845087
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2724191  TACGTGCAGTCG  2724202
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2782761  GTGCAGTCGTCA  2782772
+
+
+>CP018043.1 Mycobacterium sp. WY10, complete genome
+Length=6041408
+
+ Features in this part of subject sequence:
+   transcription termination factor Rho
+
+ Score = 30.2 bits (15),  Expect = 4.3
+ Identities = 15/15 (100%), Gaps = 0/15 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGTC  17
+                |||||||||||||||
+Sbjct  3691383  GTACGTGCAGTCGTC  3691397
+
+
+ Features in this part of subject sequence:
+   transcription termination factor Rho
+   virulence factor Mce
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  3       GTACGTGCAGTCG  15
+               |||||||||||||
+Sbjct  973188  GTACGTGCAGTCG  973200
+
+
+ Features in this part of subject sequence:
+   transcription termination factor Rho
+   molybdopterin-binding protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  3611360  GTGCAGTCGTCA  3611349
+
+
+ Features in this part of subject sequence:
+   transcription termination factor Rho
+   flavin-dependent oxidoreductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                |||| |||||||||||
+Sbjct  5175245  CGTAGGTGCAGTCGTC  5175260
+
+
+>CP015235.1 Rhodococcus fascians D188, complete genome
+Length=5139988
+
+ Features in this part of subject sequence:
+   N-acetylglucosaminyl-diphospho-decaprenol L-rhamnosyltran...
+
+ Score = 30.2 bits (15),  Expect = 4.3
+ Identities = 15/15 (100%), Gaps = 0/15 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGTCG  15
+                |||||||||||||||
+Sbjct  1339054  ACGTACGTGCAGTCG  1339068
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  4520791  ACGTACGTGCAGT  4520803
+
+
+ Features in this part of subject sequence:
+   Putative glycosyltransferase EpsH
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  619415  CGTGCAGTCGTC  619404
+
+
+ Features in this part of subject sequence:
+   Alkane 1-monooxygenase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  1252746  CGTACGTGCAGT  1252735
+
+
+ Features in this part of subject sequence:
+   Chaperone protein HscA
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  2932844  CGTACGTGCAGT  2932833
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3663805  CGTGCAGTCGTC  3663794
+
+
+ Features in this part of subject sequence:
+   Branched-chain-amino-acid aminotransferase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  4069252  ACGTACGTGCAG  4069263
+
+
+ Features in this part of subject sequence:
+   HTH-type transcriptional regulator BetI
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  4856238  CGTACGTGCAGT  4856249
+
+
+>CP014958.1 Mycobacterium abscessus strain FLAC045, complete genome
+Length=5217908
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 30.2 bits (15),  Expect = 4.3
+ Identities = 15/15 (100%), Gaps = 0/15 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCG  15
+                |||||||||||||||
+Sbjct  2988194  ACGTACGTGCAGTCG  2988180
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTC  14
+                |||||||||||||
+Sbjct  3066175  CGTACGTGCAGTC  3066187
+
+
+ Features in this part of subject sequence:
+   ATP-dependent DNA helicase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3784274  CGTGCAGTCGTCA  3784262
+
+
+ Features in this part of subject sequence:
+   ergothioneine biosynthesis PLP-dependent enzyme EgtE
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  440529  TACGTGCAGTCG  440518
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  1757481  CGTACGTGCAGT  1757470
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2129354  GTACGTGCAGTC  2129343
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3022826  CGTGCAGTCGTC  3022815
+
+
+ Features in this part of subject sequence:
+   hydroxymethylglutaryl-CoA lyase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4962170  TACGTGCAGTCG  4962181
+
+
+>CP014954.1 Mycobacterium abscessus strain FLAC008, complete genome
+Length=5166100
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 30.2 bits (15),  Expect = 4.3
+ Identities = 15/15 (100%), Gaps = 0/15 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCG  15
+                |||||||||||||||
+Sbjct  2981599  ACGTACGTGCAGTCG  2981585
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTC  14
+                |||||||||||||
+Sbjct  3059580  CGTACGTGCAGTC  3059592
+
+
+ Features in this part of subject sequence:
+   ATP-dependent DNA helicase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3777679  CGTGCAGTCGTCA  3777667
+
+
+ Features in this part of subject sequence:
+   ergothioneine biosynthesis PLP-dependent enzyme EgtE
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  366403  TACGTGCAGTCG  366392
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  1729543  CGTACGTGCAGT  1729532
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2101413  GTACGTGCAGTC  2101402
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3016231  CGTGCAGTCGTC  3016220
+
+
+ Features in this part of subject sequence:
+   hydroxymethylglutaryl-CoA lyase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4910362  TACGTGCAGTCG  4910373
+
+
+>CP014953.1 Mycobacterium abscessus strain FLAC007, complete genome
+Length=5064478
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 30.2 bits (15),  Expect = 4.3
+ Identities = 15/15 (100%), Gaps = 0/15 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCG  15
+                |||||||||||||||
+Sbjct  2881110  ACGTACGTGCAGTCG  2881096
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTC  14
+                |||||||||||||
+Sbjct  2959091  CGTACGTGCAGTC  2959103
+
+
+ Features in this part of subject sequence:
+   ATP-dependent DNA helicase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3677190  CGTGCAGTCGTCA  3677178
+
+
+ Features in this part of subject sequence:
+   ergothioneine biosynthesis PLP-dependent enzyme EgtE
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  366392  TACGTGCAGTCG  366381
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  1683860  CGTACGTGCAGT  1683849
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2000922  GTACGTGCAGTC  2000911
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  2915742  CGTGCAGTCGTC  2915731
+
+
+ Features in this part of subject sequence:
+   hydroxymethylglutaryl-CoA lyase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4808740  TACGTGCAGTCG  4808751
+
+
+>CP014951.1 Mycobacterium abscessus strain FLAC004, complete genome
+Length=5242371
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 30.2 bits (15),  Expect = 4.3
+ Identities = 15/15 (100%), Gaps = 0/15 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCG  15
+                |||||||||||||||
+Sbjct  3014381  ACGTACGTGCAGTCG  3014367
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTC  14
+                |||||||||||||
+Sbjct  3094059  CGTACGTGCAGTC  3094071
+
+
+ Features in this part of subject sequence:
+   ATP-dependent DNA helicase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3812158  CGTGCAGTCGTCA  3812146
+
+
+ Features in this part of subject sequence:
+   ergothioneine biosynthesis PLP-dependent enzyme EgtE
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  444984  TACGTGCAGTCG  444973
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  1762325  CGTACGTGCAGT  1762314
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2134193  GTACGTGCAGTC  2134182
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3050710  CGTGCAGTCGTC  3050699
+
+
+ Features in this part of subject sequence:
+   hydroxymethylglutaryl-CoA lyase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4986633  TACGTGCAGTCG  4986644
+
+
+>CP019066.1 Tsukamurella sp. MH1 chromosome, complete genome
+Length=4922396
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTCG  15
+                ||||||||||||||
+Sbjct  3292275  CGTACGTGCAGTCG  3292288
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  2391526  GTACGTGCAGTCG  2391514
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  2765854  GTACGTGCAGTCG  2765842
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  1220855  CGTACGTGCAGT  1220844
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1229254  ACGTACGTGCAG  1229265
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  2110262  ACGTGCAGTCGT  2110251
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  2870686  CGTGCAGTCGTC  2870675
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                |||||| |||||||||
+Sbjct  4071981  CGTACGCGCAGTCGTC  4071996
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4887355  CGTGCAGTCGTC  4887366
+
+
+>AP014567.1 Mycobacterium leprae Kyoto-2 DNA, complete genome
+Length=3268122
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGTC  14
+                ||||||||||||||
+Sbjct  2822095  ACGTACGTGCAGTC  2822108
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  242420  CGTGCAGTCGTC  242409
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Plus
+
+Query  2       CGTACGTGCAGTCGTC  17
+               |||| |||||||||||
+Sbjct  291725  CGTAGGTGCAGTCGTC  291740
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1598085  ACGTGCAGTCGT  1598096
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2601336  GTGCAGTCGTCA  2601325
+
+
+>CP009360.2 Mycobacterium avium subsp. hominissuis strain OCU464 chromosome, 
+complete genome
+Length=5178461
+
+ Features in this part of subject sequence:
+   (2Fe-2S)-binding protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  3342827  GTACGTGCAGTCGT  3342814
+
+
+ Features in this part of subject sequence:
+   tRNA dihydrouridine synthase DusB
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  672150  CGTGCAGTCGTC  672161
+
+
+ Features in this part of subject sequence:
+   F420-dependent methylene-tetrahydromethanopterin reductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1807703  TACGTGCAGTCG  1807692
+
+
+ Features in this part of subject sequence:
+   PAC2 family protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2155437  TACGTGCAGTCG  2155426
+
+
+ Features in this part of subject sequence:
+   alpha/beta hydrolase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3380413  ACGTGCAGTCGT  3380402
+
+
+>CP018020.1 Mycobacterium avium subsp. hominissuis strain OCU873s_P7_4s chromosome, 
+complete genome
+Length=5027510
+
+ Features in this part of subject sequence:
+   (2Fe-2S)-binding protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  1904016  GTACGTGCAGTCGT  1904029
+
+
+ Features in this part of subject sequence:
+   tRNA dihydrouridine synthase DusB
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  654164  CGTGCAGTCGTC  654175
+
+
+ Features in this part of subject sequence:
+   F420-dependent methylene-tetrahydromethanopterin reductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1750288  TACGTGCAGTCG  1750277
+
+
+ Features in this part of subject sequence:
+   PAC2 family protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2405032  TACGTGCAGTCG  2405021
+
+
+ Features in this part of subject sequence:
+   alpha/beta hydrolase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3330777  ACGTGCAGTCGT  3330766
+
+
+>CP018014.1 Mycobacterium avium subsp. hominissuis strain OCU901s_S2_2s chromosome, 
+complete genome
+Length=5186756
+
+ Features in this part of subject sequence:
+   (2Fe-2S)-binding protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  1982528  GTACGTGCAGTCGT  1982541
+
+
+ Features in this part of subject sequence:
+   tRNA dihydrouridine synthase DusB
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  657596  CGTGCAGTCGTC  657607
+
+
+ Features in this part of subject sequence:
+   F420-dependent methylene-tetrahydromethanopterin reductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1830227  TACGTGCAGTCG  1830216
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  3199843  TACGTGCAGTCG  3199854
+
+
+ Features in this part of subject sequence:
+   alpha/beta hydrolase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3448100  ACGTGCAGTCGT  3448089
+
+
+>CP016818.1 Mycobacterium avium subsp. hominissuis strain HP17 chromosome, 
+complete genome
+Length=5100725
+
+ Features in this part of subject sequence:
+   (2Fe-2S)-binding protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  1980140  GTACGTGCAGTCGT  1980153
+
+
+ Features in this part of subject sequence:
+   tRNA dihydrouridine synthase DusB
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  656182  CGTGCAGTCGTC  656193
+
+
+ Features in this part of subject sequence:
+   F420-dependent methylene-tetrahydromethanopterin reductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1829271  TACGTGCAGTCG  1829260
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  3138942  TACGTGCAGTCG  3138953
+
+
+ Features in this part of subject sequence:
+   alpha/beta hydrolase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3388632  ACGTGCAGTCGT  3388621
+
+
+>AP018410.1 Mycobacterium pseudoshottsii JCM 15466 DNA, complete genome
+Length=6061597
+
+ Features in this part of subject sequence:
+   /inference=COORDINATES: ab initio prediction:MetaGeneAnno...
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  2       CGTACGTGCAGTCG  15
+               ||||||||||||||
+Sbjct  505807  CGTACGTGCAGTCG  505794
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCGTC  17
+                ||||||||||||||
+Sbjct  4930486  TACGTGCAGTCGTC  4930499
+
+
+ Features in this part of subject sequence:
+   DNA-binding response regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  140906  TACGTGCAGTCG  140917
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2195122  TACGTGCAGTCG  2195111
+
+
+ Features in this part of subject sequence:
+   Long-chain-fatty-acid--AMP ligase FadD32
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  5923937  CGTGCAGTCGTC  5923948
+
+
+>LT899394.1 Mycobacterium aurum isolate liquid genome assembly, chromosome: 
+I
+Length=6032389
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGTCA  18
+                ||||||||||||||
+Sbjct  1300910  ACGTGCAGTCGTCA  1300923
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  2960933  GTACGTGCAGTCG  2960945
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  3030900  CGTACGTGCAGT  3030889
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4766947  CGTGCAGTCGTC  4766936
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  5949792  CGTGCAGTCGTC  5949781
+
+
+>CP022105.1 Mycobacterium avium subsp. paratuberculosis strain JII-1961 genome
+Length=4829728
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  3066940  GTACGTGCAGTCGT  3066927
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  679251  CGTGCAGTCGTC  679262
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2042845  TACGTGCAGTCG  2042856
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2358208  TACGTGCAGTCG  2358219
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3122426  ACGTGCAGTCGT  3122415
+
+
+>CP022095.1 Mycobacterium avium subsp. paratuberculosis strain FDAARGOS_305, 
+complete genome
+Length=4832268
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  2489235  GTACGTGCAGTCGT  2489248
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6      CGTGCAGTCGTC  17
+              ||||||||||||
+Sbjct  44380  CGTGCAGTCGTC  44369
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  2433755  ACGTGCAGTCGT  2433766
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  3197917  TACGTGCAGTCG  3197906
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  3513387  TACGTGCAGTCG  3513376
+
+
+>CP020821.1 Mycobacterium colombiense CECT 3035, complete genome
+Length=5581643
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTCG  15
+                ||||||||||||||
+Sbjct  3740235  CGTACGTGCAGTCG  3740248
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTC  14
+                |||||||||||||
+Sbjct  1454597  CGTACGTGCAGTC  1454585
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  4514400  ACGTACGTGCAGT  4514412
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2018646  TACGTGCAGTCG  2018657
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  2220336  ACGTGCAGTCGT  2220325
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGTCA  18
+                |||||||| |||||||
+Sbjct  2617094  GTACGTGCCGTCGTCA  2617109
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3359778  CGTGCAGTCGTC  3359767
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                |||| |||||||||||
+Sbjct  3602228  CGTAGGTGCAGTCGTC  3602213
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  4365360  ACGTACGTGCAG  4365371
+
+
+>CP018363.1 Mycobacterium avium subsp. hominissuis strain H87, complete genome
+Length=5626623
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein DnaA
+   (2Fe-2S)-binding protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  3901966  GTACGTGCAGTCGT  3901953
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein DnaA
+   tRNA dihydrouridine synthase DusB
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  732209  CGTGCAGTCGTC  732220
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein DnaA
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5       ACGTGCAGTCGT  16
+               ||||||||||||
+Sbjct  740153  ACGTGCAGTCGT  740142
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein DnaA
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2644632  TACGTGCAGTCG  2644643
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein DnaA
+   F420-dependent methylene-tetrahydromethanopterin reductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  3059049  TACGTGCAGTCG  3059060
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein DnaA
+   alpha/beta hydrolase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3944055  ACGTGCAGTCGT  3944044
+
+
+>CP017014.1 Rhodococcus sp. WMMA185, complete genome
+Length=4444448
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 17/18 (94%), Gaps = 0/18 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGTCGTCA  18
+                ||||||| ||||||||||
+Sbjct  2671443  ACGTACGAGCAGTCGTCA  2671460
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2       CGTACGTGCAGT  13
+               ||||||||||||
+Sbjct  735318  CGTACGTGCAGT  735307
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  1048404  GTGCAGTCGTCA  1048393
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1091711  ACGTGCAGTCGT  1091722
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  1526813  GTACGTGCAGTC  1526824
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1705788  ACGTGCAGTCGT  1705799
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  2775122  ACGTGCAGTCGT  2775133
+
+
+>AP017635.1 Mycobacterium ulcerans subsp. shinshuense DNA, nearly complete 
+genome, strain: ATCC 33728
+Length=5914588
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTCG  15
+                ||||||||||||||
+Sbjct  1646792  CGTACGTGCAGTCG  1646805
+
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCGTC  17
+                ||||||||||||||
+Sbjct  3223102  TACGTGCAGTCGTC  3223089
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1994454  CGTGCAGTCGTC  1994465
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2231836  TACGTGCAGTCG  2231847
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  5769097  TACGTGCAGTCG  5769108
+
+
+>AP017624.1 Mycobacterium ulcerans subsp. shinshuense DNA, complete genome, 
+strain: ATCC33728
+Length=5899681
+
+ Features in this part of subject sequence:
+   membrane glycine and proline rich protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCGTC  17
+                ||||||||||||||
+Sbjct  1126368  TACGTGCAGTCGTC  1126355
+
+
+ Features in this part of subject sequence:
+   /pseudogene=unprocessed; PE family protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTCG  15
+                ||||||||||||||
+Sbjct  5452953  CGTACGTGCAGTCG  5452966
+
+
+ Features in this part of subject sequence:
+   two-component transcriptional regulatory protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  135738  TACGTGCAGTCG  135749
+
+
+ Features in this part of subject sequence:
+   endoribonuclease L-PSP domain containing protein
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  3655717  TACGTGCAGTCG  3655728
+
+
+ Features in this part of subject sequence:
+   fatty-acid-CoA ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  5799024  CGTGCAGTCGTC  5799035
+
+
+>CP016396.1 Mycobacterium avium strain RCAD0278, complete genome
+Length=4953610
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  3498261  GTACGTGCAGTCGT  3498274
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  2844882  CGTGCAGTCGTC  2844893
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3432846  ACGTGCAGTCGT  3432857
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4079739  TACGTGCAGTCG  4079728
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4395544  TACGTGCAGTCG  4395533
+
+
+>CP016189.1 Mycobacterium immunogenum strain FLAC016, complete genome
+Length=5604845
+
+ Features in this part of subject sequence:
+   amidohydrolase
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  2861982  GTACGTGCAGTCGT  2861969
+
+
+ Features in this part of subject sequence:
+   TetR family transcriptional regulator
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTCA  18
+               |||||||||||||
+Sbjct  805117  CGTGCAGTCGTCA  805129
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  2298593  GTACGTGCAGTCG  2298581
+
+
+ Features flanking this part of subject sequence:
+   27 bp at 5' side: acyl-CoA dehydrogenase
+   45 bp at 3' side: hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  4616386  CGTGCAGTCGTCA  4616374
+
+
+ Features in this part of subject sequence:
+   cytochrome
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3      GTACGTGCAGTC  14
+              ||||||||||||
+Sbjct  28820  GTACGTGCAGTC  28831
+
+
+ Features in this part of subject sequence:
+   formate dehydrogenase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1070932  ACGTGCAGTCGT  1070943
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  3704464  TACGTGCAGTCG  3704453
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  4350013  ACGTGCAGTCGT  4350002
+
+
+>LT549889.1 Mycobacterium aurum isolate liquid genome assembly, chromosome: 
+I
+Length=6038730
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGTCA  18
+                ||||||||||||||
+Sbjct  3476452  ACGTGCAGTCGTCA  3476439
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  1816429  GTACGTGCAGTCG  1816417
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6      CGTGCAGTCGTC  17
+              ||||||||||||
+Sbjct  10415  CGTGCAGTCGTC  10426
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  1746462  CGTACGTGCAGT  1746473
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4859959  CGTGCAGTCGTC  4859970
+
+
+>CP015495.1 Mycobacterium avium subsp. paratuberculosis strain MAP/TANUVAS/TN/India/2008, 
+complete genome
+Length=4829781
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  3066585  GTACGTGCAGTCGT  3066572
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  679371  CGTGCAGTCGTC  679382
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2042712  TACGTGCAGTCG  2042723
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2357900  TACGTGCAGTCG  2357911
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3122071  ACGTGCAGTCGT  3122060
+
+
+>CP014952.1 Mycobacterium abscessus strain FLAC005, complete genome
+Length=4869298
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTCG  15
+                ||||||||||||||
+Sbjct  3837730  CGTACGTGCAGTCG  3837743
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3454383  CGTGCAGTCGTCA  3454371
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  341739  TACGTGCAGTCG  341728
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  1999957  GTACGTGCAGTC  1999946
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4586788  TACGTGCAGTCG  4586799
+
+
+>CP011530.1 Mycobacterium immunogenum strain CCUG 47286, complete genome
+Length=5573781
+
+ Features in this part of subject sequence:
+   amidohydrolase
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  2832323  GTACGTGCAGTCGT  2832310
+
+
+ Features in this part of subject sequence:
+   TetR family transcriptional regulator
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTCA  18
+               |||||||||||||
+Sbjct  803538  CGTGCAGTCGTCA  803550
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  2271658  GTACGTGCAGTCG  2271646
+
+
+ Features flanking this part of subject sequence:
+   27 bp at 5' side: acyl-CoA dehydrogenase
+   45 bp at 3' side: hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  4583545  CGTGCAGTCGTCA  4583533
+
+
+ Features in this part of subject sequence:
+   cytochrome P450
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3      GTACGTGCAGTC  14
+              ||||||||||||
+Sbjct  28820  GTACGTGCAGTC  28831
+
+
+ Features in this part of subject sequence:
+   formate dehydrogenase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1066676  ACGTGCAGTCGT  1066687
+
+
+ Features flanking this part of subject sequence:
+   2077 bp at 5' side: hypothetical protein
+   1970 bp at 3' side: hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  3673235  TACGTGCAGTCG  3673224
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  4317172  ACGTGCAGTCGT  4317161
+
+
+>CP011269.1 Mycobacterium fortuitum strain CT6, complete genome
+Length=6254616
+
+ Features in this part of subject sequence:
+   Topoisomerase IV subunit B
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3       GTACGTGCAGTCGT  16
+               ||||||||||||||
+Sbjct  418768  GTACGTGCAGTCGT  418755
+
+
+ Features in this part of subject sequence:
+   Molybdenum transport ATP-binding protein ModC
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||| ||||||||||||
+Sbjct  3429789  ACGTGCGTGCAGTCGTC  3429773
+
+
+ Features in this part of subject sequence:
+   Long-chain-fatty-acid--CoA ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2       CGTACGTGCAGT  13
+               ||||||||||||
+Sbjct  923657  CGTACGTGCAGT  923646
+
+
+ Features in this part of subject sequence:
+   putative YrbE family protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1997555  CGTGCAGTCGTC  1997566
+
+
+ Features in this part of subject sequence:
+   putative membrane protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  6230621  GTACGTGCAGTC  6230610
+
+
+>HG917972.2 Mycobacterium marinum E11 main chromosome genome
+Length=6336293
+
+ Features in this part of subject sequence:
+   PE family protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  2       CGTACGTGCAGTCG  15
+               ||||||||||||||
+Sbjct  393017  CGTACGTGCAGTCG  393004
+
+
+ Features in this part of subject sequence:
+   membrane glycine and proline rich protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCGTC  17
+                ||||||||||||||
+Sbjct  5085025  TACGTGCAGTCGTC  5085038
+
+
+ Features in this part of subject sequence:
+   two-component transcriptional regulatory protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  154258  TACGTGCAGTCG  154269
+
+
+ Features in this part of subject sequence:
+   conserved hypothetical protein
+   conserved hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2304050  TACGTGCAGTCG  2304039
+
+
+ Features in this part of subject sequence:
+   cobalamin biosynthesis protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3547455  ACGTGCAGTCGT  3547466
+
+
+ Features in this part of subject sequence:
+   fatty acyl-AMP ligase FadD32
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  6193448  CGTGCAGTCGTC  6193459
+
+
+>CP011541.1 Corynebacterium epidermidicanis strain DSM 45586, complete genome
+Length=2692072
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  5       ACGTGCAGTCGTCA  18
+               ||||||||||||||
+Sbjct  818328  ACGTGCAGTCGTCA  818341
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  252768  TACGTGCAGTCG  252757
+
+
+>CP010114.1 Mycobacterium avium subsp. paratuberculosis strain E93, complete 
+genome
+Length=4786065
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  1136512  GTACGTGCAGTCGT  1136525
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1081026  ACGTGCAGTCGT  1081037
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1835323  TACGTGCAGTCG  1835312
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2146751  TACGTGCAGTCG  2146740
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3496360  CGTGCAGTCGTC  3496349
+
+
+>CP010113.1 Mycobacterium avium subsp. paratuberculosis strain E1, complete 
+genome
+Length=4781002
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  1134890  GTACGTGCAGTCGT  1134903
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1079860  ACGTGCAGTCGT  1079871
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1833182  TACGTGCAGTCG  1833171
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2144382  TACGTGCAGTCG  2144371
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3492103  CGTGCAGTCGTC  3492092
+
+
+>CP009914.1 Mycobacterium sp. VKM Ac-1817D, complete genome
+Length=6324222
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCGTC  17
+                ||||||||||||||
+Sbjct  4961183  TACGTGCAGTCGTC  4961170
+
+
+ Features in this part of subject sequence:
+   Molybdenum transport ATP-binding protein ModC
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||| ||||||||||||
+Sbjct  3430407  ACGTGCGTGCAGTCGTC  3430391
+
+
+ Features flanking this part of subject sequence:
+   705 bp at 5' side: hypothetical protein
+   199 bp at 3' side: hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  4959526  ACGTGCAGTCGTC  4959538
+
+
+ Features in this part of subject sequence:
+   Siderophore biosynthesis non-ribosomal peptide synthetase...
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2       CGTACGTGCAGT  13
+               ||||||||||||
+Sbjct  995174  CGTACGTGCAGT  995163
+
+
+ Features in this part of subject sequence:
+   Transcriptional regulator, MerR family
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  5464399  GTACGTGCAGTC  5464410
+
+
+ Features in this part of subject sequence:
+   putative membrane protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  6300202  GTACGTGCAGTC  6300191
+
+
+>CP009614.1 Mycobacterium avium subsp. avium strain DJO-44271, complete genome
+Length=5011264
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   (2Fe-2S)-binding protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  3487166  GTACGTGCAGTCGT  3487153
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   tRNA-dihydrouridine synthase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  702553  CGTGCAGTCGTC  702564
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1813247  ACGTACGTGCAG  1813236
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   F420-dependent methylene-tetrahydromethanopterin reductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1940497  TACGTGCAGTCG  1940486
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2284112  TACGTGCAGTCG  2284101
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   protease
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3527969  ACGTGCAGTCGT  3527958
+
+
+>CP009482.1 Mycobacterium avium subsp. avium 2285 (S), complete genome
+Length=5197664
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   (2Fe-2S)-binding protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  3452858  GTACGTGCAGTCGT  3452845
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   tRNA-dihydrouridine synthase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  700834  CGTGCAGTCGTC  700845
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1808133  ACGTACGTGCAG  1808122
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   F420-dependent methylene-tetrahydromethanopterin reductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1935339  TACGTGCAGTCG  1935328
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2278855  TACGTGCAGTCG  2278844
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   protease
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3493528  ACGTGCAGTCGT  3493517
+
+
+>CP009493.1 Mycobacterium avium subsp. avium 2285 (R), complete genome
+Length=5169415
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   (2Fe-2S)-binding protein
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  3437135  GTACGTGCAGTCGT  3437122
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   tRNA-dihydrouridine synthase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  701177  CGTGCAGTCGTC  701188
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1808504  ACGTACGTGCAG  1808493
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   F420-dependent methylene-tetrahydromethanopterin reductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1935751  TACGTGCAGTCG  1935740
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2279172  TACGTGCAGTCG  2279161
+
+
+ Features in this part of subject sequence:
+   chromosomal replication initiation protein
+   protease
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3477908  ACGTGCAGTCGT  3477897
+
+
+>CP009215.1 Corynebacterium ureicelerivorans strain IMMIB RIV-2301, complete 
+genome
+Length=2279990
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTCG  15
+                ||||||||||||||
+Sbjct  1752012  CGTACGTGCAGTCG  1751999
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  1396753  GTACGTGCAGTCG  1396741
+
+
+>CP008947.1 Rhodococcus opacus strain R7 sequence
+Length=8466345
+
+ Features in this part of subject sequence:
+   beta-mannosidase
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTCG  15
+                ||||||||||||||
+Sbjct  6255446  CGTACGTGCAGTCG  6255459
+
+
+ Features flanking this part of subject sequence:
+   2171 bp at 5' side: polyketide synthase
+   2128 bp at 3' side: thioesterase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3       GTACGTGCAGTCG  15
+               |||||||||||||
+Sbjct  942818  GTACGTGCAGTCG  942806
+
+
+ Features in this part of subject sequence:
+   tRNA delta(2)-isopentenylpyrophosphate transferase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  1483269  GTACGTGCAGTCG  1483257
+
+
+ Features in this part of subject sequence:
+   AraC family transcriptional regulator
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  3648496  ACGTGCAGTCGTC  3648508
+
+
+ Features in this part of subject sequence:
+   hydrogenase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  4031656  GTACGTGCAGTCG  4031644
+
+
+ Features in this part of subject sequence:
+   alkane 1-monooxygenase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  6591178  ACGTACGTGCAGT  6591190
+
+
+ Features in this part of subject sequence:
+   TetR family transcriptional regulator
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  8311322  CGTGCAGTCGTCA  8311334
+
+
+ Features in this part of subject sequence:
+   peptide synthetase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3       GTACGTGCAGTC  14
+               ||||||||||||
+Sbjct  759921  GTACGTGCAGTC  759910
+
+
+ Features in this part of subject sequence:
+   aldehyde dehydrogenase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1158838  CGTGCAGTCGTC  1158849
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  4380318  GTGCAGTCGTCA  4380307
+
+
+ Features in this part of subject sequence:
+   trans-aconitate methyltransferase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  6879997  ACGTACGTGCAG  6879986
+
+
+ Features in this part of subject sequence:
+   acetyltransferase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  7016601  ACGTACGTGCAG  7016612
+
+
+ Features in this part of subject sequence:
+   IclR family transcriptional regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  7898827  TACGTGCAGTCG  7898816
+
+
+>CP008944.1 Corynebacterium atypicum strain R2070, complete genome
+Length=2311380
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  1      ACGTACGTGCAGTC  14
+              ||||||||||||||
+Sbjct  43934  ACGTACGTGCAGTC  43921
+
+
+>CP004350.1 Corynebacterium casei LMG S-19264, complete genome
+Length=3113488
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  1       ACGTACGTGCAGTC  14
+               ||||||||||||||
+Sbjct  150956  ACGTACGTGCAGTC  150943
+
+
+>AP012555.1 Mycobacterium avium subsp. hominissuis TH135 chromosomal DNA, 
+complete genome
+Length=4951217
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  1916650  GTACGTGCAGTCGT  1916663
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  682653  CGTGCAGTCGTC  682664
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1764317  TACGTGCAGTCG  1764306
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2998328  TACGTGCAGTCG  2998339
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3248072  ACGTGCAGTCGT  3248061
+
+
+>CP005928.1 Mycobacterium avium subsp. paratuberculosis MAP4, complete genome
+Length=4829424
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  1143947  GTACGTGCAGTCGT  1143960
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1088848  ACGTGCAGTCGT  1088859
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1851241  TACGTGCAGTCG  1851230
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2166550  TACGTGCAGTCG  2166539
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3529849  CGTGCAGTCGTC  3529838
+
+
+>CP003899.1 Mycobacterium liflandii 128FXT, complete genome
+Length=6208955
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  2       CGTACGTGCAGTCG  15
+               ||||||||||||||
+Sbjct  390529  CGTACGTGCAGTCG  390516
+
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCGTC  17
+                ||||||||||||||
+Sbjct  4994826  TACGTGCAGTCGTC  4994839
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  125182  TACGTGCAGTCG  125193
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2353564  TACGTGCAGTCG  2353553
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  6073743  CGTGCAGTCGTC  6073754
+
+
+>CP002917.1 Corynebacterium variabile DSM 44702, complete genome
+Length=3433007
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  1255615  GTACGTGCAGTCGT  1255602
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1351070  CGTGCAGTCGTC  1351059
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  3179931  GTGCAGTCGTCA  3179942
+
+
+>CP002786.1 Hoyosella subflava DQS3-9A1, complete genome
+Length=4738809
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  2       CGTACGTGCAGTCG  15
+               ||||||||||||||
+Sbjct  734844  CGTACGTGCAGTCG  734857
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  2681927  ACGTACGTGCAG  2681916
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3907331  CGTGCAGTCGTC  3907320
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  4420491  GTACGTGCAGTC  4420502
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4534395  CGTGCAGTCGTC  4534384
+
+
+>CP001966.1 Tsukamurella paurometabola DSM 20162, complete genome
+Length=4379918
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  3       GTACGTGCAGTCGT  16
+               ||||||||||||||
+Sbjct  642162  GTACGTGCAGTCGT  642175
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  1264889  ACGTGCAGTCGTC  1264901
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1101827  CGTGCAGTCGTC  1101838
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2222571  TACGTGCAGTCG  2222560
+
+
+>FM211192.1 Mycobacterium leprae Br4923, complete genome sequence
+Length=3268071
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGTC  14
+                ||||||||||||||
+Sbjct  2822077  ACGTACGTGCAGTC  2822090
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  242487  CGTGCAGTCGTC  242476
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Plus
+
+Query  2       CGTACGTGCAGTCGTC  17
+               |||| |||||||||||
+Sbjct  291792  CGTAGGTGCAGTCGTC  291807
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1598079  ACGTGCAGTCGT  1598090
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2601315  GTGCAGTCGTCA  2601304
+
+
+>CP000854.1 Mycobacterium marinum M, complete genome
+Length=6636827
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  2       CGTACGTGCAGTCG  15
+               ||||||||||||||
+Sbjct  437163  CGTACGTGCAGTCG  437150
+
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCGTC  17
+                ||||||||||||||
+Sbjct  5377371  TACGTGCAGTCGTC  5377384
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  162646  TACGTGCAGTCG  162657
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2427454  TACGTGCAGTCG  2427443
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3686056  ACGTGCAGTCGT  3686067
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  3839826  GTACGTGCAGTC  3839815
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  6496865  CGTGCAGTCGTC  6496876
+
+
+>CP000325.1 Mycobacterium ulcerans Agy99, complete genome
+Length=5631606
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  4       TACGTGCAGTCGTC  17
+               ||||||||||||||
+Sbjct  185600  TACGTGCAGTCGTC  185613
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  3716296  TACGTGCAGTCG  3716307
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  5532451  CGTGCAGTCGTC  5532462
+
+
+>CP000479.1 Mycobacterium avium 104, complete genome
+Length=5475491
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  3653633  GTACGTGCAGTCGT  3653620
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  740096  CGTGCAGTCGTC  740107
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1916884  ACGTACGTGCAG  1916873
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2044134  TACGTGCAGTCG  2044123
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2396983  TACGTGCAGTCG  2396972
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3696804  ACGTGCAGTCGT  3696793
+
+
+>AL583925.1 Mycobacterium leprae strain TN complete genome; segment 9/10
+Length=308950
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  1       ACGTACGTGCAGTC  14
+               ||||||||||||||
+Sbjct  132079  ACGTACGTGCAGTC  132092
+
+
+>AL035480.1 Mycobacterium leprae cosmid B12
+Length=34316
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Plus
+
+Query  1      ACGTACGTGCAGTC  14
+              ||||||||||||||
+Sbjct  10760  ACGTACGTGCAGTC  10773
+
+
+>AE016958.1 Mycobacterium avium subsp. paratuberculosis str. k10, complete 
+genome
+Length=4829781
+
+ Score = 28.2 bits (14),  Expect = 17
+ Identities = 14/14 (100%), Gaps = 0/14 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCGT  16
+                ||||||||||||||
+Sbjct  3066585  GTACGTGCAGTCGT  3066572
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  679371  CGTGCAGTCGTC  679382
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2042712  TACGTGCAGTCG  2042723
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2357900  TACGTGCAGTCG  2357911
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3122071  ACGTGCAGTCGT  3122060
+
+
+>CP025959.1 Rhodococcus sp. djl-6-2 chromosome, complete genome
+Length=6518575
+
+ Features in this part of subject sequence:
+   LytR family transcriptional regulator
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  3       GTACGTGCAGTCG  15
+               |||||||||||||
+Sbjct  741141  GTACGTGCAGTCG  741153
+
+
+ Features in this part of subject sequence:
+   alpha/beta hydrolase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||| ||||||||||||
+Sbjct  3531698  ACGTCCGTGCAGTCGTC  3531714
+
+
+ Features in this part of subject sequence:
+   trehalose-phosphatase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2       CGTACGTGCAGT  13
+               ||||||||||||
+Sbjct  838499  CGTACGTGCAGT  838510
+
+
+ Features in this part of subject sequence:
+   FAD-binding molybdopterin dehydrogenase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2327739  GTACGTGCAGTC  2327750
+
+
+ Features in this part of subject sequence:
+   tobH protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  2373390  CGTACGTGCAGT  2373401
+
+
+ Features flanking this part of subject sequence:
+   215 bp at 5' side: aquaporin family protein
+   14 bp at 3' side: transcriptional regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  4975601  ACGTACGTGCAG  4975612
+
+
+ Features in this part of subject sequence:
+   IclR family transcriptional regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  5671842  TACGTGCAGTCG  5671853
+
+
+ Features in this part of subject sequence:
+   copper-binding protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  5750992  ACGTGCAGTCGT  5751003
+
+
+>CP024890.1 Rhodococcus ruber strain YYL chromosome, complete genome
+Length=5592192
+
+ Features in this part of subject sequence:
+   class I SAM-dependent methyltransferase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  3274175  ACGTGCAGTCGTC  3274163
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTC  14
+                |||||||||||||
+Sbjct  5468347  CGTACGTGCAGTC  5468335
+
+
+ Features in this part of subject sequence:
+   ABC transporter permease
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2       CGTACGTGCAGT  13
+               ||||||||||||
+Sbjct  435448  CGTACGTGCAGT  435459
+
+
+ Features in this part of subject sequence:
+   WhiB family transcriptional regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3       GTACGTGCAGTC  14
+               ||||||||||||
+Sbjct  707738  GTACGTGCAGTC  707727
+
+
+ Features in this part of subject sequence:
+   MFS transporter
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  3791404  GTGCAGTCGTCA  3791415
+
+
+ Features in this part of subject sequence:
+   membrane protein insertase YidC
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  4912939  ACGTGCAGTCGT  4912928
+
+
+ Features in this part of subject sequence:
+   beta-mannosidase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                ||||||||||| ||||
+Sbjct  5440728  CGTACGTGCAGGCGTC  5440743
+
+
+>CP024315.1 Rhodococcus ruber strain P14 chromosome, complete genome
+Length=5522075
+
+ Features in this part of subject sequence:
+   class I SAM-dependent methyltransferase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  1839334  ACGTGCAGTCGTC  1839322
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTC  14
+                |||||||||||||
+Sbjct  4043787  CGTACGTGCAGTC  4043775
+
+
+ Features in this part of subject sequence:
+   WhiB family transcriptional regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3       GTACGTGCAGTC  14
+               ||||||||||||
+Sbjct  175170  GTACGTGCAGTC  175181
+
+
+ Features in this part of subject sequence:
+   ABC transporter permease
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2       CGTACGTGCAGT  13
+               ||||||||||||
+Sbjct  447243  CGTACGTGCAGT  447232
+
+
+ Features in this part of subject sequence:
+   MFS transporter
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2351214  GTGCAGTCGTCA  2351225
+
+
+ Features in this part of subject sequence:
+   membrane protein insertase YidC
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3544818  ACGTGCAGTCGT  3544807
+
+
+ Features in this part of subject sequence:
+   beta-mannosidase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                ||||||||||| ||||
+Sbjct  4016197  CGTACGTGCAGGCGTC  4016212
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  5301008  CGTGCAGTCGTC  5301019
+
+
+ Features in this part of subject sequence:
+   XRE family transcriptional regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCGTCA  18
+                |||||||| |||||||
+Sbjct  5363829  GTACGTGCCGTCGTCA  5363844
+
+
+>CP023778.1 Nocardia terpenica strain NC_YFY_NT001 chromosome, complete genome
+Length=8847159
+
+ Features in this part of subject sequence:
+   nitrate ABC transporter substrate-binding protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  2911553  GTACGTGCAGTCG  2911541
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  2945739  CGTACGTGCAGT  2945750
+
+
+ Features in this part of subject sequence:
+   LysR family transcriptional regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4160242  CGTGCAGTCGTC  4160253
+
+
+>CP023720.1 Rhodococcus sp. H-CA8f chromosome, complete genome
+Length=6196004
+
+ Features in this part of subject sequence:
+   LytR family transcriptional regulator
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  5542187  GTACGTGCAGTCG  5542175
+
+
+ Features in this part of subject sequence:
+   IclR family transcriptional regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  794328  TACGTGCAGTCG  794317
+
+
+ Features in this part of subject sequence:
+   membrane protein insertase YidC
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1351729  ACGTGCAGTCGT  1351740
+
+
+ Features flanking this part of subject sequence:
+   14 bp at 5' side: transcriptional regulator
+   215 bp at 3' side: aquaporin family protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1503323  ACGTACGTGCAG  1503312
+
+
+ Features in this part of subject sequence:
+   epoxide hydrolase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1880727  CGTGCAGTCGTC  1880716
+
+
+ Features in this part of subject sequence:
+   tobH protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  3975046  CGTACGTGCAGT  3975035
+
+
+>CP023405.1 Gordonia sp. 1D chromosome
+Length=5151623
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  2159921  ACGTACGTGCAGT  2159933
+
+
+ Features in this part of subject sequence:
+   valine--tRNA ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2157484  TACGTGCAGTCG  2157495
+
+
+ Features in this part of subject sequence:
+   protoporphyrinogen oxidase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  2367199  ACGTACGTGCAG  2367210
+
+
+ Features in this part of subject sequence:
+   MFS transporter
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  2485857  ACGTGCAGTCGT  2485868
+
+
+ Features flanking this part of subject sequence:
+   31 bp at 5' side: UDP-N-acetylmuramoyl-L-alanyl-D-glutamate--2,6-diaminopim...
+   97 bp at 3' side: penicillin-binding protein 2
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  3320900  GTACGTGCAGTC  3320911
+
+
+ Features in this part of subject sequence:
+   DNA resolvase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  3719600  GTGCAGTCGTCA  3719611
+
+
+ Features in this part of subject sequence:
+   pyridine nucleotide-disulfide oxidoreductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4830490  CGTGCAGTCGTC  4830501
+
+
+>CP021238.1 Mycobacterium lepraemurium strain Hawaii chromosome, complete 
+genome
+Length=4050523
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCGT  16
+                |||||||||||||
+Sbjct  1546844  TACGTGCAGTCGT  1546856
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  874095  CGTGCAGTCGTC  874106
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1520179  ACGTGCAGTCGT  1520190
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2167514  TACGTGCAGTCG  2167525
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2648812  TACGTGCAGTCG  2648823
+
+
+>CP023151.1 Mycobacterium chimaera strain FLAC0070, complete genome
+Length=5408332
+
+ Features in this part of subject sequence:
+   adenylate/guanylate cyclase domain-containing protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  1425635  ACGTACGTGCCGTCGTC  1425619
+
+
+ Features in this part of subject sequence:
+   type VII secretion protein EccC
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  4941190  ACGTACGTGCAGT  4941178
+
+
+ Features in this part of subject sequence:
+   class I SAM-dependent methyltransferase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  382946  TACGTGCAGTCG  382935
+
+
+ Features in this part of subject sequence:
+   tRNA dihydrouridine synthase DusB
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  769816  CGTGCAGTCGTC  769827
+
+
+ Features in this part of subject sequence:
+   PAC2 family protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2400601  TACGTGCAGTCG  2400590
+
+
+ Features flanking this part of subject sequence:
+   143 bp at 5' side: hypothetical protein
+   581 bp at 3' side: helix-turn-helix domain-containing protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2634611  GTGCAGTCGTCA  2634622
+
+
+>CP023149.1 Mycobacterium intracellulare strain FLAC0181, complete genome
+Length=5613941
+
+ Features in this part of subject sequence:
+   adenylate/guanylate cyclase domain-containing protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  1541868  ACGTACGTGCCGTCGTC  1541852
+
+
+ Features in this part of subject sequence:
+   mammalian cell entry protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCGT  16
+                |||||||||||||
+Sbjct  4198966  TACGTGCAGTCGT  4198954
+
+
+ Features in this part of subject sequence:
+   type VII secretion protein EccC
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  5211381  ACGTACGTGCAGT  5211369
+
+
+ Features in this part of subject sequence:
+   tRNA dihydrouridine synthase DusB
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  668111  CGTGCAGTCGTC  668122
+
+
+ Features in this part of subject sequence:
+   nuclease
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1321516  CGTGCAGTCGTC  1321527
+
+
+ Features in this part of subject sequence:
+   F420-dependent methylene-tetrahydromethanopterin reductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2108909  TACGTGCAGTCG  2108898
+
+
+ Features in this part of subject sequence:
+   PAC2 family protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2443949  TACGTGCAGTCG  2443938
+
+
+ Features in this part of subject sequence:
+   pyridoxal phosphate-dependent aminotransferase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  5158829  CGTGCAGTCGTC  5158840
+
+
+>CP023146.1 Mycobacterium intracellulare strain FLAC0133, complete genome
+Length=5432063
+
+ Features in this part of subject sequence:
+   adenylate/guanylate cyclase domain-containing protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  1306206  ACGTACGTGCCGTCGTC  1306190
+
+
+ Features in this part of subject sequence:
+   type VII secretion protein EccC
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  4963870  ACGTACGTGCAGT  4963858
+
+
+ Features in this part of subject sequence:
+   tRNA dihydrouridine synthase DusB
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  670702  CGTGCAGTCGTC  670713
+
+
+ Features in this part of subject sequence:
+   F420-dependent methylene-tetrahydromethanopterin reductase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2107456  TACGTGCAGTCG  2107445
+
+
+ Features in this part of subject sequence:
+   cytochrome P450
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2404096  GTACGTGCAGTC  2404107
+
+
+ Features in this part of subject sequence:
+   PAC2 family protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2484808  TACGTGCAGTCG  2484797
+
+
+ Features in this part of subject sequence:
+   pyridoxal phosphate-dependent aminotransferase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4911366  CGTGCAGTCGTC  4911377
+
+
+>CP022915.1 Rhodococcus pyridinivorans strain GF3, complete genome
+Length=5303895
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  4304563  GTACGTGCAGTCG  4304551
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  1279833  GTACGTGCAGTC  1279822
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1578366  TACGTGCAGTCG  1578377
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3212378  CGTGCAGTCGTC  3212367
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  4206826  CGTACGTGCAGT  4206815
+
+
+>LT906473.1 Corynebacterium cystitidis strain NCTC11863 genome assembly, 
+chromosome: 1
+Length=3011567
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  1050107  GTACGTGCAGTCG  1050119
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1730445  ACGTACGTGCAG  1730456
+
+
+>LT906469.1 Mycobacterium terrae strain NCTC10856 genome assembly, chromosome: 
+1
+Length=4532317
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  3550437  GTACGTGCAGTCG  3550425
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  1537531  ACGTGCAGTCGT  1537542
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                |||| |||||||||||
+Sbjct  3987497  CGTAGGTGCAGTCGTC  3987482
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  4087924  GTACGTGCAGTC  4087913
+
+
+>LT906450.1 Rhodococcus rhodochrous strain NCTC10210 genome assembly, chromosome: 
+1
+Length=5274756
+
+ Features in this part of subject sequence:
+   mannitol 2-dehydrogenase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  1321686  ACGTGCAGTCGTC  1321698
+
+
+ Features in this part of subject sequence:
+   hydrolase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  4121200  ACGTGCAGTCGTC  4121212
+
+
+ Features in this part of subject sequence:
+   lipoprotein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1       ACGTACGTGCAG  12
+               ||||||||||||
+Sbjct  374401  ACGTACGTGCAG  374390
+
+
+ Features in this part of subject sequence:
+   acyl-CoA dehydrogenase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1988568  ACGTACGTGCAG  1988557
+
+
+ Features in this part of subject sequence:
+   lipoprotein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3210894  CGTGCAGTCGTC  3210905
+
+
+ Features in this part of subject sequence:
+   Uncharacterised protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  3341947  ACGTACGTGCAG  3341936
+
+
+ Features flanking this part of subject sequence:
+   604 bp at 5' side: dehydrogenase
+   2 bp at 3' side: putative transposase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4317148  TACGTGCAGTCG  4317159
+
+
+ Features in this part of subject sequence:
+   transcriptional regulator PcaR
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4961313  TACGTGCAGTCG  4961324
+
+
+>LT906443.1 Corynebacterium ulcerans strain NCTC7910 genome assembly, chromosome: 
+1
+Length=2453761
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  1513283  CGTGCAGTCGTCA  1513271
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1449316  TACGTGCAGTCG  1449305
+
+
+>CP019888.1 Mycobacterium kansasii strain 9MK genome
+Length=6463923
+
+ Features in this part of subject sequence:
+   PE family protein
+   adenylate/guanylate cyclase domain-containing protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  1512989  ACGTACGTGCCGTCGTC  1513005
+
+
+ Features in this part of subject sequence:
+   PE family protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2574172  GTGCAGTCGTCA  2574183
+
+
+>CP019887.1 Mycobacterium kansasii strain 11MK genome
+Length=6434062
+
+ Features in this part of subject sequence:
+   adenylate/guanylate cyclase domain-containing protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  1438664  ACGTACGTGCCGTCGTC  1438680
+
+
+ Features flanking this part of subject sequence:
+   78 bp at 5' side: alpha/beta hydrolase
+   99 bp at 3' side: hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2486332  GTGCAGTCGTCA  2486343
+
+
+>CP019886.1 Mycobacterium kansasii strain 10MK genome
+Length=6421364
+
+ Features in this part of subject sequence:
+   adenylate/guanylate cyclase domain-containing protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  1475240  ACGTACGTGCCGTCGTC  1475256
+
+
+ Features flanking this part of subject sequence:
+   78 bp at 5' side: alpha/beta hydrolase
+   99 bp at 3' side: hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2482151  GTGCAGTCGTCA  2482162
+
+
+>CP019885.1 Mycobacterium kansasii strain 6MK genome
+Length=6462452
+
+ Features in this part of subject sequence:
+   hypothetical protein
+   adenylate/guanylate cyclase domain-containing protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  4883818  ACGTACGTGCCGTCGTC  4883802
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  3826296  GTGCAGTCGTCA  3826285
+
+
+>CP019884.1 Mycobacterium kansasii strain 4MK genome
+Length=6440784
+
+ Features in this part of subject sequence:
+   adenylate/guanylate cyclase domain-containing protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  5065876  ACGTACGTGCCGTCGTC  5065860
+
+
+ Features flanking this part of subject sequence:
+   99 bp at 5' side: hypothetical protein
+   78 bp at 3' side: alpha/beta hydrolase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  4012377  GTGCAGTCGTCA  4012366
+
+
+>CP019883.1 Mycobacterium kansasii strain 1MK genome
+Length=6421275
+
+ Features in this part of subject sequence:
+   PE family protein
+   adenylate/guanylate cyclase domain-containing protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  4929309  ACGTACGTGCCGTCGTC  4929293
+
+
+ Features in this part of subject sequence:
+   PE family protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  3897673  GTGCAGTCGTCA  3897662
+
+
+>CP014941.1 Rhodococcus sp. BH4, complete genome
+Length=6314891
+
+ Features in this part of subject sequence:
+   LytR family transcriptional regulator
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  3       GTACGTGCAGTCG  15
+               |||||||||||||
+Sbjct  699851  GTACGTGCAGTCG  699863
+
+
+ Features in this part of subject sequence:
+   esterase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||| ||||||||||||
+Sbjct  3437606  ACGTCCGTGCAGTCGTC  3437622
+
+
+ Features in this part of subject sequence:
+   trehalose-phosphatase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2       CGTACGTGCAGT  13
+               ||||||||||||
+Sbjct  797145  CGTACGTGCAGT  797156
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1369567  TACGTGCAGTCG  1369578
+
+
+ Features in this part of subject sequence:
+   FAD-binding molybdopterin dehydrogenase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2266698  GTACGTGCAGTC  2266709
+
+
+ Features in this part of subject sequence:
+   tobH protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  2312377  CGTACGTGCAGT  2312388
+
+
+ Features flanking this part of subject sequence:
+   215 bp at 5' side: aquaporin
+   14 bp at 3' side: transcriptional regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  4851924  ACGTACGTGCAG  4851935
+
+
+ Features in this part of subject sequence:
+   IclR family transcriptional regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  5516775  TACGTGCAGTCG  5516786
+
+
+>CP019705.1 Corynebacterium ammoniagenes strain KCCM 40472, complete genome
+Length=2808265
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  3       GTACGTGCAGTCG  15
+               |||||||||||||
+Sbjct  712170  GTACGTGCAGTCG  712182
+
+
+>CP019572.1 Rhodococcus sp. MTM3W5.2, complete genome
+Length=5665081
+
+ Features in this part of subject sequence:
+   fatty acid desaturase family protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  1790745  ACGTACGTGCAGT  1790733
+
+
+ Features in this part of subject sequence:
+   tRNA dimethylallyltransferase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2373293  GTACGTGCAGTC  2373304
+
+
+ Features in this part of subject sequence:
+   penicillin binding transpeptidase domain protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  5629091  ACGTACGTGCAG  5629102
+
+
+>CP019420.1 Mycobacterium sp. MS1601, complete genome
+Length=6407860
+
+ Features in this part of subject sequence:
+   NUDIX hydrolase
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  2348518  CGTGCAGTCGTCA  2348530
+
+
+ Features in this part of subject sequence:
+   NUDIX hydrolase
+   DNA-binding response regulator
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1842228  CGTGCAGTCGTC  1842239
+
+
+ Features in this part of subject sequence:
+   NUDIX hydrolase
+   TRAP transporter
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  3997080  ACGTGCAGTCGT  3997069
+
+
+ Features in this part of subject sequence:
+   NUDIX hydrolase
+   dihydroorotate dehydrogenase (quinone)
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4914712  CGTGCAGTCGTC  4914723
+
+
+>CP007220.1 Mycobacterium chelonae CCUG 47445, complete genome
+Length=5029817
+
+ Features in this part of subject sequence:
+   HAD family hydrolase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGTC  17
+                |||||||||||||
+Sbjct  2360023  ACGTGCAGTCGTC  2360035
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1358318  CGTGCAGTCGTC  1358329
+
+
+ Features in this part of subject sequence:
+   group 1 glycosyl transferase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  2603781  CGTGCAGTCGTC  2603770
+
+
+>CP015220.1 Rhodococcus sp. PBTS2, complete genome
+Length=5179353
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  4155044  ACGTACGTGCAGT  4155032
+
+
+ Features in this part of subject sequence:
+   Putative oxidoreductase SadH
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  458832  CGTGCAGTCGTC  458821
+
+
+ Features in this part of subject sequence:
+   Chaperone protein HscA
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2       CGTACGTGCAGT  13
+               ||||||||||||
+Sbjct  544077  CGTACGTGCAGT  544088
+
+
+ Features in this part of subject sequence:
+   Alkane 1-monooxygenase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  2241893  CGTACGTGCAGT  2241904
+
+
+ Features flanking this part of subject sequence:
+   57 bp at 5' side: hypothetical protein
+   75 bp at 3' side: NADH dehydrogenase-like protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  2273346  CGTGCAGTCGTC  2273335
+
+
+ Features in this part of subject sequence:
+   Putative glycosyltransferase EpsH
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  2856955  CGTGCAGTCGTC  2856966
+
+
+ Features in this part of subject sequence:
+   HTH-type transcriptional regulator BetI
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  3820229  CGTACGTGCAGT  3820218
+
+
+ Features in this part of subject sequence:
+   Branched-chain-amino-acid aminotransferase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  4576616  ACGTACGTGCAG  4576605
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4969493  CGTGCAGTCGTC  4969504
+
+
+>CP015219.1 Rhodococcus sp. PBTS1, complete genome
+Length=4251687
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  1625732  GTACGTGCAGTCG  1625720
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  733667  CGTGCAGTCGTC  733678
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  763586  CGTGCAGTCGTC  763597
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  1771205  ACGTACGTGCAG  1771194
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGTCGTC  17
+                ||||||||| ||||||
+Sbjct  1878813  CGTACGTGCCGTCGTC  1878798
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  2084635  CGTGCAGTCGTC  2084624
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  4016186  ACGTGCAGTCGT  4016197
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  4075108  CGTACGTGCAGT  4075119
+
+
+>CP010071.1 Mycobacterium sp. QIA-37, complete genome
+Length=4855372
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTCA  18
+               |||||||||||||
+Sbjct  656023  CGTGCAGTCGTCA  656035
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1292632  CGTGCAGTCGTC  1292643
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  2472511  CGTGCAGTCGTC  2472500
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  4131738  CGTACGTGCAGT  4131727
+
+
+>CP014961.1 Mycobacterium abscessus strain FLAC054, complete genome
+Length=5330954
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  2        CGTACGTGCAGTC  14
+                |||||||||||||
+Sbjct  3194352  CGTACGTGCAGTC  3194364
+
+
+ Features in this part of subject sequence:
+   ATP-dependent DNA helicase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3889868  CGTGCAGTCGTCA  3889856
+
+
+ Features in this part of subject sequence:
+   ergothioneine biosynthesis PLP-dependent enzyme EgtE
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  415224  TACGTGCAGTCG  415213
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5       ACGTGCAGTCGT  16
+               ||||||||||||
+Sbjct  550129  ACGTGCAGTCGT  550140
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2133896  GTACGTGCAGTC  2133885
+
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3124136  CGTGCAGTCGTC  3124125
+
+
+ Features in this part of subject sequence:
+   hydroxymethylglutaryl-CoA lyase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  5055032  TACGTGCAGTCG  5055043
+
+
+>CP014960.1 Mycobacterium abscessus strain FLAC049, complete genome
+Length=4799801
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3418161  CGTGCAGTCGTCA  3418149
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  356680  TACGTGCAGTCG  356669
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  1933968  GTACGTGCAGTC  1933957
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2624623  TACGTGCAGTCG  2624612
+
+
+>CP014959.1 Mycobacterium abscessus strain FLAC048, complete genome
+Length=4939234
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3558799  CGTGCAGTCGTCA  3558787
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  356589  TACGTGCAGTCG  356578
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2091794  GTACGTGCAGTC  2091783
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4674507  TACGTGCAGTCG  4674518
+
+
+>CP014957.1 Mycobacterium abscessus strain FLAC031, complete genome
+Length=5146255
+
+ Features in this part of subject sequence:
+   ATP-dependent DNA helicase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3584829  CGTGCAGTCGTCA  3584817
+
+
+ Features in this part of subject sequence:
+   ergothioneine biosynthesis PLP-dependent enzyme EgtE
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  372361  TACGTGCAGTCG  372350
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2093276  GTACGTGCAGTC  2093265
+
+
+ Features in this part of subject sequence:
+   ethanolamine permease
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2859771  TACGTGCAGTCG  2859760
+
+
+>CP014956.1 Mycobacterium abscessus strain FLAC029, complete genome
+Length=5188507
+
+ Features in this part of subject sequence:
+   ATP-dependent DNA helicase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3622646  CGTGCAGTCGTCA  3622634
+
+
+ Features in this part of subject sequence:
+   ergothioneine biosynthesis PLP-dependent enzyme EgtE
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  352959  TACGTGCAGTCG  352948
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2131093  GTACGTGCAGTC  2131082
+
+
+ Features in this part of subject sequence:
+   ethanolamine permease
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2845010  TACGTGCAGTCG  2844999
+
+
+>CP014955.1 Mycobacterium abscessus strain FLAC013, complete genome
+Length=5074222
+
+ Features in this part of subject sequence:
+   ATP-dependent DNA helicase
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  3568779  CGTGCAGTCGTCA  3568767
+
+
+ Features in this part of subject sequence:
+   ergothioneine biosynthesis PLP-dependent enzyme EgtE
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  352841  TACGTGCAGTCG  352830
+
+
+ Features in this part of subject sequence:
+   carboxylate--amine ligase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  2145968  GTACGTGCAGTC  2145957
+
+
+ Features in this part of subject sequence:
+   ethanolamine permease
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2847996  TACGTGCAGTCG  2847985
+
+
+>CP014950.1 Mycobacterium abscessus strain FLAC003, complete genome
+Length=4826045
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTCA  18
+               |||||||||||||
+Sbjct  648348  CGTGCAGTCGTCA  648360
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  364443  TACGTGCAGTCG  364432
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  3        GTACGTGCAGTC  14
+                ||||||||||||
+Sbjct  1960147  GTACGTGCAGTC  1960136
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2650639  TACGTGCAGTCG  2650628
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  4560177  TACGTGCAGTCG  4560188
+
+
+>CP003491.1 Mycobacterium sp. MOTT36Y, complete genome
+Length=5613626
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  1324100  ACGTACGTGCCGTCGTC  1324084
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  5203042  ACGTACGTGCAGT  5203030
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4       TACGTGCAGTCG  15
+               ||||||||||||
+Sbjct  277464  TACGTGCAGTCG  277453
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  663325  CGTGCAGTCGTC  663336
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2503772  TACGTGCAGTCG  2503761
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  7        GTGCAGTCGTCA  18
+                ||||||||||||
+Sbjct  2740790  GTGCAGTCGTCA  2740801
+
+
+>CP003324.1 Mycobacterium intracellulare MOTT-64, complete genome
+Length=5501090
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  1336322  ACGTACGTGCCGTCGTC  1336306
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  5103820  ACGTACGTGCAGT  5103808
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  677837  CGTGCAGTCGTC  677848
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  1316459  CGTGCAGTCGTC  1316470
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  1996028  TACGTGCAGTCG  1996017
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2366125  TACGTGCAGTCG  2366114
+
+
+>CP003323.1 Mycobacterium intracellulare MOTT-02, complete genome
+Length=5409696
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  1529212  ACGTACGTGCCGTCGTC  1529196
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  4        TACGTGCAGTCGT  16
+                |||||||||||||
+Sbjct  4515828  TACGTGCAGTCGT  4515840
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  5008488  ACGTACGTGCAGT  5008476
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  665525  CGTGCAGTCGTC  665536
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2098901  TACGTGCAGTCG  2098890
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2495986  TACGTGCAGTCG  2495975
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4955928  CGTGCAGTCGTC  4955939
+
+
+>CP003322.1 Mycobacterium intracellulare ATCC 13950, complete genome
+Length=5402402
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 16/17 (94%), Gaps = 0/17 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGTC  17
+                |||||||||| ||||||
+Sbjct  1581549  ACGTACGTGCCGTCGTC  1581533
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTCA  18
+                |||||||||||||
+Sbjct  2916771  CGTGCAGTCGTCA  2916759
+
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGT  13
+                |||||||||||||
+Sbjct  5000647  ACGTACGTGCAGT  5000635
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6       CGTGCAGTCGTC  17
+               ||||||||||||
+Sbjct  669161  CGTGCAGTCGTC  669172
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2121876  TACGTGCAGTCG  2121865
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  2165275  ACGTGCAGTCGT  2165286
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  4        TACGTGCAGTCG  15
+                ||||||||||||
+Sbjct  2491310  TACGTGCAGTCG  2491299
+
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  4925514  CGTGCAGTCGTC  4925525
+
+
+>CP003169.1 Mycobacterium rhodesiae NBB3, complete genome
+Length=6415739
+
+ Features in this part of subject sequence:
+   amino acid adenylation enzyme/thioester reductase family ...
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Minus
+
+Query  3       GTACGTGCAGTCG  15
+               |||||||||||||
+Sbjct  292714  GTACGTGCAGTCG  292702
+
+
+ Features in this part of subject sequence:
+   uncharacterized protein (ATP-grasp superfamily)
+
+ Score = 26.3 bits (13),  Expect = 68
+ Identities = 13/13 (100%), Gaps = 0/13 (0%)
+ Strand=Plus/Plus
+
+Query  3        GTACGTGCAGTCG  15
+                |||||||||||||
+Sbjct  5210576  GTACGTGCAGTCG  5210588
+
+
+ Features in this part of subject sequence:
+   methylase involved in ubiquinone/menaquinone biosynthesis
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 15/16 (94%), Gaps = 0/16 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAGTCGT  16
+                |||| |||||||||||
+Sbjct  2831164  ACGTCCGTGCAGTCGT  2831149
+
+
+ Features in this part of subject sequence:
+   anaerobic dehydrogenase, typically selenocysteine-containing
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  2        CGTACGTGCAGT  13
+                ||||||||||||
+Sbjct  3749146  CGTACGTGCAGT  3749135
+
+
+ Features in this part of subject sequence:
+   nucleoside-diphosphate-sugar epimerase
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  6        CGTGCAGTCGTC  17
+                ||||||||||||
+Sbjct  3933757  CGTGCAGTCGTC  3933746
+
+
+ Features in this part of subject sequence:
+   transposase family protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Plus
+
+Query  5        ACGTGCAGTCGT  16
+                ||||||||||||
+Sbjct  5231791  ACGTGCAGTCGT  5231802
+
+
+ Features in this part of subject sequence:
+   carbon starvation protein, predicted membrane protein
+
+ Score = 24.3 bits (12),  Expect = 268
+ Identities = 12/12 (100%), Gaps = 0/12 (0%)
+ Strand=Plus/Minus
+
+Query  1        ACGTACGTGCAG  12
+                ||||||||||||
+Sbjct  6100167  ACGTACGTGCAG  6100156
+
+
+  Database: Nucleotide collection (nt)
+    Posted date:  Feb 7, 2018  11:24 AM
+  Number of letters in database: 2,734,565,673
+  Number of sequences in database:  43,303
+
+Lambda      K        H
+    1.37    0.711     1.31 
+Gapped
+Lambda      K        H
+    1.37    0.711     1.31 
+Matrix: blastn matrix:1 -3
+Gap Penalties: Existence: 5, Extension: 2
+Number of Sequences: 43303
+Number of Hits to DB: 119798
+Number of extensions: 23
+Number of successful extensions: 23
+Number of sequences better than 1000: 8
+Number of HSP's better than 1000 without gapping: 0
+Number of HSP's gapped: 23
+Number of HSP's successfully gapped: 23
+Length of query: 18
+Length of database: 2734565673
+Length adjustment: 16
+Effective length of query: 2
+Effective length of database: 2733872825
+Effective search space: 5467745650
+Effective search space used: 5467745650
+A: 0
+X1: 11 (21.8 bits)
+X2: 15 (29.7 bits)
+X3: 50 (99.1 bits)
+S1: 12 (24.3 bits)
+S2: 12 (24.3 bits)
+
+
+
+

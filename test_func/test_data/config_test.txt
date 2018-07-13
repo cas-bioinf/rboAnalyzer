@@ -1,0 +1,7 @@
+[SSH]
+SSH_USER = test@test.local
+SSH_PASS = test
+USE_VIRTUAL = True
+
+[DATA]
+rfam_dir = /test/test/Documents/rfamdb/

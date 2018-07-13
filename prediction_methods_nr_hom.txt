@@ -1,0 +1,84 @@
+prediction method                                  nr   ambig_crash  function and comment
+================================================================================
+rfam_rnafoldc                                      No  - No nt  -
+rfam_subopt                                        No  - No nt  -
+subopt_rapidshapes                                 Yes - Yes nt - safe - need multiple homologous sequences (min 2) to predict common structure using suboptimal structures, if 1, this will degrade to MFE or MEA prediction (not implemented)
+rfam_rapidshapes                                   No  - Yes nt -
+clustalo_alifold_rapidshapes                       Yes - Yes nt - safe - need multiple homologous sequences (min 2) to run clustal and alifold fo consensus prediction, if 1, this will degrade to MFE or MEA with rapidshapes (not implemented)
+muscle_alifold_rapidshapes                         Yes - Yes nt - safe - see above (muscle)
+rcoffee_alifold_rapidshapes                        Yes - Yes nt - safe - see above (rcoffee)
+alifold_refold                                     Yes - No nt  - safe - need multiple for clustal and alifold for consensus prediction, if 1, the profile alignment would fail (maybe mafft could mitigate that, but consensus pred is still a problem)
+muscle_alifold_refold                              Yes - No nt  - safe - see above (muscle)
+rnafold                                            No  - No nt  -
+subopt_fold_query                                  No  - No nt  -
+subopt_fold_clustal_alifold                        Yes - No nt  - safe - for clustal and alifold
+subopt_fold_muscle_alifold                         Yes - No nt  - safe - for muscle and alifold
+alifold_refold_rnafold_c                           Yes - No nt  - safe - for clustal and alifold
+muscle_alifold_refold_rnafold_c                    Yes - No nt  - safe - for muscle and alifold
+alifold_unpaired_conserved_refold                  Yes - No nt  - safe - for clustal and alifold
+muscle_alifold_unpaired_conserved_refold           Yes - No nt  - safe - for muscle and alifold
+dh_tcoffee_alifold_refold
+dh_tcoffee_alifold_refold_rnafoldc
+dh_tcoffee_alifold_conserved_ss_rnafoldc
+dh_clustal_alifold_refold
+dh_clustal_alifold_refold_rnafoldc
+dh_clustal_alifold_conserved_ss_rnafoldc
+pairwise_centroid_homfold                          Yes - No  - (one homologous sequence suffice - this we always have)
+TurboFold_conservative                             Yes - Yes - unsafe - (one homologous sequence suffice)
+TurboFold                                          Yes - Yes - nr safe
+tcoffee_rcoffee_alifold_refold                     Yes - No nt  - safe
+tcoffee_rcoffee_alifold_refold_rnafoldc            Yes - No nt  - safe
+tcoffee_rcoffee_alifold_conserved_ss_rnafoldc      Yes - No nt  - safe
+
+* safe - minimum of one homologous sequences (other then query) is needed for prediction method
+  unsafe - none (zero) homologous sequences are needed for the prediction (query sequences suffice)
+
+
+
+need to decide if it is better to raise an error if too few sequences pass the filtering, or to do some mitigation
+
+cases 
+- no homologs
+- no unique homologs (with query)
+
+decouple homologs
+cases
+- no homologs
+- no unique homologs
+- no non homologs
+- only one non homologs
+
+================================================
+mitigation option for safe version:
+case:
+- only one unique sequence after similarity filtering
+  solution: add the most disimilar sequence to the list
+
+- no predicted homologous sequences at all
+  solution: 
+    1) duplicate the query sequence to fool the 3rd party programs
+    2) return no structures for that procedure (or raise exception), run other procedures if requested (for me, this is preferable behaviour)
+
+
+decouple homologs
+selecting homologous sequences is same as in other versions
+
+inside there is special stage when the sequences are divided to homologous and nonhomologous
+that must be delt with separetly
+
+ambiguos base crash
+3rd party
+locarna                        OK
+centroidhomfold                OK
+rapidshapes                    crash
+clustalo                       OK
+muscle allseqtypes             OK
+RNAfold                        OK
+RNAalifold                     OK
+cmbuild                        OK    - ambiguos base not propagated to cm model
+cmalign                        OK    - aling with model build from seq with ambiguos and align CM to seqs containing ambiguos
+refold.pl                      OK    - ambig in seqs, even if in consensus
+TurboFold                      crash
+t-coffee                       OK
+r-coffee                       OK
+mfold (hybrid-ss-min)          OK
