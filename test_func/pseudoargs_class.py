@@ -31,8 +31,9 @@ class Pseudoargs(object):
                  pred_params=None,
                  dev_pred=False,
                  threads=1,
-                 #ribosum='/home/rapidshapes/Documents/rsearch-1.1/matrices/RIBOSUM65.mat',
-                 ribosum='/home/big-user/bioinf_soft/rsearch-1.1/matrices/RIBOSUM65.mat',
+                 ribosum=os.path.abspath(
+                     os.path.dirname(__file__) + '/../rna_blast_analyze/3rd_party_source/RSEARCH_matrices/RIBOSUM65.mat'
+                 ),
                  structures2write=('best',),
                  subseq_window=30,
                  cm_file=None,
