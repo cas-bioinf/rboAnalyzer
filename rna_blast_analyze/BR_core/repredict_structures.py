@@ -331,6 +331,17 @@ def _hom_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold_percent_
     ref_len = len(query_)
     nr_len_select_homologous = [seq for seq in nr_homologous_seqs_ if ref_len * (1 - len_diff_) < len(seq) < ref_len * (1 + len_diff_)]
 
+    # this is to control if only one sequence remained after filtering for length difference
+    if len(nr_len_select_homologous) == 1:
+        print(
+            'No homologous sequence satisfy the length difference condition ({}: {}-{})'.format(
+                len_diff_,
+                ref_len * (1 - len_diff_),
+                ref_len * (1 + len_diff_)
+            )
+        )
+        return np.empty(0), [query_]
+
     # sanitize seq names (muscle has issues with too long names)
     san_hom_seqs, san_dict = BA_support.sanitize_fasta_names_in_seqrec_list(nr_len_select_homologous)
 
