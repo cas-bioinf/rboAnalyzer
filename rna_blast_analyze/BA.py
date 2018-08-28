@@ -144,7 +144,7 @@ def f_parser():
         nargs='*',
         type=str,
         metavar='prediction_method_name',
-        default='centroid_homfold',
+        default=['pairwise_centroid_homfold'],
         choices=BA_verify.pred_method_required_tools.keys(),
         help='Prediction method to use. Multiple are allowed.'
     )

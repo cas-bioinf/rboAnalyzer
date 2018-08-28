@@ -174,6 +174,41 @@ class TestDirectExecution(unittest.TestCase):
         os.close(ff)
         self.json = json_file
 
+    def test_BA_one_pred_method(self):
+        a = [
+            'python3',
+            '../rna_blast_analyze/BA.py',
+            '-blast_in', os.path.join(cwd, test_dir, 'RF00001.blastout'),
+            '-blast_query', os.path.join(cwd, test_dir, 'RF00001.fasta'),
+            '-blast_db', os.path.join(cwd, test_dir, 'blastdb', 'RF00001-art.blastdb'),
+            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--b_type', 'plain',
+            '--html', self.html,
+            '--json', self.json,
+            '--csv', self.csv,
+            '--pandas_dump', self.pandas_dump,
+            '--prediction_method', 'rnafold'
+        ]
+        bb = call(a)
+        self.assertEqual(bb, 0)
+
+        t = tab_output_equal(
+            csvfile=self.csv,
+            jsonfile=self.json,
+            pdfile=self.pandas_dump,
+        )
+        self.assertTrue(t)
+
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
+            ],
+            ''
+        )
+
     def test_BA(self):
         a = [
             'python3',
