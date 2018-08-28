@@ -176,16 +176,36 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
 
         # compute alignment here
         analyzed_hits.query = query
-        pack = []
-        for oeh in shorts_expanded:
-            pack.append((oeh,
-                         query_seq,
-                         stockholm_features,
-                         args_inner.locarna_params,
-                         args_inner.locarna_anchor_length))
-        pool = Pool(processes=args_inner.threads)
-        result = pool.map(locarna_worker, pack)
-        pool.close()
+
+        if args_inner.threads == 1:
+            result = []
+            for oeh in shorts_expanded:
+                result.append(
+                    locarna_worker(
+                        (
+                            oeh,
+                            query_seq,
+                            stockholm_features,
+                            args_inner.locarna_params,
+                            args_inner.locarna_anchor_length
+                        )
+                    )
+                )
+        else:
+            pack = []
+            for oeh in shorts_expanded:
+                pack.append(
+                    (
+                        oeh,
+                        query_seq,
+                        stockholm_features,
+                        args_inner.locarna_params,
+                        args_inner.locarna_anchor_length
+                    )
+                )
+            pool = Pool(processes=args_inner.threads)
+            result = pool.map(locarna_worker, pack)
+            pool.close()
 
         for res in result:
             analyzed_hits.hits.append(res)
