@@ -3,6 +3,7 @@ import json
 import unittest
 import tempfile
 import filecmp
+import gzip
 
 from rna_blast_analyze.BR_core import convert_classes
 
@@ -21,19 +22,28 @@ class TestHTMLoutput(unittest.TestCase):
         bb = convert_classes.blastsearchrecomputefromdict(mydata)
         bb.to_html(self.htmlo)
         try:
-            self.assertTrue(
-                filecmp.cmp(
-                    self.htmlo,
-                    os.path.abspath(
-                        os.path.dirname(__file__) + '/test_data/RF00001_reference_output.html'
-                    )
+            # self.assertTrue(
+            #     filecmp.cmp(
+            #         self.htmlo + '.gz',
+            #         os.path.abspath(
+            #             os.path.dirname(__file__) + '/test_data/RF00001_reference_output.html.gz'
+            #         )
+            #     )
+            # )
+            with open(self.htmlo, 'rb') as f, gzip.open(
+                os.path.abspath(
+                    os.path.dirname(__file__) + '/test_data/RF00001_reference_output.html.gz'
                 )
-            )
+            ) as r:
+                self.assertEqual(
+                    f.read(),
+                    r.read()
+                )
         finally:
             try:
                 os.remove(self.htmlo)
             except:
-                pass
+                print('removing temporary test files failed')
 
 
 if __name__ == '__main__':

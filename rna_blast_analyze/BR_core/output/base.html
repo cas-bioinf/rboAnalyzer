@@ -5,14 +5,16 @@
     <title>Blast RNA extension</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% include 'style.css' %}
-{% include 'script.html' %}
+{% include 'script.js' %}
     </head>
 <body>
     <div class="page-wrap">
         <div class="header">
             <h2>Blast expansion</h2>
         </div>
-        {% block content %}{% endblock %}
+        <div class="hits">
+            {% block content %}{% endblock %}
+        </div>>
         <div class="footer">
             {% block footer %}{% endblock %}
         </div>
@@ -22,6 +24,7 @@
             <button onclick="selectAllstrs(this)" id="selectStrsBtn" title="Select All Structures">Select all Structs.</button>
             <button onclick="writeSelectionStructures()" id="exportStrBtn" title="Export Selected Structures">Export sel. Structs.</button>
             <button onclick="writeSelectionFasta()" id="exportSeqsBtn" title="Export Selected Sequences">Export sel. Seqs.</button>
+            <button onclick="sortByEval(this)" id="sortEvalBtn" title="Sort by e-value">Sort Eval desc.</button>
         </div>
     </div>
 </body>

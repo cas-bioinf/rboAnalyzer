@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
     {% macro create_onehit(data) %}
-    <div class="onehit" data-brna_sequence="{{data.sequence}}" data-brna_seqname="{{data.seqname}}">
+    <div class="onehit" data-brna_sequence="{{data.sequence}}" data-brna_seqname="{{data.seqname}}"
+         data-eval="{{data.eval}}">
         <h3 class="onehit_heading">
             Hit: {{data.source_seq_name}}
         </h3>

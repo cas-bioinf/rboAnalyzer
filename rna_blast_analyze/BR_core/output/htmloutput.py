@@ -41,9 +41,9 @@ def _prepare_body(data):
         rr['ext_end'] = onehit.best_end
         rr['blast_text'] = blasthsp2pre(onehit.source.annotations['blast'][1])
         rr['pictures'] = _prepare_pictures(ext)
+        rr['eval'] = onehit.source.annotations['blast'][1].expect
 
         # create seqviewurl here
-
         es = onehit.source.annotations['extended_start']
         ee = onehit.source.annotations['extended_end']
         if es > ee:

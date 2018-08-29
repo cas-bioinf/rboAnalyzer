@@ -4,6 +4,8 @@
     var BtnUnselectSeqsTxt = "Unselect all Seqs."
     var BtnSelectStrsTxt = "Select all Structs."
     var BtnUnselectStrsTxt = "Unselect all Structs."
+    var BtnSortEvalAscTxt = "Sort Eval asc."
+    var BtnSortEvalDescTxt = "Sort Eval desc."
 
     function select_class_from_colect(colect, cl) {
         console.log("function select from collect start");
@@ -110,6 +112,45 @@
         window.open("data:application/txt," + encodeURIComponent(exportdata), "_self");
     }
 
+    function GetHits() {
+        var divs;
+        divs = document.getElementsByClassName("onehit");
+        return divs
+    }
+
+    function sortByEval(button) {
+        var parent = document.querySelector('.hits')
+
+        var a = Array.from(parent.children)
+
+        if (button.textContent === BtnSortEvalDescTxt) {
+            a.sort(
+                eval_desc
+            ).forEach(
+                function(ele) {
+                    parent.appendChild(ele);
+                }
+            )
+            button.textContent = BtnSortEvalAscTxt;
+        } else {
+            a.sort(
+                eval_asc
+            ).forEach(
+                function(ele) {
+                    parent.appendChild(ele);
+                }
+            )
+            button.textContent = BtnSortEvalDescTxt;
+        };
+    }
+
+    function eval_desc(a, b) {
+        return Number.parseFloat(a.dataset.eval) < Number.parseFloat(b.dataset.eval);
+    }
+
+    function eval_asc(a, b) {
+        return Number.parseFloat(a.dataset.eval) > Number.parseFloat(b.dataset.eval);
+    }
     console.log("script loaded correctly");
 </script>
 <script type="text/javascript" src="https://www.ncbi.nlm.nih.gov/projects/sviewer/js/sviewer.js"></script>
