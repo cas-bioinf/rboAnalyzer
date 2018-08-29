@@ -49,7 +49,8 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
     # run_prefix = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(6))
     # hybrid ss operates from call directory, output are ctfiles
     if not os.path.isfile(in_path):
-         raise FileNotFoundError('Provided file path not found %s', in_path)
+        FNULL.close()
+        raise FileNotFoundError('Provided file path not found %s', in_path)
     repeat = 0
     done = False
     while repeat < 5:

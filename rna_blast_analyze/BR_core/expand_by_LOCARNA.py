@@ -214,6 +214,7 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
         # consider adding query sequence to alignment and scoring it as a proof against squed alignments and datasets
         # write all hits to fasta
         fda, all_hits_fasta = mkstemp()
+        os.close(fda)
         analyzed_hits.write_results_fasta(all_hits_fasta)
 
         # this part predicts homology - it is not truly part of repredict
