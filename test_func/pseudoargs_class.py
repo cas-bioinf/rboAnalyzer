@@ -1,51 +1,57 @@
 import json as json_package
 import os
+from argparse import Namespace
 
 
-class Pseudoargs(object):
-    def __init__(self, query_in, blast_in, blast_db,
-                 b_type='guess',
-                 o_tbl=None,
-                 blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
-                 keep_all=False,
-                 max_shapes=5,
-                 subseq_step=3,
-                 subseq_window_locarna=30,
-                 subseq_window_muscle=30,
-                 subseq_window_mafft=50,
-                 subseq_window_simple_ext=10,
-                 reldev=(10, 20, 30),
-                 dump=None,
-                 pandas_dump=None,
-                 logfile=None,
-                 locarna_params='--struct-local 0 --sequ-local 0 --free-endgaps ++++',
-                 muscle_params='-distance1 kbit20_3 -distance2 pctidlog -objscore sp -weight1 threeway -weight2 none',
-                 mafft_params=' --quiet',
-                 mafft_mode='qinsi',
-                 mlocarna_params=None,
-                 locarna_anchor_length=7,
-                 repredict_file=None,
-                 pred_sim_threshold_percent=90,
-                 prediction_method=('alifold_unpaired_conserved_refold',),
-                 dill=None,
-                 pred_params=None,
-                 dev_pred=False,
-                 threads=1,
-                 ribosum=os.path.abspath(
-                     os.path.dirname(__file__) + '/../rna_blast_analyze/3rd_party_source/RSEARCH_matrices/RIBOSUM65.mat'
-                 ),
-                 structures2write=('best',),
-                 subseq_window=30,
-                 cm_file=None,
-                 use_rfam=False,
-                 config_file=None,
-                 html=None,
-                 json=None,
-                 csv=None,
-                 download_rfam=False,
-                 show_gene_browser=False,
-                 zip_json=False
-                 ):
+class Pseudoargs(Namespace):
+    def __init__(
+            self,
+            query_in,
+            blast_in,
+            blast_db,
+            b_type='guess',
+            o_tbl=None,
+            blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
+            keep_all=False,
+            max_shapes=5,
+            subseq_step=3,
+            subseq_window_locarna=30,
+            subseq_window_muscle=30,
+            subseq_window_mafft=50,
+            subseq_window_simple_ext=10,
+            reldev=(10, 20, 30),
+            dump=None,
+            pandas_dump=None,
+            logfile=None,
+            locarna_params='--struct-local 0 --sequ-local 0 --free-endgaps ++++',
+            muscle_params='-distance1 kbit20_3 -distance2 pctidlog -objscore sp -weight1 threeway -weight2 none',
+            mafft_params=' --quiet',
+            mafft_mode='qinsi',
+            mlocarna_params=None,
+            locarna_anchor_length=7,
+            repredict_file=None,
+            pred_sim_threshold_percent=90,
+            prediction_method=('alifold_unpaired_conserved_refold',),
+            dill=None,
+            pred_params=None,
+            dev_pred=False,
+            threads=1,
+            ribosum=os.path.abspath(
+                os.path.dirname(__file__) + '/../rna_blast_analyze/3rd_party_source/RSEARCH_matrices/RIBOSUM65.mat'
+            ),
+            structures2write=('best',),
+            subseq_window=30,
+            cm_file=None,
+            use_rfam=False,
+            config_file=None,
+            html=None,
+            json=None,
+            csv=None,
+            download_rfam=False,
+            show_gene_browser=False,
+            zip_json=False,
+            **kwargs):
+        super().__init__(**kwargs)
         self.blast_in = blast_in
         self.b_type = b_type
         self.o_tbl = o_tbl
