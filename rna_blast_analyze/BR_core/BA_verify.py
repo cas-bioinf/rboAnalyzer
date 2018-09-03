@@ -301,7 +301,7 @@ def verify_tcoffee(minimal_version):
             ]
         )
         a = a.decode()
-        if a.startswith('PROGRAM: T-COFFEE'):
+        if re.search('PROGRAM: T-COFFEE', a):
             im = re.search('(?<=version_)[0-9.]+', a, flags=re.IGNORECASE)
             if im:
                 b = im.group()
@@ -351,7 +351,7 @@ def verify_rcoffee(minimal_version):
 
         a = a.decode()
         t1 = re.search('-- ERROR: You have not provided any sequence', a)
-        t2 = re.search('-- COM: t_coffee -mode rcoffee', a)
+        t2 = re.search('-- COM:(.)*t_coffee -mode rcoffee', a)
 
         n1 = re.search("ERROR: special_mode rcoffee is unknown \[FATAL:T-COFFEE\]", a)
 
@@ -541,6 +541,7 @@ def check_necessery_tools(methods):
         needed = pred_method_required_tools[met] - avalible_tools
         if needed:
             raise EnvironmentError('Missing {} (needed for {}).'.format(' '.join(needed), met))
+
 
 if __name__ == '__main__':
     print(check_3rd_party_tools())
