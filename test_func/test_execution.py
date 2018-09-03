@@ -239,6 +239,7 @@ class TestDirectExecution(unittest.TestCase):
                 self.csv,
                 self.json,
                 self.pandas_dump,
+                self.html
             ],
             ''
         )
@@ -252,7 +253,7 @@ class TestDirectExecution(unittest.TestCase):
             '-blast_db', os.path.join(cwd, test_dir, 'blastdb', 'RF00001-art.blastdb'),
             '--blast_regexp', '"(?<=\|)[A-Z0-9]*\.?\d*$"',
             '--b_type', 'plain',
-            '--prediction_method', 'rnafold', 'subopt_fold_query',
+            '--prediction_method', 'rnafold',
             '--html', self.html,
             '--json', self.json,
             '--csv', self.csv,
@@ -273,6 +274,42 @@ class TestDirectExecution(unittest.TestCase):
                 self.csv,
                 self.json,
                 self.pandas_dump,
+                self.html
+            ],
+            ''
+        )
+
+    def test_BA_shell_relative_path(self):
+        a = [
+            'python3',
+            '../rna_blast_analyze/BA.py',
+            '-blast_in', os.path.join(test_dir, 'RF00001.blastout'),
+            '-blast_query', os.path.join(test_dir, 'RF00001.fasta'),
+            '-blast_db', os.path.join(test_dir, 'blastdb', 'RF00001-art.blastdb'),
+            '--blast_regexp', '"(?<=\|)[A-Z0-9]*\.?\d*$"',
+            '--b_type', 'plain',
+            '--prediction_method', 'rnafold',
+            '--html', self.html,
+            '--json', self.json,
+            '--csv', self.csv,
+            '--pandas_dump', self.pandas_dump,
+        ]
+        bb = call(' '.join(a), shell=True)
+        self.assertEqual(bb, 0)
+
+        t = tab_output_equal(
+            csvfile=self.csv,
+            jsonfile=self.json,
+            pdfile=self.pandas_dump,
+        )
+        self.assertEqual(t, True)
+
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
             ],
             ''
         )
