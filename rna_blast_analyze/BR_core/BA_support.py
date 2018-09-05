@@ -385,8 +385,9 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
             if not os.path.isfile(blast_db + '.' + ext):
                 raise FileNotFoundError('expected file : "' + blast_db + '.' + ext + '" was not found')
 
-    (fd, temp_filename) = mkstemp()
-    (fdb, blast_tempfile) = mkstemp()
+    fd, temp_filename = mkstemp()
+    fdb, blast_tempfile = mkstemp()
+    os.close(fdb)
     exp_hits = []
     strand = []
     loc = []
@@ -495,8 +496,11 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
         os.remove(temp_filename)
         os.remove(blast_tempfile)
 
-    # close the file
-    os.close(fdb)
+    if len(exp_hits) != len(hits):
+        raise LookupError(
+            'Some IDs were not found in provided BLAST database.'
+            ' Please update the database or remove the hits.'
+        )
     return exp_hits, strand
 
 
