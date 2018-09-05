@@ -18,7 +18,6 @@ def f_parser():
     """
     parser = argparse.ArgumentParser(
         description='Blast RNA Refine pipeline',
-        prog='BlastRnaExpansion',
     )
     input_group = parser.add_argument_group(
         'INPUT'
@@ -144,7 +143,7 @@ def f_parser():
         nargs='*',
         type=str,
         metavar='prediction_method_name',
-        default=['pairwise_centroid_homfold'],
+        default=['pairwise_centroid_homfold', 'rfam_rnafoldc', 'rnafold'],
         choices=BA_verify.pred_method_required_tools.keys(),
         help='Prediction method to use. Multiple are allowed.'
     )
