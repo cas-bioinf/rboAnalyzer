@@ -393,18 +393,17 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
     loc = []
     temp_file = os.fdopen(fd, 'w')
     for i, hit in enumerate(hits):
+        # +1 here because blastdbcmd counts sequences from 1
         if hit[1].strand[1] == 'Minus':
-            start = hit[1].sbjct_end - hit[1].query_start + 1 - extra
-            end = hit[1].sbjct_start + _positive_index(query_length - hit[1].query_end) + extra
+            start = hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end) + 1 - extra
+            end = hit[1].sbjct_start + hit[1].query_start + extra
             strand.append(-1)
             d = {'query_start': hit[1].sbjct_end, 'query_end': hit[1].sbjct_start,
-                 'extended_start': hit[1].sbjct_end - hit[1].query_start + 1,
-                 'extended_end': hit[1].sbjct_start + _positive_index(query_length - hit[1].query_end),
+                 'extended_start': hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end) + 1,
+                 'extended_end': hit[1].sbjct_start + hit[1].query_start,
                  'strand': -1}
         else:
-            # ss - positive(qs) - extra
             start = hit[1].sbjct_start - hit[1].query_start + 1 - extra
-            # se + positive(len(q) - qe) + extra
             end = hit[1].sbjct_end + _positive_index(query_length - hit[1].query_end) + extra
             strand.append(1)
             d = {'query_start': hit[1].sbjct_start, 'query_end': hit[1].sbjct_end,
