@@ -51,6 +51,43 @@ pred_method_required_tools = {
     'tcoffee_rcoffee_alifold_conserved_ss_rnafoldc': {'rcoffee', 'RNAalifold', 'refold.pl',},
 }
 
+pred_params = {
+    'cmscore_percent',
+    'cmscore_tr',
+    'pred_sim_threshold',
+    'query_max_len_diff',
+    'repred_unpaired',
+    'conseq_conserved',
+    'mfold',
+    'muscle',
+    'clustalo',
+    'alifold',
+    'turbofold_mode',
+    'tcoffee_rcoffee',
+    'tcoffee_profile',
+    'cmalign',
+    'rcoffee',
+    'shape_level',
+    'rapidshapes',
+    'RNAfold',
+    'centroid_homfold',
+}
+
+
+def check_params(par: dict):
+    """
+    Verify if provided parameters are valid.
+    :param par:
+    :return:
+    """
+    known_methods = set(pred_method_required_tools.keys())
+    for provided_key in par.keys():
+        if provided_key not in known_methods:
+            raise ValueError("Method '{}' does not exist.".format(provided_key))
+        for pk in par[provided_key]:
+            if pk not in pred_params:
+                raise ValueError("Parameter '{}' for method '{}' does not exist.".format(pk, provided_key))
+
 
 def verify_query_blast(blast, query):
     """
