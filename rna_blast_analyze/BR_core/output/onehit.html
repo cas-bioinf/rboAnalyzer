@@ -6,6 +6,7 @@
         <h3 class="onehit_heading">
             Hit: {{data.source_seq_name}}
         </h3>
+        <div class="onehit_body">
         <div class="blast_text">
             <p class="header-bhname">{{data.blast_hit_name}}</p>
             <pre>
@@ -44,7 +45,7 @@
                 <a href="{{data.seqviewurl}}"></a>
             </div>
         {% endif %}
-
+        </div>
     </div>
     {% endmacro %}
 
