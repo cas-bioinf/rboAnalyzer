@@ -134,8 +134,8 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 bls = bl.sbjct_start - bl.query_start
                 ble = bl.sbjct_end + (query_len - bl.query_end)
             elif bl.strand == ('Plus', 'Minus'):
-                bls = bl.sbjct_end - bl.query_start
-                ble = bl.sbjct_start + (query_len - bl.query_end)
+                bls = bl.sbjct_end - (query_len - bl.query_end)
+                ble = bl.sbjct_start + bl.query_start
             else:
                 raise Exception('unknown strand option')
 
