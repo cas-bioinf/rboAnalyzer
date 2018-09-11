@@ -26,7 +26,7 @@ For prediction:
 * viennarna (with refold.pl in PATH)
 * centroid_homfold
 
-Optional:
+Optional (some prediction methods are not avalible without these):
 * RNAstructure >= 6.0 (TurboFold)
 * RapidShapes - RNAshapes
 * mfold >= 3.8
@@ -48,7 +48,30 @@ rna_blast_analyze -blast_in BLAST_OUTPUT.txt -blast_db USED_DATABASE_PATH -blast
 ```
 
 ## Example
-example placeholder
+Examples are provided in example directory.
+#### Example 1:
+
+Analyzing subset of NCBI blast HITs for 6S ncRNA.
+1) Install rna_blast_analyze.
+2) Obtain a copy of `example` directory.
+3) cd to `example` directory.
+4) Now you need to obtain a copy of the BLAST database.
+This is best done by using the `download_blast_genomes.py` by calling: 
+    ```
+    python3 download_blast_genome.py -email YOUR_EMAIL -blast_in 6S_short.xml -out 6S.fasta
+    ```
+    This command will download all needed genomes and create blast database for you (if `makeblastdb` command is avalible).
+    The EMAIL is needed so the NCBI would contact you in case of missuse of their resources.
+    The 6S.fasta file is not needed if the blast database was created successfully and you can delete it.
+    
+    The blast database with name 6S.fasta.bdb was created for you if everything was successful.
+    You will need in next step.
+
+5) Now you can run the pipeline itself:
+    ```
+    rna_blast_analyze -blast_in 6S_short.xml -blast_query 6S_query.fasta -blast_db 6S.fasta.bdb -html 6S_out.html
+    ```
+6) The output is single html file. On open the NCBI genome viewer will fetch data to render the genomic loci of the hit.
 
 ### Notes
 This is Beta version. Especially the default parameters for prediction can change.
