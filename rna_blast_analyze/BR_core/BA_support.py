@@ -425,7 +425,6 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
         if d['extended_start'] < 1:
             d['extended_start'] = 1
             d['trimmed_start'] = True
-        loc.append(d)
 
         # add blast record
         d['blast'] = hit
@@ -438,7 +437,11 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
             print(blast_regexp)
             raise RuntimeError('provided regexp returned no result for %s,'
                                ' please provide regexp valid even for this name', hit[0])
-        temp_file.write(hname.group() + ' ' + '-region ' + str(start) + '-' + str(end) + '\n')
+        bdb_accession = hname.group()
+        d['blast'][0] = bdb_accession
+        loc.append(d)
+
+        temp_file.write(bdb_accession + ' ' + '-region ' + str(start) + '-' + str(end) + '\n')
 
     temp_file.close()
 

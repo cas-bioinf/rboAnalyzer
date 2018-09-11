@@ -130,10 +130,10 @@ def blast_wrapper_inner(args_inner, shared_list=None):
 
             bl = exp_hit.annotations['blast'][1]
 
-            if bl.strand == ('Plus', 'Plus'):
+            if bl.sbjct_start < bl.sbjct_end:
                 bls = bl.sbjct_start - bl.query_start
                 ble = bl.sbjct_end + (query_len - bl.query_end)
-            elif bl.strand == ('Plus', 'Minus'):
+            elif bl.sbjct_end < bl.sbjct_start:
                 bls = bl.sbjct_end - (query_len - bl.query_end)
                 ble = bl.sbjct_start + bl.query_start
             else:
