@@ -1059,10 +1059,10 @@ def blasthsp2pre(bhsp):
     # todo add printing with merged blast hits (ie overlapping hits or similar)
     eformat='.2E'
 
-    if bhsp.strand[1] is None:
-        strand = ''
+    if bhsp.sbjct_start < bhsp.sbjct_end:
+        strand = 'Plus'
     else:
-        strand = bhsp.strand[1]
+        strand = 'Minus'
 
     score_template = ''.join(
         (
