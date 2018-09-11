@@ -475,18 +475,18 @@ def verify_turbofold(minimal_version):
 
 
 def verify_mfold(minimal_version):
-    msgversion = 'mfold is not installed in required version, required version is {}.{}'.format(*minimal_version)
-    msgpath = '{}mfold could not be located (not in PATH).'.format(CONFIG.mfold_path)
+    msgversion = 'hybrid-ss-min (UNAfold) is not installed in required version, required version is {}.{}'.format(*minimal_version)
+    msgpath = '{}hybrid-ss-min could not be located (not in PATH).'.format(CONFIG.mfold_path)
     try:
         a = check_output(
             [
-                '{}mfold'.format(CONFIG.mfold_path),
-                '-v'
+                '{}hybrid-ss-min'.format(CONFIG.mfold_path),
+                '-V'
             ]
         )
         a = a.decode()
         b = a.split()
-        if b[0] == 'mfold':
+        if b[0] == 'hybrid-ss-min':
             r = re.finditer('[1-9]+', b[2])
             for match, minv in zip(r, minimal_version):
                 v = int(match.group())
