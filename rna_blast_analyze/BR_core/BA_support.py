@@ -394,7 +394,7 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
     temp_file = os.fdopen(fd, 'w')
     for i, hit in enumerate(hits):
         # +1 here because blastdbcmd counts sequences from 1
-        if hit[1].strand[1] == 'Minus':
+        if hit[1].sbjct_end < hit[1].sbjct_start:
             start = hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end) + 1 - extra
             end = hit[1].sbjct_start + hit[1].query_start + extra
             strand.append(-1)
@@ -1071,16 +1071,29 @@ def blasthsp2pre(bhsp):
             " Strand = Plus/{mystrand:}\n"
         )
     )
+    if isinstance(bhsp.identities, (tuple, list)):
+        idd = bhsp.identities[0]
+    elif isinstance(bhsp.identities, int):
+        idd = bhsp.identities
+    else:
+        raise ValueError
+    if isinstance(bhsp.gaps, (tuple, list)):
+        gap = bhsp.gaps[0]
+    elif isinstance(bhsp.gaps, int):
+        gap = bhsp.gaps
+    else:
+        raise ValueError
+
     myf = score_template.format(
         score=bhsp.score,
         bits=bhsp.bits,
         expect=bhsp.expect,
         eformat=eformat,
-        identities=bhsp.identities[0],
-        gaps=bhsp.gaps[0],
+        identities=idd,
+        gaps=gap,
         length=bhsp.align_length,
-        id_p=round(bhsp.identities[0]/bhsp.align_length * 100),
-        gap_p=round(bhsp.gaps[0]/bhsp.align_length * 100),
+        id_p=round(idd/bhsp.align_length * 100),
+        gap_p=round(gap/bhsp.align_length * 100),
         mystrand=strand,
     )
 
