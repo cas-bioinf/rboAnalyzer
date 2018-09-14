@@ -7,7 +7,6 @@ package_data = {
     'rna_blast_analyze': [
         'BR_core/config.txt',
         'BR_core/prediction_parameters.json',
-        'BR_core/blast_bio/LICENSE',
         'BR_core/output/*.html',
         'BR_core/output/style.css',
         '3rd_party_source/RSEARCH_matrices/*',

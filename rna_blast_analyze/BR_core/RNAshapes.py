@@ -8,7 +8,7 @@ from Bio.Alphabet.IUPAC import IUPACUnambiguousRNA
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from rna_blast_analyze.BR_core.blast_bio.parser_to_bio_blast import bread
+from rna_blast_analyze.BR_core.parser_to_bio_blast import bread
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.retry_decorator import retry
 

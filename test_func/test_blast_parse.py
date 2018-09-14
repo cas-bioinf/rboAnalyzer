@@ -1,6 +1,6 @@
 import unittest
 import os
-from rna_blast_analyze.BR_core.blast_bio.parser_to_bio_blast import blast_parse_txt
+from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt
 from Bio.Blast import NCBIXML
 
 

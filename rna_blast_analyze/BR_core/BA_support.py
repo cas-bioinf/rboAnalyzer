@@ -16,7 +16,7 @@ from Bio.Blast import NCBIXML
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from rna_blast_analyze.BR_core.blast_bio.parser_to_bio_blast import blast_parse_txt as blast_minimal_parser
+from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt as blast_minimal_parser
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.parse_accession import accession_regex
 

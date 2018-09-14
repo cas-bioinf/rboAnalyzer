@@ -7,10 +7,11 @@ from Bio.Alphabet import RNAAlphabet
 from Bio.Seq import Seq
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 from Bio.SeqRecord import SeqRecord
+from Bio.Blast import NCBIXML
 
 from rna_blast_analyze.BR_core import convert_classes
 from rna_blast_analyze.BR_core.BA_methods import Subsequences, HitList, BlastSearchRecompute
-from rna_blast_analyze.BR_core.blast_bio.parser_to_bio_blast import blast_parse_txt
+from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt
 
 
 class TestRecrusive(unittest.TestCase):
@@ -144,6 +145,44 @@ class TestBlastTxt(unittest.TestCase):
         blast_outputs = []
         with open(os.path.join('test_data', 'blast_parse_web_multi_hit.txt'), 'r') as f:
             for r in blast_parse_txt(f):
+                blast_outputs.append(r)
+        encoded = [convert_classes.blasttodict(i) for i in blast_outputs]
+        encoded_json = json.dumps(encoded)
+        encoded = json.loads(encoded_json)
+        decoded = [convert_classes.blastfromdict(i) for i in encoded]
+        for orig_r, rec_r in zip(blast_outputs, decoded):
+            tc.recrusive_compare(orig_r, rec_r)
+
+
+class TestBlastXML(unittest.TestCase):
+    def test_convert_simple(self):
+        blast_outputs = []
+        with open(os.path.join('test_data', 'web_multi_hit.xml'), 'r') as f:
+            for r in NCBIXML.parse(f):
+                blast_outputs.append(r)
+        encoded_original = [convert_classes.blasttodict(i) for i in blast_outputs]
+        encoded_json = json.dumps(encoded_original)
+        encoded = json.loads(encoded_json)
+        decoded = [convert_classes.blastfromdict(i) for i in encoded]
+        for orig_r, rec_r in zip(blast_outputs, decoded):
+            tc.recrusive_compare(orig_r, rec_r)
+
+    def test_convert_multi_queries(self):
+        blast_outputs = []
+        with open(os.path.join('test_data', 'web_multi_hit.xml'), 'r') as f:
+            for r in NCBIXML.parse(f):
+                blast_outputs.append(r)
+        encoded = [convert_classes.blasttodict(i) for i in blast_outputs]
+        encoded_json = json.dumps(encoded)
+        encoded = json.loads(encoded_json)
+        decoded = [convert_classes.blastfromdict(i) for i in encoded]
+        for orig_r, rec_r in zip(blast_outputs, decoded):
+            tc.recrusive_compare(orig_r, rec_r)
+
+    def test_convert_multi_hsps(self):
+        blast_outputs = []
+        with open(os.path.join('test_data', 'web_multi_hit.xml'), 'r') as f:
+            for r in NCBIXML.parse(f):
                 blast_outputs.append(r)
         encoded = [convert_classes.blasttodict(i) for i in blast_outputs]
         encoded_json = json.dumps(encoded)

@@ -1,17 +1,16 @@
 import binascii
 import pickle
 import time
+import copy
 from argparse import Namespace
 
-from Bio.Blast.Record import Alignment as BlastAlignment
-from Bio.Blast.Record import Description as BlastDescription
+from Bio.Blast import Record
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from pandas import read_json
 
 import rna_blast_analyze.BR_core.BA_methods
 from rna_blast_analyze.BR_core.BA_support import Subsequences
-from rna_blast_analyze.BR_core.blast_bio import BlastRecord
 
 
 def seq2dict(seq):
@@ -159,50 +158,45 @@ def blastsearchrecomputefromdict(indict):
 
 
 def headertodict(header):
-    if not isinstance(header, BlastRecord.Header):
+    if not isinstance(header, Record.Header):
         raise TypeError('accepts only BlastRecord.Header')
     return vars(header)
 
 
 def headerfromdict(indict):
-    return universalfromdict(indict, BlastRecord.Header)
+    return universalfromdict(indict, Record.Header)
 
 
 def hsptodict(hsp):
-    if not isinstance(hsp, BlastRecord.HSP):
+    if not isinstance(hsp, Record.HSP):
         raise TypeError('accepts only BlastRecord.HSP')
     return vars(hsp)
 
 
 def hspfromdict(indict):
-    return universalfromdict(indict, BlastRecord.HSP)
+    return universalfromdict(indict, Record.HSP)
 
 
 def blastalignmenttodict(blastalig):
-    if not isinstance(blastalig, BlastAlignment):
+    if not isinstance(blastalig, Record.Alignment):
         raise TypeError('accepts only Bio.Blast.Record.Alignment')
-    out = {
-        'title': blastalig.title,
-        'hit_id': blastalig.hit_id,
-        'hit_def': blastalig.hit_def,
-        'length': blastalig.length,
-        'hsps': [hsptodict(h) for h in blastalig.hsps],
-    }
+    out = vars(copy.copy(blastalig))
+    out['hsps'] = [hsptodict(h) for h in blastalig.hsps]
     return out
 
 
 def blastalignmentfromdict(indict):
-    out = BlastAlignment()
-    out.title = indict['title']
-    out.hit_id = indict['hit_id']
-    out.hit_def = indict['hit_def']
-    out.length = indict['length']
+    out = Record.Alignment()
+    keys = set(indict.keys())
+    keys.remove('hsps')
+    for key in keys:
+        setattr(out, key, indict[key])
     out.hsps = [hspfromdict(h) for h in indict['hsps']]
     return out
 
 
 def blasttodict(blast):
-    if not isinstance(blast, BlastRecord.Blast):
+    if not isinstance(blast, Record.Blast):
         raise TypeError('accepts only BlastRecord.Blast')
 
     out = dict()
@@ -219,10 +213,10 @@ def blasttodict(blast):
 
 
 def blastfromdict(indict):
-    out = BlastRecord.Blast()
-    for key in vars(out):
+    out = Record.Blast()
+    for key in indict.keys():
         if key == 'descriptions':
-            out.descriptions = [universalfromdict(d, BlastDescription) for d in indict['descriptions']]
+            out.descriptions = [universalfromdict(d, Record.Description) for d in indict['descriptions']]
         elif key == 'alignments':
             out.alignments = [blastalignmentfromdict(balig) for balig in indict['alignments']]
         else:
@@ -233,9 +227,6 @@ def blastfromdict(indict):
 def universalfromdict(inputdict, outclasspointer):
     outputobject = outclasspointer()
     for key in inputdict.keys():
-        if hasattr(outputobject, key):
-            setattr(outputobject, key, inputdict[key])
-        else:
-            raise AttributeError('attribute "{}" not found in {}'.format(key, type(outputobject)))
+        setattr(outputobject, key, inputdict[key])
 
     return outputobject

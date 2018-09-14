@@ -9,8 +9,6 @@ import re
 from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA
 from Bio.Blast import Record
 
-from rna_blast_analyze.BR_core.blast_bio import BlastRecord
-
 
 def f_parser():
     """
@@ -282,6 +280,16 @@ def _parse_tail_section(tail_text):
     return data
 
 
+def update_blast_record(br, commonparseddata):
+    """
+    :param br: Record
+    :param commonparseddata: dict
+    :return:
+    """
+    for key in commonparseddata.keys():
+        setattr(br, key, commonparseddata[key])
+
+
 def _parse_blast_body(f, common_info):
     """
     run on open handle to file
@@ -302,8 +310,8 @@ def _parse_blast_body(f, common_info):
     # start the parse loop
     txt = bread(f)
 
-    record_holder = BlastRecord.Blast()
-    record_holder.update(common_info)
+    record_holder = Record.Blast()
+    update_blast_record(record_holder, common_info)
     do_query_name = True
     do_query_length = True
     R = copy.deepcopy(record_holder)
@@ -393,7 +401,7 @@ def read_aligns(f, R):
                 # R.alignments.append(curr_alig)
                 break
 
-            curr_hsp = BlastRecord.HSP()
+            curr_hsp = Record.HSP()
 
             while txt and eor:
                 # parse scores
