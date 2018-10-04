@@ -345,19 +345,19 @@ def main():
     # ========= load optional cfg file =========
     CONFIG.override(tools_paths(config_file=args.config_file))
 
-    # ========= check if tools needed for requested methods are installed =========
-    BA_verify.check_necessery_tools(methods=args.prediction_method)
-
     # ========= check rfam =========
     if check_if_rfam_needed(args):
         if not args.download_rfam and not cmalign.check_rfam_present():
             raise ValueError(
                 'RFAM models file is not present in specified path. '
-                'Please enable rfam download or provide prepared directory.'
+                'Please enable rfam download (--download_rfam) or provide prepared directory.'
             )
 
     if args.download_rfam:
         cmalign.download_cmmodels_file()
+
+    # ========= check if tools needed for requested methods are installed =========
+    BA_verify.check_necessery_tools(methods=args.prediction_method)
 
     # ========= run =========
     if args.mode == 'simple':
