@@ -29,11 +29,11 @@ from copy import deepcopy
 from random import shuffle
 from tempfile import mkstemp
 import itertools
+import logging
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
-import rna_blast_analyze.BR_core.add_usr_local_bin
 import rna_blast_analyze.BR_core.BA_support as BA_support
 from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
 from rna_blast_analyze.BR_core.blast_hits_merging import merge_blast_hits
@@ -42,14 +42,20 @@ from rna_blast_analyze.BR_core.infer_homology import infer_homology
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
 from rna_blast_analyze.BR_core.stockholm_alig import StockholmFeatureStock
 from rna_blast_analyze.BR_core import BA_verify
+from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
+from rna_blast_analyze.BR_core.fname import fname
+
+ml = logging.getLogger(__name__)
 
 
 def blast_wrapper(args_inner, shared_list=None):
+    ml.debug(fname())
     ret_line, _ = blast_wrapper_inner(args_inner, shared_list=shared_list)
     return ret_line
 
 
 def blast_wrapper_inner(args_inner, shared_list=None):
+    ml.debug(fname())
     if not shared_list:
         shared_list = []
 
@@ -60,11 +66,6 @@ def blast_wrapper_inner(args_inner, shared_list=None):
     stockholm_features.add_custom_parser_tags('GC', {'cA1': 'anchor letter tag',
                                                      'cA2': 'anchor number tag'})
 
-    if args_inner.logfile:
-        fid = open(args_inner.logfile, 'w')
-        fid.write('Program BA runned at: {}\n'.format(BA_support.print_time()))
-        BA_support.print_parameters(args_inner, fid)
-
     p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
     # this is done for each query
 
@@ -74,6 +75,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
             itertools.zip_longest(p_blast, SeqIO.parse(args_inner.blast_query, 'fasta'))
     ):
         print('processing query: {}'.format(query.id))
+        ml.info('processing query: {}'.format(query.id))
         # check query and blast
         if bhp is None:
             raise ValueError('There is more query sequences in provided fastafile then there are BLAST outputs.')
@@ -83,7 +85,21 @@ def blast_wrapper_inner(args_inner, shared_list=None):
         BA_verify.verify_query_blast(blast=bhp, query=query)
 
         # select all
-        all_short = BA_support.blast_hsps2list(bhp)
+        all_blast_hits = BA_support.blast_hsps2list(bhp)
+
+        # filter if needed
+        if args_inner.filter_by_eval is not None:
+            all_short = filter_by_eval(all_blast_hits, *args_inner.filter_by_eval)
+        elif args_inner.filter_by_bitscore is not None:
+            all_short = filter_by_bits(all_blast_hits, *args_inner.filter_by_bitscore)
+        else:
+            all_short = all_blast_hits
+
+        if len(all_short) == 0 and len(all_blast_hits) != 0:
+            ml.error('The requested filter removed all BLAST hits. Nothing to do.')
+            exit(0)
+        elif len(all_short) == 0:
+            raise ValueError('No BLAST hits after filtering.')
 
         # expand hits according to query + 10 nucleotides +-
         shorts_expanded, _ = BA_support.expand_hits(
@@ -115,7 +131,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
             e = exp_hit.annotations['extended_end'] - exp_hit.annotations['super_end']
 
             nseq = exp_hit.seq[s:e]
-            nr = SeqRecord(nseq, id=exp_hit.id)
+            nr = SeqRecord(nseq, id=exp_hit.id, description='')
 
             nr.letter_annotations['ss0'] = '.' * len(nr.seq)
             nr.annotations['sss'] = ['ss0']
@@ -126,25 +142,25 @@ def blast_wrapper_inner(args_inner, shared_list=None):
 
             pos_match = re.search(str(nr.seq), str(exp_hit.seq), flags=re.IGNORECASE)
             if not pos_match:
-                raise Exception('Subsequnce not found in supersequence. Terminating.')
+                raise Exception('Subsequnce not found in supersequence.')
 
             bl = exp_hit.annotations['blast'][1]
 
             if bl.sbjct_start < bl.sbjct_end:
-                bls = bl.sbjct_start - bl.query_start
+                bls = bl.sbjct_start - bl.query_start + 1
                 ble = bl.sbjct_end + (query_len - bl.query_end)
             elif bl.sbjct_end < bl.sbjct_start:
                 bls = bl.sbjct_end - (query_len - bl.query_end)
-                ble = bl.sbjct_start + bl.query_start
+                ble = bl.sbjct_start + bl.query_start - 1
             else:
-                raise Exception('unknown strand option')
+                raise Exception('Unknown strand option.')
 
             # if whole subject sequence too short, this assertion will fail
-            if exp_hit.annotations['trimmed_start'] or  exp_hit.annotations['trimmed_end']:
-                print('skipping check')
+            if exp_hit.annotations['trimmed_start'] or exp_hit.annotations['trimmed_end']:
+                ml.warn('Skipping check ({}) - subject sequence too short.'.format(exp_hit.id))
             else:
-                assert len(nr.seq) == abs(bls - ble)
-                assert bls + 1 == exp_hit.annotations['extended_start']
+                assert len(nr.seq) == abs(bls - ble) + 1
+                assert bls == exp_hit.annotations['extended_start']
                 assert ble == exp_hit.annotations['extended_end']
 
             hit.ret_keys = [sub_id,
@@ -175,7 +191,6 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                                            str(hit.subs[hit.ret_keys[0]].seq)))
 
         # this part predicts homology - it is not truly part of repredict
-        print('infering homology')
         homology_prediction, homol_seqs = infer_homology(analyzed_hits=analyzed_hits, args=args_inner)
 
         # add homology prediction to the data
@@ -261,9 +276,5 @@ def blast_wrapper_inner(args_inner, shared_list=None):
         ml_out_line.append('\n'.join(out_line))
 
         os.remove(all_hits_fasta)
-
-    if args_inner.logfile:
-        fid.write('ended at: {}'.format(BA_support.print_time()))
-        fid.close()
 
     return '\n'.join(ml_out_line), all_analyzed

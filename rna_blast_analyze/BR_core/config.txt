@@ -1,3 +1,5 @@
+[TOOL_PATHS]
+[DATA]
 [SSH]
 SSH_USER = rapid@rapid.local
 SSH_PASS = rapid

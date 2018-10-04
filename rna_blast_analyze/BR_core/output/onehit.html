@@ -1,31 +1,51 @@
 {% extends "base.html" %}
+{% block header %}
+<p>pipeline output for {{hea.input}}</p>
+{% endblock %}
 {% block content %}
     {% macro create_onehit(data) %}
     <div class="onehit" data-brna_sequence="{{data.sequence}}" data-brna_seqname="{{data.seqname}}"
          data-eval="{{data.eval}}">
-        <h3 class="onehit_heading">
+        <h3 class="onehit_heading" style="background:{{data.h_color}};">
             Hit: {{data.source_seq_name}}
         </h3>
         <div class="onehit_body">
-        <div class="blast_text">
-            <p class="header-bhname">{{data.blast_hit_name}}</p>
-            <pre>
+            <div class="row reports">
+                <div class="blast_text repitem">
+                    <p class="header-bhname">{{data.blast_hit_name}}</p>
+                    <pre>
 {{data.blast_text}}</pre>
-        </div>
-        <div class="onehit_report">
-            <p>
-                <u>Extension report:</u><br>
-                sequence start:    {{data.ext_start}} nt<br>
-                sequence end:      {{data.ext_end}} nt<br>
-                RSEARCH bit score: {{data.rsearchbitscore}}<br>
-            </p>
-            <div>
-                <!--<p class="header-textarea"><u>Extended sequence fasta:</u></p>-->
-                <label for="indivSequenceCheckbox"><u>Extended sequence fasta:</u></label>
-                <input type="checkbox" class="individualSequenceCheckbox" id="indivSequenceCheckbox">
+                </div>
+                <div class="repitem">
+                    <p><u>Extension report:</u></p>
+                    <table>
+                        <tr>
+                            <th class="left" scope="row">sequence start:</th>
+                            <td class="right">{{data.ext_start}}</td>
+                        </tr>
+                        <tr>
+                            <th class="left" scope="row">sequence end:</th>
+                            <td class="right">{{data.ext_end}}</td>
+                        </tr>
+                        <tr>
+                            <th class="left" scope="row">RSEARCH bits score:</th>
+                            <td class="right">{{data.rsearchbitscore}}</td>
+                        </tr>
+                        <tr>
+                            <th class="left" scope="row">Homology estimate:</th>
+                            <td class="rigth">{{data.h_estimate}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="repitem">
+                    <div>
+                        <label for="indivSequenceCheckbox"><u>Extended sequence fasta:</u></label>
+                        <input type="checkbox" class="individualSequenceCheckbox" id="indivSequenceCheckbox">
+                    </div>
+                    <textarea readonly="true" rows="5" cols="65">{{data.formated_seq}}</textarea>
+                </div>
+                <!--</div>-->
             </div>
-            <textarea readonly="true" rows="5" cols="65">{{data.formated_seq}}</textarea>
-        </div>
         <div class="row">
             {% for pic in data.pictures %}
                 <figure class="column" data-brna_secondary_structure="{{pic.secondary_structure}}">
@@ -41,9 +61,11 @@
         </div>
 
         {% if data.draw_seqview %}
-            <div id="{{data.seqvid}}" class="SeqViewerApp" data-autoload>
-                <a href="{{data.seqviewurl}}"></a>
+
+            <div id="sv{{data.intid}}" data-sv_params="{{data.seqviewurl}}" class="sv">
+                <button class= "seqviewbtn" onclick="viewRegion(this)" title="View selected Regions">Load Sequence viewer</button>
             </div>
+
         {% endif %}
         </div>
     </div>
@@ -64,7 +86,7 @@
     <p>
         <u>date:</u>
         {% if foo.exec_date %}
-            strftime("%H:%M:%S %d. %m. %Y", foo.exec_date)
+            {{strftime("%H:%M:%S %d. %m. %Y", foo.exec_date)}}
         {% else %}
             Unknown date.
         {% endif %}

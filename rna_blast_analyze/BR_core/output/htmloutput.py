@@ -1,15 +1,36 @@
 import os
+import json
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from time import strftime
 
 from rna_blast_analyze.BR_core.BA_support import blasthsp2pre, run_rnaplot
 from rna_blast_analyze.BR_core.config import CONFIG
 
+import matplotlib
+from matplotlib import colors, cm
+
+
+def rog_cmap():
+    my_colors = [
+        '#E24B2D',
+        '#FFB916',
+        '#7AD84B'
+    ]
+    # hex2rgb = lambda x: tuple(int(x[i:i+2], 16)/255 for i in (0, 2, 4))
+    cmap_rog = colors.LinearSegmentedColormap.from_list(
+        name='rog',
+        colors=[colors.hex2color(c) for c in my_colors],
+        N=1024
+    )
+    # cm.register_cmap('rog', cmap_rog)
+    return cmap_rog
+
 
 def write_html_output(datain, template_path=''):
     # prepare data
     toprint = _prepare_body(datain)
     myfooter = _prepare_footer(datain)
+    my_header = _prepare_header(datain)
 
     # init jinja2 rendering enviroment
     env = Environment(
@@ -20,28 +41,50 @@ def write_html_output(datain, template_path=''):
     try:
         os.chdir(CONFIG.html_template_dir)
         template = env.get_template('onehit.html')
-        html_str = template.render(input_list=toprint, foo=myfooter, strftime=strftime)
+        html_str = template.render(input_list=toprint, foo=myfooter, strftime=strftime, hea=my_header)
     finally:
         os.chdir(cwd)
     return html_str
 
 
+def _prepare_header(data):
+    return {'input': data.args.blast_in}
+
+
 def _prepare_body(data):
+    rog = rog_cmap()
+    norm = matplotlib.colors.Normalize(vmin=0, vmax=data.query.annotations['cmstat']['bit_sc']/2, clip=True)
+    mm = cm.ScalarMappable(norm=norm, cmap=rog)
+
     jj = []
     for i, onehit in enumerate(data.hits):
         ext = onehit.subs[onehit.ret_keys[0]]
+        h_bit_sc = ext.annotations['cmstat']['bit_sc']
         rr = dict()
         rr['source_seq_name'] = onehit.source.annotations['blast'][0]
         rr['seqname'] = ext.id
         rr['sequence'] = str(ext.seq)
         rr['formated_seq'] = ext.format('fasta')
-        rr['rsearchbitscore'] = ext.annotations['cmstat']['bit_sc']
+        rr['rsearchbitscore'] = h_bit_sc
         rr['blast_hit_name'] = onehit.source.annotations['blast'][0] + ' ' + ' '.join(onehit.source.description.split()[1:])
         rr['ext_start'] = onehit.best_start
         rr['ext_end'] = onehit.best_end
         rr['blast_text'] = blasthsp2pre(onehit.source.annotations['blast'][1])
         rr['pictures'] = _prepare_pictures(ext)
         rr['eval'] = onehit.source.annotations['blast'][1].expect
+        rr['intid'] = str(i)
+
+        # estimate the homology
+        q_sc = data.query.annotations['cmstat']['bit_sc']
+        if h_bit_sc < 0:
+            h_estimate = 'Not homologous'
+        elif h_bit_sc/q_sc >= 0.5 and h_bit_sc >= 20:
+            h_estimate = 'Homologous'
+        else:
+            h_estimate = 'Uncertain'
+
+        rr['h_estimate'] = h_estimate
+        rr['h_color'] = colors.rgb2hex(mm.to_rgba(h_bit_sc))
 
         # create seqviewurl here
         es = onehit.source.annotations['extended_start']
@@ -86,8 +129,6 @@ def _prepare_pictures(sub):
             format='svg'
         )
         with open(picfile) as f:
-            # a = f.read()
-            # np['pic'] = "data:image/svg;base64," + base64.b64encode(f.read().encode()).decode()
             np['pic'] = "data:image/svg+xml;utf8," + f.read()
 
         pictureslist.append(np)
@@ -106,12 +147,20 @@ def _prepare_footer(data):
     if hasattr(data.args, 'command') and data.args.command:
         command = ' '.join(data.args.command)
     else:
-        command = ''
+        command = 'run directly from python'
 
     # parameters
     params = [i for i in dir(data.args) if not i.startswith('__') and not callable(getattr(data.args, i))]
     p_text = []
     for arg in params:
+        if arg == 'pred_params':
+            js = json.dumps(
+                getattr(data.args, arg),
+                sort_keys=True,
+                indent=4,
+            )
+            p_text.append((arg, js[1:-1]))
+            continue
         p_text.append((arg, getattr(data.args, arg)))
 
     if not hasattr(data, 'date_of_run'):

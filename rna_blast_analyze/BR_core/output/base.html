@@ -8,23 +8,30 @@
 {% include 'script.js' %}
     </head>
 <body>
+    <div id="waitoverlay">
+        <h2 id="waittext">Please wait while sequence viewer is loading...</h2>
+        <div id="progressbar_wrap">
+            <div id="progressbar_fill"></div>
+        </div>
+    </div>
     <div class="page-wrap">
         <div class="header">
-            <h2>Blast expansion</h2>
+            <h2>RNA BLAST Analyze</h2>
+            {% block header %}{% endblock %}
         </div>
         <div class="hits">
             {% block content %}{% endblock %}
-        </div>>
+        </div>
         <div class="footer">
             {% block footer %}{% endblock %}
         </div>
-        <div class="button-background"></div>
         <div class="controls">
             <button onclick="selectAllseqs(this)" id="selectSeqsBtn" title="Select All Sequences">Select all Seqs.</button>
             <button onclick="selectAllstrs(this)" id="selectStrsBtn" title="Select All Structures">Select all Structs.</button>
             <button onclick="writeSelectionStructures()" id="exportStrBtn" title="Export Selected Structures">Export sel. Structs.</button>
             <button onclick="writeSelectionFasta()" id="exportSeqsBtn" title="Export Selected Sequences">Export sel. Seqs.</button>
             <button onclick="sortByEval(this)" id="sortEvalBtn" title="Sort by e-value">Sort Eval desc.</button>
+            <button onclick="viewAllRegions()" id="viewAllRegionsBtn" title="View all Regions">View all Regions</button>
         </div>
     </div>
 </body>

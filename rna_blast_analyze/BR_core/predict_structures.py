@@ -4,6 +4,7 @@ import os
 import re
 import time
 import unicodedata
+import logging
 from shutil import rmtree
 from subprocess import call
 from tempfile import mkstemp, mkdtemp
@@ -27,6 +28,9 @@ from rna_blast_analyze.BR_core.db2shape import nesting
 from rna_blast_analyze.BR_core.infer_homology import _alignment_column_conservation
 from rna_blast_analyze.BR_core.par_distance_no_RNAlib import distances_one_thread as rnadistance_one_thread
 from rna_blast_analyze.BR_core.stockholm_parser import read_st, trim_cmalign_sequence_by_refseq_one_seq
+from rna_blast_analyze.BR_core.fname import fname
+
+ml = logging.getLogger(__name__)
 
 
 def _parse_first_record_only(file):
@@ -73,6 +77,38 @@ def _map_alignment_columns_from_profile_match(original_match, new_match):
     return mapping
 
 
+def _transform_score_to_pplike_line(score):
+    ms = max(score)
+    avg_score = [i / ms for i in score]
+    l = []
+    for s in avg_score:
+        if s <= 0.05:
+            l.append('0')
+        elif 0.05 < s <= 0.15:
+            l.append('1')
+        elif 0.15 < s <= 0.25:
+            l.append('2')
+        elif 0.25 < s <= 0.35:
+            l.append('3')
+        elif 0.35 < s <= 0.45:
+            l.append('4')
+        elif 0.45 < s <= 0.55:
+            l.append('5')
+        elif 0.55 < s <= 0.65:
+            l.append('6')
+        elif 0.65 < s <= 0.75:
+            l.append('7')
+        elif 0.75 < s <= 0.85:
+            l.append('8')
+        elif 0.85 < s <= 0.95:
+            l.append('9')
+        elif 0.95 < s <= 1:
+            l.append('*')
+        else:
+            raise Exception('score error')
+    return ''.join(l)
+
+
 def _refold_with_unpaired_conservation(stockholm_msa, repred_tr='8', conseq_conserved=1):
     """
     get trusted msa with consensus and develop a conservation scoring (based on my column score?)
@@ -95,38 +131,7 @@ def _refold_with_unpaired_conservation(stockholm_msa, repred_tr='8', conseq_cons
     consensus_conservation_score = _alignment_column_conservation(st_msa, gap_chars='-')
 
     # transform it to PPlike annotation
-    def transform_score_to_pplike_line(score):
-        ms = max(score)
-        avg_score = [i/ms for i in score]
-        l = []
-        for s in avg_score:
-            if s <= 0.05:
-                l.append('0')
-            elif 0.05 < s <= 0.15:
-                l.append('1')
-            elif 0.15 < s <= 0.25:
-                l.append('2')
-            elif 0.25 < s <= 0.35:
-                l.append('3')
-            elif 0.35 < s <= 0.45:
-                l.append('4')
-            elif 0.45 < s <= 0.55:
-                l.append('5')
-            elif 0.55 < s <= 0.65:
-                l.append('6')
-            elif 0.65 < s <= 0.75:
-                l.append('7')
-            elif 0.75 < s <= 0.85:
-                l.append('8')
-            elif 0.85 < s <= 0.95:
-                l.append('9')
-            elif 0.95 < s <= 1:
-                l.append('*')
-            else:
-                raise Exception('score error')
-        return ''.join(l)
-
-    pplike_line = transform_score_to_pplike_line(consensus_conservation_score)
+    pplike_line = _transform_score_to_pplike_line(consensus_conservation_score)
     st_msa.column_annotations['pp_line'] = pplike_line
 
     uni_structure = encode_structure_unicode(st_msa.column_annotations['SS_cons'], gap_mark=49)
@@ -160,7 +165,7 @@ def _refold_with_unpaired_conservation(stockholm_msa, repred_tr='8', conseq_cons
 
         # replace text occurences of lenght less then specified value
         patt = 'x{' + str(conseq_conserved) + ',}'
-        inf_c = re.sub('#','x', re.sub('x', '.', re.sub(patt, repl, inf_c)))
+        inf_c = re.sub('#', 'x', re.sub('x', '.', re.sub(patt, repl, inf_c)))
 
         unaligned_rec.letter_annotations['cons_db'] = decode_structure_unicode(
             unaligned_rec.letter_annotations['cons_uni']
@@ -243,8 +248,6 @@ def _foldme_rnafoldc_noRNA(seq, constraints):
 def repair_structure_any_variant(structure, gap_mark=49, rep_mark=48):
     """
     needs special structure encoding
-    :param ta:
-    :return:
     """
     gm = chr(gap_mark)
     ns = []
@@ -259,7 +262,7 @@ def repair_structure_any_variant(structure, gap_mark=49, rep_mark=48):
     return ''.join(ns)
 
 
-def encode_structure_unicode(structure, br=('(',')'), gap_mark=49, warn=True):
+def encode_structure_unicode(structure, br=('(', ')'), gap_mark=49, warn=True):
     """
     encode structure to unicode characters so every basepair is unique so it is possible to know which where sliced
     in the alignment
@@ -359,7 +362,7 @@ def timeit_decorator(func):
         res = func(*arg, **kwargs)
         t2 = time.time()
         # print '%s took %0.3f ms' % (func.func_name, (t2-t1)*1000.0)
-        exec_time=t2-t1
+        exec_time = t2 - t1
         return res, exec_time
     return wrapper
 
@@ -392,12 +395,9 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
     """
     return predicted structures for all hits based on provided sequence homologs
     ! beware, clustal mixes order of sequences in profile alignment, correct for it
-    :param nr_homologs_hits_fasta:
-    :param all_hits_fasta:
-    :param params: possible param keys: "clustal", "alifold", "clustalo_profile", "repred_unpaired_tr"
-    :return:
+    possible param keys: "clustal", "alifold", "clustalo_profile", "repred_unpaired_tr"
     """
-
+    ml.debug(fname())
     nr_path, san_dict = sanitize_fasta_file(nr_homologs_hits_fasta)
     all_path, san_dict = sanitize_fasta_file(all_hits_fasta, used_dict=san_dict)
 
@@ -519,15 +519,12 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
 
 @timeit_decorator
 @tryit_decorator
-def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refold='refold', threads=None,
-                              params=None):
+def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refold='refold', threads=None, params=None):
     """
     return predicted structures for all hits based on provided sequence homologs
-    :param nr_homolog_hits_file:
-    :param all_hits_fasta:
-    :param params: possible param keys: "clustal", "alifold", "clustalo_profile", "repred_unpaired_tr"
-    :return:
+    possible param keys: "clustal", "alifold", "clustalo_profile", "repred_unpaired_tr"
     """
+    ml.debug(fname())
     if params is None:
         params = dict()
 
@@ -703,12 +700,9 @@ def decouple_homologs_alifold_refold_prediction(nr_homolog_hits_file, homologous
 
     result => make consensus structure and profile, then align all homologs and predict structure and align the
             non homologs ang predict for them
-    :param nr_homolog_hits_file:
-    :param all_hits_fasta:
-    :param params: possible param keys: "clustal", "alifold", "clustalo_profile", "repred_unpaired_tr"
-    :return:
+    possible param keys: "clustal", "alifold", "clustalo_profile", "repred_unpaired_tr"
     """
-
+    ml.debug(fname())
     if params is None:
         params = dict()
 
@@ -826,11 +820,7 @@ def decouple_homologs_alifold_refold_prediction(nr_homolog_hits_file, homologous
 @timeit_decorator
 @tryit_decorator
 def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
-    """
-    :param allhits_fasta:
-    :param cmmodel_file:
-    :return:
-    """
+    ml.debug(fname())
     if params is None:
         params = dict()
 
@@ -887,7 +877,7 @@ def trim_and_repair_single_cm_alignment(cmalig):
     :param cmalig:
     :return:
     """
-
+    ml.debug(fname())
     if len(cmalig) != 1:
         raise Exception('This function is build specificaly for alignment of single sequence to cm model.'
                         'Using it for more sequences would require addition of cm msa trimming module.')
@@ -950,7 +940,7 @@ def _profile_alig_prediction(params, usethreads, cl_file, seqs_to_align_and_pred
                              homolog_profile_fasta_file,
                              consensus_record, refold,
                              align):
-
+    ml.debug(fname())
     if align == 'clustalo':
         # clustal cannot align only one sequence to profile
         # mafft also fails for this case
@@ -1083,8 +1073,8 @@ def _aligner_block(nr_homolog_hits_file, params, msa_alg, threads=None):
     :param threads: int
     :return:
     """
+    ml.debug(fname())
     if msa_alg == 'clustalo':
-        print('compute clustalo')
         if params and ('clustalo' in params) and params['clustalo']:
             clustal_params = '--outfmt=clustal {}'.format(params['clustalo'])
         else:
@@ -1094,14 +1084,12 @@ def _aligner_block(nr_homolog_hits_file, params, msa_alg, threads=None):
         alig_file = compute_clustalo_clasic(nr_homolog_hits_file, clustalo_params=clustal_params)
 
     elif msa_alg == 'muscle':
-        print('compute muscle')
         if params and ('muscle' in params) and params['muscle']:
             alig_file = run_muscle(nr_homolog_hits_file, muscle_params=params['muscle'], reorder=True)
         else:
             alig_file = run_muscle(nr_homolog_hits_file, reorder=True)
 
     elif msa_alg == 'rcoffee':
-        print('compute rcoffee')
         # sanitize nr hits for rcoffee
         nr_hits_list = [i for i in SeqIO.parse(nr_homolog_hits_file, format='fasta')]
         san_nr_hits, san_dict = sanitize_fasta_names_in_seqrec_list(nr_hits_list)
@@ -1167,6 +1155,7 @@ def remove_sharp_hairpins(structure):
 @tryit_decorator
 @timeit_decorator
 def rfam_subopt_pred(all_sequence_fasta, query_file, params=None, threads=None):
+    ml.debug(fname())
     if params is None:
         params = dict()
 
@@ -1211,12 +1200,8 @@ def cmscan_rapidshapes(all_sequence_fasta, query_file, params=None, threads=None
     """
     need to pass --allowLP 1 parameter to all Rapidshapes and RNAshapes calls because in rfam reference there can be
     lonely pairs
-
-    :param all_sequence_fasta:
-    :param params:
-    :param threads: int
-    :return:
     """
+    ml.debug(fname())
     # todo rapidshapes in parallel
     if params is None:
         params = dict()
@@ -1325,6 +1310,7 @@ def cmscan_rapidshapes(all_sequence_fasta, query_file, params=None, threads=None
 @timeit_decorator
 @tryit_decorator
 def msa_alifold_rapidshapes(all_sequence_fasta, nr_homolog_hits_file, params=None, threads=True, msa_alg=''):
+    ml.debug(fname())
     # rapidshapes can only work with canonical sequence encoding
     #  ie ACGUT - IUPAC ambigous encoding is no supported
     # but automaticly retrieved sequences frm a database has this encoding
@@ -1434,6 +1420,7 @@ def msa_alifold_rapidshapes(all_sequence_fasta, nr_homolog_hits_file, params=Non
 
 
 def rapidshapes_ambigous_prediction(sequence_string, shape_str, rs_params, shape_level):
+    ml.debug(fname())
     # get all variants
     all_seq_vars = expand_ambiguous_RNA(sequence_string)
 
@@ -1595,6 +1582,7 @@ def run_tcoffee_profile_aling(fasta_file, mode, profile_file, threads=None, outf
     only aligner which can handle only one sequence input
     :return:
     """
+    ml.debug(fname())
     # sanitize profile file for unalowed
     with open(profile_file, 'r') as pin, open(profile_file + '.san', 'w') as pout:
         for line in pin:
@@ -1626,6 +1614,8 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
     :param mode:
     :return: path to the outfile
     """
+    ml.info('Running t-coffee.')
+    ml.debug(fname())
     fd, fp = mkstemp()
     os.close(fd)
 
@@ -1636,20 +1626,17 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
 
     wd = os.getcwd()
     os.chdir(exe_path)
+    FNULL = open(os.devnull, 'w')
     try:
         if not outfile:
             of, outfile = mkstemp()
             os.close(of)
 
-        print('run_tcoffee mode {} params {} for files in:{} out:{}'.format(mode,
-                                                                            tcoffee_rcoffee_params,
-                                                                            fasta_file,
-                                                                            outfile))
         tfd, tcoffee_temp_files = mkstemp()
         os.close(tfd)
 
         if threads:
-            r = call('{}t_coffee {} -mode {} -n_core={} -outfile {} {} > {}'.format(
+            cmd = '{}t_coffee {} -mode {} -n_core={} -outfile {} {} > {}'.format(
                 CONFIG.tcoffee_path,
                 fasta_file,
                 mode,
@@ -1657,22 +1644,28 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
                 outfile,
                 tcoffee_rcoffee_params,
                 tcoffee_temp_files
-            ), shell=True)
+            )
         else:
-            r = call('{}t_coffee {} -mode {} -outfile {} {} > {}'.format(
+            cmd = '{}t_coffee {} -mode {} -outfile {} {} > {}'.format(
                 CONFIG.tcoffee_path,
                 fasta_file,
                 mode,
                 outfile,
                 tcoffee_rcoffee_params,
                 tcoffee_temp_files
-            ), shell=True)
+            )
+        ml.debug(cmd)
+
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(cmd, shell=True, stderr=FNULL)
 
         # clean after t-coffee
         try:
             rmtree(exe_path)
         except OSError:
-            print('cleanup after tcoffee unsuccessfull - Directory: {} not found.'.format(exe_path))
+            ml.warn('cleanup after tcoffee unsuccessfull - Directory: {} not found.'.format(exe_path))
 
         remove_files_with_try(
             (tcoffee_temp_files, outfile + '.html'),
@@ -1680,9 +1673,13 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
         )
 
         if r:
-            raise ChildProcessError('call to t_coffee -mode {} failed'.format(mode))
+            msgfail = 'call to t_coffee -mode {} failed'.format(mode)
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
 
     finally:
+        FNULL.close()
         os.chdir(wd)
 
     return outfile
@@ -1691,24 +1688,22 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
 @timeit_decorator
 @tryit_decorator
 def rnafold_prediction(fasta2predict, params=''):
+    ml.debug(fname())
     a, b = mkstemp()
     os.close(a)
-    r = call(
-        '{}RNAfold --noPS {} < {} > {}'.format(
-            CONFIG.viennarna_path,
-            params,
-            fasta2predict,
-            b
-        ),
-        shell=True
+    cmd = '{}RNAfold --noPS {} < {} > {}'.format(
+        CONFIG.viennarna_path,
+        params,
+        fasta2predict,
+        b
     )
+    r = call(cmd, shell=True)
 
     if r:
-        print('input_file {}'.format(fasta2predict))
-        print('output_file {}'.format(b))
-        print('parameters {}'.format(params))
-        print('command: ' + '{}RNAfold --noPS {} < {} > {}'.format(CONFIG.viennarna_path, params, fasta2predict, b))
-        raise ChildProcessError('call to rnafold failed, please check if rnafold is in path')
+        msgfail = 'call to rnafold failed, please check if rnafold is in path'
+        ml.error(msgfail)
+        ml.error(cmd)
+        raise ChildProcessError(msgfail)
 
     structures = read_seq_str(b)
     os.remove(b)
@@ -1728,6 +1723,7 @@ def subopt_fold_query(all_fasta_hits_file, query, params=None):
 
     :return:
     """
+    ml.debug(fname())
     if params is None:
         params = dict()
     # get single query structure
@@ -1781,6 +1777,7 @@ def subopt_fold_alifold(all_fasta_hits_file, homologs_file, aligner='muscle', pa
     run clustal/muscle on selected homologs file
     :return:
     """
+    ml.debug(fname())
     if params is None:
         params = dict()
     # run aligner
@@ -1857,11 +1854,13 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
     :param outfile: outfile path, if not provided, tempfile will be created with output
     :return: outfile MSA path
     """
+    ml.info('Runing clustalo profile.')
+    ml.debug(fname())
 
     def _try_rescue(profile_file):
         # beware AlignIO truncates sequence names so they become non-unique, then clustalo also fails
-        print('trying rescue for profile alignment if profile ha no gaps clustalo things, that sequences are no aligned'
-              'appendig trailing gap to overcome the issue')
+        ml.warn('Trying rescue for profile alignment if profile ha no gaps clustalo things, '
+                'that sequences are no aligned. Appendig trailing gap to overcome the issue.')
         a = AlignIO.read(profile_file, format='clustal')
         s = [SeqRecord(Seq(str(i.seq) + '-'), id=i.id) for i in a]
         fa = AlignIO.MultipleSeqAlignment(s)
@@ -1878,39 +1877,43 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
         c_fd, clustalo_file = mkstemp()
         os.close(c_fd)
 
-    r = call(
-        '{}clustalo {} --force -i {} --profile1 {} -o {}'.format(
+    with open(os.devnull, 'w') as FNULL:
+        cmd = '{}clustalo {} --force -i {} --profile1 {} -o {}'.format(
             CONFIG.clustal_path,
             clustalo_params,
             fasta_seq_file,
             msa_file,
             clustalo_file
-        ),
-        shell=True
-    )
+        )
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(cmd, shell=True, stdout=FNULL, stderr=FNULL)
 
-    if r:
-        rewriten_msa = _try_rescue(msa_file)
-        r2 = call(
-            '{}clustalo {} --force -i {} --profile1 {} -o {}'.format(
+        if r:
+            ml.warn('Profile align failed.')
+
+            # Initiate rescue attempt
+            rewriten_msa = _try_rescue(msa_file)
+            cmd2 = '{}clustalo {} --force -i {} --profile1 {} -o {}'.format(
                 CONFIG.clustal_path,
                 clustalo_params,
                 fasta_seq_file,
                 rewriten_msa,
                 clustalo_file
-            ),
-            shell=True
-        )
+            )
+            ml.debug(cmd2)
+            r2 = call(cmd2, shell=True)
 
-        os.remove(rewriten_msa)
+            os.remove(rewriten_msa)
 
-        if r2 != 0:
-            raise ChildProcessError('call to clustalo profile to sequences failed\n'
-                                    'files {} \n params {}'.format(
-                                    '-i: ' + fasta_seq_file + ' --profile1: ' + msa_file + ' -o: ' + clustalo_file,
-                                    clustalo_params
-            ))
-
+            if r2 != 0:
+                msgfail = 'call to clustalo profile to sequences failed'
+                ml.error(msgfail)
+                ml.error(cmd)
+                ml.error(cmd2)
+                raise ChildProcessError(msgfail + ' ' + cmd)
     return clustalo_file
 
 
@@ -1931,33 +1934,37 @@ def turbofold_conservative_prediction(all_sequence_fasta, homologous_file, param
         then enviroment variable must be set, if not, then the RNAstucture (Turbofold) will not work
         export DATAPATH=[directory in which RNAstructure resides]/RNAstructure/data_tables/
     """
+
+    ml.debug(fname())
+    env = os.environ.copy()
+    if 'DATAPATH' not in env:
+        env['DATAPATH'] = CONFIG.rnastructure_datapath
+
     def _run_turbofold(turbofold_conf_file):
         """
         input is properly configured input file
-        exepath is path for turbofold to be able to execute the function will cd to the provided directory and cd out after
-        execution - usually the directory data_tables in RNAstructure package suffice
+        exepath is path for turbofold to be able to execute the function will cd to the provided directory and cd out
+         after execution - usually the directory data_tables in RNAstructure package suffice
         all paths in conf file must be given in full
-        :param turbofold_conf_file:
-        :param exepath:
-        :return:
         """
-        FNULL = open(os.devnull, 'w')
-        r = call(
-            '{}TurboFold {}'.format(
+        ml.info('Run Turbofold.')
+        ml.debug(fname())
+        with open(os.devnull, 'w') as FNULL:
+            cmd = '{}TurboFold {}'.format(
                 CONFIG.turbofold_path,
                 turbofold_conf_file
-            ),
-            shell=True,
-            stdout=FNULL
-        )
-        FNULL.close()
-        #
-        # r = call('TurboFold {}'.format(conf_file), shell=True)
+            )
+            ml.debug(cmd)
+            if ml.getEffectiveLevel() == 10:
+                r = call(cmd, shell=True, env=env)
+            else:
+                r = call(cmd, shell=True, stdout=FNULL, env=env)
 
-        if r:
-            print('Call to turbofold failed, cmd below:')
-            print('{}TurboFold {}'.format(CONFIG.turbofold_path, turbofold_conf_file))
-            raise ChildProcessError('call to Turbofold failed')
+            if r:
+                msgfail = 'Call to turbofold failed, cmd below:'
+                ml.error(msgfail)
+                ml.error(cmd)
+                raise ChildProcessError(msgfail)
 
     if (params is not None) and ('turbofold_mode' in params):
         turbo_mode = params['turbofold_mode']
@@ -1978,13 +1985,13 @@ def turbofold_conservative_prediction(all_sequence_fasta, homologous_file, param
     # write sequences by one in fasta file format
     hom_paths = []
     for i, hseq in enumerate(homologs):
-        fname = os.path.join(tmpdir, 'hseq{}.fasta'.format(i))
-        with open(fname, 'w') as f:
+        fastaname = os.path.join(tmpdir, 'hseq{}.fasta'.format(i))
+        with open(fastaname, 'w') as f:
             f.write('>{}\n{}\n'.format(
                 'hseq{}'.format(i),
                 str(hseq.seq)
             ))
-        hom_paths.append(fname)
+        hom_paths.append(fastaname)
 
     hom_out_paths = [os.path.join(tmpdir, 'hseq{}.ct'.format(i)) for i in range(len(homologs))]
 
@@ -1995,10 +2002,10 @@ def turbofold_conservative_prediction(all_sequence_fasta, homologous_file, param
     #  run prediction
     new_structures = []
     for i, aseq in enumerate(all_seqs):
-        fname = os.path.join(tmpdir, 'qa_seq{}.fasta'.format(i))
+        fastaname = os.path.join(tmpdir, 'qa_seq{}.fasta'.format(i))
         o_name = os.path.join(tmpdir, 'qa_seq{}_out.ct'.format(i))
         # write the query fasta file
-        with open(fname, 'w') as f:
+        with open(fastaname, 'w') as f:
             f.write('>{}\n{}\n'.format(
                 'qaseq{}'.format(i),
                 str(aseq.seq)
@@ -2009,7 +2016,7 @@ def turbofold_conservative_prediction(all_sequence_fasta, homologous_file, param
         with open(conf_file, 'w') as c:
             c.write('Mode = {}\n'.format(turbo_mode))
 
-            in_files = '{' + ';'.join(hom_paths) + ';' + fname + '}'
+            in_files = '{' + ';'.join(hom_paths) + ';' + fastaname + '}'
             out_files = '{' + ';'.join(hom_out_paths) + ';' + o_name + '}'
 
             c.write('InSeq = {}\n'.format(in_files))
@@ -2035,7 +2042,7 @@ def turbofold_conservative_prediction(all_sequence_fasta, homologous_file, param
 
 
 def write_turbofold_confile(input_sequences, turbofold_params=None, cpus=None, outdir=None):
-
+    ml.debug(fname())
     if outdir:
         tmpdir = outdir
     else:
@@ -2051,13 +2058,13 @@ def write_turbofold_confile(input_sequences, turbofold_params=None, cpus=None, o
     # write sequences by one in fasta file format
     seq_paths = []
     for i, hseq in enumerate(input_sequences):
-        fname = os.path.join(tmpdir, 'hseq{}.fasta'.format(i))
-        with open(fname, 'w') as f:
+        fastaname = os.path.join(tmpdir, 'hseq{}.fasta'.format(i))
+        with open(fastaname, 'w') as f:
             f.write('>{}\n{}\n'.format(
                 'hseq{}'.format(i),
                 str(hseq.seq)
             ))
-        seq_paths.append(fname)
+        seq_paths.append(fastaname)
 
     hom_out_paths = [os.path.join(tmpdir, 'hseq{}.ct'.format(i)) for i in range(len(input_sequences))]
 
@@ -2097,6 +2104,7 @@ def turbofold_only_homologous(all_sequences, nr_homologous, params):
     # 2) nonhomologous sequences
     #  predict with RNAfold or something similar, or predict them together with nr homologous sequence, but use only
     #   structures for nonhomologs from this step
+    ml.debug(fname())
 
     nr_homologous_set = {str(seq.seq) for seq in nr_homologous}
 
@@ -2130,57 +2138,61 @@ def turbofold_only_homologous(all_sequences, nr_homologous, params):
 
 
 def run_turbofold(sequences, params):
+    ml.info('Running Turbofold.')
+    ml.debug(fname())
+
+    env = os.environ.copy()
+    if 'DATAPATH' not in env:
+        env['DATAPATH'] = CONFIG.rnastructure_datapath
+
     tmpdir, con_file, output_structure_files = write_turbofold_confile(
         input_sequences=sequences,
         turbofold_params=params,
     )
 
     # run without prediction progress reporting output
-    FNULL = open(os.devnull, 'w')
-    r = call(
-        [
+    with open(os.devnull, 'w') as FNULL:
+        cmd = [
             '{}TurboFold'.format(CONFIG.turbofold_path),
             con_file
-        ],
-        stdout=FNULL
-    )
-    FNULL.close()
+        ]
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, env=env)
+        else:
+            r = call(cmd, stdout=FNULL, env=env)
 
-    # run with prediction progress
-    # r = call(['Turbofold', con_file])
+        if r:
+            msgfail = 'Call to turbofold failed, cmd below:'
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
 
-    if r:
-        print('Call to turbofold failed, cmd below:')
-        print('TurboFold {}'.format(con_file))
-        raise ChildProcessError('call to Turbofold failed')
+        # now convert ct files produced by TurboFold
+        new_structures = []
+        for out_str_file, orig_seq in zip(output_structure_files, sequences):
+            o = open(out_str_file, 'r')
+            seq_with_pred_str = ct2db(o, energy_txt='ENERGY')
+            o.close()
 
-    # now convert ct files produced by TurboFold
-    new_structures = []
-    for out_str_file, orig_seq in zip(output_structure_files, sequences):
-        o = open(out_str_file, 'r')
-        seq_with_pred_str = ct2db(o, energy_txt='ENERGY')
-        o.close()
+            assert str(seq_with_pred_str[0].seq) == str(orig_seq.seq)
 
-        assert str(seq_with_pred_str[0].seq) == str(orig_seq.seq)
-
-        new_structures.append(
-            SeqRecord(
-                orig_seq.seq,
-                id=orig_seq.id,
-                annotations={'sss': ['ss0']},
-                letter_annotations={'ss0': seq_with_pred_str[0].letter_annotations['ss0']}
+            new_structures.append(
+                SeqRecord(
+                    orig_seq.seq,
+                    id=orig_seq.id,
+                    annotations={'sss': ['ss0']},
+                    letter_annotations={'ss0': seq_with_pred_str[0].letter_annotations['ss0']}
+                )
             )
-        )
 
-    rmtree(tmpdir)
-    return new_structures
+        rmtree(tmpdir)
+        return new_structures
 
 
 def check_lonely_bp(structure, gap_char='.'):
     """
     check lonely bp in classic dot bracket structure notation
-    :param structure:
-    :return:
     """
     match = re.search('\.\(\.|\.\)\.', structure)
     if not match:

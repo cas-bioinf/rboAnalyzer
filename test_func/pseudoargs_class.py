@@ -50,6 +50,8 @@ class Pseudoargs(Namespace):
             download_rfam=False,
             show_gene_browser=False,
             zip_json=False,
+            filter_by_eval=None,
+            filter_by_bitscore=None,
             **kwargs):
         super().__init__(**kwargs)
         self.blast_in = blast_in
@@ -90,6 +92,8 @@ class Pseudoargs(Namespace):
         self.download_rfam = download_rfam
         self.show_gene_browser = show_gene_browser
         self.zip_json = zip_json
+        self.filter_by_eval = filter_by_eval
+        self.filter_by_bitscore = filter_by_bitscore
 
         self.dev_pred = dev_pred
 
@@ -97,6 +101,9 @@ class Pseudoargs(Namespace):
             self.pred_sim_threshold_percent = pred_sim_threshold_percent
         else:
             raise AttributeError('pred_sim_threshold_percent must be between 0 and 100')
+
+        if self.filter_by_eval is not None and self.filter_by_bitscore is not None:
+            raise AttributeError('filter_by_eval is not allowed with filter_by_bitscore')
 
         if isinstance(reldev, list):
             self.reldev = reldev

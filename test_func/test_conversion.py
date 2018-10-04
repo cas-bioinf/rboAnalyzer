@@ -14,12 +14,15 @@ from rna_blast_analyze.BR_core.BA_methods import Subsequences, HitList, BlastSea
 from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt
 
 
+fwd = os.path.dirname(__file__)
+
+
 class TestRecrusive(unittest.TestCase):
     def recrusive_compare(self, a, b):
         # assume that list and tuple are ok to interchange
         # because after json, everything is list
         try:
-            assert(type(a), type(b), 'rec compare: type not same {} {}'.format(a, b))
+            self.assertEqual(type(a), type(b), 'rec compare: type not same {} {}'.format(a, b))
         except AssertionError:
             if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
                 pass
@@ -119,7 +122,7 @@ class TestBioSeqRecord(unittest.TestCase):
 class TestBlastTxt(unittest.TestCase):
     def test_convert_simple(self):
         blast_outputs = []
-        with open(os.path.join('test_data', 'blast_parse_hits_txt_standalone.txt'), 'r') as f:
+        with open(os.path.join(fwd, 'test_data', 'blast_parse_hits_txt_standalone.txt'), 'r') as f:
             for r in blast_parse_txt(f):
                 blast_outputs.append(r)
         encoded_original = [convert_classes.blasttodict(i) for i in blast_outputs]
@@ -131,7 +134,7 @@ class TestBlastTxt(unittest.TestCase):
 
     def test_convert_multi_queries(self):
         blast_outputs = []
-        with open(os.path.join('test_data', 'blast_parse_multi_query_web.txt'), 'r') as f:
+        with open(os.path.join(fwd, 'test_data', 'blast_parse_multi_query_web.txt'), 'r') as f:
             for r in blast_parse_txt(f):
                 blast_outputs.append(r)
         encoded = [convert_classes.blasttodict(i) for i in blast_outputs]
@@ -143,7 +146,7 @@ class TestBlastTxt(unittest.TestCase):
 
     def test_convert_multi_hsps(self):
         blast_outputs = []
-        with open(os.path.join('test_data', 'blast_parse_web_multi_hit.txt'), 'r') as f:
+        with open(os.path.join(fwd, 'test_data', 'blast_parse_web_multi_hit.txt'), 'r') as f:
             for r in blast_parse_txt(f):
                 blast_outputs.append(r)
         encoded = [convert_classes.blasttodict(i) for i in blast_outputs]
@@ -157,7 +160,7 @@ class TestBlastTxt(unittest.TestCase):
 class TestBlastXML(unittest.TestCase):
     def test_convert_simple(self):
         blast_outputs = []
-        with open(os.path.join('test_data', 'web_multi_hit.xml'), 'r') as f:
+        with open(os.path.join(fwd, 'test_data', 'web_multi_hit.xml'), 'r') as f:
             for r in NCBIXML.parse(f):
                 blast_outputs.append(r)
         encoded_original = [convert_classes.blasttodict(i) for i in blast_outputs]
@@ -169,7 +172,7 @@ class TestBlastXML(unittest.TestCase):
 
     def test_convert_multi_queries(self):
         blast_outputs = []
-        with open(os.path.join('test_data', 'web_multi_hit.xml'), 'r') as f:
+        with open(os.path.join(fwd, 'test_data', 'web_multi_hit.xml'), 'r') as f:
             for r in NCBIXML.parse(f):
                 blast_outputs.append(r)
         encoded = [convert_classes.blasttodict(i) for i in blast_outputs]
@@ -181,7 +184,7 @@ class TestBlastXML(unittest.TestCase):
 
     def test_convert_multi_hsps(self):
         blast_outputs = []
-        with open(os.path.join('test_data', 'web_multi_hit.xml'), 'r') as f:
+        with open(os.path.join(fwd, 'test_data', 'web_multi_hit.xml'), 'r') as f:
             for r in NCBIXML.parse(f):
                 blast_outputs.append(r)
         encoded = [convert_classes.blasttodict(i) for i in blast_outputs]
@@ -255,7 +258,7 @@ class TestBlastRecompute(unittest.TestCase):
     def test_blastrecompute_with_blast_data(self):
         # load blast data
         blast_outputs = []
-        with open(os.path.join('test_data', 'blast_parse_hits_txt_standalone.txt'), 'r') as f:
+        with open(os.path.join(fwd, 'test_data', 'blast_parse_hits_txt_standalone.txt'), 'r') as f:
             for r in blast_parse_txt(f):
                 blast_outputs.append(r)
 

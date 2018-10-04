@@ -1,9 +1,13 @@
 import re
-import warnings
+import sys
+import os
 from subprocess import check_output, STDOUT, CalledProcessError
 
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core import cmalign
+
+import logging
+ml = logging.getLogger(__name__)
 
 blast_minimal_version = [2, 2, 28]
 locarna_minimal_version = [1, 9, 2]
@@ -21,34 +25,34 @@ mfold_minimal_version = [3, 6]
 pred_method_required_tools = {
     # ===== All possible prediction methods =====
     #  list only methods which are not required by default
-    'rfam_rnafoldc': {'rfam',},
-    'rfam_subopt': {'mfold',},
-    'rfam_rapidshapes': {'rfam', 'rapidshapes',},
-    'clustalo_alifold_rapidshapes': {'RNAalifold', 'rapidshapes',},
-    'muscle_alifold_rapidshapes': {'RNAalifold', 'rapidshapes',},
-    'rcoffee_alifold_rapidshapes': {'rcoffee', 'RNAalifold', 'rapidshapes',},
-    'alifold_refold': {'RNAalifold', 'refold.pl',},
-    'muscle_alifold_refold': {'RNAalifold', 'refold.pl',},
+    'rfam_rnafoldc': {'rfam'},
+    'rfam_subopt': {'mfold'},
+    'rfam_rapidshapes': {'rfam', 'rapidshapes'},
+    'clustalo_alifold_rapidshapes': {'RNAalifold', 'rapidshapes'},
+    'muscle_alifold_rapidshapes': {'RNAalifold', 'rapidshapes'},
+    'rcoffee_alifold_rapidshapes': {'rcoffee', 'RNAalifold', 'rapidshapes'},
+    'alifold_refold': {'RNAalifold', 'refold.pl'},
+    'muscle_alifold_refold': {'RNAalifold', 'refold.pl'},
     'rnafold': set(),
-    'subopt_fold_query': {'mfold', 'RNAdistance',},
-    'subopt_fold_clustal_alifold': {'mfold', 'RNAalifold', 'RNAdistance',},
-    'subopt_fold_muscle_alifold': {'mfold', 'RNAalifold', 'RNAdistance',},
-    'alifold_refold_rnafold_c': {'RNAalifold', 'refold.pl',},
-    'muscle_alifold_refold_rnafold_c': {'RNAalifold', 'refold.pl',},
-    'alifold_unpaired_conserved_refold': {'RNAalifold', 'refold.pl',},
-    'muscle_alifold_unpaired_conserved_refold': {'RNAalifold', 'refold.pl',},
+    'subopt_fold_query': {'mfold', 'RNAdistance'},
+    'subopt_fold_clustal_alifold': {'mfold', 'RNAalifold', 'RNAdistance'},
+    'subopt_fold_muscle_alifold': {'mfold', 'RNAalifold', 'RNAdistance'},
+    'alifold_refold_rnafold_c': {'RNAalifold', 'refold.pl'},
+    'muscle_alifold_refold_rnafold_c': {'RNAalifold', 'refold.pl'},
+    'alifold_unpaired_conserved_refold': {'RNAalifold', 'refold.pl'},
+    'muscle_alifold_unpaired_conserved_refold': {'RNAalifold', 'refold.pl'},
     'dh_tcoffee_alifold_refold': {'RNAalifold', 'refold.pl', 'tcoffee'},
     'dh_tcoffee_alifold_refold_rnafoldc': {'RNAalifold', 'refold.pl', 'tcoffee'},
     'dh_tcoffee_alifold_conserved_ss_rnafoldc': {'RNAalifold', 'refold.pl', 'tcoffee'},
-    'dh_clustal_alifold_refold': {'RNAalifold', 'refold.pl',},
-    'dh_clustal_alifold_refold_rnafoldc': {'RNAalifold', 'refold.pl',},
-    'dh_clustal_alifold_conserved_ss_rnafoldc': {'RNAalifold', 'refold.pl',},
-    'pairwise_centroid_homfold': {'centroid_homfold',},
-    'TurboFold_conservative': {'turbofold',},
+    'dh_clustal_alifold_refold': {'RNAalifold', 'refold.pl'},
+    'dh_clustal_alifold_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
+    'dh_clustal_alifold_conserved_ss_rnafoldc': {'RNAalifold', 'refold.pl'},
+    'pairwise_centroid_homfold': {'centroid_homfold'},
+    'TurboFold_conservative': {'turbofold'},
     'TurboFold': {'turbofold'},
-    'tcoffee_rcoffee_alifold_refold': {'rcoffee', 'RNAalifold', 'refold.pl',},
-    'tcoffee_rcoffee_alifold_refold_rnafoldc': {'rcoffee', 'RNAalifold', 'refold.pl',},
-    'tcoffee_rcoffee_alifold_conserved_ss_rnafoldc': {'rcoffee', 'RNAalifold', 'refold.pl',},
+    'tcoffee_rcoffee_alifold_refold': {'rcoffee', 'RNAalifold', 'refold.pl'},
+    'tcoffee_rcoffee_alifold_refold_rnafoldc': {'rcoffee', 'RNAalifold', 'refold.pl'},
+    'tcoffee_rcoffee_alifold_conserved_ss_rnafoldc': {'rcoffee', 'RNAalifold', 'refold.pl'},
 }
 
 pred_params = {
@@ -97,14 +101,14 @@ def verify_query_blast(blast, query):
     :return:
     """
     if not (query.id == blast.query or query.description == blast.query):
-        warnings.warn(
+        ml.warn(
             'Provided query id ({}) do not match query id in BLAST output ({})'.format(
                 query.id,
                 blast.query
             )
         )
     if len(query) != blast.query_length:
-        warnings.warn(
+        ml.warn(
             'Provided query lenght ({}: {}) do not match BLAST query length ({}: {}).'.format(
                 query.id,
                 len(query),
@@ -120,6 +124,7 @@ def verify_blastdbcmd(minimal_version):
     """
     msgversion = 'blastcmd not installed in required version, required version is {}.{}.{}'.format(*minimal_version)
     msgpath = '{}blastcmd could not be located (not in PATH)'.format(CONFIG.blast_path)
+    msgsuccess = 'blastcmd is installed in required version'
     try:
         a = check_output(
             [
@@ -128,28 +133,31 @@ def verify_blastdbcmd(minimal_version):
             ]
         )
         a = a.decode(encoding='utf-8')
-        r = re.search('(?<=blastdbcmd: )[1-9.]+', a)
+        r = re.search('(?<=blastdbcmd: )[0-9.]+', a)
         if r:
             ver = r.group().split('.')
             ver = [int(i) for i in ver]
             for v, minv in zip(ver, minimal_version):
                 if v > minv:
+                    ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    print(msgversion)
+                    ml.warn(msgversion)
                     return False
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
 
 
 def verify_locarna(minimal_version):
     msgversion = 'Locarna is not installed in required version, required version is {}.{}.{}'.format(*locarna_minimal_version)
     msgpath = '{}LocARNA could not be located (not in PATH).'.format(CONFIG.locarna_path)
+    msgsuccess = 'Locarna is installed in required version'
     try:
         a = check_output(
             [
@@ -159,26 +167,29 @@ def verify_locarna(minimal_version):
         )
         a = a.decode()
         if a.startswith('LocARNA'):
-            r = re.finditer('[1-9]+', a)
+            r = re.finditer('[0-9]+', a)
             for match, minv in zip(r, minimal_version):
                 v = int(match.group())
                 if v > minv:
+                    ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    print(msgversion)
+                    ml.warn(msgversion)
                     return False
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
 
 
 def verify_infernal(program, minimal_version):
     msgversion = '{} (part of INFERNAL) is not installed in required version, required is {}.{}.{}'.format(program, *minimal_version)
     msgpath = '{}{} could not be located (not in PATH).'.format(CONFIG.infernal_path, program)
+    msgsuccess = '{} is installed in required version'.format(program)
     try:
         a = check_output(
             [
@@ -188,27 +199,30 @@ def verify_infernal(program, minimal_version):
         )
         a = a.decode()
         if a.startswith('# {}'.format(program)):
-            r = re.search('(?<=# INFERNAL )[1-9.]+', a)
+            r = re.search('(?<=# INFERNAL )[0-9.]+', a)
             ver = r.group().split('.')
             ver = [int(i) for i in ver]
             for v, minv in zip(ver, minimal_version):
                 if v > minv:
+                    ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    print(msgversion)
+                    ml.warn(msgversion)
                     return False
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         raise
 
 
 def verify_viennarna_program(program, minimal_version):
     msgversion = '{} is not installed in required version, required version is {}.{}.{}'.format(program, *minimal_version)
     msgpath = '{}{} could not be located'.format(CONFIG.viennarna_path, program)
+    msgsuccess = '{} is installed in required version'.format(program)
     try:
         a = check_output(
             [
@@ -221,16 +235,18 @@ def verify_viennarna_program(program, minimal_version):
             ver = a.split()[1].split('.')
             for v, minv in zip(ver, minimal_version):
                 if int(v) > minv:
+                    ml.info(msgsuccess)
                     return True
                 elif int(v) < minv:
-                    print(msgversion)
+                    ml.warn(msgversion)
                     return False
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
 
 
@@ -245,6 +261,7 @@ def verify_viennarna(programs, vrna_minv):
 def verify_vrna_refold():
     msgversion = 'refold.pl is not installed in required version.'
     msgpath = '{}refold.pl could not be located (not in PATH).'.format(CONFIG.refold_path)
+    msgsuccess = 'refold.pl is instaled in required version'
     try:
         try:
             a = check_output(
@@ -259,18 +276,20 @@ def verify_vrna_refold():
 
         a = a.decode()
         if a.strip().startswith('refold.pl [-t threshold] myseqs.aln alidot.ps | RNAfold -C'):
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
 
 
 def verify_clustalo(minimal_version):
     msgversion = 'clustalo is not installed in required version, required version is {}.{}.{}'.format(*minimal_version)
     msgpath = '{}clustalo could not be located (not in PATH).'.format(CONFIG.clustal_path)
+    msgsuccess = 'clustalo is installed in required version'
     try:
         a = check_output(
             [
@@ -280,26 +299,29 @@ def verify_clustalo(minimal_version):
         )
         a = a.decode()
         if a:
-            r = re.finditer('[1-9]+', a)
+            r = re.finditer('[0-9]+', a)
             for match, minv in zip(r, minimal_version):
                 v = int(match.group())
                 if v > minv:
+                    ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    print(msgversion)
+                    ml.warn(msgversion)
                     return False
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
 
 
 def verify_muscle(minimal_version):
     msgversion = 'muscle is not installed in required version, required version is {}.{}.{}'.format(*minimal_version)
     msgpath = '{}muscle could not be located (not in PATH).'.format(CONFIG.muscle_path)
+    msgsuccess = 'muslce is installed in required version'
     try:
         a = check_output(
             [
@@ -309,20 +331,22 @@ def verify_muscle(minimal_version):
         )
         a = a.decode()
         if a.startswith('MUSCLE'):
-            r = re.finditer('[1-9]+', a)
+            r = re.finditer('[0-9]+', a)
             for match, minv in zip(r, minimal_version):
                 v = int(match.group())
                 if v > minv:
+                    ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    print(msgversion)
+                    ml.warn(msgversion)
                     return False
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
 
 
@@ -330,6 +354,7 @@ def verify_tcoffee(minimal_version):
     # do not check the revision
     msgversion = 't_coffee is not installed in required version, required version is {}.{}'.format(*minimal_version)
     msgpath = '{}t_coffee could not be located (not in PATH).'.format(CONFIG.tcoffee_path)
+    msgsuccess = 't_coffee is installed in required version'
     try:
         a = check_output(
             [
@@ -346,28 +371,31 @@ def verify_tcoffee(minimal_version):
                 for match, minv in zip(r, minimal_version):
                     v = int(match.group())
                     if v > minv:
+                        ml.info(msgsuccess)
                         return True
                     elif v < minv:
-                        print(msgversion)
+                        ml.warn(msgversion)
                         return False
+                ml.info(msgsuccess)
                 return True
             else:
-                print(msgversion)
+                ml.warn(msgversion)
                 return False
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
 
 
 def verify_rcoffee(minimal_version):
     msgversion = 't_coffee -mode rcoffee is not installed in required version, required version is {}.{}'.format(*minimal_version)
     msgpath = '{}t_coffee -mode rcoffee could not be located (not in PATH).'.format(CONFIG.muscle_path)
+    msgsuccess = 't_coffee -mode rcoffee is installed in required version'
 
     if not verify_tcoffee(minimal_version):
-        print(
+        ml.warn(
             't_coffee is not installed in required version, required is {}.{}'.format(
                 *minimal_version
             )
@@ -393,19 +421,21 @@ def verify_rcoffee(minimal_version):
         n1 = re.search("ERROR: special_mode rcoffee is unknown \[FATAL:T-COFFEE\]", a)
 
         if t1 and t2 and not n1:
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
 
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
 
 
 def verify_centroid_homfold(minimal_version):
     msgversion = 'centroid_homfold is not installed in required version, required version is {}.{}.{}'.format(*minimal_version)
     msgpath = '{}centroid_homfold could not be located (not in PATH).'.format(CONFIG.centriod_path)
+    msgsuccess = 'centroid_homfold is installed in required version'
     # double try because help returns exit status 1
     try:
         try:
@@ -422,26 +452,29 @@ def verify_centroid_homfold(minimal_version):
         a = a.decode()
         b = a.split()
         if b[0] == 'CentroidHomfold':
-            r = re.finditer('[1-9]+', b[1])
+            r = re.finditer('[0-9]+', b[1])
             for match, minv in zip(r, minimal_version):
                 v = int(match.group())
                 if v > minv:
+                    ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    print(msgversion)
+                    ml.warn(msgversion)
                     return False
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
 
 
 def verify_turbofold(minimal_version):
     msgversion = 'TurboFold is not installed in required version, required version is {}.{}'.format(*minimal_version)
     msgpath = '{}TurboFold could not be located (not in PATH).'.format(CONFIG.turbofold_path)
+    msgsuccess = 'TruboFold is installed in required version'
     try:
         try:
             a = check_output(
@@ -457,26 +490,44 @@ def verify_turbofold(minimal_version):
         a = a.decode()
         b = a.split()
         if b[0] == 'TurboFold:':
-            r = re.finditer('[1-9]+', b[2])
+            r = re.finditer('[0-9]+', b[2])
             for match, minv in zip(r, minimal_version):
                 v = int(match.group())
                 if v > minv:
+                    ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    print(msgversion)
+                    ml.warn(msgversion)
                     return False
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
+
+
+def verify_turbofold_datapath():
+    """
+    verify that datapath enviroment variable is set (it is not set by default when installing turbofold from conda)
+    :return:
+    """
+    try:
+        dp = os.environ['DATAPATH']
+        return True
+    except KeyError:
+        if CONFIG.rnastructure_datapath is None:
+            return False
+        else:
+            return True
 
 
 def verify_mfold(minimal_version):
     msgversion = 'hybrid-ss-min (UNAfold) is not installed in required version, required version is {}.{}'.format(*minimal_version)
     msgpath = '{}hybrid-ss-min could not be located (not in PATH).'.format(CONFIG.mfold_path)
+    msgsuccess = 'hybrid-ss-min (UNAfold) is installed in required version'
     try:
         a = check_output(
             [
@@ -487,20 +538,22 @@ def verify_mfold(minimal_version):
         a = a.decode()
         b = a.split()
         if b[0] == 'hybrid-ss-min':
-            r = re.finditer('[1-9]+', b[2])
+            r = re.finditer('[0-9]+', b[2])
             for match, minv in zip(r, minimal_version):
                 v = int(match.group())
                 if v > minv:
+                    ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    print(msgversion)
+                    ml.warn(msgversion)
                     return False
+            ml.info(msgsuccess)
             return True
         else:
-            print(msgversion)
+            ml.warn(msgversion)
             return False
     except FileNotFoundError:
-        print(msgpath)
+        ml.warn(msgpath)
         return False
 
 
@@ -576,9 +629,63 @@ def check_necessery_tools(methods):
 
     for met in methods:
         needed = pred_method_required_tools[met] - avalible_tools
-        if needed:
-            raise EnvironmentError('Missing {} (needed for {}).'.format(' '.join(needed), met))
 
+        if 'refold.pl' in needed:
+            msgfail = 'Please add the refold.pl to PATH or add the path to refold.pl to configfile.'
+            is_conda = os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
+            if is_conda:
+                ml.info('Trying to find refold.pl in "CONDA_ROOT/share"')
+                out = check_output('find {}/share -type f -name refold.pl'.format(sys.prefix), shell=True)
+                op = out.decode().strip()
+                if op != '':
+                    op = os.path.dirname(op.split('/n')[0])
+                    ml.info('Inferred refold.pl in {}'.format(op))
+                    ml.info('writing configuration to {}'.format(CONFIG.conf_file))
+                    CONFIG.tool_paths['refold'] = op
+                    if 'TOOL_PATHS' not in CONFIG.config_obj:
+                        CONFIG.config_obj['TOOL_PATHS'] = {}
+                    CONFIG.config_obj['TOOL_PATHS']['refold'] = op
+                    with open(CONFIG.conf_file, 'w') as updated_cfh:
+                        CONFIG.config_obj.write(updated_cfh)
+                    avalible_tools.add('refold.pl')
+                    needed.remove('refold.pl')
+                else:
+                    ml.error(msgfail)
+                    raise EnvironmentError(msgfail)
+            else:
+                ml.error(msgfail)
+
+        if needed:
+            msgfail = 'Missing {} (needed for {}).'.format(' '.join(needed), met)
+            ml.error(msgfail)
+            raise EnvironmentError(msgfail)
+
+    if 'TurboFold' in methods or 'TurboFold_conservative' in methods:
+        msgfail = 'Please provide DATAPATH for Turbofold from RNAstructure package. Either as DATAPATH ' \
+                  'environment variable or as rnastructure_DATAPATH entry in config DATA section.'
+        if not verify_turbofold_datapath():
+            ml.warn('The turbofold is installed but the DATAPATH environment variable is not set nor present in config.txt.')
+            is_conda = os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
+            if is_conda:
+                ml.info('Trying to find required data in "CONDA_ROOT/share"')
+                out = check_output('find {}/share -type d -name data_tables'.format(sys.prefix), shell=True)
+                op = out.decode().strip()
+                if op != '':
+                    op = op.split('/n')[0]
+                    ml.info('Inferred datapath in {}'.format(op))
+                    ml.info('writing configuration to {}'.format(CONFIG.conf_file))
+                    CONFIG.data_paths['rnastructure_datapath'] = op
+                    if 'DATA' not in CONFIG.config_obj:
+                        CONFIG.config_obj['DATA'] = {}
+                    CONFIG.config_obj['DATA']['rnastructure_datapath'] = op
+                    with open(CONFIG.conf_file, 'w') as updated_cfh:
+                        CONFIG.config_obj.write(updated_cfh)
+                else:
+                    ml.error(msgfail)
+                    raise EnvironmentError(msgfail)
+            else:
+                ml.error(msgfail)
+                raise EnvironmentError(msgfail)
 
 if __name__ == '__main__':
     print(check_3rd_party_tools())

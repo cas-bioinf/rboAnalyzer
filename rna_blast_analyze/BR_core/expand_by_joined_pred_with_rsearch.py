@@ -3,10 +3,8 @@ import pickle
 import re
 from copy import deepcopy
 from tempfile import mkstemp
+import logging
 
-from Bio import SeqIO
-
-import rna_blast_analyze.BR_core.add_usr_local_bin
 import rna_blast_analyze.BR_core.BA_support as BA_support
 from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
 from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
@@ -14,15 +12,19 @@ from rna_blast_analyze.BR_core.expand_by_BLAST import blast_wrapper_inner
 from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper_inner
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
 from rna_blast_analyze.BR_core.stockholm_alig import StockholmFeatureStock
+from rna_blast_analyze.BR_core.fname import fname
+
+ml = logging.getLogger(__name__)
 
 
 def joined_wrapper(args_inner, shared_list=None):
+    ml.debug(fname())
     ret_line, _ = joined_wrapper_inner(args_inner, shared_list=shared_list)
     return ret_line
 
 
 def joined_wrapper_inner(args_inner, shared_list=None):
-
+    ml.debug(fname())
     # update params if different config is requested
     CONFIG.override(tools_paths(args_inner.config_file))
 
@@ -36,7 +38,7 @@ def joined_wrapper_inner(args_inner, shared_list=None):
         repred_file = args_inner.repredict_file
 
     for i, args in enumerate([blast_args, locarna_args]):
-        args.prediction_method = ()
+        args.prediction_method = []
         args.pred_params = dict()
         args.dump = None
         args.dill = None
@@ -57,11 +59,6 @@ def joined_wrapper_inner(args_inner, shared_list=None):
     stockholm_features.add_custom_parser_tags('GC', {'cA1': 'anchor letter tag',
                                                      'cA2': 'anchor number tag'})
 
-    if args_inner.logfile:
-        fid = open(args_inner.logfile, 'w')
-        fid.write('Program BA runned at: {}\n'.format(BA_support.print_time()))
-        BA_support.print_parameters(args_inner, fid)
-
     p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
     # this is done for each query
 
@@ -78,6 +75,10 @@ def joined_wrapper_inner(args_inner, shared_list=None):
 
         analyzed_hits = BlastSearchRecompute()
         analyzed_hits.args = args_inner
+
+        # add query from simple extension to analyzed hits of joined pred (need cm bit score for html out)
+        analyzed_hits.query = query = b_hits.query
+
         all_analyzed.append(analyzed_hits)
         order_out = []
         for bh, lh in zip(b_hits.hits, l_hits.hits):
@@ -128,20 +129,6 @@ def joined_wrapper_inner(args_inner, shared_list=None):
                     hit.subs[hit.ret_keys[0]].anotations['sss'] = []
                 hit.subs[hit.ret_keys[0]].annotations['sss'] += ['ss0']
                 hit.subs[hit.ret_keys[0]].letter_annotations['ss0'] = '.'*len(hit.subs[hit.ret_keys[0]].seq)
-
-        query = None
-        # read query sequence
-        with open(args_inner.blast_query, 'r') as f:
-            for j, q in enumerate(SeqIO.parse(f, 'fasta')):
-                if j == iteration:
-                    # effectively selecting query
-                    query = q
-                    break
-        if not query:
-            raise TypeError('query sequence could not be parsed')
-        # query_seq = query.seq.transcribe()
-
-        analyzed_hits.query = query
 
         fda, all_hits_fasta = mkstemp()
         with os.fdopen(fda, 'w') as fah:
@@ -232,9 +219,5 @@ def joined_wrapper_inner(args_inner, shared_list=None):
         ml_out_line.append('\n'.join(out_line))
 
         os.remove(all_hits_fasta)
-
-    if args_inner.logfile:
-        fid.write('ended at: {}'.format(BA_support.print_time()))
-        fid.close()
 
     return '\n'.join(ml_out_line), all_analyzed

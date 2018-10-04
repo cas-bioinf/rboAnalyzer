@@ -1,11 +1,15 @@
 import os
 from tempfile import mkstemp
+import logging
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
 from rna_blast_analyze.BR_core.cmalign import run_cmalign_on_fasta, read_cmalign_sfile, run_cmbuild, get_cm_model, run_cmfetch, RfamInfo
 from rna_blast_analyze.BR_core.stockholm_alig import StockholmAlig
 from rna_blast_analyze.BR_core.stockholm_parser import read_st
 from rna_blast_analyze.BR_core.config import CONFIG
+from rna_blast_analyze.BR_core.fname import fname
+
+ml = logging.getLogger(__name__)
 
 
 def infer_homology(analyzed_hits, args):
@@ -13,17 +17,23 @@ def infer_homology(analyzed_hits, args):
     This is wrapper for infer homology methods. It deals with different options for generating CM.
     :return:
     """
+    ml.info('Infering homology...')
+    ml.debug(fname())
     bits, eval, loc_score, alig_length = hit_cons_characteristic(analyzed_hits.hits)
 
     if args.cm_file:
         # use provided cm file
+        ml.info('Infer homology - using provided CM file: {}'.format(args.cm_file))
         cm_model_file = args.cm_file
     elif args.use_rfam:
+        ml.info('Infer homology - using RFAM')
         # find and extract cm model
         rfam = RfamInfo()
         best_matching_model_name = get_cm_model(args.blast_query, threads=args.threads)
+        ml.info('Infer homology - best matching model: {}'.format(best_matching_model_name))
         cm_model_file = run_cmfetch(rfam.file_path, best_matching_model_name)
     else:
+        ml.info('Infer homology - using RSEARCH to build model')
         # default to using RSEARCH
         # cm_model_file = build_cm_model_rsearch(analyzed_hits.query, args.ribosum)
         cm_model_file = build_cm_model_rsearch(analyzed_hits.query, CONFIG.rsearch_ribosum)
@@ -91,6 +101,7 @@ def infer_homology(analyzed_hits, args):
 
 
 def build_cm_model_rsearch(query_seq, path2selected_sim_array):
+    ml.debug(fname())
     query_structure = BA_support.RNAfold(str(query_seq.seq))[1]
     # query_structure = RNA.fold(str(analyzed_hits.query.seq))[0]
     # build stockholm like file for use in cm mohdel build
@@ -119,6 +130,10 @@ def _add_rsearch_align_scores2anal_hits(ahits, s_table):
     :param s_table:
     :return:
     """
+    ml.debug(fname())
+    # add result for query to the query
+    ahits.query.annotations['cmstat'] = s_table.iloc[0]
+
     for hit, (i, row) in zip(ahits.hits, s_table[1:].iterrows()):
         assert hit.subs[hit.ret_keys[0]].id == row.seq_name
         hit.subs[hit.ret_keys[0]].annotations['cmstat'] = row
@@ -129,7 +144,7 @@ def _infer_hits_cm(bit_sc, tr=-2.03):
     """ current best guess mcc 0.9
     best found threshold = -2.03
     """
-    # tr = -2.03
+    ml.debug(fname())
     pred = []
     for i in bit_sc:
         if i > tr:
@@ -141,6 +156,7 @@ def _infer_hits_cm(bit_sc, tr=-2.03):
 
 def _print_table_for_corelation(file, names, bits, eval, loc_score, alig_length,
                                 cm_msa_conservation, cm_bit_score, cm_msa_default, cm_bit_default):
+    ml.debug(fname())
     # write header
     file.write('table for correlation analysis cm_msa_default={} cm_bit_default={}\n'.format(
         cm_msa_default, cm_bit_default
@@ -161,7 +177,7 @@ def alignment_sequence_conservation(msa, gap_chars='-'):
     :param msa:
     :return:
     """
-
+    ml.debug(fname())
     column_cons = _alignment_column_conservation(msa, gap_chars=gap_chars)
 
     # todo continue here
@@ -183,6 +199,7 @@ def _alignment_column_conservation(msa, gap_chars='-'):
     :param gap_chars: characters denoting the gaps in alignment
     :return: list of ints
     """
+    ml.debug(fname())
     column_cons = []
     for i in range(msa.get_alignment_length()):
         al_col = msa[:, i]
@@ -197,6 +214,7 @@ def _alignment_column_conservation(msa, gap_chars='-'):
 def hit_cons_characteristic(sequence_hits):
     # use blast e-value score and locarna alignment score to select trusted alignments
     # can also use blast hit bits info
+    ml.debug(fname())
     bits = []
     eval = []
     align_score = []

@@ -31,11 +31,11 @@ from random import shuffle
 from subprocess import call
 from tempfile import mkstemp
 import itertools
+import logging
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
-import rna_blast_analyze.BR_core.add_usr_local_bin
 import rna_blast_analyze.BR_core.BA_support as BA_support
 from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
 from rna_blast_analyze.BR_core.alifold4all import compute_refold
@@ -46,29 +46,37 @@ from rna_blast_analyze.BR_core.locarna_clustal_like_2stockholm import parse_loca
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
 from rna_blast_analyze.BR_core.stockholm_parser import StockholmFeatureStock, trim_alignment_by_sequence
 from rna_blast_analyze.BR_core import BA_verify
+from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
+from rna_blast_analyze.BR_core.fname import fname
+
+ml = logging.getLogger(__name__)
+
+
+def write_clustal_like_file_with_anchors(fid, seq_name, cseq, my_anchors):
+    fid.write('CLUSTAL W --- Clustal like format for locarna\n')
+    fid.write('{} {}\n'.format(seq_name, cseq))
+    for anch in my_anchors:
+        fid.write('{} {}\n'.format(anch[0], anch[1]))
 
 
 def locarna_worker(pack):
+    ml.debug(fname())
     one_expanded_hit, query_seq, stockholm_features, locarna_params, anchor_length = pack
     # read the aligned segment and use it as anchors for locarna
     # run locarna in local mode and put the query sequence with the extended sequence with the blast aligned
     # segment as anchor
     blast_entry = one_expanded_hit.annotations['blast'][1]
 
-    anchors = LocarnaAnchor(to_rna(blast_entry.query),
-                            blast_entry.match,
-                            to_rna(blast_entry.sbjct),
-                            anchor_length=anchor_length)
+    anchors = LocarnaAnchor(
+        to_rna(blast_entry.query),
+        blast_entry.match,
+        to_rna(blast_entry.sbjct),
+        anchor_length=anchor_length
+    )
     # extracted temp is my query
 
     # access the locarna aligner directly
     # CARNA for some reason wount accept its own designed format, but, it will eat a pseudo-clustal
-    def write_clustal_like_file_with_anchors(fid, seq_name, cseq, my_anchors):
-        fid.write('CLUSTAL W --- Clustal like format for locarna\n')
-        fid.write('{} {}\n'.format(seq_name, cseq))
-        for anch in my_anchors:
-            fid.write('{} {}\n'.format(anch[0], anch[1]))
-
     fd1, locarna_file1 = mkstemp()
     with os.fdopen(fd1, 'w') as fp_locarna_file_1:
         ql1, ql2 = anchors.anchor_whole_seq(str(query_seq), 'query')
@@ -91,9 +99,11 @@ def locarna_worker(pack):
                                                  ('#A2', sl2.split()[0])
                                              ))
 
-    loc_out_file = run_locarna(locarna_file1,
-                               locarna_file2,
-                               locarna_params)
+    loc_out_file = run_locarna(
+        locarna_file1,
+        locarna_file2,
+        locarna_params
+    )
 
     # debug only
     # call('cat {} >> /tmp/all_locarna_files.txt'.format(loc_out_file), shell=True)
@@ -114,11 +124,13 @@ def locarna_worker(pack):
 
 
 def locarna_anchored_wrapper(args_inner, shared_list=None):
+    ml.debug(fname())
     ret_line, hits = locarna_anchored_wrapper_inner(args_inner, shared_list=shared_list)
     return ret_line
 
 
 def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
+    ml.debug(fname())
     if not shared_list:
         shared_list = []
 
@@ -128,11 +140,6 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
     stockholm_features = StockholmFeatureStock()
     stockholm_features.add_custom_parser_tags('GC', {'cA1': 'anchor letter tag',
                                                      'cA2': 'anchor number tag'})
-
-    if args_inner.logfile:
-        fid = open(args_inner.logfile, 'w')
-        fid.write('Program BA runned at: {}\n'.format(BA_support.print_time()))
-        BA_support.print_parameters(args_inner, fid)
 
     p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
     # this is done for each query
@@ -152,7 +159,22 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
         BA_verify.verify_query_blast(blast=bhp, query=query)
 
         # select all
-        all_short = BA_support.blast_hsps2list(bhp)
+        all_blast_hits = BA_support.blast_hsps2list(bhp)
+
+        # filter if needed
+        if args_inner.filter_by_eval is not None:
+            all_short = filter_by_eval(all_blast_hits, *args_inner.filter_by_eval)
+        elif args_inner.filter_by_bitscore is not None:
+            all_short = filter_by_bits(all_blast_hits, *args_inner.filter_by_bitscore)
+        else:
+            all_short = all_blast_hits
+
+        if len(all_short) == 0 and len(all_blast_hits) != 0:
+            print('The requested filter removed all BLAST hits. Nothing to do.')
+            exit(0)
+        elif len(all_short) == 0:
+            raise ValueError('No BLAST hits after filtering.')
+
         # expand hits according to query + 10 nucleotides +-
         shorts_expanded, _ = BA_support.expand_hits(
             all_short,
@@ -218,7 +240,6 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
         analyzed_hits.write_results_fasta(all_hits_fasta)
 
         # this part predicts homology - it is not truly part of repredict
-        print('infering homology')
         homology_prediction, homol_seqs = infer_homology(analyzed_hits=analyzed_hits, args=args_inner)
 
         # add homology prediction to the data
@@ -305,10 +326,6 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
 
         os.remove(all_hits_fasta)
 
-    if args_inner.logfile:
-        fid.write('ended at: {}'.format(BA_support.print_time()))
-        fid.close()
-
     return '\n'.join(ml_out_line), all_analyzed
 
 
@@ -321,7 +338,7 @@ def create_report_object_from_locarna(exp_hit, locarna_alig):
     :param locarna_alig:
     :return:
     """
-
+    ml.debug(fname())
     # chop alignment by seq
     query_ind = [i for i, j in enumerate(locarna_alig) if j.id == 'query']
     if len(query_ind) != 1:
@@ -331,14 +348,6 @@ def create_report_object_from_locarna(exp_hit, locarna_alig):
         str(locarna_alig[query_ind[0]].seq),
         structure_annotation='SS_cons'
     )
-
-    # select analyzed hit, drop query
-    # def _select_analyzed_hit(trimmed_locarna_alig):
-    #     for seq_in_alig in trimmed_locarna_alig.get_unalined_seqs(keep_letter_ann=True):
-    #         if seq_in_alig.id == exp_hit.id:
-    #             # aligned_subsequence = exp_hit
-    #             aligned_subsequence = seq_in_alig
-    #             return aligned_subsequence
 
     aligned_subsequence = BA_support.select_analyzed_aligned_hit(trimmed_locarna_alig, exp_hit.id)
 
@@ -351,7 +360,6 @@ def create_report_object_from_locarna(exp_hit, locarna_alig):
 
     # get the structure
     # by refold
-    # todo check where secondary structure is
     refold_structures = refold_stockholm(trimmed_locarna_alig, trimmed_locarna_alig.column_annotations['SS_cons'])
 
     # select refold structure for my seq
@@ -367,6 +375,7 @@ def create_report_object_from_locarna(exp_hit, locarna_alig):
     aligned_subsequence.annotations['sss'] = ['ss0']
 
     # prepare seq_record for subsequences
+    aligned_subsequence.description = ''
     hit = BA_support.Subsequences(exp_hit)
     sub_id = aligned_subsequence.id[:-2].split(':')[-1]
 
@@ -404,31 +413,33 @@ def run_locarna(query_file, subject_file, locarna_params):
     :param locarna_params:
     :return:
     """
+    ml.debug('running locarna')
     if not os.path.isfile(query_file):
         raise FileNotFoundError('Provided file {} was not found'.format(query_file))
     if not os.path.isfile(subject_file):
         raise FileNotFoundError('Provided file {} was not found'.format(subject_file))
 
-    r = call(
-        '{}locarna {} {} {} > {}'.format(
-            CONFIG.locarna_path,
-            locarna_params,
-            query_file,
-            subject_file,
-            subject_file + '.loc_out',
-        ),
-        shell=True
+    cmd = '{}locarna {} {} {} > {}'.format(
+        CONFIG.locarna_path,
+        locarna_params,
+        query_file,
+        subject_file,
+        subject_file + '.loc_out',
     )
+    ml.debug(cmd)
+    r = call(cmd, shell=True)
     if r:
-        raise ChildProcessError('call to locarna failed for files '
-                                'in1:{} in2:{} out:{}'.format(query_file,
-                                                              subject_file,
-                                                              subject_file + '.loc_out'))
+        msgfail = 'call to locarna failed for files in1:{} in2:{} out:{}'.format(
+            query_file, subject_file, subject_file + '.loc_out'
+        )
+        ml.error(msgfail)
+        raise ChildProcessError(msgfail)
 
     return subject_file + '.loc_out'
 
 
 def write_locarna_anchors_with_min_length(match_line, min_anchor_length=1):
+    ml.debug(fname())
     h1 = []
     h2 = []
     pa = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
@@ -464,7 +475,7 @@ def write_locarna_anchors_with_min_length(match_line, min_anchor_length=1):
 
 
 def squeeze_locarna_anchors_to_aligned_seq(aligned_seq, anchor_line1, anchor_line2):
-
+    ml.debug(fname())
     out_seq = []
     out_al1 = []
     out_al2 = []
@@ -567,6 +578,7 @@ def refold_stockholm(stockholm_alig, consensus_structure):
     :param consensus_structure:
     :return:
     """
+    ml.debug(fname())
     # convert to clustal alignment
     fd, clust_tempfile = mkstemp()
     with os.fdopen(fd, 'w') as f:

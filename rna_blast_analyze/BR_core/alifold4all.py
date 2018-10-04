@@ -1,31 +1,40 @@
 import os
+import logging
 from subprocess import call
 from tempfile import mkstemp
 
 from rna_blast_analyze.BR_core.config import CONFIG
+from rna_blast_analyze.BR_core.fname import fname
+
+ml = logging.getLogger(__name__)
 
 
 def compute_clustalo_clasic(file, clustalo_params=''):
+    ml.info('Running clustalo.')
+    ml.debug(fname())
 
     fd, out_path = mkstemp()
     os.close(fd)
     FNULL = open(os.devnull, 'w')
 
-    print('compute_clustalo_clasic infile {} outfile {}'.format(file, out_path))
-
     try:
-        k = call(
-            '{}clustalo {} -i {} > {}'.format(
-                CONFIG.clustal_path,
-                clustalo_params,
-                file,
-                out_path
-            ),
-            shell=True,
-            stdout=FNULL
+        cmd = '{}clustalo {} -i {} > {}'.format(
+            CONFIG.clustal_path,
+            clustalo_params,
+            file,
+            out_path
         )
-        if k:
-            raise ChildProcessError('call to clustalo failed for files: in: {}, out: {}'.format(file, out_path))
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(cmd, shell=True, stdout=FNULL)
+
+        if r:
+            msgfail = 'call to clustalo failed for files: in: {}, out: {}'.format(file, out_path)
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
     finally:
         FNULL.close()
 
@@ -33,23 +42,31 @@ def compute_clustalo_clasic(file, clustalo_params=''):
 
 
 def compute_alifold(msa_file, alifold_params=''):
-
+    ml.info('Running RNAalifold.')
+    ml.debug(fname())
     fd, out_path = mkstemp()
     os.close(fd)
 
-    k = call(
-        '{}RNAalifold --noPS -f C {} < {} > {}'.format(
+    with open(os.devnull, 'w') as FNULL:
+        cmd = '{}RNAalifold --noPS -f C {} < {} > {}'.format(
             CONFIG.viennarna_path,
             alifold_params,
             msa_file,
             out_path
-        ),
-        shell=True
-    )
-    if k:
-        raise ChildProcessError('RNAalifold failed for files: in: {}, out {}'.format(msa_file, out_path))
+        )
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(cmd, shell=True, stderr=FNULL)
 
-    return out_path
+        if r:
+            msgfail = 'RNAalifold failed for files: in: {}, out {}'.format(msa_file, out_path)
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
+
+        return out_path
 
 
 def compute_refold(alig_file, cons_file):
@@ -59,35 +76,40 @@ def compute_refold(alig_file, cons_file):
     :param cons_file: file with consensus structure in alifold format
     :return:
     """
+    ml.debug(fname())
     fd, out_path = mkstemp()
     os.close(fd)
-    k = call(
-        '{}refold.pl {} {} > {}'.format(
-            CONFIG.refold_path,
-            alig_file,
-            cons_file,
-            out_path
-        ),
-        shell=True
+    cmd = '{}refold.pl {} {} > {}'.format(
+        CONFIG.refold_path,
+        alig_file,
+        cons_file,
+        out_path
     )
+    ml.debug(cmd)
+    k = call(cmd, shell=True)
     if k:
-        raise ChildProcessError('refold.pl failed for files in: {}, {}, out: {}'.format(alig_file, cons_file, out_path))
+        msgfail = 'refold.pl failed for files in: {}, {}, out: {}'.format(alig_file, cons_file, out_path)
+        ml.error(msgfail)
+        ml.error(cmd)
+        raise ChildProcessError(msgfail)
 
     return out_path
 
 
 def compute_constrained_prediction(constrained_file):
-    # constrained prediction je funkcni
+    ml.debug(fname())
     fd, outfile = mkstemp()
     os.close(fd)
-    r = call(
-        '{}RNAfold -C --noPS < {} > {}'.format(
-            CONFIG.viennarna_path,
-            constrained_file,
-            outfile
-        ),
-        shell=True
+    cmd = '{}RNAfold -C --noPS < {} > {}'.format(
+        CONFIG.viennarna_path,
+        constrained_file,
+        outfile
     )
+    ml.debug(cmd)
+    r = call(cmd, shell=True)
     if r:
-        raise ChildProcessError('call to RNAfold -C failed')
+        msgfail = 'call to RNAfold -C failed'
+        ml.error(msgfail)
+        ml.error(cmd)
+        raise ChildProcessError(msgfail)
     return outfile

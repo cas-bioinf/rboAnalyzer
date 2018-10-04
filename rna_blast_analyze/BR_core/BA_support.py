@@ -1,11 +1,12 @@
 import datetime
 import locale
+import logging
 import os
 import re
 import shutil
 from io import StringIO
 from random import choice, shuffle
-from subprocess import call, STDOUT, check_output, CalledProcessError
+from subprocess import call, check_output, CalledProcessError
 from tempfile import mkstemp, gettempdir
 from warnings import warn
 
@@ -16,12 +17,15 @@ from Bio.Blast import NCBIXML
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt as blast_minimal_parser
 from rna_blast_analyze.BR_core.config import CONFIG
+from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.parse_accession import accession_regex
+from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt as blast_minimal_parser
 
 # idiotic matplotlib
 locale.setlocale(locale.LC_ALL, 'C')
+
+ml = logging.getLogger(__name__)
 
 
 def write_fasta_from_list_of_seqrecords(f, seq_list):
@@ -40,6 +44,7 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
     :param mfold: mfold parameters (P, W, M)
     :returns: list of SeqRecord objects wit suboptimal structures as letter_annotations in them
     """
+    ml.info('Runing hybrid-ss-min')
     P = mfold[0]
     W = mfold[1]
     M = mfold[2]
@@ -55,20 +60,24 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
     done = False
     while repeat < 5:
         try:
-            rt = call(
-                [
-                    '{}hybrid-ss-min'.format(CONFIG.mfold_path),
-                    '--suffix=DAT',
-                    '--NA=RNA',
-                    '--noisolate',
-                    '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
-                    in_path
-                ],
-                # cwd=''.join(os.path.join(os.path.split(in_path)[:-1])),
-                cwd=os.path.dirname(in_path),
-                stdout=FNULL,
-                stderr=STDOUT
-            )
+            cmd = [
+                '{}hybrid-ss-min'.format(CONFIG.mfold_path),
+                '--suffix=DAT',
+                '--NA=RNA',
+                '--noisolate',
+                '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
+                in_path
+            ]
+            ml.debug(cmd)
+            if ml.getEffectiveLevel() == 10:
+                rt = call(cmd, cwd=os.path.dirname(in_path))
+            else:
+                rt = call(
+                    cmd,
+                    cwd=os.path.dirname(in_path),
+                    stdout=FNULL,
+                    stderr=FNULL
+                )
 
             if rt:
                 raise ChildProcessError('Execution of hybrid-ss-min failed')
@@ -86,13 +95,15 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
         except ChildProcessError:
             # try again
             repeat += 1
-            warn('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
+            ml.warn('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
 
     if repeat >= 5 and not done:
-        warn('There is an issue with hybrid-ss-min, that it does not work for certain combination of energies,'
-             ' window parameters and desired number of structures.'
-             'The issue also appears to be related to exact order of sequences in the input file'
-             'we well try to resolve this by predicting each sequence separetly')
+        ml.warn(
+            'There is an issue with hybrid-ss-min, that it does not work for certain combination of energies,'
+            ' window parameters and desired number of structures.'
+            'The issue also appears to be related to exact order of sequences in the input file'
+            'we well try to resolve this by predicting each sequence separetly'
+        )
 
         repeat = 1
         # get the order of file
@@ -103,7 +114,6 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
 
         while repeat < 5:
             try:
-
                 # shuffle input file
                 # the shuffle operates directly on the list, it doesnt return anything
                 shuff_fasta = fasta_file.copy()
@@ -114,20 +124,24 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
                 with os.fdopen(fd, 'w') as fp:
                     for r in shuff_fasta:
                         fp.write('>{}\n{}\n'.format(r.id, str(r.seq)))
-
-                rt = call(
-                    [
+                cmd2 = [
                         '{}hybrid-ss-min'.format(CONFIG.mfold_path),
                         '--suffix=DAT',
                         '--NA=RNA',
                         '--noisolate',
                         '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
                         retry_path
-                    ],
-                    cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])),
-                    stdout=FNULL,
-                    stderr=STDOUT
-                )
+                    ]
+                ml.debug(cmd2)
+                if ml.getEffectiveLevel() == 10:
+                    rt = call(cmd2, cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])))
+                else:
+                    rt = call(
+                        cmd2,
+                        cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])),
+                        stdout=FNULL,
+                        stderr=FNULL
+                    )
 
                 if rt:
                     print('exit code of child process: {}'.format(rt))
@@ -154,7 +168,7 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
                 # try again
                 repeat += 1
                 # adjust the max amount of produced structures
-                warn('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
+                ml.warn('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
             finally:
                 if retry_path:
                     for ext in ['.run', '.plot', '.dG', '.ct', '.ann', '']:
@@ -162,39 +176,49 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
                             rpath = retry_path + ext
                             os.remove(rpath.strip())
                         except FileNotFoundError:
-                            warn('cannot remove file: {}, file not found'.format(retry_path))
+                            ml.warn('cannot remove file: {}, file not found'.format(retry_path))
                         except OSError:
-                            warn('cannot remove file: {}, file is directory'.format(retry_path))
+                            ml.warn('cannot remove file: {}, file is directory'.format(retry_path))
 
         if not done:
             # make last try: predict one by one
-            print('Last try to predict structures with hybrid-ss-min')
+            ml.warn('Last try to predict structures with hybrid-ss-min')
             suboptimals = []
             for seq in fasta_file:
 
                 fd, retry_path = mkstemp()
                 with os.fdopen(fd, 'w') as fid:
                     fid.write('>{}\n{}\n'.format(seq.id, str(seq.seq)))
-
-                rt = call(
-                    [
-                        '{}hybrid-ss-min'.format(CONFIG.mfold_path),
-                        '--suffix=DAT',
-                        '--NA=RNA',
-                        '--noisolate',
-                        '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
-                        retry_path
-                    ],
-                    cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])),
-                    stdout=FNULL,
-                    stderr=STDOUT
-                )
+                cmd3 = [
+                    '{}hybrid-ss-min'.format(CONFIG.mfold_path),
+                    '--suffix=DAT',
+                    '--NA=RNA',
+                    '--noisolate',
+                    '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
+                    retry_path
+                ]
+                ml.debug(cmd3)
+                if ml.getEffectiveLevel() == 10:
+                    rt = call(cmd3, cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])))
+                else:
+                    rt = call(
+                        cmd3,
+                        cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])),
+                        stdout=FNULL,
+                        stderr=FNULL
+                    )
 
                 if rt:
-                    raise ChildProcessError('Execution of hybrid-ss-min failed')
+                    msgfail = 'Execution of hybrid-ss-min failed'
+                    ml.error(msgfail)
+                    ml.error(cmd3)
+                    raise ChildProcessError(msgfail)
 
                 if not os.path.isfile(retry_path + '.ct'):
-                    raise ChildProcessError('Execution of hybrid-ss-min failed - not output file')
+                    msgfail = 'Execution of hybrid-ss-min failed - not output file'
+                    ml.error(msgfail)
+                    ml.error(cmd3)
+                    raise ChildProcessError(msgfail)
 
                 with open(retry_path + '.ct', 'r') as sout:
                     suboptimals.append(ct2db(sout)[0])
@@ -212,7 +236,9 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
             pass
         else:
             FNULL.close()
-            raise Exception('hybrid-ss-failed with unexpected behaviour, please contact developers')
+            msgfail = 'hybrid-ss-failed with unexpected behaviour, please contact developers'
+            ml.critical(msgfail)
+            raise Exception(msgfail)
 
     # remove files that hybrid-ss-min created
     # the source file is removed elsewhere
@@ -230,16 +256,18 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
 
 
 def ct2db(f, energy_txt='dG'):
-    """read ct Zuker file
-    there are two versions, first, in ct file there in principle can be pseudoknots encoded
-    and simple db notation cannot handle them
-    second, when pseudoknots are present, wee need to use different king of brackets
-    also, there is WUSS notation for different types of pairs present
-    so cogent package is weird, there are references, that appears out of nowhere, and i don't even know
-    if the code has worked in the first place
+    """
+    read ct Zuker file
+        there are two versions,
+        first, in ct file there in principle can be pseudoknots encoded and simple db notation cannot handle them
+        second, when pseudoknots are present, wee need to use different king of brackets
+        also, there is WUSS notation for different types of pairs present
     :returns list of Seq Record objects,
-    each Seq Record object contains suboptimal structures in its 'letter_annotations'
-    in dict with keys termed ss1 ss2 ..., the list of keys to letter_annotations is in annotations under the key 'sss'"""
+        each Seq Record object contains suboptimal structures in its 'letter_annotations'
+        in dict with keys termed ss1 ss2 ...,
+        the list of keys to letter_annotations is in annotations under the key 'sss'
+    """
+    ml.debug(fname())
     # if not isinstance(f, 'file'):
     #     print('accepts open handle to a file')
     #     raise FileNotFoundError
@@ -327,7 +355,7 @@ def rc_hits_2_rna(seqs, strand=None):
     also turn all seqs in rna (if some of them was in dna) (the transcribe method)
     :returns list of Seq objects
     """
-
+    ml.debug(fname())
     # sanity check
     if strand:
         if len(seqs) != len(strand):
@@ -379,6 +407,8 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
     Two temporary files are used in this call and are deleted at final stage
     :return list of SeqRecord objects (parsed fasta file)
     """
+    ml.info('Retrieving sequence neighborhoods for blast hits.')
+    ml.debug(fname())
     ext_try = ['nsd', 'nhr', 'nog', 'nsi', 'nin']
     if not os.path.isfile(blast_db + '.nal'):
         for ext in ext_try:
@@ -395,14 +425,16 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
     for i, hit in enumerate(hits):
         # +1 here because blastdbcmd counts sequences from 1
         if hit[1].sbjct_end < hit[1].sbjct_start:
-            start = hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end) + 1 - extra
-            end = hit[1].sbjct_start + hit[1].query_start + extra
+            # this is hit to minus strand
+            start = hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end) - extra
+            end = hit[1].sbjct_start + hit[1].query_start + extra - 1
             strand.append(-1)
             d = {'query_start': hit[1].sbjct_end, 'query_end': hit[1].sbjct_start,
-                 'extended_start': hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end) + 1,
-                 'extended_end': hit[1].sbjct_start + hit[1].query_start,
+                 'extended_start': hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end),
+                 'extended_end': hit[1].sbjct_start + hit[1].query_start - 1,
                  'strand': -1}
         else:
+            # this is hit to plus strand
             start = hit[1].sbjct_start - hit[1].query_start + 1 - extra
             end = hit[1].sbjct_end + _positive_index(query_length - hit[1].query_end) + extra
             strand.append(1)
@@ -456,12 +488,15 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
             '-out',
             blast_tempfile
         ]
-
+    ml.debug(cmd)
     r_val = call(
         cmd
     )
     if r_val:
-        ChildProcessError('Unable to run blastdbcmd command, please check its availability')
+        msgfail = 'Unable to run blastdbcmd command, please check its availability.'
+        ml.error(msgfail)
+        ml.error(cmd)
+        ChildProcessError(msgfail)
 
     # records at minus are not in rc
     with open(blast_tempfile, 'r') as bf:
@@ -476,7 +511,7 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
             # repair possible extended end violation
             # relevant to extended_end and super_end ? or super_end only
             if loc[i]['super_start'] + len(parsed_record.seq) - 1 < loc[i]['super_end']:
-                print(
+                ml.warn(
                     'Sequence retrieved from database based on hit {} is shorther then expected.'
                     'This either means database difference or that the hit is located near the end of the database '
                     'and could not be extended as requested. Please note that when examining the results.'
@@ -486,7 +521,7 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
                 parsed_record.annotations['trimmed_end'] = True
 
                 if loc[i]['super_start'] + len(parsed_record.seq) - 1 < loc[i]['extended_end']:
-                    print(
+                    ml.warn(
                         'Retrieved sequence is shorter even for simple extention by unaligned length of query. '
                         'We use whole avalible sequence as deposited in the database.'
                     )
@@ -499,10 +534,10 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
         os.remove(blast_tempfile)
 
     if len(exp_hits) != len(hits):
-        raise LookupError(
-            'Some IDs were not found in provided BLAST database.'
-            ' Please update the database or remove the hits.'
-        )
+        msgfail = 'Some IDs were not found in provided BLAST database.' \
+                  ' Please update the database or remove the hits.'
+        ml.error(msgfail)
+        raise LookupError(msgfail)
     return exp_hits, strand
 
 
@@ -651,55 +686,13 @@ def desanitize_fasta_names_in_seqrec_list(seqrec_list, used_dict):
     return reverted
 
 
-def run_mlocarna(file_name, mlocarna_params='--sequ-local 0 --struct-local 0 --free-endgaps --stockholm'):
-    """
-    possible settings:
-    struct_local : seq_local
-    1 : 1   - breaks sequences and joins them !!!! DO NOT USE
-    1 : 0   - tries to align globally, end to end - lot of gaps
-    0 : 1   - wanted alignment - unaligned ends of input sequences are trimmed in output alignment
-    0 : 0   - wanted alignment - returns whole alignment including unaligned ends - also not good - tries to align
-                ends of sequences together - then i have to trimm alignemnt and check if structure is correct
-                which it isn't
-
-    return locarna output directory
-    :param file_name:
-    :param mlocarna_params: mlocarna_params
-    :return:
-    """
-
-    FNULL = open(os.devnull, 'w')
-
-    if not os.path.isfile(file_name):
-        raise FileNotFoundError('Provided file {} was not found'.format(file_name))
-    # if not os.path.isfile(subject_file):
-    #     raise FileNotFoundError('Provided file {} was not found'.format(subject_file))
-
-    r = call(
-        '{}mlocarna {} --tgtdir {} {}'.format(
-            CONFIG.locarna_path,
-            mlocarna_params,
-            file_name + 'out',
-            file_name
-        ),
-        shell=True, stdout=FNULL
-    )
-
-    FNULL.close()
-
-    if r:
-        raise ChildProcessError('call to mlocarna failed for files in:{}'.format(file_name))
-
-    return file_name + 'out'
-
-
 def select_sequences_from_similarity_rec(dist_mat: np.ndarray, sim_threshold_percent=90) -> list:
     """
     :param dist_mat: distmat table, by default obtained from read_clustal_distmat_file, values in percent
     :param sim_threshold_percent: threshold for similarity in percent
     :return:
     """
-
+    ml.debug(fname())
     # dists = np.triu(dist_mat.as_matrix(), 1)          # removes unwanted similarities
     if dist_mat is None:
         return 0,
@@ -732,23 +725,27 @@ def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
     :param muscle_params:
     :return:
     """
+    ml.info('Running muscle.')
+    ml.debug(fname())
     if out_file:
         cl_file = out_file
     else:
         cl_fd, cl_file = mkstemp()
         os.close(cl_fd)
 
-    r = call(
-        '{}muscle -clwstrict -seqtype rna -out {} -in {} {} -quiet'.format(
-            CONFIG.muscle_path,
-            cl_file,
-            fasta_file,
-            muscle_params
-        ),
-        shell=True
+    cmd = '{}muscle -clwstrict -seqtype rna -out {} -in {} {} -quiet'.format(
+        CONFIG.muscle_path,
+        cl_file,
+        fasta_file,
+        muscle_params
     )
+    ml.debug(cmd)
+    r = call(cmd, shell=True)
     if r:
-        raise ChildProcessError('call to muscle failed')
+        msgfail = 'call to muscle failed'
+        ml.error(msgfail)
+        ml.error(cmd)
+        raise ChildProcessError(msgfail)
 
     if reorder:
         # reorder sequences acording to input file
@@ -770,34 +767,8 @@ def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
     return cl_file
 
 
-def run_mafft(fasta_file, mafft_mode='qinsi', out_file=None, mafft_params='', thread=1):
-    avalible_modes = {'qinsi', 'linsi', 'ginsi', 'einsi', 'fftnsi', 'fftns', 'nwns', 'nwnsi', 'profile'}
-    if mafft_mode not in avalible_modes:
-        raise Exception('MAFFT mode can be only {}, not {}'.format(avalible_modes, mafft_mode))
-
-    if out_file:
-        cl_file = out_file
-    else:
-        cl_fd, cl_file = mkstemp()
-        os.close(cl_fd)
-
-    r = call(
-        '{}mafft-{} --clustalout {} --thread {} {} > {}'.format(
-            CONFIG.mafft_path,
-            mafft_mode,
-            mafft_params,
-            thread,
-            fasta_file,
-            cl_file
-        ),
-        shell=True
-    )
-    if r:
-        raise ChildProcessError('call to mafft failed for files {} {}'.format(fasta_file, cl_file))
-    return cl_file
-
-
 def RNAfold(sequence):
+    ml.debug(fname())
     r = check_output(
         [
             '{}RNAfold'.format(CONFIG.viennarna_path),
@@ -829,6 +800,7 @@ def select_analyzed_aligned_hit(one_alig, exp_hit_id):
 
 
 def rebuild_structures_output_from_pred(reference_sequences_list, predicted_structures_list, method=None):
+    ml.debug(fname())
     structuresids = [seq.id for seq in predicted_structures_list]
     structures_list = []
     for seq in reference_sequences_list:
@@ -863,6 +835,7 @@ def blast_in(blast_in, b='guess'):
     gueses blast format
     :returns list of SearchIO objects, one set of hits per per query sequence per field
     """
+    ml.debug(fname())
     multiq = []
     with open(blast_in, 'r') as f:
         if b == 'guess':
@@ -872,9 +845,11 @@ def blast_in(blast_in, b='guess'):
             if re.search('^BLASTN \d+\.\d+\.\d+',l):
                 # blast object prob plaintext
                 b_type = 'plain'
+                ml.info('Infered BLAST format: txt.')
             elif re.search('<\?xml version', l):
                 # run xml parser
                 b_type = 'xml'
+                ml.info('Infered BLAST format: xml.')
             else:
                 print('could not guess the blast format, preferred format is NCBI xml')
                 raise AssertionError
@@ -908,6 +883,7 @@ def run_rnaplot(seq, structure=None, format='svg', outfile=None):
     :param structure:
     :return:
     """
+    ml.debug(fname())
     if structure is None:
         sequence = str(seq.seq)
         structure = seq.letter_annotations['ss0']
@@ -935,22 +911,21 @@ def run_rnaplot(seq, structure=None, format='svg', outfile=None):
             structure
         ))
 
-    r = call(
-        '{}RNAplot --output-format={} < {}'.format(
-            CONFIG.viennarna_path,
-            format,
-            tempfile
-        ),
-        shell=True
+    cmd = '{}RNAplot --output-format={} < {}'.format(
+        CONFIG.viennarna_path,
+        format,
+        tempfile
     )
+    ml.debug(cmd)
+    r = call(cmd, shell=True)
     if r:
-        print('Call to RNAplot failed')
-        print('cmd: {}'.format('{}RNAplot --output-format={} < {}'.format(CONFIG.viennarna_path, format, tempfile)))
+        msgfail = 'Call to RNAplot failed'
+        ml.error(msgfail)
+        ml.error(cmd)
         os.chdir(currdirr)
         raise ChildProcessError
 
     # output file is name of the sequence (in this case name of the file) + "_ss." + chosen format
-
     os.remove(tempfile)
 
     plot_output_file = os.path.join(tmpdir, rnaname + '_ss.' + format)
@@ -1159,6 +1134,7 @@ def non_redundant_seqs(sequences: list) -> list:
     :param sequences:
     :return:
     """
+    ml.debug(fname())
     nr_seqs = set()
     out = []
     for seq in sequences:

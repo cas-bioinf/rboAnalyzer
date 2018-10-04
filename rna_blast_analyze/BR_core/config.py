@@ -1,17 +1,15 @@
 import configparser
 import os
-import re
 from distutils.util import strtobool
-from subprocess import check_output, CalledProcessError, STDOUT
+import logging
+ml = logging.getLogger(__name__)
 # Beware of lazy or conditional import with config!!!! It would overwrite custom config file.
 
 
 class tools_paths(object):
     def __init__(self, config_file):
         self.tool_paths = {
-            'refold': os.path.abspath(
-                os.path.dirname(__file__) + '/../3rd_party_source/refold/'
-            ) + os.path.sep,
+            'refold': '',
             'infernal': '',
             'muscle': '',
             'clustal': '',
@@ -25,8 +23,12 @@ class tools_paths(object):
             'turbofold': '',
             'rnashapes': '',
             'rapidshapes': '',
-
         }
+
+        try:
+            dp = os.environ['DATAPATH']
+        except KeyError:
+            dp = None
 
         self.data_paths = {
             'rsearch_ribosum': os.path.abspath(
@@ -38,7 +40,8 @@ class tools_paths(object):
             'rfam_url': 'ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/Rfam.cm.gz',
             'html_template_dir': os.path.abspath(
                 os.path.dirname(__file__) + '/output'
-            )
+            ),
+            'rnastructure_datapath': dp
         }
 
         self.ssh = {
@@ -48,12 +51,13 @@ class tools_paths(object):
         }
 
         if config_file:
-            conf_file = config_file
+            self.conf_file = config_file
         else:
-            conf_file = os.path.sep.join(__file__.split(os.path.sep)[:-1] + ['config.txt'])
+            self.conf_file = os.path.sep.join(__file__.split(os.path.sep)[:-1] + ['config.txt'])
 
+        ml.info('Loading {}'.format(self.conf_file))
         config = configparser.ConfigParser()
-        config.read(conf_file)
+        config.read(self.conf_file)
 
         if 'TOOL_PATHS' in config:
             for key in config['TOOL_PATHS'].keys():
@@ -73,16 +77,26 @@ class tools_paths(object):
             for key in config['DATA'].keys():
                 self.data_paths[key] = config['DATA'][key]
 
+        self.config_obj = config
+
+        ml.debug('Current configuration: {}'.format(self))
+
     def override(self, other):
+        ml.info('Overriding previous configuration.')
         self.differ(self.tool_paths, other.tool_paths)
         self.differ(self.ssh, other.ssh)
         self.differ(self.data_paths, other.data_paths)
+        ml.debug('New configuration: {}'.format(self))
 
     @staticmethod
     def differ(a, b):
         for key in a.keys():
             if a[key] != b[key]:
                 a[key] = b[key]
+
+    @property
+    def rnastructure_datapath(self):
+        return self.data_paths['rnastructure_datapath']
 
     @property
     def refold_path(self):
@@ -168,6 +182,8 @@ class tools_paths(object):
     def html_template_dir(self):
         return self.data_paths['html_template_dir']
 
+    def __repr__(self):
+        return repr(vars(self))
 
 # load defaults
 CONFIG = tools_paths(config_file=None)
@@ -177,6 +193,4 @@ if __name__ == '__main__':
     for s in CC.tool_paths.values():
         print(s)
     for s in CC.ssh.values():
-        print(s)
-    for s in CC.rfam.values():
         print(s)

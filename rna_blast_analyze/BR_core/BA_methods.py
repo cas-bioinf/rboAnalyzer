@@ -304,11 +304,13 @@ def to_tab_delim_header(input_args):
     return '\t'.join(B)
 
 
-def remove_uid_internal_descriptor(analyzed_hits):
+def cleanup_sequence_id(analyzed_hits):
     out = analyzed_hits.copy()
     out.hits = HitList()
     for hit in analyzed_hits.hits:
         nhid = re.sub('uid:\d+\|', '', hit.subs[hit.ret_keys[0]].id)
+        sp = nhid.split(':')
+        nhid = ':'.join(sp[:-1]) + ':{}-{}{}'.format(hit.best_start, hit.best_end, nhid[-2:])
         hit.subs[hit.ret_keys[0]].id = nhid
         hit.source.id = re.sub('uid:\d+\|', '', hit.source.id)
         out.hits.append(hit)

@@ -6,7 +6,7 @@ import os
 import unittest
 from rna_blast_analyze.BR_core.config import CONFIG, tools_paths
 
-cwd = os.curdir
+fwd = os.path.dirname(__file__)
 
 
 class TestConfig(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestConfig(unittest.TestCase):
     def test_config_override(self):
         rfam_dir = '/test/test/Documents/rfamdb/'
         self.assertNotEqual(CONFIG.rfam_dir, rfam_dir)
-        CONFIG.override(tools_paths(os.path.join(cwd, 'test_data', 'config_test.txt')))
+        CONFIG.override(tools_paths(os.path.join(fwd, 'test_data', 'config_test.txt')))
         self.assertEqual(CONFIG.rfam_dir, rfam_dir)
 
 

@@ -8,6 +8,10 @@ import re
 
 from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA
 from Bio.Blast import Record
+from rna_blast_analyze.BR_core.fname import fname
+
+
+ml = logging.getLogger(__name__)
 
 
 def f_parser():
@@ -36,6 +40,7 @@ def blast_parse_txt(handle):
     :param handle:
     :return:
     """
+    ml.info(fname())
     lead_info = _read_leading_info(handle)
     trail_info = _read_trailing_info(handle)
     lead_info.update(trail_info)
@@ -177,7 +182,7 @@ def _parse_tail_section(tail_text):
         del ft
         del pat
     except AssertionError:
-        logging.debug('parsing data: matrix - failed')
+        ml.debug('parsing data: matrix - failed')
     except:
         raise
 
@@ -196,7 +201,7 @@ def _parse_tail_section(tail_text):
         del g1
         del g2
     except AssertionError:
-        logging.debug('parsing data: gap_penalties - failed')
+        ml.debug('parsing data: gap_penalties - failed')
     except:
         raise
 
@@ -223,7 +228,7 @@ def _parse_tail_section(tail_text):
         del p1r, p2r
 
     except AssertionError:
-        logging.debug('parsing data: ka_params - failed')
+        ml.debug('parsing data: ka_params - failed')
     except:
         raise
 
@@ -251,7 +256,7 @@ def _parse_tail_section(tail_text):
             del m
             del ft
         except AssertionError:
-            logging.debug("parsing data: {} - failed".format(key))
+            ml.debug("parsing data: {} - failed".format(key))
         except:
             raise
     del bat
@@ -273,7 +278,7 @@ def _parse_tail_section(tail_text):
             data[key] = int(ft[-1].split(':')[-1].strip())  # try split with ":" it may not be necessary
 
         except AssertionError:
-            logging.debug("parsing data: {} - failed".format(key))
+            ml.debug("parsing data: {} - failed".format(key))
         except:
             raise
 
@@ -453,7 +458,7 @@ def read_aligns(f, R):
                     break
 
                 else:
-                    logging.debug("line ignored pos {} - {}".format(f.tell(), txt))
+                    ml.debug("line ignored pos {} - {}".format(f.tell(), txt))
 
                 # read next line
                 txt = bread(f)
@@ -598,7 +603,7 @@ def _features_flanking_strict(f, txt):
         elif re.search("at 3' side:", txt):
             flanks[1] = _parse_features_flank(txt)
         else:
-            logging.debug("flanking feature parsing failed for line: {}".format(txt))
+            ml.debug("flanking feature parsing failed for line: {}".format(txt))
 
         txt = f.readline()
     return flanks
@@ -612,7 +617,7 @@ def _features_flanking(f, txt):
         elif re.search("at 3' side:", txt):
             flanks.append(txt)
         else:
-            logging.debug("flanking feature parsing failed for line: {}".format(txt))
+            ml.debug("flanking feature parsing failed for line: {}".format(txt))
 
         txt = f.readline()
     return flanks

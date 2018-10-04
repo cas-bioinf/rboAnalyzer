@@ -2,7 +2,6 @@ import os
 import json
 import unittest
 import tempfile
-import filecmp
 import gzip
 
 from rna_blast_analyze.BR_core import convert_classes

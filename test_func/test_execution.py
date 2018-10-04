@@ -19,16 +19,22 @@ from test_func.pseudoargs_class import Pseudoargs
 # test locarna
 # test LoSe
 
-cwd = os.getcwd()
-test_dir = 'test_data'
+fwd = os.path.dirname(__file__)
+test_dir = 'test_func'
+test_data_dir = 'test_data'
+blast_in = os.path.join(fwd, test_data_dir, 'RF00001_short.blastout')
+blast_query = os.path.join(fwd, test_data_dir, 'RF00001.fasta')
+blast_db = os.path.join(fwd, test_data_dir, 'blastdb', 'RF00001-art.blastdb')
+root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+base_script = ['python3', '-m', 'rna_blast_analyze.BA']
 
 
 class TestExecution(unittest.TestCase):
     def setUp(self):
         self.args = Pseudoargs(
-            os.path.join(cwd, test_dir, 'RF00001.fasta'),
-            os.path.join(cwd, test_dir, 'RF00001.blastout'),
-            os.path.join(cwd, test_dir, 'blastdb', 'RF00001-art.blastdb'),
+            blast_query,
+            blast_in,
+            blast_db,
             b_type='plain',
             prediction_method=['rnafold'],
             blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$'
@@ -174,13 +180,12 @@ class TestDirectExecution(unittest.TestCase):
         os.close(ff)
         self.json = json_file
 
-    def test_BA_one_pred_method(self):
-        a = [
-            'python3',
-            '../rna_blast_analyze/BA.py',
-            '-blast_in', os.path.join(cwd, test_dir, 'RF00001.blastout'),
-            '-blast_query', os.path.join(cwd, test_dir, 'RF00001.fasta'),
-            '-blast_db', os.path.join(cwd, test_dir, 'blastdb', 'RF00001-art.blastdb'),
+    def test_BA_one_pred_method_simple(self):
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
+            '--mode', 'simple',
             '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
             '--b_type', 'plain',
             '--html', self.html,
@@ -189,7 +194,75 @@ class TestDirectExecution(unittest.TestCase):
             '--pandas_dump', self.pandas_dump,
             '--prediction_method', 'rnafold'
         ]
-        bb = call(a)
+        bb = call(a, cwd=root)
+        self.assertEqual(bb, 0)
+
+        t = tab_output_equal(
+            csvfile=self.csv,
+            jsonfile=self.json,
+            pdfile=self.pandas_dump,
+        )
+        self.assertTrue(t)
+
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
+            ],
+            ''
+        )
+
+    def test_BA_one_pred_method_locarna(self):
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
+            '--mode', 'locarna',
+            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--b_type', 'plain',
+            '--html', self.html,
+            '--json', self.json,
+            '--csv', self.csv,
+            '--pandas_dump', self.pandas_dump,
+            '--prediction_method', 'rnafold'
+        ]
+        bb = call(a, cwd=root)
+        self.assertEqual(bb, 0)
+
+        t = tab_output_equal(
+            csvfile=self.csv,
+            jsonfile=self.json,
+            pdfile=self.pandas_dump,
+        )
+        self.assertTrue(t)
+
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
+            ],
+            ''
+        )
+
+    def test_BA_one_pred_method_joined(self):
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
+            '--mode', 'joined',
+            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--b_type', 'plain',
+            '--html', self.html,
+            '--json', self.json,
+            '--csv', self.csv,
+            '--pandas_dump', self.pandas_dump,
+            '--prediction_method', 'rnafold'
+        ]
+        bb = call(a, cwd=root)
         self.assertEqual(bb, 0)
 
         t = tab_output_equal(
@@ -210,12 +283,10 @@ class TestDirectExecution(unittest.TestCase):
         )
 
     def test_BA(self):
-        a = [
-            'python3',
-            '../rna_blast_analyze/BA.py',
-            '-blast_in', os.path.join(cwd, test_dir, 'RF00001.blastout'),
-            '-blast_query', os.path.join(cwd, test_dir, 'RF00001.fasta'),
-            '-blast_db', os.path.join(cwd, test_dir, 'blastdb', 'RF00001-art.blastdb'),
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
             '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
             '--b_type', 'plain',
             '--prediction_method', 'rnafold', 'subopt_fold_query',
@@ -224,7 +295,7 @@ class TestDirectExecution(unittest.TestCase):
             '--csv', self.csv,
             '--pandas_dump', self.pandas_dump,
         ]
-        bb = call(a)
+        bb = call(a, cwd=root)
         self.assertEqual(bb, 0)
 
         t = tab_output_equal(
@@ -245,12 +316,10 @@ class TestDirectExecution(unittest.TestCase):
         )
 
     def test_BA_shell(self):
-        a = [
-            'python3',
-            '../rna_blast_analyze/BA.py',
-            '-blast_in', os.path.join(cwd, test_dir, 'RF00001.blastout'),
-            '-blast_query', os.path.join(cwd, test_dir, 'RF00001.fasta'),
-            '-blast_db', os.path.join(cwd, test_dir, 'blastdb', 'RF00001-art.blastdb'),
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
             '--blast_regexp', '"(?<=\|)[A-Z0-9]*\.?\d*$"',
             '--b_type', 'plain',
             '--prediction_method', 'rnafold',
@@ -259,7 +328,7 @@ class TestDirectExecution(unittest.TestCase):
             '--csv', self.csv,
             '--pandas_dump', self.pandas_dump,
         ]
-        bb = call(' '.join(a), shell=True)
+        bb = call(' '.join(a), shell=True, cwd=root)
         self.assertEqual(bb, 0)
 
         t = tab_output_equal(
@@ -280,12 +349,10 @@ class TestDirectExecution(unittest.TestCase):
         )
 
     def test_BA_shell_relative_path(self):
-        a = [
-            'python3',
-            '../rna_blast_analyze/BA.py',
-            '-blast_in', os.path.join(test_dir, 'RF00001.blastout'),
-            '-blast_query', os.path.join(test_dir, 'RF00001.fasta'),
-            '-blast_db', os.path.join(test_dir, 'blastdb', 'RF00001-art.blastdb'),
+        a = base_script + [
+            '-blast_in', os.path.join(test_dir, test_data_dir, 'RF00001.blastout'),
+            '-blast_query', os.path.join(test_dir, test_data_dir, 'RF00001.fasta'),
+            '-blast_db', os.path.join(test_dir, test_data_dir, 'blastdb', 'RF00001-art.blastdb'),
             '--blast_regexp', '"(?<=\|)[A-Z0-9]*\.?\d*$"',
             '--b_type', 'plain',
             '--prediction_method', 'rnafold',
@@ -294,7 +361,7 @@ class TestDirectExecution(unittest.TestCase):
             '--csv', self.csv,
             '--pandas_dump', self.pandas_dump,
         ]
-        bb = call(' '.join(a), shell=True)
+        bb = call(' '.join(a), shell=True, cwd=root)
         self.assertEqual(bb, 0)
 
         t = tab_output_equal(

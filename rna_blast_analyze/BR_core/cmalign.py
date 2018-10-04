@@ -3,6 +3,9 @@ import re
 from io import StringIO
 from subprocess import call, check_output
 from tempfile import mkstemp
+import logging
+import gzip
+import shutil
 
 from Bio import AlignIO
 import pandas as pd
@@ -10,8 +13,9 @@ import pandas as pd
 from rna_blast_analyze.BR_core.BA_support import parse_seq_str
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.stockholm_parser import stockholm_read
+from rna_blast_analyze.BR_core.fname import fname
 
-
+ml = logging.getLogger(__name__)
 # this file holds files needed for running and parsing infernal tools
 
 
@@ -20,7 +24,8 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
     run cmscan program for finding suitable known CM model for a sequence
     :return:
     """
-
+    ml.info('Runing cmscan.')
+    ml.debug(fname())
     rfam = RfamInfo()
 
     if outfile:
@@ -46,16 +51,21 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
             cm_file,
             fastafile
         )
-
-        r = call(
-            cmd,
-            shell=True,
-            stdout=FNULL
-        )
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(
+                cmd,
+                shell=True,
+                stdout=FNULL
+            )
 
         if r:
-            print('cmd: {}'.format(cmd))
-            raise ChildProcessError('cmscan failed')
+            msgfail = 'cmscan failed'
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
 
     return out
 
@@ -67,24 +77,36 @@ def run_cmfetch(cmfile, modelid, outfile=None):
     :param modelid:
     :return:
     """
+    ml.info('Runing cmfetch.')
+    ml.debug(fname())
     if outfile:
         out = outfile
     else:
         fd, out = mkstemp()
         os.close(fd)
 
-    r = call(
-        '{}cmfetch -o {} {} {}'.format(
+    with open(os.devnull, 'w') as FNULL:
+        cmd = '{}cmfetch -o {} {} {}'.format(
             CONFIG.infernal_path,
             out,
             cmfile,
             modelid
-        ),
-        shell=True
-    )
-    if r:
-        raise ChildProcessError('call to cmfetch failed')
-    return out
+        )
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(
+                cmd,
+                shell=True,
+                stdout=FNULL
+            )
+        if r:
+            msgfail = 'call to cmfetch failed'
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
+        return out
 
 
 def run_cmemit(model, params='', out_file=None):
@@ -94,6 +116,8 @@ def run_cmemit(model, params='', out_file=None):
     :param params:
     :return:
     """
+    ml.info('Run cmemit.')
+    ml.debug(fname())
     if out_file:
         out = out_file
     else:
@@ -107,15 +131,20 @@ def run_cmemit(model, params='', out_file=None):
             out,
             model
         )
-        r = call(
-            cmd,
-            shell=True,
-            stdout=FNULL
-        )
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(
+                cmd,
+                shell=True,
+                stdout=FNULL
+            )
         if r:
-            print('call to cmemit failed')
-            print('cmd: {}'.format(cmd))
-            raise ChildProcessError('cmemit failed')
+            msgfail = 'call to cmemit failed'
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
     return out
 
 
@@ -125,6 +154,7 @@ def extract_ref_structure_fromRFAM_CM(model_name):
     :param model_name: model name in cm file
     :return: string
     """
+    ml.debug(fname())
     rfam = RfamInfo()
 
     single_cm_file = run_cmfetch(rfam.file_path, model_name)
@@ -135,6 +165,7 @@ def extract_ref_structure_fromRFAM_CM(model_name):
 
 
 def extract_ref_from_cm(cm_file):
+    ml.debug(fname())
     single_alig_file = run_cmemit(cm_file, params='-a -N 1')
     o = open(single_alig_file, 'r')
     salig = stockholm_read(o)
@@ -194,6 +225,7 @@ def check_rfam_present():
 
     :return: bool
     """
+    ml.debug(fname())
     rfam = RfamInfo()
     cm_present = os.path.isfile(rfam.file_path)
     if cm_present:
@@ -210,6 +242,7 @@ def check_if_cmpress_processed():
     This is defined by presence of binary files [i1f, i1i, i1m, i1p]
     :return:
     """
+    ml.debug(fname())
     rfam = RfamInfo()
     files = os.listdir(rfam.rfam_dir)
     for suff in ['.i1f', '.i1i', '.i1m', '.i1p']:
@@ -226,6 +259,8 @@ def download_cmmodels_file(path=None, url=None):
     :param url:
     :return:
     """
+    ml.info('Running CM download from RFAM.')
+    ml.debug(fname())
     rfam = RfamInfo()
     if not path:
         path = rfam.rfam_dir
@@ -235,50 +270,45 @@ def download_cmmodels_file(path=None, url=None):
     if not os.path.exists(path):
         os.makedirs(path)
 
-    filename = rfam.gzname
-    try:
-        r = check_output('wget -N -P {} {}'.format(path, url), shell=True)
+    cmd = 'wget -N -P {} {}'.format(path, url)
+    ml.debug(cmd)
+    r = check_output(cmd, shell=True)
 
-        if 'Remote file no newer than local file ‘Rfam.cm.gz’ -- not retrieving.' in r:
-            # do not download
-            pass
-        else:
-            r = call(
-                'gunzip -k -f {}'.format(
-                    os.path.join(
-                        path,
-                        filename
-                    )
-                ),
-                shell=True
-            )
-            if r:
-                print('call to gunzip failed')
-                print('cmd: {}'.format('gunzip -k -f {}'.format(os.path.join(path, filename))))
-                raise ChildProcessError('call to tar -xzf failed')
+    if r:
+        msgfail = 'call to wget failed'
+        ml.error(msgfail)
+        ml.error(cmd)
+        raise ChildProcessError(msgfail)
 
-            # run cmpress to create binary files needed to run cmscan
-            run_cmpress(os.path.join(path, filename))
+    if 'Remote file no newer than local file ‘Rfam.cm.gz’ -- not retrieving.' in r:
+        # do not download
+        ml.info('No new data. Nothing to do.')
+    else:
+        # unzip using build in gzip
+        with gzip.open(os.path.join(path, rfam.gzname), 'rb') as fin:
+            with open(os.path.join(path, rfam.rfam_file_name), 'wb') as fout:
+                shutil.copyfileobj(fin, fout)
 
-    except ChildProcessError:
-        print('call to wget failed')
-        print('cmd: {}'.format('wget -N -P {} {}'.format(path, url)))
-        raise
+        # run cmpress to create binary files needed to run cmscan
+        run_cmpress(os.path.join(path, rfam.rfam_file_name))
 
-    return os.path.join(path, filename)
+    return os.path.join(path, rfam.rfam_file_name)
 
 
 def run_cmpress(file2process):
-    r = call(
-        '{}cmpress -F {}'.format(
-            CONFIG.infernal_path,
-            file2process
-        ), shell=True
+    ml.info('Running cmpress.')
+    ml.debug(fname())
+    cmd = '{}cmpress -F {}'.format(
+        CONFIG.infernal_path,
+        file2process
     )
+    ml.debug(cmd)
+    r = call(cmd, shell=True)
     if r:
-        print('call to cmpress failed')
-        print('cmd: {}'.format('{}cmpress -F {}'.format(CONFIG.infernal_path, file2process)))
-        raise ChildProcessError('call to cmpress failed')
+        msgfail = 'call to cmpress failed'
+        ml.error(msgfail)
+        ml.error(cmd)
+        raise ChildProcessError(msgfail)
 
 
 def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
@@ -292,26 +322,32 @@ def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
     :param cmbuild_params: additional params to cmbuild
     :return:
     """
+    ml.info('Runing cmbuild.')
+    ml.debug(fname())
     cm_fd, cm_file = mkstemp()
     os.close(cm_fd)
-    print('run_cmbuild for input:{}'.format(cmbuild_input_file))
+
     FNULL = open(os.devnull, 'w')
     try:
-        r = call(
-            '{}cmbuild -F {} {} {}'.format(
-                CONFIG.infernal_path,
-                cmbuild_params,
-                cm_file,
-                cmbuild_input_file
-            ),
-            shell=True,
-            stdout=FNULL
+        cmd = '{}cmbuild -F {} {} {}'.format(
+            CONFIG.infernal_path,
+            cmbuild_params,
+            cm_file,
+            cmbuild_input_file
         )
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(cmd, shell=True, stdout=FNULL)
 
         if r:
-            # print('if oneThread parameter is used, the numactl program must be installed ()')
+            msgfail = 'Call to cmbuild failed'
+            ml.error(msgfail)
+            ml.error(cmd)
             raise ChildProcessError(
-                'Call to cmbuild failed - files: {} {} \nparams: {}'.format(
+                '{} - files: {} {} \nparams: {}'.format(
+                    msgfail,
                     cmbuild_input_file,
                     cm_file,
                     cmbuild_params
@@ -331,30 +367,31 @@ def run_cmalign_on_fasta(fasta_file, model_file, cmalign_params='--notrunc', ali
     :param cmalign_params: parameter of the search
     :return:
     """
+    ml.info('Runing cmaling.')
+    ml.debug(fname())
     cma_fd, cma_file = mkstemp()
     os.close(cma_fd)
     FNULL = open(os.devnull, 'w')
-    print('run_cmalign_on_fasta for model_file:{} fasta_file:{} output_file:{}'.format(model_file,
-                                                                                       fasta_file,
-                                                                                       cma_file))
     try:
-        r = call(
-            '{}cmalign --informat fasta --outformat {} {} -o {} {} {}'.format(
-                CONFIG.infernal_path,
-                alig_format,
-                cmalign_params,
-                cma_file,
-                model_file,
-                fasta_file,
-            ),
-            shell=True,
-            stdout=FNULL
+        cmd = '{}cmalign --informat fasta --outformat {} {} -o {} {} {}'.format(
+            CONFIG.infernal_path,
+            alig_format,
+            cmalign_params,
+            cma_file,
+            model_file,
+            fasta_file,
         )
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(cmd, shell=True, stdout=FNULL)
         if r:
-            raise ChildProcessError('call to cmalign failed for files:\n'
-                                    'model file:{}\n'
-                                    'fasta file:{}\n'
-                                    'output file:{}'.format(model_file, fasta_file, cma_file))
+            msgfail = 'call to cmalign failed'
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError('{} for files:\nmodel file:{}fasta file:{}\noutput file:{}'.format(
+                msgfail, model_file, fasta_file, cma_file))
     finally:
         FNULL.close()
 
@@ -366,6 +403,7 @@ def build_stockholm_from_clustal_alig(clustal_file, alif_file):
     build stockholm alignment
     :return:
     """
+    ml.debug(fname())
     with open(clustal_file, 'r') as cf, open(alif_file, 'r') as af:
         # write stockholm align to buffer and read it with my parser
         clust = AlignIO.read(cf, format='clustal')
@@ -395,9 +433,8 @@ def read_cmalign_sfile(f):
     :param f: file handle or file path
     :return:
     """
-
     # there is an issue that if the table has more then 10000 entries, the header is repeated
-
+    ml.debug(fname())
     sfile = pd.read_table(
         f,
         skiprows=4,
@@ -417,7 +454,7 @@ def parse_cmalign_infernal_table(tbl):
     # todo revrite this to be fully featured pd.table read not this hacky function returning strings
     # first row => names but with spaces
     # second row => guide line
-
+    ml.debug(fname())
     expected_names = ['#target_name',
                       'accession',
                       'query_name',
@@ -487,6 +524,7 @@ def parse_cmalign_infernal_table(tbl):
 
 
 def get_cm_model(query_file, params=None, threads=None):
+    ml.debug(fname())
     if params is None:
         params = dict()
 
@@ -503,7 +541,7 @@ def get_cm_model(query_file, params=None, threads=None):
     assert ei == si
 
     best_model = cmscan_data['target_name'][ei]
-
+    ml.info('Best matching model: {}'.format(best_model))
     os.remove(out_table)
 
     return best_model

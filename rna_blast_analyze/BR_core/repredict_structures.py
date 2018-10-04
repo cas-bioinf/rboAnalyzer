@@ -3,8 +3,7 @@ import pickle
 import re
 import sys
 from tempfile import mkstemp
-from warnings import warn
-
+import logging
 import dill
 import numpy as np
 import pandas
@@ -24,6 +23,10 @@ from Bio.SeqRecord import SeqRecord
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
 from rna_blast_analyze.BR_core.BA_support import NoHomologousSequenceException
+from rna_blast_analyze.BR_core.fname import fname
+
+
+ml = logging.getLogger(__name__)
 
 safe_prediction_method = [
     'rnafold',
@@ -37,6 +40,7 @@ def filter_ambiguous_seqs_from_list(seqlist):
 
 
 def select_homologous_sequences(all_hits, cmscore=None, selection_threshold=0, cm_percent_threshold=None):
+    ml.debug(fname())
     # if cm_percent_threshold is given, selection threshold must not be given
     assert (selection_threshold == 0) or cm_percent_threshold is None
     if cmscore is None:
@@ -65,6 +69,7 @@ def wrapped_ending_with_prediction(args_inner, analyzed_hits, all_hits_fasta, qu
     :param method_params:
     :return:
     """
+    ml.debug(fname())
     if pred_method is None:
         pred_method = args_inner.prediction_method
 
@@ -112,8 +117,7 @@ def wrapped_ending_with_prediction(args_inner, analyzed_hits, all_hits_fasta, qu
 
     # do not need this, for the sake of compatibility with evaluation scripts
     template_structure = BA_support.RNAfold(str(query.seq))[1]
-    # templates = {'t0': {'str': RNA.fold(str(query.seq))[0],
-    #                     'seq': str(query.seq)}}
+
     templates = {'t0': {'str': template_structure,
                         'seq': str(query.seq)}}
 
@@ -121,24 +125,29 @@ def wrapped_ending_with_prediction(args_inner, analyzed_hits, all_hits_fasta, qu
         hit.templates = templates
 
     # remove uid from file descriptor
-    analyzed_hits = rna_blast_analyze.BR_core.BA_methods.remove_uid_internal_descriptor(analyzed_hits)
+    analyzed_hits = rna_blast_analyze.BR_core.BA_methods.cleanup_sequence_id(analyzed_hits)
 
     # write html if requested
     if args_inner.html:
+        ml.info('Writing html to {}.'.format(args_inner.html))
         analyzed_hits.to_html(args_inner.html)
 
     # write csv file if requested
     if args_inner.csv:
+        ml.info('Writing csv to {}.'.format(args_inner.csv))
         analyzed_hits.to_csv(args_inner.csv)
 
     # replace with json
     if args_inner.json:
+        ml.info('Writing json to {}.'.format(args_inner.json))
         analyzed_hits.to_json(args_inner.json, getattr(args_inner, 'zip_json', False))
 
     if args_inner.pandas_dump:
+        ml.info('Writing pandas pickle to {}.'.format(args_inner.pandas_dump))
         pandas.to_pickle(analyzed_hits.pandas, args_inner.pandas_dump)
 
     if args_inner.dump:
+        ml.info('Writing dump files base: {}.'.format(args_inner.dump))
         with open(args_inner.dump, 'wb') as pp:
             pickle.dump(analyzed_hits, pp, pickle.HIGHEST_PROTOCOL)
 
@@ -164,10 +173,16 @@ def create_nr_homolog_hits_file_MSA_safe(
     multiple at minimum (2) sequences are needed for profile alignment for some alignmers
     so this function always return two or more sequences or raises exception
 
-    :param sim_threshold_percent:
+    :param sim_threshold_percent:   seq similarity threshold for homology exclusion
+    :param all_hits:                list of hits
+    :param query:                   blast query
+    :param cmscore_tr:              threshold for homology inclusion in bits
+    :param cm_threshold_percent:    threshold for homology inclusion in % of query bits
+    :param check_unambiguous:       bool wherther to check unambiguous seqs
+    :param len_diff:                threshold for exclusion of hits lq=len(query) lq - diff*lq < len(seq) < lq + diff*lq
     :return:
     """
-
+    ml.debug(fname())
     # i need to leave query, even if with umbiguos basepairs in
     # because it is used as an reference during distance computation and subsequence selection,
     # however i dont need to have all homologous seqs there
@@ -199,8 +214,10 @@ def create_nr_homolog_hits_file_MSA_safe(
     # what if trusted hit is only one?
     if len(nr_homolog_hits) < 2 and not check_unambiguous:
         # warn('Only one sequence is unique under defined sim_threshold_percent (including query)')
-        warn('Only one sequence is unique under defined sim_threshold_percent (including query)\n'
-             'Adding the most disimilar homologous sequence to non redundant sequences list')
+        ml.warn(
+            'Only one sequence is unique under defined sim_threshold_percent (including query)\n'
+            'Adding the most disimilar homologous sequence to non redundant sequences list'
+        )
         # dis_hom_index = dist_table.index.get_loc(dist_table[0].idxmin())
         dis_hom_index = dist_table[:, 0].argmin()
         nr_homolog_hits.append(SeqRecord(homologous_seqs[dis_hom_index].seq, id='dummy_seq_01'))
@@ -211,8 +228,10 @@ def create_nr_homolog_hits_file_MSA_safe(
             # this mean query contain ambiguos bases
             raise NoHomologousSequenceException
         else:
-            warn('Only one sequence is unique under defined sim_threshold_percent (including query)\n'
-                 'Adding the most disimilar homologous sequence to non redundant sequences list')
+            ml.warn(
+                'Only one sequence is unique under defined sim_threshold_percent (including query)\n'
+                'Adding the most disimilar homologous sequence to non redundant sequences list'
+            )
             # dis_hom_index = dist_table.index.get_loc(dist_table[0].idxmin())
             dis_hom_index = dist_table[:, 0].argmin()
             nr_homolog_hits.append(SeqRecord(homologous_seqs[dis_hom_index].seq, id='dummy_seq_01'))
@@ -250,9 +269,8 @@ def create_nr_homolog_hits_file_MSA_unsafe(sim_threshold_percent=None, all_hits=
                                            cm_threshold_percent=None, len_diff=0.1):
     """
     create non redundant homologous hits file
-    :param sim_threshold_percent:
-    :return:
     """
+    ml.debug(fname())
     dist_table, homologous_seqs = _hom_selection_wrapper(
         all_hits,
         query,
@@ -287,7 +305,7 @@ def _extract_cmscore_from_hom_seqs(hom_seqs):
     return [i.annotations['cmstat']['bit_sc'] for i in hom_seqs]
 
 
-def _hom_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold_percent_, len_diff_ = 0.1):
+def _hom_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold_percent_, len_diff_=0.1):
     """
     runs basic non_redundant sequences calculation (ie exact sequence match)
     selects homologous sequences from all hits list by cmscore threshold or by query sequence
@@ -298,13 +316,8 @@ def _hom_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold_percent_
 
         if no sequence is homologous
         it will return empty array for distance matrix and list with query sequence
-
-    :param all_hits_:
-    :param query_:
-    :param cmscore_tr_:
-    :param cm_threshold_percent_:
-    :return:
     """
+    ml.debug(fname())
     hom_seqs_ = select_homologous_sequences(
         all_hits_,
         selection_threshold=cmscore_tr_,
@@ -329,7 +342,9 @@ def _hom_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold_percent_
     # this is needed for longish ncRNAs
     #   tolerate 10 % length difference?
     ref_len = len(query_)
-    nr_len_select_homologous = [seq for seq in nr_homologous_seqs_ if ref_len * (1 - len_diff_) < len(seq) < ref_len * (1 + len_diff_)]
+    nr_len_select_homologous = [
+        seq for seq in nr_homologous_seqs_ if ref_len * (1 - len_diff_) < len(seq) < ref_len * (1 + len_diff_)
+    ]
 
     # this is to control if only one sequence remained after filtering for length difference
     if len(nr_len_select_homologous) == 1:
@@ -349,27 +364,6 @@ def _hom_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold_percent_
     with os.fdopen(c_fd, 'w') as f:
         BA_support.write_fasta_from_list_of_seqrecords(f, san_hom_seqs)
 
-    # consider to not to do this but if lot of homologs are present,
-    # it is better to do this so consensus predictor is not confused
-    # also consider running some rnastructure avare algorithm
-    # also consensus structure prediction is impossible in only one sequence avalible
-    # but needed for alifold
-
-    # distance computation is problem, when only 2 sequences here
-    # compute sequence similarity in another way
-    # ==== solution
-    # run some fast alignment, (clustalo, muscle)
-    # load the result alignment with Bio.AlignIO
-    # compute distance matrix with Bio.Phylo.TreeConstruction.DistanceCalculator
-    # only need to adapt to distances from the distance matrix
-    # def _refil_UT(df):
-    #     l = len(df)
-    #     for i in range(l):
-    #         for j in range(l):
-    #             if isnan(df[i][j]):
-    #                 df[i][j] = df[j][i]
-    #     return df
-
     align_file = BA_support.run_muscle(homologous_sequence_file_, reorder=True)
     alig = AlignIO.read(align_file, format='clustal')
     distance_calc = DistanceCalculator(model='identity')
@@ -378,7 +372,8 @@ def _hom_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold_percent_
     orig_index = [san_dict[i] for i in dist_mat.names]
     dist_mat_pd = pandas.DataFrame.from_records(dist_mat.matrix, index=orig_index)
     # dist_table = _refil_UT(dist_mat_pd) # maybe not need this
-    dist_table_ = (1 - dist_mat_pd.as_matrix()) * 100
+    # dist_table_ = (1 - dist_mat_pd.as_matrix()) * 100
+    dist_table_ = (1 - dist_mat_pd.values) * 100
 
     os.remove(align_file)
     os.remove(homologous_sequence_file_)
@@ -391,7 +386,7 @@ def nonhomseqwarn(method_name):
               method_name,
               ', '.join(safe_prediction_method)
           )
-    warn(msg, RuntimeWarning)
+    ml.warn(msg, RuntimeWarning)
     sys.stderr.flush()
 
 
@@ -406,7 +401,7 @@ def annotate_ambiguos_bases(seqlist):
                 m.group(),
                 m.start()
             )
-            warn(msg)
+            ml.warn(msg)
             seq.annotations['ambiguous'] = True
         else:
             seq.annotations['ambiguous'] = False
@@ -426,7 +421,9 @@ def repredict_structures_for_homol_seqs(
     some fast alignment and consensus prediction with refold like proces is also possible
     :return:
     """
-    print('entering structure prediction')
+    msg = 'Entering structure prediction..'
+    ml.info(msg)
+    print(msg)
 
     default_sim_tr_perc = 90
     default_score_tr = 0.0
@@ -457,7 +454,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'rfam_rnafoldc' in prediction_method:
         pkey = 'rfam_rnafoldc'
-        BA_support.devprint(pkey, flush=True)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         # select cm_model ()
         fd, temp_query_file = mkstemp()
         with os.fdopen(fd, 'w') as f:
@@ -492,7 +490,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'rfam_subopt' in prediction_method:
         pkey = 'rfam_subopt'
-        BA_support.devprint(pkey, flush=True)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         fd, temp_query_file = mkstemp()
         with os.fdopen(fd, 'w') as f:
             f.write('>{}\n{}\n'.format(query.id, str(query.seq)))
@@ -515,8 +514,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'rfam_rapidshapes' in prediction_method:
         pkey = 'rfam_rapidshapes'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
 
         fd, temp_query_file = mkstemp()
         with os.fdopen(fd, 'w') as f:
@@ -543,7 +542,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'clustalo_alifold_rapidshapes' in prediction_method:
         pkey = 'clustalo_alifold_rapidshapes'
-        BA_support.devprint(pkey, flush=True)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -584,7 +584,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'muscle_alifold_rapidshapes' in prediction_method:
         pkey = 'muscle_alifold_rapidshapes'
-        BA_support.devprint(pkey, flush=True)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -625,7 +626,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'rcoffee_alifold_rapidshapes' in prediction_method:
         pkey = 'rcoffee_alifold_rapidshapes'
-        BA_support.devprint(pkey, flush=True)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -666,8 +668,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'alifold_refold' in prediction_method:
         pkey = 'alifold_refold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -710,8 +712,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'muscle_alifold_refold' in prediction_method:
         pkey = 'muscle_alifold_refold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -748,8 +750,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'rnafold' in prediction_method:
         pkey = 'rnafold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         if pkey in pred_method_params and pred_method_params[pkey]:
             structures[pkey], exec_time[pkey] = rnafold_prediction(
                 all_hits_fasta,
@@ -763,8 +765,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'subopt_fold_query' in prediction_method:
         pkey = 'subopt_fold_query'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         if pkey in pred_method_params and pred_method_params[pkey]:
             structures[pkey], exec_time[pkey] = subopt_fold_query(
                 all_hits_fasta,
@@ -781,8 +783,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'subopt_fold_clustal_alifold' in prediction_method:
         pkey = 'subopt_fold_clustal_alifold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, homologous_seqs = create_nr_homolog_hits_file_MSA_safe(
@@ -835,8 +837,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'subopt_fold_muscle_alifold' in prediction_method:
         pkey = 'subopt_fold_muscle_alifold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, homologous_seqs = create_nr_homolog_hits_file_MSA_safe(
@@ -889,8 +891,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'alifold_refold_rnafold_c' in prediction_method:
         pkey = 'alifold_refold_rnafold_c'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -933,8 +935,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'muscle_alifold_refold_rnafold_c' in prediction_method:
         pkey = 'muscle_alifold_refold_rnafold_c'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -977,8 +979,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'alifold_unpaired_conserved_refold' in prediction_method:
         pkey = 'alifold_unpaired_conserved_refold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -1021,8 +1023,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'muscle_alifold_unpaired_conserved_refold' in prediction_method:
         pkey = 'muscle_alifold_unpaired_conserved_refold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -1065,8 +1067,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'dh_tcoffee_alifold_refold' in prediction_method:
         pkey = 'dh_tcoffee_alifold_refold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, homologous_seqs = create_nr_homolog_hits_file_MSA_safe(
@@ -1110,8 +1112,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'dh_tcoffee_alifold_refold_rnafoldc' in prediction_method:
         pkey = 'dh_tcoffee_alifold_refold_rnafoldc'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, homologous_seqs = create_nr_homolog_hits_file_MSA_safe(
@@ -1155,8 +1157,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'dh_tcoffee_alifold_conserved_ss_rnafoldc' in prediction_method:
         pkey = 'dh_tcoffee_alifold_conserved_ss_rnafoldc'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, homologous_seqs = create_nr_homolog_hits_file_MSA_safe(
@@ -1200,8 +1202,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'dh_clustal_alifold_refold' in prediction_method:
         pkey = 'dh_clustal_alifold_refold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, homologous_seqs = create_nr_homolog_hits_file_MSA_safe(
@@ -1247,8 +1249,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'dh_clustal_alifold_refold_rnafoldc' in prediction_method:
         pkey = 'dh_clustal_alifold_refold_rnafoldc'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, homologous_seqs = create_nr_homolog_hits_file_MSA_safe(
@@ -1294,8 +1296,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'dh_clustal_alifold_conserved_ss_rnafoldc' in prediction_method:
         pkey = 'dh_clustal_alifold_conserved_ss_rnafoldc'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, homologous_seqs = create_nr_homolog_hits_file_MSA_safe(
@@ -1341,8 +1343,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'pairwise_centroid_homfold' in prediction_method:
         pkey = 'pairwise_centroid_homfold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         if pkey in pred_method_params and pred_method_params[pkey]:
             nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_unsafe(
                 all_hits=all_hits_list,
@@ -1391,8 +1393,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'TurboFold_conservative' in prediction_method:
         pkey = 'TurboFold_conservative'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         if pkey in pred_method_params and pred_method_params[pkey]:
             nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_unsafe(
                 all_hits=all_hits_list,
@@ -1432,8 +1434,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'TurboFold' in prediction_method:
         pkey = 'TurboFold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         # set arbitrary sim_threshold_percent to 100, because we want to remove only identical sequences from prediction
         #  with Trurbofold. The structure of redundant sequences will be set according to the one in prediction
         try:
@@ -1484,8 +1486,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'tcoffee_rcoffee_alifold_refold' in prediction_method:
         pkey = 'tcoffee_rcoffee_alifold_refold'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -1526,8 +1528,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'tcoffee_rcoffee_alifold_refold_rnafoldc' in prediction_method:
         pkey = 'tcoffee_rcoffee_alifold_refold_rnafoldc'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(
@@ -1568,8 +1570,8 @@ def repredict_structures_for_homol_seqs(
 
     if 'tcoffee_rcoffee_alifold_conserved_ss_rnafoldc' in prediction_method:
         pkey = 'tcoffee_rcoffee_alifold_conserved_ss_rnafoldc'
-        BA_support.devprint(pkey, flush=True)
-        print(pkey)
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
         try:
             if pkey in pred_method_params and pred_method_params[pkey]:
                 nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_safe(

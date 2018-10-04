@@ -2,6 +2,7 @@ import os
 import re
 import subprocess
 from tempfile import mkstemp
+import logging
 
 from Bio import SeqIO
 from Bio.Alphabet.IUPAC import IUPACUnambiguousRNA
@@ -11,14 +12,21 @@ from Bio.SeqRecord import SeqRecord
 from rna_blast_analyze.BR_core.parser_to_bio_blast import bread
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.retry_decorator import retry
+from rna_blast_analyze.BR_core.fname import fname
+
+ml = logging.getLogger(__name__)
 
 
 @retry(ChildProcessError, tries=5)
 def structures2shape_virtualbox(infile, out_file=None, shape_level=5, params=''):
-    print('Warning, this is rather slow, especially for long structures it can take minutes to finish one structure,'
-          ' if you need abstraction level 5, consider switching to db2shape python implementation'
-          ' also for LSSU ends in segfault (from my experience)')
-    FOUT = open(os.devnull, 'w')
+    ml.info('Running structures2shape in virtualbox.')
+    ml.debug(fname())
+    ml.warn(
+        'Warning, this is rather slow, especially for long structures it can take minutes to finish one structure,'
+        ' if you need abstraction level 5, consider switching to db2shape python implementation'
+        ' also for LSSU ends in segfault (from my experience)'
+    )
+    FNULL = open(os.devnull, 'w')
 
     if out_file:
         out = out_file
@@ -31,24 +39,31 @@ def structures2shape_virtualbox(infile, out_file=None, shape_level=5, params='')
     virtualbox_copy(infile, virt_rapid_tempfile)
 
     try:
-        ret_v = subprocess.call(
-            "sshpass -p {} ssh {} '{}RNAshapes -mode abstract --shapeLevel {} {} {}' > {}".format(
-                CONFIG.SSH_PASS,
-                CONFIG.SSH_USER,
-                CONFIG.rnashapes_path,
-                shape_level,
-                params,
-                virt_rapid_tempfile,
-                out
-            ),
-            stdout=FOUT,
-            shell=True
+        cmd = "sshpass -p {} ssh {} '{}RNAshapes -mode abstract --shapeLevel {} {} {}' > {}".format(
+            CONFIG.SSH_PASS,
+            CONFIG.SSH_USER,
+            CONFIG.rnashapes_path,
+            shape_level,
+            params,
+            virt_rapid_tempfile,
+            out
         )
-        if ret_v:
-            raise ChildProcessError(ret_v)
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = subprocess.call(cmd, shell=True)
+        else:
+            r = subprocess.call(
+                cmd,
+                stdout=FNULL,
+                shell=True
+            )
+        if r:
+            ml.error('structures2shapes failed')
+            ml.error(cmd)
+            raise ChildProcessError(r)
         out_shapes = _str2shape_parse(out)
     finally:
-        FOUT.close()
+        FNULL.close()
         if not out_file:
             os.remove(out)
 
@@ -59,6 +74,8 @@ def structures2shape_virtualbox(infile, out_file=None, shape_level=5, params='')
 
 @retry(ChildProcessError, tries=5)
 def rapid_shapes_list_virtualbox(fasta_file, shape2use, rapidshapes_params='', out=None, shape_level=5):
+    ml.info('Running rapidshapes in virtualbox.')
+    ml.debug(fname())
     if shape2use == '':
         raise Exception('no shape found')
     if re.search('[^\[\] _]', shape2use):
@@ -79,40 +96,35 @@ def rapid_shapes_list_virtualbox(fasta_file, shape2use, rapidshapes_params='', o
     # run analysis
     FNULL = open(os.devnull, 'w')
     try:
-        r = subprocess.call(
-            "sshpass -p {} ssh {} '{}RapidShapes {} --mode list --list ""{}"" --shapeLevel {} {}' > {}".format(
-                CONFIG.SSH_PASS,
-                CONFIG.SSH_USER,
-                CONFIG.rnashapes_path,
-                rapidshapes_params,
-                shape2use,
-                shape_level,
-                rapid_in_tempfile,
-                outfile
-            ),
-            shell=True,
-            stdout=FNULL,
-            stderr=FNULL
+        cmd = "sshpass -p {} ssh {} '{}RapidShapes {} --mode list --list ""{}"" --shapeLevel {} {}' > {}".format(
+            CONFIG.SSH_PASS,
+            CONFIG.SSH_USER,
+            CONFIG.rnashapes_path,
+            rapidshapes_params,
+            shape2use,
+            shape_level,
+            rapid_in_tempfile,
+            outfile
         )
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = subprocess.call(cmd, shell=True)
+        else:
+            r = subprocess.call(
+                cmd,
+                shell=True,
+                stdout=FNULL,
+                stderr=FNULL
+            )
+
+        if r:
+            msgfail = 'Call to RapidShapes failed.'
+            ml.error(msgfail)
+            ml.error(cmd)
+            ml.error('errorcode: {}'.format(r))
+            raise ChildProcessError(msgfail)
     finally:
         FNULL.close()
-
-    if r:
-        print('call to RapidShapes failed')
-        print(
-            'command:' + 'shpass -p {} ssh {} {}RapidShapes {} --mode list --list "{}" --shapeLevel {} {} > {}'.format(
-                CONFIG.SSH_PASS,
-                CONFIG.SSH_USER,
-                CONFIG.rnashapes_path,
-                rapidshapes_params,
-                shape2use,
-                shape_level,
-                fasta_file,
-                outfile
-            )
-        )
-        print('errorcode: {}'.format(r))
-        raise ChildProcessError('RapidShapes failed')
 
     virtualbox_delete(rapid_in_tempfile)
 
@@ -147,13 +159,16 @@ def rapid_shapes_list(fasta_file, shape2use, rapidshapes_params='', out=None, sh
     :param shape2use: string of space separated shapes to use
     :param rapidshapes_params:
     :param out: output file path
+    :param out: output file path
+    :param shape_level:
     """
 
     # if isinstance(inshape, list) and all([isinstance(i, CastShape) for i in inshape]):
     #     shape2use = ' '.join([i.shape for i in inshape])
     # else:
     #     shape2use = inshape
-
+    ml.info('Runing rapidshapes.')
+    ml.debug(fname())
     if shape2use == '':
         raise Exception('no shape found')
     if re.search('[^\[\] _]', shape2use):
@@ -167,68 +182,77 @@ def rapid_shapes_list(fasta_file, shape2use, rapidshapes_params='', out=None, sh
 
     FNULL = open(os.devnull, 'w')
     try:
-        r = subprocess.call(
-            '{}RapidShapes {} --mode list --list "{}" --shapeLevel {} {} > {}'.format(
-                CONFIG.rapidshapes_path,
-                rapidshapes_params,
-                shape2use,
-                shape_level,
-                fasta_file,
-                outfile),
-            shell=True,
-            stdout=FNULL,
-            stderr=FNULL
-        )
-    finally:
-        FNULL.close()
-
-    if r:
-        print('call to RapidShapes failed')
-        print('command:' + '{}RapidShapes {} --mode list --list "{}" --shapeLevel {} {} > {}'.format(
+        cmd = '{}RapidShapes {} --mode list --list "{}" --shapeLevel {} {} > {}'.format(
             CONFIG.rapidshapes_path,
             rapidshapes_params,
             shape2use,
             shape_level,
             fasta_file,
             outfile
-        ))
-        raise ChildProcessError('RapidShapes failed')
+        )
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = subprocess.call(cmd, shell=True)
+        else:
+            r = subprocess.call(
+                cmd,
+                shell=True,
+                stdout=FNULL,
+                stderr=FNULL
+            )
+
+        if r:
+            msgfail = 'Call to RapidShapes failed.'
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
+    finally:
+        FNULL.close()
 
     return outfile
 
 
 @retry(ChildProcessError, tries=5)
 def virtualbox_tempfile():
+    ml.debug(fname())
+    cmd = "sshpass -p {} ssh {} 'tfile=$(mktemp /tmp/virt_tmp.XXXXXXXX); echo $tfile'".format(
+        CONFIG.SSH_PASS,
+        CONFIG.SSH_USER,
+        )
     try:
-        report_str = subprocess.check_output(
-            "sshpass -p {} ssh {} 'tfile=$(mktemp /tmp/virt_tmp.XXXXXXXX); echo $tfile'".format(
-                CONFIG.SSH_PASS,
-                CONFIG.SSH_USER,
-            ),
-            shell=True)
+        ml.debug(cmd)
+        report_str = subprocess.check_output(cmd, shell=True)
         return report_str.decode().strip()
     except:
-        raise ChildProcessError('make tempfile failed')
+        msgfail = 'make tempfile failed'
+        ml.error(msgfail)
+        ml.error(cmd)
+        raise ChildProcessError(msgfail)
 
 
 @retry(ChildProcessError, tries=5)
 def virtualbox_copy(source, dest):
+    ml.debug(fname())
+    cmd = "sshpass -p {} scp {} {}:{}".format(
+        CONFIG.SSH_PASS,
+        source,
+        CONFIG.SSH_USER,
+        dest
+    )
     try:
-        cmd = "sshpass -p {} scp {} {}:{}".format(
-            CONFIG.SSH_PASS,
-            source,
-            CONFIG.SSH_USER,
-            dest
-        )
+        ml.debug(cmd)
         r = subprocess.call(cmd, shell=True)
         if r:
             raise ChildProcessError('command: {} failed'.format(cmd))
     except:
+        ml.error('Virtualbox copy failed.')
+        ml.error(cmd)
         raise
 
 
 @retry(ChildProcessError, tries=5)
 def virtualbox_delete(file):
+    ml.debug(fname())
     assert '-rf' not in file
 
     cmd = "sshpass -p {} ssh {} 'rm {}'".format(
@@ -236,12 +260,16 @@ def virtualbox_delete(file):
         CONFIG.SSH_USER,
         file
     )
+    ml.debug(cmd)
     r = subprocess.call(
         cmd,
         shell=True
     )
     if r:
-        raise ChildProcessError('cmd: {} failed'.format(cmd))
+        msgfail = 'Virtualbox delete failed.'
+        ml.error(msgfail)
+        ml.error(cmd)
+        raise ChildProcessError(msgfail)
     return
 
 
@@ -311,14 +339,20 @@ class CastShape(object):
 
 @virtual_decorator
 def structures2shape(infile, out_file=None, shape_level=5, params=''):
-    """convert structure to shape with RNAshapes
+    """
+    convert structure to shape with RNAshapes
     file input must be fasta/like file but with structures instead of sequences
     structure cannot contain lonely pairs
-    consider using db2shape function, which should give same result in most cases but is significantly faster"""
-    print('Warning, this is rather slow, especially for long structures it can take minutes to finish one structure,'
-          ' if you need abstraction level 5, consider switching to db2shape python implementation'
-          ' also for LSSU ends in segfault (from my experience)')
-    FOUT = open(os.devnull, 'w')
+    consider using db2shape function, which should give same result in most cases but is significantly faster
+    """
+    ml.info('Running Structures2shape')
+    ml.debug(fname())
+    ml.warn(
+        'Warning, this is rather slow, especially for long structures it can take minutes to finish one structure,'
+        ' if you need abstraction level 5, consider switching to db2shape python implementation'
+        ' also for LSSU ends in segfault (from my experience)'
+    )
+    FNULL = open(os.devnull, 'w')
 
     if out_file:
         out = out_file
@@ -327,22 +361,27 @@ def structures2shape(infile, out_file=None, shape_level=5, params=''):
         os.close(fd)
 
     try:
-        ret_v = subprocess.call(
-            '{}RNAshapes -mode abstract --shapeLevel {} {} {} > {}'.format(
-                CONFIG.rnashapes_path,
-                shape_level,
-                params,
-                infile,
-                out
-            ),
-            stdout=FOUT,
+        cmd = '{}RNAshapes -mode abstract --shapeLevel {} {} {} > {}'.format(
+            CONFIG.rnashapes_path,
+            shape_level,
+            params,
+            infile,
+            out
+        )
+        ml.debug(cmd)
+        r = subprocess.call(
+            cmd,
+            stdout=FNULL,
             shell=True
         )
-        if ret_v:
-            raise ChildProcessError(ret_v)
+        if r:
+            msgfail = 'Call to structures2shape failed'
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
         out_shapes = _str2shape_parse(out)
     finally:
-        FOUT.close()
+        FNULL.close()
         if not out_file:
             os.remove(out)
 
@@ -351,7 +390,7 @@ def structures2shape(infile, out_file=None, shape_level=5, params=''):
 
 def _str2shape_parse(fin):
     out = []
-    with open(fin,'r') as f:
+    with open(fin, 'r') as f:
         # each line is shape
         txt = f.readline()
         while txt:
@@ -375,7 +414,7 @@ def cast_parse(file):
         if 'No consensus shapes found' in txt:
             raise NoShapeFoundError('Common shape not found, try to increase relative or absolute energy deviation')
         while txt:
-            if re.search('^\d+\)\s*(?=Shape)',txt):
+            if re.search('^\d+\)\s*(?=Shape)', txt):
                 # enter a shape record
                 curr_shape = CastShape()
                 curr_shape.shape = _parse_shape(txt)
@@ -386,7 +425,10 @@ def cast_parse(file):
                 txt = bread(f)
                 r_obj.append(curr_shape)
             else:
-                raise UnboundLocalError('Unable to parse string "%s", expected str similar to "4)  Shape: [][[][][][]][]  Score: -258.30  Ratio of MFE: 0.98"', txt)
+                raise UnboundLocalError(
+                    'Unable to parse string "%s", expected str similar to "4)  '
+                    'Shape: [][[][][][]][]  Score: -258.30  Ratio of MFE: 0.98"', txt
+                )
     return r_obj
 
 
@@ -418,7 +460,7 @@ def _get_fasta_records(f):
         [sid, sdescription] = _get_fasta_name(txt)
         txt = bread(f)
         # sequence record
-        sr = re.search('[AUGCT]+',txt)
+        sr = re.search('[AUGCT]+', txt)
         # structure record
         txt = bread(f)
         st = txt[sr.start():sr.end()]
@@ -431,7 +473,7 @@ def _get_fasta_records(f):
         # todo Consider additional parsing for remaining fields of RNAshapes cast output.
         rl.append(record)
         txt = bread(f)
-        if re.search('\d+\)',txt):
+        if re.search('\d+\)', txt):
             # return one line
             f.seek(f.tell() - len(txt) - 2)
             break
@@ -443,7 +485,7 @@ def _get_fasta_name(txt):
     :return fasta_id (str) and fasta_description (str)"""
     # todo consider to rework this catching some more standard exceptions
     try:
-        c = re.search('(?<=\>)\ *[\S\|\.]+', txt)
+        c = re.search('(?<=>) *[\S|.]+', txt)
         hit_id = c.group().lstrip()
         hit_def = txt[c.end() + 1:].lstrip()
     except:
@@ -457,7 +499,7 @@ def _parse_mfe_ratio(txt):
     # todo consider to rework this catching some more standard exceptions
     if ('Ratio' in txt or 'ratio' in txt) and 'of' in txt:
         try:
-            rat = float(re.search('(?<=MFE:)\s*[01]\.\d+$',txt).group().lstrip().rstrip())
+            rat = float(re.search('(?<=MFE:)\s*[01]\.\d+$', txt).group().lstrip().rstrip())
         except:
             raise UnboundLocalError('Unable to parse Ratio of "MFE" in string %s', txt)
     else:
@@ -470,7 +512,7 @@ def _parse_score(txt):
     :return float"""
     # todo consider to rework this catching some more standard exceptions
     try:
-        score_val = float(re.search('(?<=Score:)\s*-?\d+\.?\d*\s*(?=Ratio)',txt).group().lstrip().rstrip())
+        score_val = float(re.search('(?<=Score:)\s*-?\d+\.?\d*\s*(?=Ratio)', txt).group().lstrip().rstrip())
     except:
         raise UnboundLocalError('Unable to parse a "Score" in string in %s', txt)
     return score_val
@@ -482,7 +524,7 @@ def run_rnashapes_cast(hits, reldev, keep_all=0):
     if len(hits) < 2:
         raise AssertionError('input to rnashapes must be at least 2 sequences')
     [fd, temp_name] = mkstemp()
-
+    os.close(fd)
     err_name = None
     out_rnashapes_file = None
 
@@ -542,20 +584,26 @@ def call_shapes_cast(cast_infile, reldev, fd, err):
     :param err: os level file descriptor for error file
     :return:
     """
+    ml.info('Running RNAshapes cast')
+    ml.debug(fname())
+    cmd = [
+        '{}RNAshapes'.format(CONFIG.rnashapes_path),
+        '-mode',
+        'cast',
+        '--relativeDeviation',
+        str(reldev.pop()),
+        cast_infile
+    ]
     r = subprocess.call(
-        [
-            '{}RNAshapes'.format(CONFIG.rnashapes_path),
-            '-mode',
-            'cast',
-            '--relativeDeviation',
-            str(reldev.pop()),
-            cast_infile
-        ],
+        cmd,
         stdout=fd,
         stderr=err
     )
     if r:
-        raise ChildProcessError('call to RNAshapes mode cast failed')
+        msgfail = 'call to RNAshapes mode cast failed'
+        ml.error(msgfail)
+        ml.error(cmd)
+        raise ChildProcessError(msgfail)
     return
 
 
@@ -563,11 +611,7 @@ def _parse_shape(txt):
     """parse shape from rnashapes cast parse entry header
     :return string"""
     try:
-        shape_string = re.search('(?<=Shape:)\s*[\[\]]+\s*(?=Score)',txt).group().lstrip().rstrip()
+        shape_string = re.search('(?<=Shape:)\s*[\[\]]+\s*(?=Score)', txt).group().lstrip().rstrip()
     except:
         raise UnboundLocalError('Unable to parse a "Shape" string in %s', txt)
     return shape_string
-
-
-
-

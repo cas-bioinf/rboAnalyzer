@@ -10,7 +10,6 @@ package_data = {
         'BR_core/output/*.html',
         'BR_core/output/style.css',
         '3rd_party_source/RSEARCH_matrices/*',
-        '3rd_party_source/refold/*',
     ]
 }
 
@@ -23,6 +22,7 @@ setup(
     entry_points={
         'console_scripts': [
             'rna_blast_analyze = rna_blast_analyze.BA:main',
+            'genomes_from_blast = rna_blast_analyze.download_blast_genomes:main'
         ],
     },
     install_requires=[
