@@ -56,9 +56,9 @@ Analyzing subset of NCBI blast HITs for 6S ncRNA.
 2) Obtain a copy of `example` directory.
 3) cd to `example` directory.
 4) Now you need to obtain a copy of the BLAST database.
-This is best done by using the `download_blast_genomes.py` by calling: 
+This is best done by using the `genomes_from_blast` by calling:
     ```
-    python3 download_blast_genome.py -email YOUR_EMAIL -blast_in 6S_short.xml -out 6S.fasta
+    genomes_from_blast -email YOUR_EMAIL -blast_in 6S_short.xml -out 6S.fasta
     ```
     This command will download all needed genomes and create blast database for you (if `makeblastdb` command is avalible).
     The EMAIL is needed so the NCBI would contact you in case of missuse of their resources.
