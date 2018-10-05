@@ -41,7 +41,7 @@ Install all prequisities and run
 python3 setup.py install
 ```
 The pipeline is equipped with argument completion for bash shell.
-To enable this feature you need to register the script (more info [here][https://pypi.org/project/argcomplete/]).
+To enable this feature you need to register the script (more info [here](https://pypi.org/project/argcomplete/)).
 
 To get the autocompletion working run:
 ```
@@ -85,32 +85,32 @@ This is Beta version. Especially the default parameters for prediction can chang
 ## References
 - ViennaRNA: Lorenz, Ronny and Bernhart, Stephan H. and Höner zu Siederdissen, Christian and Tafer, Hakim and Flamm, Christoph and Stadler, Peter F. and Hofacker, Ivo L.
  ViennaRNA Package 2.0. <https://doi.org/10.1186/1748-7188-6-26>.
- We include copy of refold.pl script with Viennarna license here for convinience. [website][https://www.tbi.univie.ac.at/RNA/]
+ We include copy of refold.pl script with Viennarna license here for convinience. [website](https://www.tbi.univie.ac.at/RNA/)
 - Locarna: Sebastian Will, Tejal Joshi, Ivo L. Hofacker, Peter F. Stadler, and Rolf Backofen.
 LocARNA-P: Accurate boundary prediction and improved detection of structural RNAs
-RNA, 18 no. 5, pp. 900-14, 2012. <https://doi.org/10.1261/rna.029041.111>, [website][http://rna.informatik.uni-freiburg.de/LocARNA/Input.jsp]
+RNA, 18 no. 5, pp. 900-14, 2012. <https://doi.org/10.1261/rna.029041.111>, [website](http://rna.informatik.uni-freiburg.de/LocARNA/Input.jsp)
 - NCBI BLAST: Camacho C., Coulouris G., Avagyan V., Ma N., Papadopoulos J., Bealer K., & Madden T.L. (2008)
- "BLAST+: architecture and applications." BMC Bioinformatics 10:421. <https://doi.org/10.1186/1471-2105-10-421>, [website][https://blast.ncbi.nlm.nih.gov/Blast.cgi]
+ "BLAST+: architecture and applications." BMC Bioinformatics 10:421. <https://doi.org/10.1186/1471-2105-10-421>, [website](https://blast.ncbi.nlm.nih.gov/Blast.cgi)
 - RSEARCH: Finding Homologs of Single Structured RNA Sequences.
- R. J. Klein, S. R. Eddy. BMC Bioinformatics, 4:44, 2003. <https://doi.org/10.1186/1471-2105-4-44>, [website][http://eddylab.org/software.html#rsearch]
+ R. J. Klein, S. R. Eddy. BMC Bioinformatics, 4:44, 2003. <https://doi.org/10.1186/1471-2105-4-44>, [website](http://eddylab.org/software.html#rsearch)
 - Infernal: Infernal 1.1: 100-fold Faster RNA Homology Searches.
- E. P. Nawrocki, S. R. Eddy. Bioinformatics, 29:2933-2935, 2013. <https://doi.org/10.1093/bioinformatics/btt509>, [website][http://eddylab.org/infernal/]
+ E. P. Nawrocki, S. R. Eddy. Bioinformatics, 29:2933-2935, 2013. <https://doi.org/10.1093/bioinformatics/btt509>, [website](http://eddylab.org/infernal/)
 - Clustal omega: Sievers F, Wilm A, Dineen DG, Gibson TJ, Karplus K, Li W, Lopez R, McWilliam H, Remmert M, Söding J, Thompson JD, Higgins DG (2011).
  Fast, scalable generation of high-quality protein multiple sequence alignments using Clustal Omega.
-  Molecular Systems Biology 7:539. <https://doi.org/10.1038/msb.2011.75>, [website][http://www.clustal.org/omega/]
+  Molecular Systems Biology 7:539. <https://doi.org/10.1038/msb.2011.75>, [website](http://www.clustal.org/omega/)
 - MUSCLE: Edgar, R.C. (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput
- Nucleic Acids Res. 32(5):1792-1797. <https://doi.org/10.1093/nar/gkh340>, [website][https://www.drive5.com/muscle/]
+ Nucleic Acids Res. 32(5):1792-1797. <https://doi.org/10.1093/nar/gkh340>, [website](https://www.drive5.com/muscle/)
 - T-coffee (r-coffee): Wilm, A., Higgins, D.G., Notredame, C.
  R-Coffee: a method for multiple alignment of non-coding RNA.
-  Nucleic Acids Res., 36(9):e52 (2008). <https://doi.org/10.1093/nar/gkn174>, [website][http://www.tcoffee.org/Projects/tcoffee/]
+  Nucleic Acids Res., 36(9):e52 (2008). <https://doi.org/10.1093/nar/gkn174>, [website](http://www.tcoffee.org/Projects/tcoffee/)
 - Centroid homfold: Michiaki Hamada, Koichiro Yamada, Kengo Sato, Martin C. Frith, Kiyoshi Asai;
  CentroidHomfold-LAST: accurate prediction of RNA secondary structure using automatically collected homologous sequences,
  Nucleic Acids Research, Volume 39, Issue suppl_2, 1 July 2011, Pages W100–W106.
-  <https://doi.org/10.1093/nar/gkr290>, [github][https://github.com/satoken/centroid-rna-package/]
+  <https://doi.org/10.1093/nar/gkr290>, [github](https://github.com/satoken/centroid-rna-package/)
 - TurboFold (RNAstructure): Tan, Z., Fu, Y., Sharma, G., & Mathews, D. H. (2017).
  TurboFold II: RNA structural alignment and secondary structure prediction informed by multiple homologs.
-  Nucleic Acids Research. 45: 11570-11581. <https://doi.org/10.1093/nar/gkx815>, [website][http://rna.urmc.rochester.edu/RNAstructure.html]
+  Nucleic Acids Research. 45: 11570-11581. <https://doi.org/10.1093/nar/gkx815>, [website](http://rna.urmc.rochester.edu/RNAstructure.html)
 - UNAFold: Markham N.R., Zuker M. (2008) UNAFold. In: Keith J.M. (eds) Bioinformatics.
- Methods in Molecular Biology™, vol 453. Humana Press. <https://doi.org/10.1007/978-1-60327-429-6_1>, [website][http://unafold.rna.albany.edu/]
+ Methods in Molecular Biology™, vol 453. Humana Press. <https://doi.org/10.1007/978-1-60327-429-6_1>, [website](http://unafold.rna.albany.edu/)
 - Biopython: Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics.
- Bioinformatics 2009 Jun 1; 25(11) 1422-3. <http://dx.doi.org/10.1093/bioinformatics/btp163>, [website][https://biopython.org/]
+ Bioinformatics 2009 Jun 1; 25(11) 1422-3. <http://dx.doi.org/10.1093/bioinformatics/btp163>, [website](https://biopython.org/)
