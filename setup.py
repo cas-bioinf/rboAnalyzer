@@ -33,6 +33,7 @@ setup(
         'pandas>=0.22',
         'PyPDF2',
         'biopython',
+        'argcomplete',
     ],
     packages=find_packages(),
     package_data=package_data,

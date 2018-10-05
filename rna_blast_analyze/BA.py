@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-import argparse
+# PYTHON_ARGCOMPLETE_OK
+import argcomplete, argparse
 import sys
 import json
 import os
 
 import logging
 # this must precede the CONFIG
+from rna_blast_analyze.BR_core.tools_versions import pred_method_required_tools, pred_params
+
 logger = logging.getLogger('rna_blast_analyze')
 
 ch = logging.StreamHandler()
@@ -13,14 +16,6 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 
 logger.addHandler(ch)
-
-
-from rna_blast_analyze.BR_core import BA_verify
-from rna_blast_analyze.BR_core import cmalign
-from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper_inner
-from rna_blast_analyze.BR_core.expand_by_BLAST import blast_wrapper_inner
-from rna_blast_analyze.BR_core.expand_by_joined_pred_with_rsearch import joined_wrapper_inner
-from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
 
 
 class ParseFilter(argparse.Action):
@@ -173,7 +168,7 @@ def f_parser():
         type=str,
         metavar='prediction_method_name',
         default=['pairwise_centroid_homfold', 'rfam_rnafoldc', 'rnafold'],
-        choices=BA_verify.pred_method_required_tools.keys(),
+        choices=pred_method_required_tools.keys(),
         help='Prediction method to use. Multiple are allowed.'
     )
     parameters_group.add_argument(
@@ -278,6 +273,7 @@ def f_parser():
         default=0,
         help='output verbosity -> most detailed -vv (lot of output)'
     )
+    argcomplete.autocomplete(parser)
     args = parser.parse_args()
     args.command = sys.argv
 
@@ -300,7 +296,7 @@ def f_parser():
     logger.setLevel(max(3 - args.verbose, 1) * 10)
 
     # check if prediction method params are valid
-    BA_verify.check_params(params)
+    check_params(params)
 
     args.pred_params = params
     return args
@@ -325,6 +321,16 @@ def main():
     # outer envelope for the script
     # ========= perform argument parsing =========
     args = f_parser()
+
+    # ========= imports ==========
+    # move slow imports here, so the argcomplete would be fast
+    from rna_blast_analyze.BR_core import BA_verify
+    from rna_blast_analyze.BR_core import cmalign
+    from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper_inner
+    from rna_blast_analyze.BR_core.expand_by_BLAST import blast_wrapper_inner
+    from rna_blast_analyze.BR_core.expand_by_joined_pred_with_rsearch import joined_wrapper_inner
+    from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
+
     logger.debug('parsed arguments: {}'.format(args))
 
     # create logging file if requested
@@ -370,5 +376,22 @@ def main():
         raise ValueError('Unknown option - should be cached by argparse.')
 
 
+def check_params(par: dict):
+    """
+    Verify if provided parameters are valid.
+    :param par:
+    :return:
+    """
+    known_methods = set(pred_method_required_tools.keys())
+    for provided_key in par.keys():
+        if provided_key not in known_methods:
+            raise ValueError("Method '{}' does not exist.".format(provided_key))
+        for pk in par[provided_key]:
+            if pk not in pred_params:
+                raise ValueError("Parameter '{}' for method '{}' does not exist.".format(pk, provided_key))
+
+
 if __name__ == '__main__':
     main()
+
+

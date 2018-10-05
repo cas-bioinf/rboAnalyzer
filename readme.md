@@ -40,7 +40,13 @@ Install all prequisities and run
 ```
 python3 setup.py install
 ```
+The pipeline is equipped with argument completion for bash shell.
+To enable this feature you need to register the script (more info [here][https://pypi.org/project/argcomplete/]).
 
+To get the autocompletion working run:
+```
+register-python-argcomplete rna_blast_analyze >> ~/.bashrc
+```
 
 ## Basic Usage
 ```

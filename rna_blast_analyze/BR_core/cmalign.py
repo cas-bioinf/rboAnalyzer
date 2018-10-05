@@ -1,7 +1,7 @@
 import os
 import re
 from io import StringIO
-from subprocess import call, check_output
+from subprocess import call, check_output, STDOUT
 from tempfile import mkstemp
 import logging
 import gzip
@@ -270,17 +270,19 @@ def download_cmmodels_file(path=None, url=None):
     if not os.path.exists(path):
         os.makedirs(path)
 
-    cmd = 'wget -N -P {} {}'.format(path, url)
+    cmd = ['wget', '-N', '-P', path, url]
     ml.debug(cmd)
-    r = check_output(cmd, shell=True)
 
-    if r:
+    print('Downloading RFAM database (aprox 300Mb). This may take a while...')
+    r = check_output(cmd, stderr=STDOUT)
+
+    if not r:
         msgfail = 'call to wget failed'
         ml.error(msgfail)
         ml.error(cmd)
         raise ChildProcessError(msgfail)
 
-    if 'Remote file no newer than local file ‘Rfam.cm.gz’ -- not retrieving.' in r:
+    if 'Remote file no newer than local file ‘Rfam.cm.gz’ -- not retrieving.' in r.decode():
         # do not download
         ml.info('No new data. Nothing to do.')
     else:
@@ -298,17 +300,21 @@ def download_cmmodels_file(path=None, url=None):
 def run_cmpress(file2process):
     ml.info('Running cmpress.')
     ml.debug(fname())
-    cmd = '{}cmpress -F {}'.format(
-        CONFIG.infernal_path,
-        file2process
-    )
-    ml.debug(cmd)
-    r = call(cmd, shell=True)
-    if r:
-        msgfail = 'call to cmpress failed'
-        ml.error(msgfail)
-        ml.error(cmd)
-        raise ChildProcessError(msgfail)
+    with open(os.devnull, 'w') as FNULL:
+        cmd = '{}cmpress -F {}'.format(
+            CONFIG.infernal_path,
+            file2process
+        )
+        ml.debug(cmd)
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(cmd, shell=True, stdout=FNULL, stderr=FNULL)
+        if r:
+            msgfail = 'call to cmpress failed'
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
 
 
 def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
