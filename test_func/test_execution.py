@@ -7,6 +7,7 @@ from subprocess import call
 import pandas as pd
 from Bio import SeqIO
 
+from rna_blast_analyze.BR_core.tools_versions import pred_method_required_tools
 from rna_blast_analyze.BR_core.BA_support import remove_files_with_try, parse_named_structure_file
 from rna_blast_analyze.BR_core.convert_classes import blastsearchrecomputefromdict
 from rna_blast_analyze.BR_core.expand_by_BLAST import blast_wrapper_inner
@@ -381,6 +382,77 @@ class TestDirectExecution(unittest.TestCase):
             ''
         )
 
+    def test_BA_rfam(self):
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
+            '--mode', 'simple',
+            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--b_type', 'plain',
+            '--html', self.html,
+            '--json', self.json,
+            '--csv', self.csv,
+            '--pandas_dump', self.pandas_dump,
+            '--prediction_method', 'rnafold',
+            '--use_rfam',
+        ]
+        bb = call(a, cwd=root)
+        self.assertEqual(bb, 0)
+
+        t = tab_output_equal(
+            csvfile=self.csv,
+            jsonfile=self.json,
+            pdfile=self.pandas_dump,
+        )
+        self.assertTrue(t)
+
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
+            ],
+            ''
+        )
+
+    def test_BA_cm_file(self):
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
+            '--mode', 'simple',
+            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--b_type', 'plain',
+            '--html', self.html,
+            '--json', self.json,
+            '--csv', self.csv,
+            '--pandas_dump', self.pandas_dump,
+            '--prediction_method', 'rnafold',
+            '--cm_file', os.path.join(fwd, test_data_dir, 'RF00001.cm'),
+            '-vv'
+        ]
+        bb = call(a, cwd=root)
+        self.assertEqual(bb, 0)
+
+        t = tab_output_equal(
+            csvfile=self.csv,
+            jsonfile=self.json,
+            pdfile=self.pandas_dump,
+        )
+        self.assertTrue(t)
+
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
+            ],
+            ''
+        )
+
 
 def tab_output_equal(csvfile=None, jsonfile=None, pdfile=None, fastafile=None, fastastructures=None):
     c = None
@@ -424,7 +496,7 @@ def tab_output_equal(csvfile=None, jsonfile=None, pdfile=None, fastafile=None, f
 
 def tab_output_equal_structures(csvfile=None, jsonfile=None, pdfile=None, fastastructures=None):
 
-    names = BA_verify.pred_method_required_tools.keys()
+    names = pred_method_required_tools.keys()
 
     cc = None
     jj = None

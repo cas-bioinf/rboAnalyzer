@@ -8,6 +8,7 @@ from rna_blast_analyze.BR_core.stockholm_alig import StockholmAlig
 from rna_blast_analyze.BR_core.stockholm_parser import read_st
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
+import shutil
 
 ml = logging.getLogger(__name__)
 
@@ -24,7 +25,11 @@ def infer_homology(analyzed_hits, args):
     if args.cm_file:
         # use provided cm file
         ml.info('Infer homology - using provided CM file: {}'.format(args.cm_file))
-        cm_model_file = args.cm_file
+        fd, cm_model_file = mkstemp()
+        os.close(fd)
+        ml.debug('Making a copy of provided cm model file to: {}'.format(cm_model_file))
+        shutil.copy(args.cm_file, cm_model_file)
+
     elif args.use_rfam:
         ml.info('Infer homology - using RFAM')
         # find and extract cm model
