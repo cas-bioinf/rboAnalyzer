@@ -13,7 +13,6 @@ from rna_blast_analyze.BR_core.convert_classes import blastsearchrecomputefromdi
 from rna_blast_analyze.BR_core.expand_by_BLAST import blast_wrapper_inner
 from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper_inner
 from rna_blast_analyze.BR_core.expand_by_joined_pred_with_rsearch import joined_wrapper_inner
-from rna_blast_analyze.BR_core import BA_verify
 from test_func.pseudoargs_class import Pseudoargs
 
 # test SE

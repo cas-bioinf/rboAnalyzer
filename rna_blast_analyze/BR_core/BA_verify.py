@@ -22,14 +22,14 @@ def verify_query_blast(blast, query):
     :return:
     """
     if not (query.id == blast.query or query.description == blast.query):
-        ml.warn(
+        ml.warning(
             'Provided query id ({}) do not match query id in BLAST output ({})'.format(
                 query.id,
                 blast.query
             )
         )
     if len(query) != blast.query_length:
-        ml.warn(
+        ml.warning(
             'Provided query lenght ({}: {}) do not match BLAST query length ({}: {}).'.format(
                 query.id,
                 len(query),
@@ -63,15 +63,15 @@ def verify_blastdbcmd(minimal_version):
                     ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    ml.warn(msgversion)
+                    ml.warning(msgversion)
                     return False
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -95,15 +95,15 @@ def verify_locarna(minimal_version):
                     ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    ml.warn(msgversion)
+                    ml.warning(msgversion)
                     return False
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -128,16 +128,16 @@ def verify_infernal(program, minimal_version):
                     ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    ml.warn(msgversion)
+                    ml.warning(msgversion)
                     return False
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
-        raise
+        ml.warning(msgpath)
+        return False
 
 
 def verify_viennarna_program(program, minimal_version):
@@ -159,15 +159,15 @@ def verify_viennarna_program(program, minimal_version):
                     ml.info(msgsuccess)
                     return True
                 elif int(v) < minv:
-                    ml.warn(msgversion)
+                    ml.warning(msgversion)
                     return False
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -200,10 +200,10 @@ def verify_vrna_refold():
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -227,15 +227,15 @@ def verify_clustalo(minimal_version):
                     ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    ml.warn(msgversion)
+                    ml.warning(msgversion)
                     return False
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -259,15 +259,15 @@ def verify_muscle(minimal_version):
                     ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    ml.warn(msgversion)
+                    ml.warning(msgversion)
                     return False
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -295,18 +295,18 @@ def verify_tcoffee(minimal_version):
                         ml.info(msgsuccess)
                         return True
                     elif v < minv:
-                        ml.warn(msgversion)
+                        ml.warning(msgversion)
                         return False
                 ml.info(msgsuccess)
                 return True
             else:
-                ml.warn(msgversion)
+                ml.warning(msgversion)
                 return False
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -316,7 +316,7 @@ def verify_rcoffee(minimal_version):
     msgsuccess = 't_coffee -mode rcoffee is installed in required version'
 
     if not verify_tcoffee(minimal_version):
-        ml.warn(
+        ml.warning(
             't_coffee is not installed in required version, required is {}.{}'.format(
                 *minimal_version
             )
@@ -345,11 +345,11 @@ def verify_rcoffee(minimal_version):
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
 
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -380,15 +380,15 @@ def verify_centroid_homfold(minimal_version):
                     ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    ml.warn(msgversion)
+                    ml.warning(msgversion)
                     return False
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -418,15 +418,15 @@ def verify_turbofold(minimal_version):
                     ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    ml.warn(msgversion)
+                    ml.warning(msgversion)
                     return False
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -466,15 +466,15 @@ def verify_mfold(minimal_version):
                     ml.info(msgsuccess)
                     return True
                 elif v < minv:
-                    ml.warn(msgversion)
+                    ml.warning(msgversion)
                     return False
             ml.info(msgsuccess)
             return True
         else:
-            ml.warn(msgversion)
+            ml.warning(msgversion)
             return False
     except FileNotFoundError:
-        ml.warn(msgpath)
+        ml.warning(msgpath)
         return False
 
 
@@ -585,7 +585,7 @@ def check_necessery_tools(methods):
         msgfail = 'Please provide DATAPATH for Turbofold from RNAstructure package. Either as DATAPATH ' \
                   'environment variable or as rnastructure_DATAPATH entry in config DATA section.'
         if not verify_turbofold_datapath():
-            ml.warn('The turbofold is installed but the DATAPATH environment variable is not set nor present in config.txt.')
+            ml.warning('The turbofold is installed but the DATAPATH environment variable is not set nor present in config.txt.')
             is_conda = os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
             if is_conda:
                 ml.info('Trying to find required data in "CONDA_ROOT/share"')

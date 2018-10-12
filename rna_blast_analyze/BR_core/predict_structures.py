@@ -1665,7 +1665,7 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
         try:
             rmtree(exe_path)
         except OSError:
-            ml.warn('cleanup after tcoffee unsuccessfull - Directory: {} not found.'.format(exe_path))
+            ml.warning('cleanup after tcoffee unsuccessfull - Directory: {} not found.'.format(exe_path))
 
         remove_files_with_try(
             (tcoffee_temp_files, outfile + '.html'),
@@ -1859,7 +1859,7 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
 
     def _try_rescue(profile_file):
         # beware AlignIO truncates sequence names so they become non-unique, then clustalo also fails
-        ml.warn('Trying rescue for profile alignment if profile ha no gaps clustalo things, '
+        ml.warning('Trying rescue for profile alignment if profile ha no gaps clustalo things, '
                 'that sequences are no aligned. Appendig trailing gap to overcome the issue.')
         a = AlignIO.read(profile_file, format='clustal')
         s = [SeqRecord(Seq(str(i.seq) + '-'), id=i.id) for i in a]
@@ -1892,7 +1892,7 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
             r = call(cmd, shell=True, stdout=FNULL, stderr=FNULL)
 
         if r:
-            ml.warn('Profile align failed.')
+            ml.warning('Profile align failed.')
 
             # Initiate rescue attempt
             rewriten_msa = _try_rescue(msa_file)

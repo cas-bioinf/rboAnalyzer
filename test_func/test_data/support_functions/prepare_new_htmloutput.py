@@ -1,8 +1,8 @@
 import os
 import json
 from rna_blast_analyze.BR_core import convert_classes
-import gzip
 import tempfile
+import hashlib
 
 
 def prepare_new_htmlout():
@@ -15,9 +15,10 @@ def prepare_new_htmlout():
     bb.to_html(
         html_file
     )
-    target = os.path.abspath(os.path.dirname(__file__) + '/../RF00001_reference_output.html.gz')
-    with open(html_file, 'rb') as f, gzip.open(target, 'wb') as t:
-        t.write(f.read())
+
+    target = os.path.abspath(os.path.dirname(__file__) + '/../RF00001_reference_output.html.md5')
+    with open(html_file, 'rb') as f, open(target, 'w') as t:
+        t.write(hashlib.md5(f.read()).hexdigest())
 
     os.remove(html_file)
 

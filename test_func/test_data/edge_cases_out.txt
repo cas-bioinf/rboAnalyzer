@@ -1,0 +1,299 @@
+BLASTN 2.2.28+
+
+
+Reference: Zheng Zhang, Scott Schwartz, Lukas Wagner, and Webb
+Miller (2000), "A greedy algorithm for aligning DNA sequences", J
+Comput Biol 2000; 7(1-2):203-14.
+
+
+
+Database: db1.fa
+           16 sequences; 1,020 total letters
+
+
+
+Query= q
+
+Length=60
+                                                                      Score     E
+Sequences producing significant alignments:                          (Bits)  Value
+
+lcl|LT311116.1  ext rc                                                 111    9e-30
+lcl|LT311115.1  ext rc                                                 111    9e-30
+lcl|LT311114.1  ext                                                    111    9e-30
+lcl|LT311113.1  ext                                                    111    9e-30
+lcl|LT311112.1  ext rc                                                 111    9e-30
+lcl|LT311111.1  ext                                                    111    9e-30
+lcl|LT411114.1  missing 10 left add 20 right rc                       93.5    3e-24
+lcl|LT411113.1  missing 10 right add 20 left rc                       93.5    3e-24
+lcl|LT411112.1  missing 10 left add 20 right                          93.5    3e-24
+lcl|LT411111.1  missing 10 right add 20 left                          93.5    3e-24
+lcl|LT211112.1  missing 10 right rc                                   93.5    3e-24
+lcl|LT211111.1  missing 10 left rc                                    93.5    3e-24
+lcl|LT111112.1  missing 10 right                                      93.5    3e-24
+lcl|LT111111.1  missing 10 left                                       93.5    3e-24
+lcl|LT211113.1  missing 10 both rc                                    75.0    1e-18
+lcl|LT111113.1  missing 10 both                                       75.0    1e-18
+
+
+>lcl|LT311116.1 ext rc
+Length=80
+
+ Score =  111 bits (60),  Expect = 9e-30
+ Identities = 60/60 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Minus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  75  ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  16
+
+
+>lcl|LT311115.1 ext rc
+Length=80
+
+ Score =  111 bits (60),  Expect = 9e-30
+ Identities = 60/60 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Minus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  65  ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  6
+
+
+>lcl|LT311114.1 ext
+Length=80
+
+ Score =  111 bits (60),  Expect = 9e-30
+ Identities = 60/60 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Plus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  6   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  65
+
+
+>lcl|LT311113.1 ext
+Length=80
+
+ Score =  111 bits (60),  Expect = 9e-30
+ Identities = 60/60 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Plus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  16  ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  75
+
+
+>lcl|LT311112.1 ext rc
+Length=70
+
+ Score =  111 bits (60),  Expect = 9e-30
+ Identities = 60/60 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Minus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  65  ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  6
+
+ Score =  111 bits (60),  Expect = 7e-30
+ Identities = 60/60 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Minus
+
+Query  6   AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           |||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  60  AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  6
+
+
+ Score =  111 bits (60),  Expect = 7e-30
+ Identities = 60/60 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Minus
+
+Query  6   AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGAC  55
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  60  AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGAC  11
+
+ Score =  111 bits (60),  Expect = 7e-30
+ Identities = 60/60 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Minus
+
+Query  6   AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGAC  55
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  60  AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGAC  11
+
+>lcl|LT311111.1 ext
+Length=70
+
+ Score =  111 bits (60),  Expect = 9e-30
+ Identities = 60/60 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Plus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  6   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  65
+
+ Score =  111 bits (55),  Expect = 7e-30
+ Identities = 55/55 (100%), Gaps = 0/55 (0%)
+ Strand=Plus/Plus
+
+Query  6   AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           |||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  11  AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  65
+
+
+ Score =  111 bits (55),  Expect = 7e-30
+ Identities = 55/55 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Plus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGAC  55
+           |||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  6   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGAC  60
+
+
+ Score =  111 bits (60),  Expect = 7e-30
+ Identities = 60/60 (100%), Gaps = 0/60 (0%)
+ Strand=Plus/Plus
+
+Query  6   AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGAC  55
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  11  AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGAC  60
+
+>lcl|LT411114.1 missing 10 left add 20 right rc
+Length=70
+
+ Score = 93.5 bits (50),  Expect = 3e-24
+ Identities = 50/50 (100%), Gaps = 0/50 (0%)
+ Strand=Plus/Minus
+
+Query  11  GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  70  GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  21
+
+
+>lcl|LT411113.1 missing 10 right add 20 left rc
+Length=70
+
+ Score = 93.5 bits (50),  Expect = 3e-24
+ Identities = 50/50 (100%), Gaps = 0/50 (0%)
+ Strand=Plus/Minus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  50
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  50  ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  1
+
+
+>lcl|LT411112.1 missing 10 left add 20 right
+Length=70
+
+ Score = 93.5 bits (50),  Expect = 3e-24
+ Identities = 50/50 (100%), Gaps = 0/50 (0%)
+ Strand=Plus/Plus
+
+Query  11  GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  1   GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  50
+
+
+>lcl|LT411111.1 missing 10 right add 20 left
+Length=70
+
+ Score = 93.5 bits (50),  Expect = 3e-24
+ Identities = 50/50 (100%), Gaps = 0/50 (0%)
+ Strand=Plus/Plus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  50
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  21  ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  70
+
+
+>lcl|LT211112.1 missing 10 right rc
+Length=50
+
+ Score = 93.5 bits (50),  Expect = 3e-24
+ Identities = 50/50 (100%), Gaps = 0/50 (0%)
+ Strand=Plus/Minus
+
+Query  11  GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  50  GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  1
+
+
+>lcl|LT211111.1 missing 10 left rc
+Length=50
+
+ Score = 93.5 bits (50),  Expect = 3e-24
+ Identities = 50/50 (100%), Gaps = 0/50 (0%)
+ Strand=Plus/Minus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  50
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  50  ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  1
+
+
+>lcl|LT111112.1 missing 10 right
+Length=50
+
+ Score = 93.5 bits (50),  Expect = 3e-24
+ Identities = 50/50 (100%), Gaps = 0/50 (0%)
+ Strand=Plus/Plus
+
+Query  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  50
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  1   ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  50
+
+
+>lcl|LT111111.1 missing 10 left
+Length=50
+
+ Score = 93.5 bits (50),  Expect = 3e-24
+ Identities = 50/50 (100%), Gaps = 0/50 (0%)
+ Strand=Plus/Plus
+
+Query  11  GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+           ||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  1   GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  50
+
+
+>lcl|LT211113.1 missing 10 both rc
+Length=40
+
+ Score = 75.0 bits (40),  Expect = 1e-18
+ Identities = 40/40 (100%), Gaps = 0/40 (0%)
+ Strand=Plus/Minus
+
+Query  11  GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  50
+           ||||||||||||||||||||||||||||||||||||||||
+Sbjct  40  GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  1
+
+
+>lcl|LT111113.1 missing 10 both
+Length=40
+
+ Score = 75.0 bits (40),  Expect = 1e-18
+ Identities = 40/40 (100%), Gaps = 0/40 (0%)
+ Strand=Plus/Plus
+
+Query  11  GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  50
+           ||||||||||||||||||||||||||||||||||||||||
+Sbjct  1   GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC  40
+
+
+
+Lambda      K        H
+    1.33    0.621     1.12 
+
+Gapped
+Lambda      K        H
+    1.28    0.460    0.850 
+
+Effective search space used: 44676
+
+
+  Database: db1.fa
+    Posted date:  Oct 9, 2018  1:43 PM
+  Number of letters in database: 1,020
+  Number of sequences in database:  16
+
+
+
+Matrix: blastn matrix 1 -2
+Gap Penalties: Existence: 0, Extension: 2.5

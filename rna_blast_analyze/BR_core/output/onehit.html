@@ -67,6 +67,13 @@
             </div>
 
         {% endif %}
+        {% if len(data.msgs) != 0 %}
+            <div class="warnmsgs">
+                {% for msg in data.msgs %}
+                    <p class="warn">{{msg}}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
         </div>
     </div>
     {% endmacro %}
@@ -78,7 +85,11 @@
 
 {% block footer %}
 <h3 class="onehit_heading">
-    command and parameters
+    {% if len(foo.logdup) != 0 %}
+        Command, parameters and program log
+    {% else %}
+        Command and parameters
+    {% endif %}
 </h3>
 <div class="footerwrap">
     <p class="header-command"><u>executed command:</u></p>
@@ -91,6 +102,14 @@
             Unknown date.
         {% endif %}
     </p>
+    <div>
+        {% if len(foo.logdup) != 0 %}
+            <p><u>program log:</u></p>
+            {% for s in foo.logdup %}
+                <p class="warn">{{s}}</p>
+            {% endfor %}
+        {% endif %}
+    </div>
     <pre><u>parameters:</u>
 {% for par in foo.parameters %}
     <u>{{par[0]}}:</u> {{par[1]}}

@@ -41,7 +41,7 @@ def write_html_output(datain, template_path=''):
     try:
         os.chdir(CONFIG.html_template_dir)
         template = env.get_template('onehit.html')
-        html_str = template.render(input_list=toprint, foo=myfooter, strftime=strftime, hea=my_header)
+        html_str = template.render(input_list=toprint, foo=myfooter, strftime=strftime, hea=my_header, len=len)
     finally:
         os.chdir(cwd)
     return html_str
@@ -73,6 +73,7 @@ def _prepare_body(data):
         rr['pictures'] = _prepare_pictures(ext)
         rr['eval'] = onehit.source.annotations['blast'][1].expect
         rr['intid'] = str(i)
+        rr['msgs'] = onehit.source.annotations['msgs']
 
         # estimate the homology
         q_sc = data.query.annotations['cmstat']['bit_sc']
@@ -95,6 +96,9 @@ def _prepare_body(data):
         diff = 1000 + 2*len(ext)
         es -= diff
         ee += diff
+
+        if es < 0:
+            es = 1
 
         if getattr(data.args, 'show_gene_browser', False):
             rr['draw_seqview'] = True
@@ -170,5 +174,6 @@ def _prepare_footer(data):
         'command': command,
         'parameters': p_text,
         'exec_date': data.date_of_run,
+        'logdup': data.args.logmsgs
     }
     return prepared_footer_data

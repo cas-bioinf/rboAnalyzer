@@ -97,7 +97,7 @@ def joined_wrapper_inner(args_inner, shared_list=None):
             with open(blast_args.repredict_file, 'r') as barf, open(locarna_args.repredict_file, 'r') as larf, \
                     open(args_inner.repredict_file, 'w') as reprf:
                 """
-                please note that order of files to merge must be same as the order of methods in previos for cycle
+                please note that order of files to merge must be same as the order of methods in previous for cycle
                 ie same as the one in which order_out var is set
                 """
                 bb = (barf, larf)

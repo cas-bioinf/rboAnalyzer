@@ -21,7 +21,7 @@ ml = logging.getLogger(__name__)
 def structures2shape_virtualbox(infile, out_file=None, shape_level=5, params=''):
     ml.info('Running structures2shape in virtualbox.')
     ml.debug(fname())
-    ml.warn(
+    ml.warning(
         'Warning, this is rather slow, especially for long structures it can take minutes to finish one structure,'
         ' if you need abstraction level 5, consider switching to db2shape python implementation'
         ' also for LSSU ends in segfault (from my experience)'
@@ -347,7 +347,7 @@ def structures2shape(infile, out_file=None, shape_level=5, params=''):
     """
     ml.info('Running Structures2shape')
     ml.debug(fname())
-    ml.warn(
+    ml.warning(
         'Warning, this is rather slow, especially for long structures it can take minutes to finish one structure,'
         ' if you need abstraction level 5, consider switching to db2shape python implementation'
         ' also for LSSU ends in segfault (from my experience)'

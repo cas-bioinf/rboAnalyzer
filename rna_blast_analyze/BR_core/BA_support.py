@@ -19,7 +19,6 @@ from Bio.SeqRecord import SeqRecord
 
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
-from rna_blast_analyze.BR_core.parse_accession import accession_regex
 from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt as blast_minimal_parser
 
 # idiotic matplotlib
@@ -95,10 +94,10 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
         except ChildProcessError:
             # try again
             repeat += 1
-            ml.warn('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
+            ml.warning('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
 
     if repeat >= 5 and not done:
-        ml.warn(
+        ml.warning(
             'There is an issue with hybrid-ss-min, that it does not work for certain combination of energies,'
             ' window parameters and desired number of structures.'
             'The issue also appears to be related to exact order of sequences in the input file'
@@ -168,7 +167,7 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
                 # try again
                 repeat += 1
                 # adjust the max amount of produced structures
-                ml.warn('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
+                ml.warning('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
             finally:
                 if retry_path:
                     for ext in ['.run', '.plot', '.dG', '.ct', '.ann', '']:
@@ -176,13 +175,13 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
                             rpath = retry_path + ext
                             os.remove(rpath.strip())
                         except FileNotFoundError:
-                            ml.warn('cannot remove file: {}, file not found'.format(retry_path))
+                            ml.warning('cannot remove file: {}, file not found'.format(retry_path))
                         except OSError:
-                            ml.warn('cannot remove file: {}, file is directory'.format(retry_path))
+                            ml.warning('cannot remove file: {}, file is directory'.format(retry_path))
 
         if not done:
             # make last try: predict one by one
-            ml.warn('Last try to predict structures with hybrid-ss-min')
+            ml.warning('Last try to predict structures with hybrid-ss-min')
             suboptimals = []
             for seq in fasta_file:
 
@@ -398,158 +397,6 @@ def rc_hits_2_rna(seqs, strand=None):
                             annotations=seq.annotations,
                             description=seq.description))
     return out
-
-
-def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=None):
-    """takes list of blast.HSP objects as first argument and
-    path to local blast database as second argument
-    then it uses blastdbcmd from blast+ installation to obtain desired sequence
-    Two temporary files are used in this call and are deleted at final stage
-    :return list of SeqRecord objects (parsed fasta file)
-    """
-    ml.info('Retrieving sequence neighborhoods for blast hits.')
-    ml.debug(fname())
-    ext_try = ['nsd', 'nhr', 'nog', 'nsi', 'nin']
-    if not os.path.isfile(blast_db + '.nal'):
-        for ext in ext_try:
-            if not os.path.isfile(blast_db + '.' + ext):
-                raise FileNotFoundError('expected file : "' + blast_db + '.' + ext + '" was not found')
-
-    fd, temp_filename = mkstemp()
-    fdb, blast_tempfile = mkstemp()
-    os.close(fdb)
-    exp_hits = []
-    strand = []
-    loc = []
-    temp_file = os.fdopen(fd, 'w')
-    for i, hit in enumerate(hits):
-        # +1 here because blastdbcmd counts sequences from 1
-        if hit[1].sbjct_end < hit[1].sbjct_start:
-            # this is hit to minus strand
-            start = hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end) - extra
-            end = hit[1].sbjct_start + hit[1].query_start + extra - 1
-            strand.append(-1)
-            d = {'query_start': hit[1].sbjct_end, 'query_end': hit[1].sbjct_start,
-                 'extended_start': hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end),
-                 'extended_end': hit[1].sbjct_start + hit[1].query_start - 1,
-                 'strand': -1}
-        else:
-            # this is hit to plus strand
-            start = hit[1].sbjct_start - hit[1].query_start + 1 - extra
-            end = hit[1].sbjct_end + _positive_index(query_length - hit[1].query_end) + extra
-            strand.append(1)
-            d = {'query_start': hit[1].sbjct_start, 'query_end': hit[1].sbjct_end,
-                 'extended_start': hit[1].sbjct_start - hit[1].query_start + 1,
-                 'extended_end': hit[1].sbjct_end + _positive_index(query_length - hit[1].query_end),
-                 'strand': 1}
-
-        # ====== information about possible trim ======
-        # assume ok
-        d['trimmed_start'] = False
-        d['trimmed_end'] = False
-
-        if start <= 0:
-            start = 1
-            d['trimmed_start'] = True
-        d['super_start'] = start
-        d['super_end'] = end
-        # repair possible extended start violation
-        if d['extended_start'] < 1:
-            d['extended_start'] = 1
-            d['trimmed_start'] = True
-
-        # add blast record
-        d['blast'] = hit
-
-        # get a index name to the blastdb
-        if blast_regexp is None:
-            blast_regexp = accession_regex
-        hname = re.search(blast_regexp, hit[0])
-        if not hname:
-            print(blast_regexp)
-            raise RuntimeError('provided regexp returned no result for %s,'
-                               ' please provide regexp valid even for this name', hit[0])
-        bdb_accession = hname.group()
-        d['blast'][0] = bdb_accession
-        loc.append(d)
-
-        temp_file.write(bdb_accession + ' ' + '-region ' + str(start) + '-' + str(end) + '\n')
-
-    temp_file.close()
-
-    cmd = [
-            '{}blastdbcmd'.format(CONFIG.blast_path),
-            '-dbtype',
-            'nucl',
-            '-db',
-            str(blast_db),
-            '-entry_batch',
-            temp_filename,
-            '-out',
-            blast_tempfile
-        ]
-    ml.debug(cmd)
-    r_val = call(
-        cmd
-    )
-    if r_val:
-        msgfail = 'Unable to run blastdbcmd command, please check its availability.'
-        ml.error(msgfail)
-        ml.error(cmd)
-        ChildProcessError(msgfail)
-
-    # records at minus are not in rc
-    with open(blast_tempfile, 'r') as bf:
-        for i, parsed_record in enumerate(SeqIO.parse(bf, 'fasta')):
-            parsed_record.annotations = loc[i]
-            # add uid to ensure that all hits are unique
-            parsed_record.id = 'uid:' + str(i) + '|' + parsed_record.id
-
-            # ==================================================================
-            # add checking, that hits are retrieved whole for edgecases, when
-            # hit is close to begening or end of the database sequence
-            # repair possible extended end violation
-            # relevant to extended_end and super_end ? or super_end only
-            if loc[i]['super_start'] + len(parsed_record.seq) - 1 < loc[i]['super_end']:
-                ml.warn(
-                    'Sequence retrieved from database based on hit {} is shorther then expected.'
-                    'This either means database difference or that the hit is located near the end of the database '
-                    'and could not be extended as requested. Please note that when examining the results.'
-                    ''.format(parsed_record.id)
-                )
-                parsed_record.annotations['super_end'] = parsed_record.annotations['super_start'] + len(parsed_record.seq) - 1
-                parsed_record.annotations['trimmed_end'] = True
-
-                if loc[i]['super_start'] + len(parsed_record.seq) - 1 < loc[i]['extended_end']:
-                    ml.warn(
-                        'Retrieved sequence is shorter even for simple extention by unaligned length of query. '
-                        'We use whole avalible sequence as deposited in the database.'
-                    )
-
-                    parsed_record.annotations['extended_end'] = parsed_record['super_start'] + len(parsed_record.seq) - 1
-
-            exp_hits.append(parsed_record)
-    if not keep_all:
-        os.remove(temp_filename)
-        os.remove(blast_tempfile)
-
-    if len(exp_hits) != len(hits):
-        msgfail = 'Some IDs were not found in provided BLAST database.' \
-                  ' Please update the database or remove the hits.'
-        ml.error(msgfail)
-        raise LookupError(msgfail)
-    return exp_hits, strand
-
-
-def _positive_index(o):
-    """
-    this ensures that indexes stay positive and would not colapse extended sequence
-    :param o:
-    :return:
-    """
-    if o < 0:
-        o = 0
-    return o
 
 
 def blast_hsps2list(parsed_blast):
@@ -923,7 +770,7 @@ def run_rnaplot(seq, structure=None, format='svg', outfile=None):
         ml.error(msgfail)
         ml.error(cmd)
         os.chdir(currdirr)
-        raise ChildProcessError
+        raise ChildProcessError(msgfail)
 
     # output file is name of the sequence (in this case name of the file) + "_ss." + chosen format
     os.remove(tempfile)

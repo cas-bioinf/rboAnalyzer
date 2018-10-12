@@ -1,4 +1,4 @@
-blast_minimal_version = [2, 2, 28]
+blast_minimal_version = [2, 6, 0]
 locarna_minimal_version = [1, 9, 2]
 infernal_minimal_version = [1, 1, 2]
 vrna_minimal_version = [2, 3, 5]

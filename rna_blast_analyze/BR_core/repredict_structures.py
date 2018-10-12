@@ -125,7 +125,7 @@ def wrapped_ending_with_prediction(args_inner, analyzed_hits, all_hits_fasta, qu
         hit.templates = templates
 
     # remove uid from file descriptor
-    analyzed_hits = rna_blast_analyze.BR_core.BA_methods.cleanup_sequence_id(analyzed_hits)
+    rna_blast_analyze.BR_core.BA_methods.add_loc_to_description(analyzed_hits)
 
     # write html if requested
     if args_inner.html:
@@ -214,7 +214,7 @@ def create_nr_homolog_hits_file_MSA_safe(
     # what if trusted hit is only one?
     if len(nr_homolog_hits) < 2 and not check_unambiguous:
         # warn('Only one sequence is unique under defined sim_threshold_percent (including query)')
-        ml.warn(
+        ml.warning(
             'Only one sequence is unique under defined sim_threshold_percent (including query)\n'
             'Adding the most disimilar homologous sequence to non redundant sequences list'
         )
@@ -228,7 +228,7 @@ def create_nr_homolog_hits_file_MSA_safe(
             # this mean query contain ambiguos bases
             raise NoHomologousSequenceException
         else:
-            ml.warn(
+            ml.warning(
                 'Only one sequence is unique under defined sim_threshold_percent (including query)\n'
                 'Adding the most disimilar homologous sequence to non redundant sequences list'
             )
@@ -386,7 +386,7 @@ def nonhomseqwarn(method_name):
               method_name,
               ', '.join(safe_prediction_method)
           )
-    ml.warn(msg, RuntimeWarning)
+    ml.warning(msg, RuntimeWarning)
     sys.stderr.flush()
 
 
@@ -401,8 +401,9 @@ def annotate_ambiguos_bases(seqlist):
                 m.group(),
                 m.start()
             )
-            ml.warn(msg)
+            ml.warning(msg)
             seq.annotations['ambiguous'] = True
+            seq.annotations['msgs'].append(msg)
         else:
             seq.annotations['ambiguous'] = False
 

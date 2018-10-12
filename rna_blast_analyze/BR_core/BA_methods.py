@@ -304,14 +304,8 @@ def to_tab_delim_header(input_args):
     return '\t'.join(B)
 
 
-def cleanup_sequence_id(analyzed_hits):
-    out = analyzed_hits.copy()
-    out.hits = HitList()
+def add_loc_to_description(analyzed_hits):
     for hit in analyzed_hits.hits:
-        nhid = re.sub('uid:\d+\|', '', hit.subs[hit.ret_keys[0]].id)
-        sp = nhid.split(':')
-        nhid = ':'.join(sp[:-1]) + ':{}-{}{}'.format(hit.best_start, hit.best_end, nhid[-2:])
-        hit.subs[hit.ret_keys[0]].id = nhid
-        hit.source.id = re.sub('uid:\d+\|', '', hit.source.id)
-        out.hits.append(hit)
-    return out
+        d2a = ' {}-{}'.format(hit.best_start, hit.best_end)
+        hit.source.description += d2a
+        hit.subs[hit.ret_keys[0]].description += d2a

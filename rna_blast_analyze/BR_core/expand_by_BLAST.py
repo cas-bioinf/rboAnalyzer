@@ -35,6 +35,7 @@ from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
+import rna_blast_analyze.BR_core.extend_hits
 from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
 from rna_blast_analyze.BR_core.blast_hits_merging import merge_blast_hits
 from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
@@ -52,6 +53,83 @@ def blast_wrapper(args_inner, shared_list=None):
     ml.debug(fname())
     ret_line, _ = blast_wrapper_inner(args_inner, shared_list=shared_list)
     return ret_line
+
+
+def trim_before(seqs):
+    nseqs = []
+    for seq in seqs:
+        ann = seq.annotations
+        tss = ann['trimmed_ss']
+        tse = ann['trimmed_se']
+        tes = ann['trimmed_es']
+        tee = ann['trimmed_ee']
+
+        if not tss and not tse and not tes and not tee:
+            # |-----|----------|---|-------------|-----|
+            s = ann['extended_start'] - ann['super_start']
+            e = ann['extended_end'] - ann['super_end']
+        elif tss and not tse and not tes and not tee:
+            # |---:--|----------|---|-------------|-----|
+            s = ann['extended_start'] - 1
+            e = ann['extended_end']
+        elif not tss and tse and not tes and not tee:
+            # |-----|----------|---|-------------|---:--|
+            s = ann['extended_start'] - ann['super_start']
+            e = ann['extended_end'] - ann['super_start'] + 1
+        elif tss and tse and not tes and not tee:
+            # |--:---|----------|---|-------------|---:--|
+            if ann['strand'] == -1:
+                s = len(seq.seq) - ann['extended_end']
+                e = len(seq.seq) - ann['extended_start'] + 1
+            else:
+                s = ann['extended_start'] - 1
+                e = ann['extended_end']
+        elif tss and not tse and tes and not tee:
+            # |-----|----:------|---|-------------|-----|
+            s = 0
+            e = ann['extended_end']
+        elif not tss and tse and not tes and tee:
+            # |-----|----------|---|-------:------|-----|
+            s = ann['extended_start'] - ann['super_start']
+            e = ann['extended_end'] - ann['super_start'] + 1
+        elif tss and tse and tes and tee:
+            # |-----|----:------|---|------:-------|-----|
+            s = 0
+            e = len(seq.seq)
+        elif tss and tse and tee and not tes:
+            # |--:---|----------|---|------:-------|-----|
+            s = ann['extended_start'] - 1
+            e = len(seq.seq[s:])
+        elif tss and tes and tse and not tee:
+            # |-----|-----:-----|---|-------------|--:---|
+            s = 0
+            e = ann['extended_end']
+        else:
+            raise NotImplementedError('Unexpected combination when trimming extended sequence.')
+
+        nseq = seq[s:e]
+        nseq.annotations = ann
+        nseqs.append(nseq)
+    return nseqs
+
+
+def compute_true_location_se(hit):
+    hh = hit.subs[hit.ret_keys[0]]
+    ann = hh.annotations
+    if ann['strand'] == -1:
+        if ann['trimmed_es']:
+            s = 0
+        else:
+            s = ann['blast'][1].sbjct_end - ann['blast'][1].query_start
+        e = s + len(hh.seq)
+    else:
+        if ann['trimmed_es']:
+            s = 0
+        else:
+            s = ann['blast'][1].sbjct_start - ann['blast'][1].query_start
+        e = s + len(hh.seq)
+
+    return s, e
 
 
 def blast_wrapper_inner(args_inner, shared_list=None):
@@ -102,17 +180,21 @@ def blast_wrapper_inner(args_inner, shared_list=None):
             raise ValueError('No BLAST hits after filtering.')
 
         # expand hits according to query + 10 nucleotides +-
-        shorts_expanded, _ = BA_support.expand_hits(
+        shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits(
             all_short,
             args_inner.blast_db,
             bhp.query_length,
             extra=args_inner.subseq_window_simple_ext,
-            blast_regexp=args_inner.blast_regexp
+            blast_regexp=args_inner.blast_regexp,
+            skip_missing=args_inner.skip_missing,
+            msgs=args_inner.logmsgs,
         )
 
         # check, if blast hits are non - overlapping, if so, add the overlapping hit info to the longer hit
         # reflect this in user output
-        shorts_expanded = merge_blast_hits(shorts_expanded)
+        # shorts_expanded = merge_blast_hits(shorts_expanded)
+
+        shorts_expanded = trim_before(shorts_expanded)
 
         shorts_expanded = BA_support.rc_hits_2_rna(shorts_expanded)
 
@@ -125,26 +207,30 @@ def blast_wrapper_inner(args_inner, shared_list=None):
         analyzed_hits.query = query
 
         def create_blast_only_report_object(exp_hit, query_len):
-            # get extension by blast indices
-            # create new record by those indices
-            s = exp_hit.annotations['extended_start'] - exp_hit.annotations['super_start']
-            e = exp_hit.annotations['extended_end'] - exp_hit.annotations['super_end']
-
-            nseq = exp_hit.seq[s:e]
-            nr = SeqRecord(nseq, id=exp_hit.id, description='')
-
-            nr.letter_annotations['ss0'] = '.' * len(nr.seq)
-            nr.annotations['sss'] = ['ss0']
-
+            # init new Subsequences object
+            #  here the object source shadows the final hit
             hit = BA_support.Subsequences(exp_hit)
-            sub_id = nr.id[:-2].split(':')[1]
-            hit.subs[sub_id] = nr
 
-            pos_match = re.search(str(nr.seq), str(exp_hit.seq), flags=re.IGNORECASE)
+            # init new SeqRecord object
+            ns = deepcopy(exp_hit)
+            ann = ns.annotations
+            tss = ann['trimmed_ss']
+            tse = ann['trimmed_se']
+            tes = ann['trimmed_es']
+            tee = ann['trimmed_ee']
+
+            ns.letter_annotations['ss0'] = '.' * len(ns.seq)
+            ns.annotations['sss'] = ['ss0']
+            ns.description = ''
+
+            sub_id = ns.id[:-2].split(':')[1]
+            hit.subs[sub_id] = ns
+
+            pos_match = re.search(str(ns.seq), str(ns.seq), flags=re.IGNORECASE)
             if not pos_match:
                 raise Exception('Subsequnce not found in supersequence.')
 
-            bl = exp_hit.annotations['blast'][1]
+            bl = ns.annotations['blast'][1]
 
             if bl.sbjct_start < bl.sbjct_end:
                 bls = bl.sbjct_start - bl.query_start + 1
@@ -156,18 +242,19 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 raise Exception('Unknown strand option.')
 
             # if whole subject sequence too short, this assertion will fail
-            if exp_hit.annotations['trimmed_start'] or exp_hit.annotations['trimmed_end']:
-                ml.warn('Skipping check ({}) - subject sequence too short.'.format(exp_hit.id))
+            if tss or tse or tes or tee:
+                ml.warning('Skipping check ({}) - subject sequence too short.'.format(ns.id))
             else:
-                assert len(nr.seq) == abs(bls - ble) + 1
-                assert bls == exp_hit.annotations['extended_start']
-                assert ble == exp_hit.annotations['extended_end']
+                assert len(ns.seq) == abs(bls - ble) + 1
+                assert bls == ns.annotations['extended_start']
+                assert ble == ns.annotations['extended_end']
 
             hit.ret_keys = [sub_id,
                             'ss0',
                             None]
-            hit.best_start = hit.source.annotations['super_start'] + pos_match.span()[0]
-            hit.best_end = hit.source.annotations['super_start'] + pos_match.span()[1] - 1
+
+            hit.best_start, hit.best_end = compute_true_location_se(hit)
+
             return hit
 
         # blast only extension

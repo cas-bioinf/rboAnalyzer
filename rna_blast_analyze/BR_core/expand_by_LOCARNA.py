@@ -37,6 +37,7 @@ from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
+import rna_blast_analyze.BR_core.extend_hits
 from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
 from rna_blast_analyze.BR_core.alifold4all import compute_refold
 from rna_blast_analyze.BR_core.blast_hits_merging import merge_blast_hits
@@ -176,17 +177,19 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
             raise ValueError('No BLAST hits after filtering.')
 
         # expand hits according to query + 10 nucleotides +-
-        shorts_expanded, _ = BA_support.expand_hits(
+        shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits(
             all_short,
             args_inner.blast_db,
             bhp.query_length,
             extra=args_inner.subseq_window_locarna,
-            blast_regexp=args_inner.blast_regexp
+            blast_regexp=args_inner.blast_regexp,
+            skip_missing=args_inner.skip_missing,
+            msgs=args_inner.logmsgs,
         )
 
         # check, if blast hits are non - overlapping, if so, add the overlapping hit info to the longer hit
         # reflect this in user output
-        shorts_expanded = merge_blast_hits(shorts_expanded)
+        # shorts_expanded = merge_blast_hits(shorts_expanded)
 
         shorts_expanded = BA_support.rc_hits_2_rna(shorts_expanded)
 
@@ -389,9 +392,22 @@ def create_report_object_from_locarna(exp_hit, locarna_alig):
     hit.ret_keys = [sub_id,
                     'ss0',
                     None]
-    hit.best_start = hit.source.annotations['super_start'] + pos_match.span()[0]
-    hit.best_end = hit.source.annotations['super_start'] + pos_match.span()[1] - 1
+
+    hit.best_start, hit.best_end = compute_true_location_locarna(hit, pos_match)
+
     return hit
+
+
+def compute_true_location_locarna(hit, match):
+    start, end = match.span()
+    if hit.source.annotations['trimmed_ss']:
+        s = start
+    else:
+        s = hit.source.annotations['super_start'] + start
+
+    e = end - start + s
+
+    return s, e
 
 
 def to_rna(seq):

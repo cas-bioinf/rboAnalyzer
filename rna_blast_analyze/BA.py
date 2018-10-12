@@ -6,13 +6,15 @@ import json
 import os
 
 import logging
+
 # this must precede the CONFIG
 from rna_blast_analyze.BR_core.tools_versions import pred_method_required_tools, pred_params
 
 logger = logging.getLogger('rna_blast_analyze')
 
 ch = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 
 logger.addHandler(ch)
@@ -169,38 +171,44 @@ def f_parser():
         metavar='prediction_method_name',
         default=['pairwise_centroid_homfold', 'rfam_rnafoldc', 'rnafold'],
         choices=pred_method_required_tools.keys(),
-        help='Prediction method to use. Multiple are allowed.'
+        help='Prediction method to use. Multiple prediction methods are allowed.'
     )
     parameters_group.add_argument(
         '--pm_param_file',
         type=str,
         metavar='PATH',
         default=None,
-        help='File with parameters for prediction methods in JSON. Nondeclared prediction methods treated as defaults.'
+        help="Path to file with parameters for prediction methods in JSON. "
+             "Prediction methods not declared within provided file are used with default values. "
+             "File is in json format. Default values (also example how to provide parameters) are stored in "
+             "'[install location]/rna_blast_analyze/BR_core/prediction_parameters.json'"
     )
     misc_group.add_argument(
         '--logfile',
         type=str,
         default=None,
-        metavar='logfile'
+        metavar='logfile',
+        help='Path to where logfile should be written.'
     )
-    # todo add help
     parameters_group.add_argument(
         '--subseq_window_simple_ext',
         type=int,
         default=10,
-        help=argparse.SUPPRESS
+        help=argparse.SUPPRESS,
+        # help='N of nucleotides to add to expected start/end of sequence.'
     )
     parameters_group.add_argument(
         '--subseq_window_locarna',
         type=int,
         default=30,
-        help='N of nucleotides to add before realignment.'
+        help='N of nucleotides to add to expected start/end of sequence before realignement. '
+             'The unaligned nucleotides are not included in reported sequence.'
     )
     parameters_group.add_argument(
         '--locarna_params',
         type=str,
         default='--struct-local=0 --sequ-local=0 --free-endgaps=++++',
+        help="Parameters for locarna execution. Used when 'mode' is 'locarna' or 'joined'."
     )
     parameters_group.add_argument(
         '--locarna_anchor_length',
@@ -273,6 +281,14 @@ def f_parser():
         default=0,
         help='output verbosity -> most detailed -vv (lot of output)'
     )
+    misc_group.add_argument(
+        '--skip_missing',
+        action='store_true',
+        default=False,
+        help='If given, the missing records in given blast database will be skipped.'
+             ' This may alter the results of bit_score computation (for homology prediction)'
+             ' and secondary structure prediction for several methods.'
+    )
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
     args.command = sys.argv
@@ -331,6 +347,7 @@ def main():
     from rna_blast_analyze.BR_core.expand_by_joined_pred_with_rsearch import joined_wrapper_inner
     from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
 
+    args.logmsgs = []
     logger.debug('parsed arguments: {}'.format(args))
 
     # create logging file if requested

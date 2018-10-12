@@ -52,6 +52,7 @@ class Pseudoargs(Namespace):
             zip_json=False,
             filter_by_eval=None,
             filter_by_bitscore=None,
+            skipp_missing=False,
             **kwargs):
         super().__init__(**kwargs)
         self.blast_in = blast_in
@@ -94,7 +95,8 @@ class Pseudoargs(Namespace):
         self.zip_json = zip_json
         self.filter_by_eval = filter_by_eval
         self.filter_by_bitscore = filter_by_bitscore
-
+        self.skip_missing = skipp_missing
+        self.logmsgs = []
         self.dev_pred = dev_pred
 
         if 0 < pred_sim_threshold_percent <= 100:

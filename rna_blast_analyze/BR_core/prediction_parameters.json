@@ -42,6 +42,7 @@
     "query_max_len_diff": 0.1
   }, 
   "subopt_fold_query": {
+    "mfold": [10, 2, 60]
   },
   "subopt_fold_clustal_alifold": {
     "cmscore_percent": 80,

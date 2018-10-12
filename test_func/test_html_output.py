@@ -2,7 +2,7 @@ import os
 import json
 import unittest
 import tempfile
-import gzip
+import hashlib
 
 from rna_blast_analyze.BR_core import convert_classes
 
@@ -21,21 +21,13 @@ class TestHTMLoutput(unittest.TestCase):
         bb = convert_classes.blastsearchrecomputefromdict(mydata)
         bb.to_html(self.htmlo)
         try:
-            # self.assertTrue(
-            #     filecmp.cmp(
-            #         self.htmlo + '.gz',
-            #         os.path.abspath(
-            #             os.path.dirname(__file__) + '/test_data/RF00001_reference_output.html.gz'
-            #         )
-            #     )
-            # )
-            with open(self.htmlo, 'rb') as f, gzip.open(
+            with open(self.htmlo, 'rb') as f, open(
                 os.path.abspath(
-                    os.path.dirname(__file__) + '/test_data/RF00001_reference_output.html.gz'
+                    os.path.dirname(__file__) + '/test_data/RF00001_reference_output.html.md5'
                 )
             ) as r:
                 self.assertEqual(
-                    f.read(),
+                    hashlib.md5(f.read()).hexdigest(),
                     r.read()
                 )
         finally:
