@@ -154,7 +154,7 @@ def f_parser():
     misc_group.add_argument(
         '--version',
         action='version',
-        version='%(prog)s 0.0.1'
+        version='%(prog)s 0.0.4'
     )
     parameters_group.add_argument(
         '--config_file',

@@ -15,7 +15,7 @@ package_data = {
 
 setup(
     name='rna_blast_analyze',
-    version='0.0.2',
+    version='0.0.4',
     description='Analyze BLAST output for RNA query',
     author='Marek Schwarz',
     author_email='marek.schwarz@biomed.cas.cz',
