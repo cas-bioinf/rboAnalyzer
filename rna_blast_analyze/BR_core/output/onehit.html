@@ -4,7 +4,10 @@
 {% endblock %}
 {% block content %}
     {% macro create_onehit(data) %}
-    <div class="onehit" data-brna_sequence="{{data.sequence}}" data-brna_seqname="{{data.seqname}}"
+    <div class="onehit"
+         id="{{data.intid}}onehit"
+         data-brna_sequence="{{data.sequence}}"
+         data-brna_seqname="{{data.seqname}}"
          data-eval="{{data.eval}}">
         <h3 class="onehit_heading" style="background:{{data.h_color}};">
             Hit: {{data.source_seq_name}}
@@ -21,11 +24,11 @@
                     <table>
                         <tr>
                             <th class="left" scope="row">sequence start:</th>
-                            <td class="right">{{data.ext_start}}</td>
+                            <td class="right" id="{{data.intid}}SeqStart">{{data.ext_start}}</td>
                         </tr>
                         <tr>
                             <th class="left" scope="row">sequence end:</th>
-                            <td class="right">{{data.ext_end}}</td>
+                            <td class="right" id="{{data.intid}}SeqEnd">{{data.ext_end}}</td>
                         </tr>
                         <tr>
                             <th class="left" scope="row">RSEARCH bits score:</th>
@@ -39,26 +42,25 @@
                 </div>
                 <div class="repitem">
                     <div>
-                        <label for="indivSequenceCheckbox"><u>Extended sequence fasta:</u></label>
-                        <input type="checkbox" class="individualSequenceCheckbox" id="indivSequenceCheckbox">
+                        <label for="{{data.intid}}SeqCheck"><u>Extended sequence fasta:</u></label>
+                        <input type="checkbox" class="individualSequenceCheckbox" id="{{data.intid}}SeqCheck">
                     </div>
-                    <textarea readonly="true" rows="5" cols="65">{{data.formated_seq}}</textarea>
+                    <textarea id="{{data.intid}}FormSeq" readonly="true" rows="5" cols="65">{{data.formated_seq}}</textarea>
                 </div>
-                <!--</div>-->
             </div>
-        <div class="row">
-            {% for pic in data.pictures %}
-                <figure class="column" data-brna_secondary_structure="{{pic.secondary_structure}}">
-                    <a href onclick="mypicload(this)">
-                        <img class="rnapic" src="{{pic.pic}}" />
-                    </a>
-                    <figcaption>
-                        {{pic.picname}}
-                        <input type="checkbox" class="individualStructureCheckbox">
-                    </figcaption>
-                </figure>
-            {% endfor %}
-        </div>
+            <div class="row">
+                {% for pic in data.pictures %}
+                    <figure class="column" data-brna_secondary_structure="{{pic.secondary_structure}}" id="{{data.intid}}{{pic.picname}}">
+                        <a href onclick="mypicload(this)">
+                            <img class="rnapic" src="{{pic.pic}}" />
+                        </a>
+                        <figcaption>
+                            {{pic.picname}}
+                            <input type="checkbox" class="individualStructureCheckbox" id="{{data.intid}}{{data.picname}}StrCheck">
+                        </figcaption>
+                    </figure>
+                {% endfor %}
+            </div>
 
         {% if data.draw_seqview %}
 

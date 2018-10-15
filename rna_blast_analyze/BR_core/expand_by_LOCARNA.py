@@ -400,12 +400,20 @@ def create_report_object_from_locarna(exp_hit, locarna_alig):
 
 def compute_true_location_locarna(hit, match):
     start, end = match.span()
-    if hit.source.annotations['trimmed_ss']:
-        s = start
-    else:
-        s = hit.source.annotations['super_start'] + start
+    if hit.source.annotations['blast'][1].strand == 1:
+        if hit.source.annotations['trimmed_ss']:
+            s = start + 1
+        else:
+            s = hit.source.annotations['super_start'] + start
 
-    e = end - start + s
+        e = end - start + s + 1
+    else:
+        if hit.source.annotations['trimmed_ss']:
+            s = start + 1
+        else:
+            s = hit.source.annotations['super_start'] + start
+
+        e = end - start + s - 1
 
     return s, e
 

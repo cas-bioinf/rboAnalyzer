@@ -306,6 +306,6 @@ def to_tab_delim_header(input_args):
 
 def add_loc_to_description(analyzed_hits):
     for hit in analyzed_hits.hits:
-        d2a = ' {}-{}'.format(hit.best_start, hit.best_end)
-        hit.source.description += d2a
+        d2a = '{}-{}'.format(hit.best_start, hit.best_end)
+        # hit.source.description += d2a
         hit.subs[hit.ret_keys[0]].description += d2a

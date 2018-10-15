@@ -139,6 +139,10 @@ def joined_wrapper_inner(args_inner, shared_list=None):
                 fah.write('>{}\n{}\n'.format(hit.subs[hit.ret_keys[0]].id,
                                            str(hit.subs[hit.ret_keys[0]].seq)))
 
+        # remove description from hits and sources
+        for hit in analyzed_hits.hits:
+            hit.subs[hit.ret_keys[0]].description = ''
+
         out_line = []
         # multiple prediction params
         if args_inner.dev_pred:

@@ -116,19 +116,18 @@ def trim_before(seqs):
 def compute_true_location_se(hit):
     hh = hit.subs[hit.ret_keys[0]]
     ann = hh.annotations
-    if ann['strand'] == -1:
+    if ann['strand'] == 1:
         if ann['trimmed_es']:
-            s = 0
+            s = 1
         else:
-            s = ann['blast'][1].sbjct_end - ann['blast'][1].query_start
-        e = s + len(hh.seq)
+            s = ann['blast'][1].sbjct_start - ann['blast'][1].query_start + 1
+        e = s + len(hh.seq) - 1
     else:
         if ann['trimmed_es']:
-            s = 0
+            s = 1
         else:
-            s = ann['blast'][1].sbjct_start - ann['blast'][1].query_start
-        e = s + len(hh.seq)
-
+            s = ann['blast'][1].sbjct_end - ann['blast'][1].query_start + 1
+        e = s + len(hh.seq) - 1
     return s, e
 
 

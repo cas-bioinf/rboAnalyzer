@@ -51,6 +51,19 @@ function buildFasta(seqname, sequence) {
   return ">" + seqname + "\n" + sequence + "\n";
 }
 
+function mySaveFile(uri, filename) {
+  var link = document.createElement('a');
+  if (typeof(link.download) === 'string') {
+    document.body.appendChild(link);
+    link.download = filename;
+    link.href = uri;
+    link.click();
+    document.body.removeChild(link);
+  } else {
+    window.open(uri, "_self");
+  }
+}
+
 function writeSelectionStructures() {
   console.log("write selection fasta");
   var sel = exportSelected("individualStructureCheckbox");
@@ -58,12 +71,13 @@ function writeSelectionStructures() {
   var exportdata = "";
 
   for (i = 0; i < sel.length; i++) {
-    var pnodedata = sel[i].parentNode.parentNode.parentNode.parentNode.dataset;
-    var structure = sel[i].parentNode.parentNode.dataset.brna_secondary_structure;
-
-    exportdata += buildFastaStructure(pnodedata.brna_seqname, pnodedata.brna_sequence, structure);
+    var intid = parseInt(sel[i].id)
+    var oh = document.getElementById(intid + "onehit");
+    var method = sel[i].parentNode.textContent.trim()
+    var seqname = oh.dataset.brna_seqname + "-" + method + " " + document.getElementById(intid + "SeqStart").textContent + "-" + document.getElementById(intid + "SeqEnd").textContent
+    exportdata += buildFastaStructure(seqname, oh.dataset.brna_sequence, document.getElementById(intid + method).dataset.brna_secondary_structure);
   }
-  window.open("data:application/txt," + encodeURIComponent(exportdata), "_self");
+  mySaveFile("data:application/txt," + encodeURIComponent(exportdata), "structures.txt");
 }
 
 function placeSelection(boxlist, val2place) {
@@ -106,10 +120,12 @@ function writeSelectionFasta() {
   var exportdata = "";
 
   for (i = 0; i < sel.length; i++) {
-    var pnodedata = sel[i].parentNode.parentNode.parentNode.dataset;
-    exportdata += buildFasta(pnodedata.brna_seqname, pnodedata.brna_sequence);
+    var intid = parseInt(sel[i].id)
+    var pnodedata = document.getElementById(intid + "FormSeq");
+
+    exportdata += pnodedata.textContent;
   }
-  window.open("data:application/txt," + encodeURIComponent(exportdata), "_self");
+  mySaveFile("data:application/txt," + encodeURIComponent(exportdata), "sequences.fasta");
 }
 
 function GetHits() {
