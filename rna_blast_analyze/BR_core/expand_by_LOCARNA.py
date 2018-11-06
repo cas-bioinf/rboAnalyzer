@@ -40,7 +40,6 @@ import rna_blast_analyze.BR_core.BA_support as BA_support
 import rna_blast_analyze.BR_core.extend_hits
 from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
 from rna_blast_analyze.BR_core.alifold4all import compute_refold
-from rna_blast_analyze.BR_core.blast_hits_merging import merge_blast_hits
 from rna_blast_analyze.BR_core.config import CONFIG, tools_paths
 from rna_blast_analyze.BR_core.infer_homology import infer_homology
 from rna_blast_analyze.BR_core.locarna_clustal_like_2stockholm import parse_locarna_alignment
@@ -49,6 +48,7 @@ from rna_blast_analyze.BR_core.stockholm_parser import StockholmFeatureStock, tr
 from rna_blast_analyze.BR_core import BA_verify
 from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
 from rna_blast_analyze.BR_core.fname import fname
+from rna_blast_analyze.BR_core.cmalign import get_cm_model, run_cmfetch, RfamInfo
 
 ml = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ def locarna_worker(pack):
 
     # access the locarna aligner directly
     # CARNA for some reason wount accept its own designed format, but, it will eat a pseudo-clustal
-    fd1, locarna_file1 = mkstemp()
+    fd1, locarna_file1 = mkstemp(prefix='rba_', suffix='_20')
     with os.fdopen(fd1, 'w') as fp_locarna_file_1:
         ql1, ql2 = anchors.anchor_whole_seq(str(query_seq), 'query')
         write_clustal_like_file_with_anchors(fp_locarna_file_1,
@@ -89,7 +89,7 @@ def locarna_worker(pack):
                                                  ('#A2', ql2.split()[0])
                                              ))
 
-    fd2, locarna_file2 = mkstemp()
+    fd2, locarna_file2 = mkstemp(prefix='rba_', suffix='_21')
     with os.fdopen(fd2, 'w') as fp_locarna_file_2:
         sl1, sl2 = anchors.anchor_whole_seq(str(one_expanded_hit.seq), 'subject')
         write_clustal_like_file_with_anchors(fp_locarna_file_2,
@@ -238,12 +238,12 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
         # infer homology
         # consider adding query sequence to alignment and scoring it as a proof against squed alignments and datasets
         # write all hits to fasta
-        fda, all_hits_fasta = mkstemp()
+        fda, all_hits_fasta = mkstemp(prefix='rba_', suffix='_22')
         os.close(fda)
         analyzed_hits.write_results_fasta(all_hits_fasta)
 
         # this part predicts homology - it is not truly part of repredict
-        homology_prediction, homol_seqs = infer_homology(analyzed_hits=analyzed_hits, args=args_inner)
+        homology_prediction, homol_seqs, cm_file = infer_homology(analyzed_hits=analyzed_hits, args=args_inner)
 
         # add homology prediction to the data
         for hit, pred in zip(analyzed_hits.hits, homology_prediction):
@@ -261,6 +261,12 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
                 dpfile = args_inner.pandas_dump.strip('pandas_dump')
             if getattr(args_inner, 'json', False):
                 dpfile = args_inner.json.strip('json')
+
+            # optimization so the rfam cm file is used only once
+            if cm_file is None and 'rfam' in ''.join(args_inner.prediction_method):
+                best_model = get_cm_model(args_inner.blast_query, threads=args_inner.threads)
+                rfam = RfamInfo()
+                cm_file = run_cmfetch(rfam.file_path, best_model)
 
             for method in args_inner.prediction_method:
                 # cycle the prediction method settings
@@ -307,6 +313,7 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
                         query=query,
                         pred_method=method,
                         method_params=method_params,
+                        used_cm_file=cm_file,
                     )
                     success = True
                     out_line.append(to_tab_delim_line_simple(ah.args))
@@ -321,11 +328,15 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
                 args_inner=args_inner,
                 analyzed_hits=analyzed_hits,
                 all_hits_fasta=all_hits_fasta,
-                query=query
+                query=query,
+                used_cm_file=cm_file,
             )
             out_line.append(to_tab_delim_line_simple(args_inner))
 
         ml_out_line.append('\n'.join(out_line))
+
+        if cm_file is not None and os.path.exists(cm_file):
+            os.remove(cm_file)
 
         os.remove(all_hits_fasta)
 
@@ -604,12 +615,12 @@ def refold_stockholm(stockholm_alig, consensus_structure):
     """
     ml.debug(fname())
     # convert to clustal alignment
-    fd, clust_tempfile = mkstemp()
+    fd, clust_tempfile = mkstemp(prefix='rba_', suffix='_23')
     with os.fdopen(fd, 'w') as f:
         stockholm_alig.write_clustal(f)
 
     # write fake alifold output with given consensus structure
-    fd, alif_fake_file = mkstemp()
+    fd, alif_fake_file = mkstemp(prefix='rba_', suffix='_24')
     with os.fdopen(fd, 'w') as f:
         # the consensus sequence in alifold file is really not used for anything
         f.write('A'*len(consensus_structure) + '\n')

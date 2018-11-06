@@ -13,6 +13,10 @@
     "cmscore_percent": 30,
     "query_max_len_diff": 0.1
   },
+  "TurboFold_fast": {
+    "query_max_len_diff": 0.05,
+    "max_seqs_in_prediction": 4
+  },
   "rfam_subopt": {
   },
   "tcoffee_rcoffee_alifold_refold_rnafoldc": {
@@ -93,10 +97,8 @@
     "query_max_len_diff": 0.1
   }, 
   "muscle_alifold_rapidshapes": {
-
   }, 
   "rcoffee_alifold_rapidshapes": {
-
   }, 
   "rnafold": {}, 
   "dh_tcoffee_alifold_refold": {

@@ -119,7 +119,7 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
                 shuffle(shuff_fasta)
 
                 # write shuffled file and rewrite input path
-                fd, retry_path = mkstemp()
+                fd, retry_path = mkstemp(prefix='rba_', suffix='_05')
                 with os.fdopen(fd, 'w') as fp:
                     for r in shuff_fasta:
                         fp.write('>{}\n{}\n'.format(r.id, str(r.seq)))
@@ -185,7 +185,7 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
             suboptimals = []
             for seq in fasta_file:
 
-                fd, retry_path = mkstemp()
+                fd, retry_path = mkstemp(prefix='rba_', suffix='_06')
                 with os.fdopen(fd, 'w') as fid:
                     fid.write('>{}\n{}\n'.format(seq.id, str(seq.seq)))
                 cmd3 = [
@@ -577,7 +577,7 @@ def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
     if out_file:
         cl_file = out_file
     else:
-        cl_fd, cl_file = mkstemp()
+        cl_fd, cl_file = mkstemp(prefix='rba_', suffix='_07')
         os.close(cl_fd)
 
     cmd = '{}muscle -clwstrict -seqtype rna -out {} -in {} {} -quiet'.format(
@@ -743,7 +743,7 @@ def run_rnaplot(seq, structure=None, format='svg', outfile=None):
     if format not in allowed_formats:
         raise TypeError('Format can be only from {}.'.format(allowed_formats))
 
-    fd, tempfile = mkstemp()
+    fd, tempfile = mkstemp(prefix='rba_', suffix='_08')
 
     rnaname = tempfile.split('/')[-1].split('\\')[-1]
 
@@ -881,7 +881,6 @@ def blasthsp2pre(bhsp):
     :param bhsp: Bio.Blast.Record.HSP
     :return:
     """
-    # todo add printing with merged blast hits (ie overlapping hits or similar)
     eformat='.2E'
 
     if bhsp.sbjct_start < bhsp.sbjct_end:
@@ -974,6 +973,10 @@ class NoHomologousSequenceException(Exception):
     pass
 
 
+class AmbiguousQuerySequenceException(Exception):
+    pass
+
+
 def non_redundant_seqs(sequences: list) -> list:
     """
     return list of non redundant sequences
@@ -1025,3 +1028,13 @@ def parse_one_rec_in_multiline_structure(fh):
 
     if len(r) != 0:
         yield ''.join(r)
+
+
+def filter_ambiguous_seqs_from_list(seqlist):
+    return [seq for seq in seqlist if not seq.annotations['ambiguous']]
+
+
+def filter_by_length_diff(sequences, ref_len, len_diff_):
+    return [
+        seq for seq in sequences if ref_len * (1 - len_diff_) < len(seq) < ref_len * (1 + len_diff_)
+    ]

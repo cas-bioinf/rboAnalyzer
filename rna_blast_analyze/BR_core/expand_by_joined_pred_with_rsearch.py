@@ -13,6 +13,7 @@ from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
 from rna_blast_analyze.BR_core.stockholm_alig import StockholmFeatureStock
 from rna_blast_analyze.BR_core.fname import fname
+from rna_blast_analyze.BR_core.cmalign import get_cm_model, run_cmfetch, RfamInfo
 
 ml = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ def joined_wrapper_inner(args_inner, shared_list=None):
     locarna_args = deepcopy(args_inner)
 
     if args_inner.repredict_file is None:
-        fd, repred_file = mkstemp()
+        fd, repred_file = mkstemp(prefix='rba_', suffix='_18')
         os.close(fd)
     else:
         repred_file = args_inner.repredict_file
@@ -130,7 +131,7 @@ def joined_wrapper_inner(args_inner, shared_list=None):
                 hit.subs[hit.ret_keys[0]].annotations['sss'] += ['ss0']
                 hit.subs[hit.ret_keys[0]].letter_annotations['ss0'] = '.'*len(hit.subs[hit.ret_keys[0]].seq)
 
-        fda, all_hits_fasta = mkstemp()
+        fda, all_hits_fasta = mkstemp(prefix='rba_', suffix='_19')
         with os.fdopen(fda, 'w') as fah:
             # analyzed_hits.write_results_fasta(fah)
             for hit in analyzed_hits.hits:
@@ -142,6 +143,11 @@ def joined_wrapper_inner(args_inner, shared_list=None):
         # remove description from hits and sources
         for hit in analyzed_hits.hits:
             hit.subs[hit.ret_keys[0]].description = ''
+
+        if args_inner.cm_file:
+            cm_file = args_inner.cm_file
+        else:
+            cm_file = None
 
         out_line = []
         # multiple prediction params
@@ -157,6 +163,12 @@ def joined_wrapper_inner(args_inner, shared_list=None):
                     dpfile = args_inner.pandas_dump.strip('pandas_dump')
                 if getattr(args_inner, 'json', False):
                     dpfile = args_inner.json.strip('json')
+
+            # optimization so the rfam cm file is used only once
+            if cm_file is None and 'rfam' in ''.join(args_inner.prediction_method):
+                best_model = get_cm_model(args_inner.blast_query, threads=args_inner.threads)
+                rfam = RfamInfo()
+                cm_file = run_cmfetch(rfam.file_path, best_model)
 
             for method in args_inner.prediction_method:
                 method = method
@@ -203,6 +215,7 @@ def joined_wrapper_inner(args_inner, shared_list=None):
                         query=query,
                         pred_method=method,
                         method_params=method_params,
+                        used_cm_file=cm_file,
                     )
                     success = True
                     out_line.append(to_tab_delim_line_simple(ah.args))
@@ -216,11 +229,22 @@ def joined_wrapper_inner(args_inner, shared_list=None):
                 args_inner=args_inner,
                 analyzed_hits=analyzed_hits,
                 all_hits_fasta=all_hits_fasta,
-                query=query
+                query=query,
+                used_cm_file=cm_file
             )
             out_line.append(to_tab_delim_line_simple(args_inner))
 
         ml_out_line.append('\n'.join(out_line))
+
+        if cm_file is not None and os.path.exists(cm_file) and args_inner.cm_file is None:
+            os.remove(cm_file)
+
+        # remove repredict files for each method
+        for i in range(2):
+            os.remove(repred_file + str(i))
+
+        if args_inner.repredict_file is None:
+            os.remove(repred_file)
 
         os.remove(all_hits_fasta)
 

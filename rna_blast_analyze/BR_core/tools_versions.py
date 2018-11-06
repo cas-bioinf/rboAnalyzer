@@ -34,7 +34,7 @@ pred_method_required_tools = {
     'dh_clustal_alifold_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
     'dh_clustal_alifold_conserved_ss_rnafoldc': {'RNAalifold', 'refold.pl'},
     'pairwise_centroid_homfold': {'centroid_homfold'},
-    'TurboFold_conservative': {'turbofold'},
+    'TurboFold_fast': {'turbofold'},
     'TurboFold': {'turbofold'},
     'tcoffee_rcoffee_alifold_refold': {'rcoffee', 'RNAalifold', 'refold.pl'},
     'tcoffee_rcoffee_alifold_refold_rnafoldc': {'rcoffee', 'RNAalifold', 'refold.pl'},
@@ -60,4 +60,5 @@ pred_params = {
     'rapidshapes',
     'RNAfold',
     'centroid_homfold',
+    'max_seqs_in_prediction',
 }

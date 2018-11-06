@@ -13,7 +13,7 @@ def compute_clustalo_clasic(file, clustalo_params=''):
     ml.info('Running clustalo.')
     ml.debug(fname())
 
-    fd, out_path = mkstemp()
+    fd, out_path = mkstemp(prefix='rba_', suffix='_01')
     os.close(fd)
     FNULL = open(os.devnull, 'w')
 
@@ -44,7 +44,7 @@ def compute_clustalo_clasic(file, clustalo_params=''):
 def compute_alifold(msa_file, alifold_params=''):
     ml.info('Running RNAalifold.')
     ml.debug(fname())
-    fd, out_path = mkstemp()
+    fd, out_path = mkstemp(prefix='rba_', suffix='_02')
     os.close(fd)
 
     with open(os.devnull, 'w') as FNULL:
@@ -77,7 +77,7 @@ def compute_refold(alig_file, cons_file):
     :return:
     """
     ml.debug(fname())
-    fd, out_path = mkstemp()
+    fd, out_path = mkstemp(prefix='rba_', suffix='_03')
     os.close(fd)
     cmd = '{}refold.pl {} {} > {}'.format(
         CONFIG.refold_path,
@@ -98,7 +98,7 @@ def compute_refold(alig_file, cons_file):
 
 def compute_constrained_prediction(constrained_file):
     ml.debug(fname())
-    fd, outfile = mkstemp()
+    fd, outfile = mkstemp(prefix='rba_', suffix='_04')
     os.close(fd)
     cmd = '{}RNAfold -C --noPS < {} > {}'.format(
         CONFIG.viennarna_path,

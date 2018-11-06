@@ -31,7 +31,7 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
     if outfile:
         out = outfile
     else:
-        fd, out = mkstemp()
+        fd, out = mkstemp(prefix='rba_', suffix='_10')
         os.close(fd)
 
     if threads:
@@ -82,7 +82,7 @@ def run_cmfetch(cmfile, modelid, outfile=None):
     if outfile:
         out = outfile
     else:
-        fd, out = mkstemp()
+        fd, out = mkstemp(prefix='rba_', suffix='_11')
         os.close(fd)
 
     with open(os.devnull, 'w') as FNULL:
@@ -121,7 +121,7 @@ def run_cmemit(model, params='', out_file=None):
     if out_file:
         out = out_file
     else:
-        fd, out = mkstemp()
+        fd, out = mkstemp(prefix='rba_', suffix='_12')
         os.close(fd)
 
     with open(os.devnull, 'w') as FNULL:
@@ -330,7 +330,7 @@ def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
     """
     ml.info('Runing cmbuild.')
     ml.debug(fname())
-    cm_fd, cm_file = mkstemp()
+    cm_fd, cm_file = mkstemp(prefix='rba_', suffix='_13')
     os.close(cm_fd)
 
     FNULL = open(os.devnull, 'w')
@@ -375,7 +375,7 @@ def run_cmalign_on_fasta(fasta_file, model_file, cmalign_params='--notrunc', ali
     """
     ml.info('Runing cmaling.')
     ml.debug(fname())
-    cma_fd, cma_file = mkstemp()
+    cma_fd, cma_file = mkstemp(prefix='rba_', suffix='_14')
     os.close(cma_fd)
     FNULL = open(os.devnull, 'w')
     try:
@@ -425,7 +425,7 @@ def build_stockholm_from_clustal_alig(clustal_file, alif_file):
             if i == 0:
                 break
 
-        st_fd, st_file = mkstemp()
+        st_fd, st_file = mkstemp(prefix='rba_', suffix='_15')
         with os.fdopen(st_fd, 'w') as sf:
             st_alig.write_stockholm(sf)
 

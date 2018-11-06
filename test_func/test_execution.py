@@ -381,7 +381,7 @@ class TestDirectExecution(unittest.TestCase):
             ''
         )
 
-    def test_BA_rfam(self):
+    def test_BA_rfam_simple(self):
         a = base_script + [
             '-blast_in', blast_in,
             '-blast_query', blast_query,
@@ -416,12 +416,154 @@ class TestDirectExecution(unittest.TestCase):
             ''
         )
 
-    def test_BA_cm_file(self):
+    def test_BA_rfam_locarna(self):
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
+            '--mode', 'locarna',
+            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--b_type', 'plain',
+            '--html', self.html,
+            '--json', self.json,
+            '--csv', self.csv,
+            '--pandas_dump', self.pandas_dump,
+            '--prediction_method', 'rnafold',
+            '--use_rfam',
+        ]
+        bb = call(a, cwd=root)
+        self.assertEqual(bb, 0)
+
+        t = tab_output_equal(
+            csvfile=self.csv,
+            jsonfile=self.json,
+            pdfile=self.pandas_dump,
+        )
+        self.assertTrue(t)
+
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
+            ],
+            ''
+        )
+
+    def test_BA_rfam_joined(self):
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
+            '--mode', 'joined',
+            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--b_type', 'plain',
+            '--html', self.html,
+            '--json', self.json,
+            '--csv', self.csv,
+            '--pandas_dump', self.pandas_dump,
+            '--prediction_method', 'rnafold',
+            '--use_rfam',
+        ]
+        bb = call(a, cwd=root)
+        self.assertEqual(bb, 0)
+
+        t = tab_output_equal(
+            csvfile=self.csv,
+            jsonfile=self.json,
+            pdfile=self.pandas_dump,
+        )
+        self.assertTrue(t)
+
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
+            ],
+            ''
+        )
+
+    def test_BA_cm_file_simple(self):
         a = base_script + [
             '-blast_in', blast_in,
             '-blast_query', blast_query,
             '-blast_db', blast_db,
             '--mode', 'simple',
+            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--b_type', 'plain',
+            '--html', self.html,
+            '--json', self.json,
+            '--csv', self.csv,
+            '--pandas_dump', self.pandas_dump,
+            '--prediction_method', 'rnafold',
+            '--cm_file', os.path.join(fwd, test_data_dir, 'RF00001.cm'),
+            '-vv'
+        ]
+        bb = call(a, cwd=root)
+        self.assertEqual(bb, 0)
+
+        t = tab_output_equal(
+            csvfile=self.csv,
+            jsonfile=self.json,
+            pdfile=self.pandas_dump,
+        )
+        self.assertTrue(t)
+
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
+            ],
+            ''
+        )
+
+    def test_BA_cm_file_locarna(self):
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
+            '--mode', 'locarna',
+            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--b_type', 'plain',
+            '--html', self.html,
+            '--json', self.json,
+            '--csv', self.csv,
+            '--pandas_dump', self.pandas_dump,
+            '--prediction_method', 'rnafold',
+            '--cm_file', os.path.join(fwd, test_data_dir, 'RF00001.cm'),
+            '-vv'
+        ]
+        bb = call(a, cwd=root)
+        self.assertEqual(bb, 0)
+
+        t = tab_output_equal(
+            csvfile=self.csv,
+            jsonfile=self.json,
+            pdfile=self.pandas_dump,
+        )
+        self.assertTrue(t)
+
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
+            ],
+            ''
+        )
+
+    def test_BA_cm_file_joined(self):
+        a = base_script + [
+            '-blast_in', blast_in,
+            '-blast_query', blast_query,
+            '-blast_db', blast_db,
+            '--mode', 'joined',
             '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
             '--b_type', 'plain',
             '--html', self.html,

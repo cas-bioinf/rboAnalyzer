@@ -5,6 +5,7 @@ from subprocess import call
 
 from rna_blast_analyze.BR_core.BA_support import remove_files_with_try
 from test_func.test_execution import fwd, test_data_dir, tab_output_equal, base_script, root
+import json
 
 
 class TestDirectExecution_with_prediction(unittest.TestCase):
@@ -25,6 +26,20 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
         os.close(ff)
         self.json = json_file
 
+        ppfile = os.path.join(root, 'rna_blast_analyze', 'BR_core', 'prediction_parameters.json')
+        np_fd, self.np_file = tempfile.mkstemp()
+        with open(ppfile, 'r') as f, os.fdopen(np_fd, 'w') as np:
+            prediction_parameters = json.load(f)
+
+            for met in prediction_parameters:
+                if 'cmscore_percent' in prediction_parameters[met]:
+                    del prediction_parameters[met]['cmscore_percent']
+
+                    # effectively set all NoHomologousSeq exceptions where applicable
+                    prediction_parameters[met]['cmscore_tr'] = 1000
+
+            json.dump(prediction_parameters, np)
+
         self.cmd = base_script + [
             '-blast_in', os.path.join(fwd, test_data_dir, 'RF00001_short.blastout'),
             '-blast_query', os.path.join(fwd, test_data_dir, 'RF00001.fasta'),
@@ -37,6 +52,7 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
             '--csv', self.csv,
             '--pandas_dump', self.pandas_dump,
             '--threads', '2',
+            '--pm_param_file', self.np_file
         ]
 
         def run(mm):
@@ -56,6 +72,7 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
                     self.csv,
                     self.json,
                     self.pandas_dump,
+                    self.np_file
                 ],
                 ''
             )

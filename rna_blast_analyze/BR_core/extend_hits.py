@@ -28,8 +28,8 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
             if not os.path.isfile(blast_db + '.' + ext):
                 raise FileNotFoundError('expected file : "' + blast_db + '.' + ext + '" was not found')
 
-    fd, temp_filename = mkstemp()
-    fdb, blast_tempfile = mkstemp()
+    fd, temp_filename = mkstemp(prefix='rba_', suffix='_25')
+    fdb, blast_tempfile = mkstemp(prefix='rba_', suffix='_26')
     os.close(fdb)
     exp_hits = []
     strand = []
@@ -83,6 +83,8 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
         hname = re.search(blast_regexp, hit[0])
         if not hname:
             print(blast_regexp)
+            os.remove(temp_filename)
+            os.remove(blast_tempfile)
             raise RuntimeError('provided regexp returned no result for %s,'
                                ' please provide regexp valid even for this name', hit[0])
         bdb_accession = hname.group()
@@ -118,6 +120,8 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
         msgfail = 'Unable to run blastdbcmd command, please check its availability.'
         ml.error(msgfail)
         ml.error(cmd)
+        os.remove(temp_filename)
+        os.remove(blast_tempfile)
         raise ChildProcessError(msgfail)
 
     # inspect the stdout (the blastdbcmd returns exit code 1 even if only one sequence is missing)
@@ -128,6 +132,8 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
 
     if errs and not skip_missing:
         ml.error(msgfail)
+        os.remove(temp_filename)
+        os.remove(blast_tempfile)
         raise LookupError(msgfail)
     elif errs and skip_missing:
         ml.warning(msgfail)

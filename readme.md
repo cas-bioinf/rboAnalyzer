@@ -2,7 +2,7 @@
 Pipeline for analyzing BLAST search output for non-coding RNAs (ncRNAs).
 
 ## Short description
-Provided with query rna sequence and BLAST output, the pipeline will
+Provided with query RNA sequence and BLAST output, the pipeline will
  realign each BLAST hit with Locarna to account for more RNA sequence
  variability. The realign step is done to recover potential ncRNA
  sequence at that loci precisely even from low-scoring BLAST hits.
@@ -13,7 +13,31 @@ Sequences are analyzed with RSEARCH and its bit-score is used as
 Next sequences are predicted with one or more methods and predicted
  structures are merged with blast output to be easy to understand.
 
-## Prequisities
+## Installation
+
+### Install via Conda
+ The easies way to install this pipeline is to use conda. This package is avalible
+ from bioconda channel.
+
+ If you don't have conda, install it from [here](https://conda.io/docs/index.html).
+
+ Then open terminal and run
+```
+# for system-wide installation
+conda install -c conda-forge -c bioconda rna_blast_analyze
+
+# install to virtual environment (not tested)
+conda create YOUR_VIRTUAL_ENV_NAME
+source activate YOUR_VIRTUAL_ENV_NAME
+conda install -c conda-forge -c bioconda rna_blast_analyze
+```
+If virtual environment is used, then you need to activate virtual
+ environment before usage
+
+
+### Install from source
+
+ __Prequisities__
 * python >= 3.4
 * ncbi-blast+ >= 2.6
 * locarna >= 1.9
@@ -31,15 +55,17 @@ Optional (some prediction methods are not avalible without these):
 * RapidShapes - RNAshapes
 * UNAFold >= 3.8
 
-Data:
-* local copy of the database in which analyzed query were searched
-(often this will be ncbi-blast db)
-
-## Installation
-Install all prequisities and run
+Clone or download this repository. Go to root folder and run
 ```
 python3 setup.py install
 ```
+
+The rna_blast_analyze executable should be created.
+To test it, restart terminal (close and open new) and run
+```
+rna_blast_analyze --version
+```
+Which should return installed version number.
 
 ## Preparation
 ### Shell autocomplete

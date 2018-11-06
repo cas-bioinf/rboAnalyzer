@@ -1,10 +1,9 @@
 import copy
 import itertools
+import logging
 import os
 import re
-import time
 import unicodedata
-import logging
 from shutil import rmtree
 from subprocess import call
 from tempfile import mkstemp, mkdtemp
@@ -14,10 +13,9 @@ from Bio import AlignIO, SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from rna_blast_analyze.BR_core.BA_support import devprint, remove_files_with_try, NoHomologousSequenceException
 from rna_blast_analyze.BR_core.BA_support import read_seq_str, write_fasta_from_list_of_seqrecords,\
     sanitize_fasta_names_in_seqrec_list, desanitize_fasta_names_in_seqrec_list, run_hybrid_ss_min,\
-    run_muscle, ct2db
+    run_muscle, ct2db, devprint, remove_files_with_try
 from rna_blast_analyze.BR_core.RNAshapes import rapid_shapes_list, read_rapid_shapes_list_outfile, structures2shape
 from rna_blast_analyze.BR_core.alifold4all import compute_refold, compute_clustalo_clasic, compute_alifold,\
     compute_constrained_prediction
@@ -25,10 +23,11 @@ from rna_blast_analyze.BR_core.cmalign import build_stockholm_from_clustal_alig,
     get_cm_model
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.db2shape import nesting
+from rna_blast_analyze.BR_core.decorators import timeit_decorator
+from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.infer_homology import _alignment_column_conservation
 from rna_blast_analyze.BR_core.par_distance_no_RNAlib import distances_one_thread as rnadistance_one_thread
 from rna_blast_analyze.BR_core.stockholm_parser import read_st, trim_cmalign_sequence_by_refseq_one_seq
-from rna_blast_analyze.BR_core.fname import fname
 
 ml = logging.getLogger(__name__)
 
@@ -234,7 +233,7 @@ def _foldme_rnafoldc_noRNA(seq, constraints):
     :return:
     """
 
-    fd, tempfile = mkstemp()
+    fd, tempfile = mkstemp(prefix='rba_', suffix='_31')
     with os.fdopen(fd, 'w') as fh:
         fh.write('>seq01\n{}\n{}\n'.format(
             seq,
@@ -356,30 +355,8 @@ def grouped(iterable, n):
     return zip(*[iter(iterable)]*n)
 
 
-def timeit_decorator(func):
-    def wrapper(*arg, **kwargs):
-        t1 = time.time()
-        res = func(*arg, **kwargs)
-        t2 = time.time()
-        # print '%s took %0.3f ms' % (func.func_name, (t2-t1)*1000.0)
-        exec_time = t2 - t1
-        return res, exec_time
-    return wrapper
-
-
-def tryit_decorator(func):
-    def wrapper(*arg, **kwargs):
-        # try:
-        res = func(*arg, **kwargs)
-        return res
-        # except:
-        #     print('problem in prediction {}'.format(str(func)))
-        #     raise
-    return wrapper
-
-
 def sanitize_fasta_file(infasta, used_dict=None):
-    fd, out_path = mkstemp()
+    fd, out_path = mkstemp(prefix='rba_', suffix='_32')
     with open(infasta, 'r') as inh, os.fdopen(fd, 'w') as outh:
         k = [i for i in SeqIO.parse(inh, format='fasta')]
         san_seqs, san_dict = sanitize_fasta_names_in_seqrec_list(k, used_dict=used_dict)
@@ -389,7 +366,6 @@ def sanitize_fasta_file(infasta, used_dict=None):
 
 
 @timeit_decorator
-@tryit_decorator
 def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='refold', threads=None,
                               params=None, msa_alg='clustalo'):
     """
@@ -463,19 +439,18 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
                                                                    gap_char=ord('_'))
 
     # write new consensus to a file
-    a_fd, new_alifold_consensus_file = mkstemp()
+    a_fd, new_alifold_consensus_file = mkstemp(prefix='rba_', suffix='_33')
     with os.fdopen(a_fd, 'w') as f:
         f.write(new_consensus_sequence + '\n')
         f.write(new_consensus_structure + '\n')
 
     # write sliced alignment to a file
-    sa_fd, sliced_alignment_file = mkstemp()
+    sa_fd, sliced_alignment_file = mkstemp(prefix='rba_', suffix='_34')
     with os.fdopen(sa_fd, 'w') as f:
         AlignIO.write(new_alig_for_refold, f, 'clustal')
 
     # now process the file, and map alignment to consensus structure (how)
     #  take 1 sequence from original alignment and map it to new sequence alignment ?
-    #  mozna lepsi obracene, protoze se gapy mohou pridat v novem alignmentu spis nez by zmizely
 
     if refold in ['refold', 'refold_rnafoldc']:
         refold_file = compute_refold(sliced_alignment_file, new_alifold_consensus_file)
@@ -518,7 +493,6 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
 
 
 @timeit_decorator
-@tryit_decorator
 def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refold='refold', threads=None, params=None):
     """
     return predicted structures for all hits based on provided sequence homologs
@@ -533,8 +507,8 @@ def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refo
         raise Exception('refold procedure not recognized: {}, possible vaues are {}'.format(refold,
                                                                                             ' '.join(ref_pred)))
     # sanitize names input to a new file, sanitize all hits fasta also.
-    fid, nr_sanitized_fasta_file = mkstemp()
-    fid2, all_hits_fasta_sanitized = mkstemp()
+    fid, nr_sanitized_fasta_file = mkstemp(prefix='rba_', suffix='_35')
+    fid2, all_hits_fasta_sanitized = mkstemp(prefix='rba_', suffix='_36')
 
     with open(nr_homolog_hits_file, 'r') as f, os.fdopen(fid, 'w') as nr_fid:
         nr_seqs2san = [nrseq for nrseq in SeqIO.parse(f, 'fasta')]
@@ -627,7 +601,7 @@ def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refo
                                                                    gap_char=ord('_'))
 
     # write new consensus to a file
-    a_fd, new_alifold_consensus_file = mkstemp()
+    a_fd, new_alifold_consensus_file = mkstemp(prefix='rba_', suffix='_37')
     with os.fdopen(a_fd, 'w') as f:
         f.write(new_consensus_sequence + '\n')
         f.write(new_consensus_structure + '\n')
@@ -635,7 +609,7 @@ def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refo
     new_alig_for_refold_san, used_dict_2 = sanitize_fasta_names_in_seqrec_list(new_alig_for_refold)
 
     # write sliced alignment to a file
-    sa_fd, sliced_alignment_file = mkstemp()
+    sa_fd, sliced_alignment_file = mkstemp(prefix='rba_', suffix='_38')
     with os.fdopen(sa_fd, 'w') as f:
         AlignIO.write(
             AlignIO.MultipleSeqAlignment(new_alig_for_refold_san),
@@ -682,7 +656,6 @@ def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refo
 
 
 @timeit_decorator
-@tryit_decorator
 def decouple_homologs_alifold_refold_prediction(nr_homolog_hits_file, homologous_seqs, all_hits_fasta, refold='refold',
                                                 threads=None, align='tcoffee',
                                                 params=None):
@@ -738,8 +711,8 @@ def decouple_homologs_alifold_refold_prediction(nr_homolog_hits_file, homologous
             all_seqs_db.append(seq)
             if str(seq.seq) not in hom_seq_db:
                 nonhom_seqs.append(seq)
-        ah_fd, all_h_seq_fasta = mkstemp()
-        an_fd, all_n_seq_fasta = mkstemp()
+        ah_fd, all_h_seq_fasta = mkstemp(prefix='rba_', suffix='_39')
+        an_fd, all_n_seq_fasta = mkstemp(prefix='rba_', suffix='_40')
 
         if len(nonhom_seqs) == 1 and align != 'tcoffee':
             print('Warning: Only 1 sequence which is considered non-homologous. \n'
@@ -818,13 +791,12 @@ def decouple_homologs_alifold_refold_prediction(nr_homolog_hits_file, homologous
 
 
 @timeit_decorator
-@tryit_decorator
 def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
     ml.debug(fname())
     if params is None:
         params = dict()
 
-    allhits_fasta, san_dict = sanitize_fasta_file(allhits_fasta)
+    allhits_fasta_file, san_dict = sanitize_fasta_file(allhits_fasta)
 
     cmalign_params = ''
     if threads:
@@ -836,11 +808,12 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
     if '--notrunc' not in cmalign_params:
         cmalign_params += ' --notrunc'
 
-    alig_file = run_cmalign_on_fasta(allhits_fasta, cmmodel_file, cmalign_params=cmalign_params)
-
+    alig_file = run_cmalign_on_fasta(allhits_fasta_file, cmmodel_file, cmalign_params=cmalign_params)
+    os.remove(allhits_fasta_file)
     # multiple sequence cm align
     # split by sequence, then run the rest
     cm_alig = read_st(alig_file)
+    os.remove(alig_file)
 
     structures = []
     for single_alig in trim_cmalign_sequence_by_refseq_one_seq(cm_alig, rs='SS_cons', convert2uppercase=True):
@@ -850,7 +823,7 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
 
         # constraint prediction
         # write constraint file
-        fd, temp_constraint_file = mkstemp()
+        fd, temp_constraint_file = mkstemp(prefix='rba_', suffix='_41')
         with os.fdopen(fd, 'w') as tmpf:
             tmpf.write('>{}\n{}\n{}\n'.format(
                 trimmed_seq.id,
@@ -1019,13 +992,13 @@ def _profile_alig_prediction(params, usethreads, cl_file, seqs_to_align_and_pred
                                                                    gap_char=ord('_'))
 
     # write new consensus to a file
-    a_fd, new_alifold_consensus_file = mkstemp()
+    a_fd, new_alifold_consensus_file = mkstemp(prefix='rba_', suffix='_42')
     with os.fdopen(a_fd, 'w') as f:
         f.write(new_consensus_sequence + '\n')
         f.write(new_consensus_structure + '\n')
 
     # write sliced alignment to a file
-    sa_fd, sliced_alignment_file = mkstemp()
+    sa_fd, sliced_alignment_file = mkstemp(prefix='rba_', suffix='_43')
     with os.fdopen(sa_fd, 'w') as f:
         AlignIO.write(new_alig_for_refold, f, 'clustal')
 
@@ -1044,8 +1017,6 @@ def _profile_alig_prediction(params, usethreads, cl_file, seqs_to_align_and_pred
             seq_str = read_seq_str(refold_file)
 
         os.remove(refold_file)
-        os.remove(new_alifold_consensus_file)
-        os.remove(sliced_alignment_file)
     else:
         st_alig_file = build_stockholm_from_clustal_alig(sliced_alignment_file, new_alifold_consensus_file)
         if 'repred_unpaired_tr' in params:
@@ -1060,6 +1031,9 @@ def _profile_alig_prediction(params, usethreads, cl_file, seqs_to_align_and_pred
                                                      repred_tr=repred_tr,
                                                      conseq_conserved=conseq_conserved)
         os.remove(st_alig_file)
+
+    os.remove(new_alifold_consensus_file)
+    os.remove(sliced_alignment_file)
     os.remove(realign_file)
     return seq_str
 
@@ -1094,7 +1068,7 @@ def _aligner_block(nr_homolog_hits_file, params, msa_alg, threads=None):
         nr_hits_list = [i for i in SeqIO.parse(nr_homolog_hits_file, format='fasta')]
         san_nr_hits, san_dict = sanitize_fasta_names_in_seqrec_list(nr_hits_list)
 
-        nrfd, nr_sanitized_fasta_file = mkstemp()
+        nrfd, nr_sanitized_fasta_file = mkstemp(prefix='rba_', suffix='_44')
         with os.fdopen(nrfd, 'w') as f:
             SeqIO.write(san_nr_hits, f, format='fasta')
 
@@ -1116,7 +1090,7 @@ def _aligner_block(nr_homolog_hits_file, params, msa_alg, threads=None):
         os.remove(alig_file)
         del alig_file
 
-        afd, alig_file = mkstemp()
+        afd, alig_file = mkstemp(prefix='rba_', suffix='_45')
         with os.fdopen(afd, 'w') as f:
             AlignIO.write(alignment, f, format='clustal')
 
@@ -1152,15 +1126,11 @@ def remove_sharp_hairpins(structure):
     return final
 
 
-@tryit_decorator
 @timeit_decorator
-def rfam_subopt_pred(all_sequence_fasta, query_file, params=None, threads=None):
+def rfam_subopt_pred(all_sequence_fasta, cm_ref_str, params=None):
     ml.debug(fname())
     if params is None:
         params = dict()
-
-    best_model = get_cm_model(query_file, params=params, threads=threads)
-    cm_ref_str = extract_ref_structure_fromRFAM_CM(best_model)
 
     if params and ('mfold' in params) and params['mfold']:
         assert isinstance(params['mfold'], (tuple, list)) and 3 == len(params['mfold'])
@@ -1194,7 +1164,6 @@ def rfam_subopt_pred(all_sequence_fasta, query_file, params=None, threads=None):
     return new_structures
 
 
-@tryit_decorator
 @timeit_decorator
 def cmscan_rapidshapes(all_sequence_fasta, query_file, params=None, threads=None):
     """
@@ -1225,7 +1194,7 @@ def cmscan_rapidshapes(all_sequence_fasta, query_file, params=None, threads=None
 
     # cm_shape = db2shape(cm_ref_str)
     # or to leverage possibility of selecting shape level
-    fd, temp_str_file = mkstemp()
+    fd, temp_str_file = mkstemp(prefix='rba_', suffix='_46')
     with os.fdopen(fd, 'w') as f:
         f.write(san_cm_ref_str + '\n')
 
@@ -1262,7 +1231,7 @@ def cmscan_rapidshapes(all_sequence_fasta, query_file, params=None, threads=None
 
         else:
             devprint('rapidshapes - normal sequence #{}'.format(i), flush=True)
-            tp, temp_fasta = mkstemp()
+            tp, temp_fasta = mkstemp(prefix='rba_', suffix='_47')
             with os.fdopen(tp, 'w') as f:
                 f.write('>seq{}\n{}\n'.format(i, seq_str))
 
@@ -1308,7 +1277,6 @@ def cmscan_rapidshapes(all_sequence_fasta, query_file, params=None, threads=None
 
 
 @timeit_decorator
-@tryit_decorator
 def msa_alifold_rapidshapes(all_sequence_fasta, nr_homolog_hits_file, params=None, threads=True, msa_alg=''):
     ml.debug(fname())
     # rapidshapes can only work with canonical sequence encoding
@@ -1342,7 +1310,7 @@ def msa_alifold_rapidshapes(all_sequence_fasta, nr_homolog_hits_file, params=Non
 
     san_template_str = remove_sharp_hairpins(consensus_structure)
     # get shape from consensus
-    fd, temp_str_file = mkstemp()
+    fd, temp_str_file = mkstemp(prefix='rba_', suffix='_48')
     with os.fdopen(fd, 'w') as f:
         f.write(san_template_str + '\n')
     out_shape_list = structures2shape(infile=temp_str_file, shape_level=sh_level, params='--allowLP 1')
@@ -1375,7 +1343,7 @@ def msa_alifold_rapidshapes(all_sequence_fasta, nr_homolog_hits_file, params=Non
 
         else:
             devprint('rapidshapes - normal sequence #{}'.format(i), flush=True)
-            tp, temp_fasta = mkstemp()
+            tp, temp_fasta = mkstemp(prefix='rba_', suffix='_49')
             with os.fdopen(tp, 'w') as f:
                 f.write('>seq{}\n{}\n'.format(i, seq_str))
 
@@ -1427,7 +1395,7 @@ def rapidshapes_ambigous_prediction(sequence_string, shape_str, rs_params, shape
     structures = []
     # dum_str = ''.join(['.'] * len(all_seq_vars[0]))
     for i, var_seq in enumerate(all_seq_vars):
-        tf, tempfile = mkstemp()
+        tf, tempfile = mkstemp(prefix='rba_', suffix='_50')
         with os.fdopen(tf, 'w') as f:
             f.write('>seq{}\n{}\n'.format(i, var_seq))
 
@@ -1596,6 +1564,7 @@ def run_tcoffee_profile_aling(fasta_file, mode, profile_file, threads=None, outf
                      outfile=outfile,
                      tcoffee_rcoffee_params=tr_params,
                      )
+    os.remove(profile_file + '.san')
     return of
 
 
@@ -1616,7 +1585,7 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
     """
     ml.info('Running t-coffee.')
     ml.debug(fname())
-    fd, fp = mkstemp()
+    fd, fp = mkstemp(prefix='rba_', suffix='_51')
     os.close(fd)
 
     exe_path = fp + 'dir'
@@ -1629,10 +1598,10 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
     FNULL = open(os.devnull, 'w')
     try:
         if not outfile:
-            of, outfile = mkstemp()
+            of, outfile = mkstemp(prefix='rba_', suffix='_52')
             os.close(of)
 
-        tfd, tcoffee_temp_files = mkstemp()
+        tfd, tcoffee_temp_files = mkstemp(prefix='rba_', suffix='_53')
         os.close(tfd)
 
         if threads:
@@ -1686,10 +1655,9 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
 
 
 @timeit_decorator
-@tryit_decorator
 def rnafold_prediction(fasta2predict, params=''):
     ml.debug(fname())
-    a, b = mkstemp()
+    a, b = mkstemp(prefix='rba_', suffix='_54')
     os.close(a)
     cmd = '{}RNAfold --noPS {} < {} > {}'.format(
         CONFIG.viennarna_path,
@@ -1711,7 +1679,6 @@ def rnafold_prediction(fasta2predict, params=''):
 
 
 @timeit_decorator
-@tryit_decorator
 def subopt_fold_query(all_fasta_hits_file, query, params=None):
     """
     use folded query sequence as a reference,
@@ -1727,7 +1694,7 @@ def subopt_fold_query(all_fasta_hits_file, query, params=None):
     if params is None:
         params = dict()
     # get single query structure
-    a, qf = mkstemp()
+    a, qf = mkstemp(prefix='rba_', suffix='_55')
     with os.fdopen(a, 'w') as fd:
         fd.write('>query\n{}\n'.format(str(query.seq)))
 
@@ -1771,7 +1738,6 @@ def subopt_fold_query(all_fasta_hits_file, query, params=None):
 
 
 @timeit_decorator
-@tryit_decorator
 def subopt_fold_alifold(all_fasta_hits_file, homologs_file, aligner='muscle', params=None, threads=None):
     """
     run clustal/muscle on selected homologs file
@@ -1865,7 +1831,7 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
         s = [SeqRecord(Seq(str(i.seq) + '-'), id=i.id) for i in a]
         fa = AlignIO.MultipleSeqAlignment(s)
 
-        fd, temp = mkstemp()
+        fd, temp = mkstemp(prefix='rba_', suffix='_56')
         with os.fdopen(fd, 'w') as fh:
             # AlignIO.write(fa, fh, format='clustal')
             AlignIO.write(fa, fh, format='fasta')
@@ -1874,7 +1840,7 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
     if outfile:
         clustalo_file = outfile
     else:
-        c_fd, clustalo_file = mkstemp()
+        c_fd, clustalo_file = mkstemp(prefix='rba_', suffix='_57')
         os.close(c_fd)
 
     with open(os.devnull, 'w') as FNULL:
@@ -1918,7 +1884,6 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
 
 
 @timeit_decorator
-@tryit_decorator
 def turbofold_conservative_prediction(all_sequence_fasta, homologous_file, params=None):
     """
     specific turbofold wrapper
@@ -2039,155 +2004,6 @@ def turbofold_conservative_prediction(all_sequence_fasta, homologous_file, param
 
     rmtree(tmpdir)
     return new_structures
-
-
-def write_turbofold_confile(input_sequences, turbofold_params=None, cpus=None, outdir=None):
-    ml.debug(fname())
-    if outdir:
-        tmpdir = outdir
-    else:
-        tmpdir = mkdtemp()
-
-    params2write = {
-        'Mode': 'MEA',
-        'OutAln': os.path.join(tmpdir, 'Output.aln')
-    }
-    if turbofold_params:
-        params2write.update(turbofold_params)
-
-    # write sequences by one in fasta file format
-    seq_paths = []
-    for i, hseq in enumerate(input_sequences):
-        fastaname = os.path.join(tmpdir, 'hseq{}.fasta'.format(i))
-        with open(fastaname, 'w') as f:
-            f.write('>{}\n{}\n'.format(
-                'hseq{}'.format(i),
-                str(hseq.seq)
-            ))
-        seq_paths.append(fastaname)
-
-    hom_out_paths = [os.path.join(tmpdir, 'hseq{}.ct'.format(i)) for i in range(len(input_sequences))]
-
-    conf_file = os.path.join(tmpdir, 'conf_file.conf')
-    with open(conf_file, 'w') as c:
-        for key in params2write.keys():
-            c.write('{} = {}\n'.format(key, params2write[key]))
-
-        if cpus and isinstance(cpus, int):
-            c.write('Processors = {}'.format(cpus))
-
-        in_files = '{' + ';'.join(seq_paths) + '}'
-        out_files = '{' + ';'.join(hom_out_paths) + '}'
-
-        c.write('InSeq = {}\n'.format(in_files))
-        c.write('OutCT = {}\n'.format(out_files))
-
-    return tmpdir, conf_file, hom_out_paths
-
-
-@timeit_decorator
-@tryit_decorator
-def turbofold_only_homologous(all_sequences, nr_homologous, params):
-    """
-    Trubofold mode is MEA by default
-    :param all_sequences:
-    :param nr_homologous:
-    :param params: dict with key: value structure for params to be used in turbofold
-    :return:
-    """
-    # ==================================================
-    # prediction phase
-    # 1) homologous sequences
-    #  write predicted seq to a file
-    #  write conf file
-    #  run prediction
-    # 2) nonhomologous sequences
-    #  predict with RNAfold or something similar, or predict them together with nr homologous sequence, but use only
-    #   structures for nonhomologs from this step
-    ml.debug(fname())
-
-    nr_homologous_set = {str(seq.seq) for seq in nr_homologous}
-
-    if len(nr_homologous_set) < 2:
-        raise NoHomologousSequenceException
-
-    nonhom_seqs = [seq for seq in all_sequences if str(seq.seq) not in nr_homologous_set]
-
-    hom_seqs_structures = run_turbofold(nr_homologous, params=params)
-    hom_seqs_dict = {str(seq.seq): seq.letter_annotations['ss0'] for seq in hom_seqs_structures}
-
-    # fold nonhomologous seqs together with homologous
-    nonhom_seqs_structures = run_turbofold(nonhom_seqs + nr_homologous, params=params)
-    nonhom_seqs_dict = {str(seq.seq): seq.letter_annotations['ss0'] for seq in nonhom_seqs_structures}
-
-    # merge the dicts together
-    # we need to merge in this particular order to ensure that structures for homologous sequences from folding with
-    #  nonhomologous sequences are replaced by structures from folding only with homologous seqs
-
-    nonhom_seqs_dict.update(hom_seqs_dict)
-
-    # check if the update run correctly
-    assert all([True if hom_seqs_dict[hs] == nonhom_seqs_dict[hs] else False for hs in hom_seqs_dict.keys()])
-
-    predicted = []
-    for seq in all_sequences:
-        seq.letter_annotations['ss0'] = nonhom_seqs_dict[str(seq.seq)]
-        predicted.append(seq)
-
-    return predicted
-
-
-def run_turbofold(sequences, params):
-    ml.info('Running Turbofold.')
-    ml.debug(fname())
-
-    env = os.environ.copy()
-    if 'DATAPATH' not in env:
-        env['DATAPATH'] = CONFIG.rnastructure_datapath
-
-    tmpdir, con_file, output_structure_files = write_turbofold_confile(
-        input_sequences=sequences,
-        turbofold_params=params,
-    )
-
-    # run without prediction progress reporting output
-    with open(os.devnull, 'w') as FNULL:
-        cmd = [
-            '{}TurboFold'.format(CONFIG.turbofold_path),
-            con_file
-        ]
-        ml.debug(cmd)
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd, env=env)
-        else:
-            r = call(cmd, stdout=FNULL, env=env)
-
-        if r:
-            msgfail = 'Call to turbofold failed, cmd below:'
-            ml.error(msgfail)
-            ml.error(cmd)
-            raise ChildProcessError(msgfail)
-
-        # now convert ct files produced by TurboFold
-        new_structures = []
-        for out_str_file, orig_seq in zip(output_structure_files, sequences):
-            o = open(out_str_file, 'r')
-            seq_with_pred_str = ct2db(o, energy_txt='ENERGY')
-            o.close()
-
-            assert str(seq_with_pred_str[0].seq) == str(orig_seq.seq)
-
-            new_structures.append(
-                SeqRecord(
-                    orig_seq.seq,
-                    id=orig_seq.id,
-                    annotations={'sss': ['ss0']},
-                    letter_annotations={'ss0': seq_with_pred_str[0].letter_annotations['ss0']}
-                )
-            )
-
-        rmtree(tmpdir)
-        return new_structures
 
 
 def check_lonely_bp(structure, gap_char='.'):

@@ -31,7 +31,7 @@ def structures2shape_virtualbox(infile, out_file=None, shape_level=5, params='')
     if out_file:
         out = out_file
     else:
-        fd, out = mkstemp()
+        fd, out = mkstemp(prefix='rba_', suffix='_67')
         os.close(fd)
 
     virt_rapid_tempfile = virtualbox_tempfile()
@@ -84,7 +84,7 @@ def rapid_shapes_list_virtualbox(fasta_file, shape2use, rapidshapes_params='', o
     if out:
         outfile = out
     else:
-        fd, outfile = mkstemp()
+        fd, outfile = mkstemp(prefix='rba_', suffix='_68')
         os.close(fd)
 
     # make tempfile
@@ -177,7 +177,7 @@ def rapid_shapes_list(fasta_file, shape2use, rapidshapes_params='', out=None, sh
     if out:
         outfile = out
     else:
-        fd, outfile = mkstemp()
+        fd, outfile = mkstemp(prefix='rba_', suffix='_69')
         os.close(fd)
 
     FNULL = open(os.devnull, 'w')
@@ -357,7 +357,7 @@ def structures2shape(infile, out_file=None, shape_level=5, params=''):
     if out_file:
         out = out_file
     else:
-        fd, out = mkstemp()
+        fd, out = mkstemp(prefix='rba_', suffix='_70')
         os.close(fd)
 
     try:
@@ -523,7 +523,7 @@ def run_rnashapes_cast(hits, reldev, keep_all=0):
     input is """
     if len(hits) < 2:
         raise AssertionError('input to rnashapes must be at least 2 sequences')
-    [fd, temp_name] = mkstemp()
+    [fd, temp_name] = mkstemp(prefix='rba_', suffix='_71')
     os.close(fd)
     err_name = None
     out_rnashapes_file = None
@@ -540,8 +540,8 @@ def run_rnashapes_cast(hits, reldev, keep_all=0):
                                       '1) Provide more consise input fasta sequences. '
                                       '2) Decrease number of input fasta sequeces. '
                                       '3) Increase permisible relative deviation parameters (-reldev)')
-        fd, out_rnashapes_file = mkstemp()
-        err, err_name = mkstemp()
+        fd, out_rnashapes_file = mkstemp(prefix='rba_', suffix='_72')
+        err, err_name = mkstemp(prefix='rba_', suffix='_73')
         call_shapes_cast(temp_name, reldev, fd, err)
         # call(['RNAshapes', '-mode','cast', '--relativeDeviation', str(reldev.pop()), temp_name],
         #      stdout=fd, stderr=err)

@@ -32,12 +32,10 @@ import itertools
 import logging
 
 from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
 import rna_blast_analyze.BR_core.extend_hits
 from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
-from rna_blast_analyze.BR_core.blast_hits_merging import merge_blast_hits
 from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
 from rna_blast_analyze.BR_core.infer_homology import infer_homology
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
@@ -45,6 +43,7 @@ from rna_blast_analyze.BR_core.stockholm_alig import StockholmFeatureStock
 from rna_blast_analyze.BR_core import BA_verify
 from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
 from rna_blast_analyze.BR_core.fname import fname
+from rna_blast_analyze.BR_core.cmalign import run_cmfetch, get_cm_model, RfamInfo
 
 ml = logging.getLogger(__name__)
 
@@ -267,7 +266,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
         # infer homology
         # consider adding query sequence to alignment and scoring it as a proof against squed alignments and datasets
         # write all hits to fasta
-        fda, all_hits_fasta = mkstemp()
+        fda, all_hits_fasta = mkstemp(prefix='rba_', suffix='_17')
         with os.fdopen(fda, 'w') as fah:
             # analyzed_hits.write_results_fasta(fah)
             for hit in analyzed_hits.hits:
@@ -277,8 +276,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                                            str(hit.subs[hit.ret_keys[0]].seq)))
 
         # this part predicts homology - it is not truly part of repredict
-        homology_prediction, homol_seqs = infer_homology(analyzed_hits=analyzed_hits, args=args_inner)
-
+        homology_prediction, homol_seqs, cm_file = infer_homology(analyzed_hits=analyzed_hits, args=args_inner)
         # add homology prediction to the data
         for hit, pred in zip(analyzed_hits.hits, homology_prediction):
             hit.hpred = pred
@@ -295,6 +293,12 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 dpfile = args_inner.pandas_dump.strip('pandas_dump')
             if getattr(args_inner, 'json', False):
                 dpfile = args_inner.json.strip('json')
+
+            # optimization so the rfam cm file is used only once
+            if cm_file is None and 'rfam' in ''.join(args_inner.prediction_method):
+                best_model = get_cm_model(args_inner.blast_query, threads=args_inner.threads)
+                rfam = RfamInfo()
+                cm_file = run_cmfetch(rfam.file_path, best_model)
 
             for method in args_inner.prediction_method:
                 method = method
@@ -342,6 +346,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                         query=query,
                         pred_method=method,
                         method_params=method_params,
+                        used_cm_file=cm_file,
                     )
                     success = True
                     out_line.append(to_tab_delim_line_simple(ah.args))
@@ -355,11 +360,15 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 args_inner=args_inner,
                 analyzed_hits=analyzed_hits,
                 all_hits_fasta=all_hits_fasta,
-                query=query
+                query=query,
+                used_cm_file=cm_file
             )
             out_line.append(to_tab_delim_line_simple(args_inner))
 
         ml_out_line.append('\n'.join(out_line))
+
+        if cm_file is not None and os.path.exists(cm_file):
+            os.remove(cm_file)
 
         os.remove(all_hits_fasta)
 

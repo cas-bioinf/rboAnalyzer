@@ -6,7 +6,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from rna_blast_analyze.BR_core.config import CONFIG
-from rna_blast_analyze.BR_core.predict_structures import timeit_decorator, tryit_decorator
+from rna_blast_analyze.BR_core.decorators import timeit_decorator
 from rna_blast_analyze.BR_core.BA_support import parse_one_rec_in_multiline_structure
 
 
@@ -14,7 +14,7 @@ def run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_
     if outfile:
         ch_outfile = outfile
     else:
-        ch, ch_outfile = mkstemp()
+        ch, ch_outfile = mkstemp(prefix='rba_', suffix='_09')
         os.close(ch)
 
     r = call(
@@ -37,7 +37,6 @@ def run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_
 
 
 @timeit_decorator
-@tryit_decorator
 def me_centroid_homfold(fasta2predict, fasta_homologous_seqs, params=None):
     """
     run centroid_homefold several times and vary -g parameter, to predict the best possible structure

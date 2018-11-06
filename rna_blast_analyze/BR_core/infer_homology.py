@@ -25,7 +25,7 @@ def infer_homology(analyzed_hits, args):
     if args.cm_file:
         # use provided cm file
         ml.info('Infer homology - using provided CM file: {}'.format(args.cm_file))
-        fd, cm_model_file = mkstemp()
+        fd, cm_model_file = mkstemp(prefix='rba_', suffix='_27')
         os.close(fd)
         ml.debug('Making a copy of provided cm model file to: {}'.format(cm_model_file))
         shutil.copy(args.cm_file, cm_model_file)
@@ -45,13 +45,13 @@ def infer_homology(analyzed_hits, args):
 
     # do i need to include query in fasta file?
     # yes - to get idea of cm_conservation score value - it does not affect bit score for others
-    fd_f, fd_fasta = mkstemp()
+    fd_f, fd_fasta = mkstemp(prefix='rba_', suffix='_28')
     with os.fdopen(fd_f, 'w') as f:
         for seq in [analyzed_hits.query] + analyzed_hits.res_2_record_list():
             f.write('>{}\n{}\n'.format(seq.id,
                                        str(seq.seq)))
 
-    fd_sfile, cm_sfile_path = mkstemp()
+    fd_sfile, cm_sfile_path = mkstemp(prefix='rba_', suffix='_29')
     os.close(fd_sfile)
     if args.threads:
         cm_params = '--notrunc --cpu {} --sfile {}'.format(args.threads, cm_sfile_path)
@@ -97,12 +97,17 @@ def infer_homology(analyzed_hits, args):
 
     os.remove(fd_fasta)
     os.remove(cm_sfile_path)
-    os.remove(cm_model_file)
     os.remove(cm_msa_file)
 
     selected_hits = [hit.subs[hit.ret_keys[0]] for b, hit in zip(prediction, analyzed_hits.hits) if b]
 
-    return prediction, selected_hits
+    if args.cm_file or args.use_rfam:
+        r_cm_file = cm_model_file
+    else:
+        r_cm_file = None
+        os.remove(cm_model_file)
+
+    return prediction, selected_hits, r_cm_file
 
 
 def build_cm_model_rsearch(query_seq, path2selected_sim_array):
@@ -114,7 +119,7 @@ def build_cm_model_rsearch(query_seq, path2selected_sim_array):
     st_like.append(query_seq)
     st_like.column_annotations['SS_cons'] = query_structure
 
-    fds, stock_file = mkstemp()
+    fds, stock_file = mkstemp(prefix='rba_', suffix='_30')
     with os.fdopen(fds, 'w') as f:
         st_like.write_stockholm(f)
 
@@ -145,10 +150,7 @@ def _add_rsearch_align_scores2anal_hits(ahits, s_table):
     return
 
 
-def _infer_hits_cm(bit_sc, tr=-2.03):
-    """ current best guess mcc 0.9
-    best found threshold = -2.03
-    """
+def _infer_hits_cm(bit_sc, tr=0):
     ml.debug(fname())
     pred = []
     for i in bit_sc:
