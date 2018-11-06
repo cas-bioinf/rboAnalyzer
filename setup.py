@@ -3,6 +3,10 @@ from setuptools import setup, find_packages
 # package_data
 # - directly related to code
 # - 3rd_party_data as data_files not working to expectations
+
+with open('VERSION', 'r') as o:
+    version = o.read().strip()
+
 package_data = {
     'rna_blast_analyze': [
         'BR_core/config.txt',

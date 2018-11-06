@@ -19,6 +19,9 @@ ch.setFormatter(formatter)
 
 logger.addHandler(ch)
 
+with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'VERSION'), 'r') as o:
+    version = o.read().strip()
+
 
 class ParseFilter(argparse.Action):
     def __call__(self, parser, args, values, option_string=None):
@@ -154,7 +157,7 @@ def f_parser():
     misc_group.add_argument(
         '--version',
         action='version',
-        version='%(prog)s 0.0.5'
+        version='%(prog)s ' + version
     )
     parameters_group.add_argument(
         '--config_file',

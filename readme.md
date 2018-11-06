@@ -13,6 +13,9 @@ Sequences are analyzed with RSEARCH and its bit-score is used as
 Next sequences are predicted with one or more methods and predicted
  structures are merged with blast output to be easy to understand.
 
+More information on the pipeline is avalible in the [docs](docs/help.md) section.
+
+
 ## Installation
 
 ### Install via Conda

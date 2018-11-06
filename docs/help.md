@@ -109,11 +109,14 @@ In the secondary structure prediction the pipeline can use multiple approaches (
 The prediction methods can be (roughly) divided to following groups:
 
 - Predict structure independently on other extended sequences
-    The advantage here is robustness to possible improper parameter choice.
+
+    The main advantage here is that these methods can be used even if
+     only fragments and low scoring hits are in the output.
     - [rnafold](prediction_methods.md#rnafold)
     - [subopt_fold_query](prediction_methods.md#subopt_fold_query)
     - [rfam_rnafoldc](prediction_methods.md#rfam_rnafoldc)
     - [rfam_subopt](prediction_methods.md#rfam_subopt)
+    - [TurboFold_fast](prediction_methods.md#TurboFold_fast) (with max_seqs_in_prediction = 2)
 
 - Use _trusted_ extended sequences as reference
     - [centroid_homfold](prediction_methods.md#centroid_homfold)
