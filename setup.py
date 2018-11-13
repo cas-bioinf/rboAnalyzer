@@ -14,12 +14,13 @@ package_data = {
         'BR_core/output/*.html',
         'BR_core/output/style.css',
         '3rd_party_source/RSEARCH_matrices/*',
+        'docs/*'
     ]
 }
 
 setup(
     name='rna_blast_analyze',
-    version='0.0.5',
+    version=version,
     description='Analyze BLAST output for RNA query',
     author='Marek Schwarz',
     author_email='marek.schwarz@biomed.cas.cz',
