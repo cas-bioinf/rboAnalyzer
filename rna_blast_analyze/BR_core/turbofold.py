@@ -60,7 +60,7 @@ def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params):
         seq_set = _prepare_set_n(seq, nrset, n)
 
         if len(seq_set) < 2:
-            ml.error('Turbofold can be used with less then 2 sequences.')
+            ml.error("Turbofold can't be used with less then 2 sequences.")
             raise NoHomologousSequenceException
 
         if len(seq_set) < n:
@@ -218,7 +218,7 @@ def turbofold_with_homologous(all_sequences, nr_homologous, params, n, cpu):
         seq_set = _prepare_set_n(seq, nr_homologous, n)
 
         if len(seq_set) < 2:
-            ml.error('Turbofold can be used with less then 2 sequences.')
+            ml.error("Turbofold can't be used with less then 2 sequences.")
             raise NoHomologousSequenceException
 
         if len(seq_set) < n:
