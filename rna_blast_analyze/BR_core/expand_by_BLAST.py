@@ -112,7 +112,7 @@ def trim_before(seqs):
     return nseqs
 
 
-def compute_true_location_se(hit):
+def compute_true_location_se(hit, ql):
     hh = hit.subs[hit.ret_keys[0]]
     ann = hh.annotations
     if ann['strand'] == 1:
@@ -125,7 +125,7 @@ def compute_true_location_se(hit):
         if ann['trimmed_es']:
             s = 1
         else:
-            s = ann['blast'][1].sbjct_end - ann['blast'][1].query_start + 1
+            s = ann['blast'][1].sbjct_end - (ql - ann['blast'][1].query_end)
         e = s + len(hh.seq) - 1
     return s, e
 
@@ -251,7 +251,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                             'ss0',
                             None]
 
-            hit.best_start, hit.best_end = compute_true_location_se(hit)
+            hit.best_start, hit.best_end = compute_true_location_se(hit, query_len)
 
             return hit
 
