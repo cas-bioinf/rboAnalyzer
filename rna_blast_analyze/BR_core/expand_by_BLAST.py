@@ -1,27 +1,3 @@
-# try different approach
-# use structure of template as guide and blast alignment as seed
-# then gradually add nucleotides and reward addition which is in possible structure
-# rather then structure, use probability dot plot for that
-# ? how to allow insertions and deletions?
-# is it just structure rna alignment ?
-# maybe do it over all extended sequences at once?
-
-# its like locarna's anchored mode - try that
-# just take blast, mark matched parts and run locarna for each of them
-# locarna in anchored mode with exp window 10 provided best results
-
-# todo structure prediction
-#  - repredict structures for aligned sequences
-#    - alifold + refold of aligned sequences - or other consensus prediction algorithms
-#    - custom alignment ad identification of conserved unaligned regions?
-#    - predict by shapes cast () - unable to handle large records
-#
-#  - how to infer homology of record from alignment?
-#  - repredict after homology inference
-#  - run cmalign after homology inference
-#  - rscape analysis
-# prediction programs: MCFold, ProbKnot?, RSpredict, RNAwolf, TurboFold
-
 import os
 import pickle
 import re
@@ -44,6 +20,7 @@ from rna_blast_analyze.BR_core import BA_verify
 from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.cmalign import run_cmfetch, get_cm_model, RfamInfo
+from rna_blast_analyze.BR_core.validate_args import validate_args
 
 ml = logging.getLogger(__name__)
 
@@ -112,8 +89,8 @@ def trim_before(seqs):
     return nseqs
 
 
-def compute_true_location_se(hit):
-    hh = hit.subs[hit.ret_keys[0]]
+def compute_true_location_se(hit, ql):
+    hh = hit.extension
     ann = hh.annotations
     if ann['strand'] == 1:
         if ann['trimmed_es']:
@@ -125,7 +102,7 @@ def compute_true_location_se(hit):
         if ann['trimmed_es']:
             s = 1
         else:
-            s = ann['blast'][1].sbjct_end - ann['blast'][1].query_start + 1
+            s = ann['blast'][1].sbjct_end - (ql - ann['blast'][1].query_end)
         e = s + len(hh.seq) - 1
     return s, e
 
@@ -134,6 +111,10 @@ def blast_wrapper_inner(args_inner, shared_list=None):
     ml.debug(fname())
     if not shared_list:
         shared_list = []
+
+    if not validate_args(args_inner):
+        print("There was an error with provided arguments. Please see the error message.")
+        exit(1)
 
     # update params if different config is requested
     CONFIG.override(tools_paths(args_inner.config_file))
@@ -165,28 +146,42 @@ def blast_wrapper_inner(args_inner, shared_list=None):
 
         # filter if needed
         if args_inner.filter_by_eval is not None:
-            all_short = filter_by_eval(all_blast_hits, *args_inner.filter_by_eval)
+            tmp = filter_by_eval(all_blast_hits, *args_inner.filter_by_eval)
+            if len(tmp) == 0 and len(all_blast_hits) != 0:
+                ml.error('The requested filter removed all BLAST hits. Nothing to do.')
+                exit(0)
         elif args_inner.filter_by_bitscore is not None:
-            all_short = filter_by_bits(all_blast_hits, *args_inner.filter_by_bitscore)
-        else:
-            all_short = all_blast_hits
+            tmp = filter_by_bits(all_blast_hits, *args_inner.filter_by_bitscore)
+            if len(tmp) == 0 and len(all_blast_hits) != 0:
+                ml.error('The requested filter removed all BLAST hits. Nothing to do.')
+                exit(0)
 
-        if len(all_short) == 0 and len(all_blast_hits) != 0:
-            ml.error('The requested filter removed all BLAST hits. Nothing to do.')
-            exit(0)
-        elif len(all_short) == 0:
-            raise ValueError('No BLAST hits after filtering.')
+        all_short = all_blast_hits
 
         # expand hits according to query + 10 nucleotides +-
-        shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits(
-            all_short,
-            args_inner.blast_db,
-            bhp.query_length,
-            extra=args_inner.subseq_window_simple_ext,
-            blast_regexp=args_inner.blast_regexp,
-            skip_missing=args_inner.skip_missing,
-            msgs=args_inner.logmsgs,
-        )
+        if args_inner.db_type == "blastdb":
+            shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits(
+                all_short,
+                args_inner.blast_db,
+                bhp.query_length,
+                extra=args_inner.subseq_window_simple_ext,
+                blast_regexp=args_inner.blast_regexp,
+                skip_missing=args_inner.skip_missing,
+                msgs=args_inner.logmsgs,
+            )
+        elif args_inner.db_type in ["fasta", "gb", "server"]:
+            shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits_from_fasta(
+                all_short,
+                args_inner.blast_db,
+                bhp.query_length,
+                extra=args_inner.subseq_window_simple_ext,
+                blast_regexp=args_inner.blast_regexp,
+                skip_missing=args_inner.skip_missing,
+                msgs=args_inner.logmsgs,
+                format=args_inner.db_type,
+            )
+        else:
+            raise ValueError
 
         # check, if blast hits are non - overlapping, if so, add the overlapping hit info to the longer hit
         # reflect this in user output
@@ -221,8 +216,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
             ns.annotations['sss'] = ['ss0']
             ns.description = ''
 
-            sub_id = ns.id[:-2].split(':')[1]
-            hit.subs[sub_id] = ns
+            hit.extension = ns
 
             pos_match = re.search(str(ns.seq), str(ns.seq), flags=re.IGNORECASE)
             if not pos_match:
@@ -247,11 +241,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 assert bls == ns.annotations['extended_start']
                 assert ble == ns.annotations['extended_end']
 
-            hit.ret_keys = [sub_id,
-                            'ss0',
-                            None]
-
-            hit.best_start, hit.best_end = compute_true_location_se(hit)
+            hit.best_start, hit.best_end = compute_true_location_se(hit, query_len)
 
             return hit
 
@@ -261,19 +251,21 @@ def blast_wrapper_inner(args_inner, shared_list=None):
 
         # assign Locarna score to None as it is not directly accessible from mlocarna
         for hit in analyzed_hits.hits:
-            hit.subs[hit.ret_keys[0]].annotations['score'] = None
+            hit.extension.annotations['score'] = None
 
         # infer homology
         # consider adding query sequence to alignment and scoring it as a proof against squed alignments and datasets
         # write all hits to fasta
-        fda, all_hits_fasta = mkstemp(prefix='rba_', suffix='_17')
+        fda, all_hits_fasta = mkstemp(prefix='rba_', suffix='_17', dir=CONFIG.tmpdir)
         with os.fdopen(fda, 'w') as fah:
             # analyzed_hits.write_results_fasta(fah)
             for hit in analyzed_hits.hits:
-                if len(hit.subs[hit.ret_keys[0]].seq) == 0:
+                if len(hit.extension.seq) == 0:
                     continue
-                fah.write('>{}\n{}\n'.format(hit.subs[hit.ret_keys[0]].id,
-                                           str(hit.subs[hit.ret_keys[0]].seq)))
+                fah.write('>{}\n{}\n'.format(
+                    hit.extension.id,
+                    str(hit.extension.seq))
+                )
 
         # this part predicts homology - it is not truly part of repredict
         homology_prediction, homol_seqs, cm_file = infer_homology(analyzed_hits=analyzed_hits, args=args_inner)
@@ -326,9 +318,6 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                     if getattr(args_inner, 'pandas_dump', False):
                         spa = args_inner.pandas_dump.split('.')
                         ah.args.pandas_dump = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                    if getattr(args_inner, 'o_tbl', False):
-                        spa = args_inner.o_tbl.split('.')
-                        ah.args.o_tbl = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
                     if getattr(args_inner, 'dill', False):
                         spa = args_inner.dill.split('.')
                         ah.args.dill = '.'.join(spa[:-1]) + flag + '.' + spa[-1]

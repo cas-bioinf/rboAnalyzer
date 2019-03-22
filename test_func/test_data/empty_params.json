@@ -1,0 +1,23 @@
+{
+  "clustalo_alifold_refold_rnafoldc": {},
+  "TurboFold": {},
+  "TurboFold_fast": {},
+  "rfam_subopt": {},
+  "rcoffee_alifold_refold_rnafoldc": {},
+  "dh_clustal_alifold_unpaired_conserved_rnafoldc": {},
+  "dh_rcoffee_alifold_unpaired_conserved_rnafoldc": {},
+  "muscle_alifold_unpaired_conserved_refold_rnafoldc": {},
+  "subopt_fold_muscle_alifold": {},
+  "subopt_fold_query": {},
+  "subopt_fold_clustal_alifold": {},
+  "rfam_rnafoldc": {},
+  "muscle_alifold_refold_rnafoldc": {},
+  "centroid_homfold": {},
+  "clustalo_alifold_unpaired_conserved_refold_rnafoldc": {},
+  "rcoffee_alifold_unpaired_conserved_refold_rnafoldc": {},
+  "dh_clustal_alifold_refold_rnafoldc": {},
+  "dh_rcoffee_alifold_refold_rnafoldc": {},
+  "rnafold": {},
+  "centroid_homfold_fast": {},
+  "rfam_centroid_homfold": {}
+}

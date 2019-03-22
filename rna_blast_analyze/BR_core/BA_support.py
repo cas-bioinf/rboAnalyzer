@@ -9,6 +9,7 @@ from random import choice, shuffle
 from subprocess import call, check_output, CalledProcessError
 from tempfile import mkstemp, gettempdir
 from warnings import warn
+import shlex
 
 import numpy as np
 from Bio import SeqIO, AlignIO
@@ -44,86 +45,153 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
     :returns: list of SeqRecord objects wit suboptimal structures as letter_annotations in them
     """
     ml.info('Runing hybrid-ss-min')
+    assert isinstance(mfold, (tuple, list)) and 3 == len(mfold)
+
     P = mfold[0]
     W = mfold[1]
     M = mfold[2]
 
-    FNULL = open(os.devnull, 'w')
+    # use context manager to care about closing FNULL
+    with open(os.devnull, 'w') as FNULL:
 
-    # run_prefix = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(6))
-    # hybrid ss operates from call directory, output are ctfiles
-    if not os.path.isfile(in_path):
-        FNULL.close()
-        raise FileNotFoundError('Provided file path not found %s', in_path)
-    repeat = 0
-    done = False
-    while repeat < 5:
-        try:
-            cmd = [
-                '{}hybrid-ss-min'.format(CONFIG.mfold_path),
-                '--suffix=DAT',
-                '--NA=RNA',
-                '--noisolate',
-                '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
-                in_path
-            ]
-            ml.debug(cmd)
-            if ml.getEffectiveLevel() == 10:
-                rt = call(cmd, cwd=os.path.dirname(in_path))
-            else:
-                rt = call(
-                    cmd,
-                    cwd=os.path.dirname(in_path),
-                    stdout=FNULL,
-                    stderr=FNULL
-                )
-
-            if rt:
-                raise ChildProcessError('Execution of hybrid-ss-min failed')
-
-            # well, there is only one file, with the same name as the input file had
-            if not os.path.isfile(in_path + '.ct'):
-                raise ChildProcessError('Execution of hybrid-ss-min failed - not output file\n'
-                                        'expected {}'.format(in_path + '.ct'))
-
-            with open(in_path + '.ct', 'r') as sout:
-                suboptimals = ct2db(sout)
-
-            done = True
-            break
-        except ChildProcessError:
-            # try again
-            repeat += 1
-            ml.warning('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
-
-    if repeat >= 5 and not done:
-        ml.warning(
-            'There is an issue with hybrid-ss-min, that it does not work for certain combination of energies,'
-            ' window parameters and desired number of structures.'
-            'The issue also appears to be related to exact order of sequences in the input file'
-            'we well try to resolve this by predicting each sequence separetly'
-        )
-
-        repeat = 1
-        # get the order of file
-        fasta_file = []
-        with open(in_path, 'r') as f:
-            for seqr in SeqIO.parse(f, 'fasta'):
-                fasta_file.append(seqr)
-
+        # run_prefix = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(6))
+        # hybrid ss operates from call directory, output are ctfiles
+        if not os.path.isfile(in_path):
+            raise FileNotFoundError('Provided file path not found %s', in_path)
+        repeat = 0
+        done = False
         while repeat < 5:
             try:
-                # shuffle input file
-                # the shuffle operates directly on the list, it doesnt return anything
-                shuff_fasta = fasta_file.copy()
-                shuffle(shuff_fasta)
+                cmd = [
+                    '{}hybrid-ss-min'.format(CONFIG.mfold_path),
+                    '--suffix=DAT',
+                    '--NA=RNA',
+                    '--noisolate',
+                    '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
+                    in_path
+                ]
+                ml.debug(cmd)
+                if ml.getEffectiveLevel() == 10:
+                    rt = call(cmd, cwd=os.path.dirname(in_path))
+                else:
+                    rt = call(
+                        cmd,
+                        cwd=os.path.dirname(in_path),
+                        stdout=FNULL,
+                        stderr=FNULL
+                    )
 
-                # write shuffled file and rewrite input path
-                fd, retry_path = mkstemp(prefix='rba_', suffix='_05')
-                with os.fdopen(fd, 'w') as fp:
-                    for r in shuff_fasta:
-                        fp.write('>{}\n{}\n'.format(r.id, str(r.seq)))
-                cmd2 = [
+                if rt:
+                    raise ChildProcessError('Execution of hybrid-ss-min failed')
+
+                # well, there is only one file, with the same name as the input file had
+                if not os.path.isfile(in_path + '.ct'):
+                    raise ChildProcessError('Execution of hybrid-ss-min failed - not output file\n'
+                                            'expected {}'.format(in_path + '.ct'))
+
+                with open(in_path + '.ct', 'r') as sout:
+                    suboptimals = ct2db(sout)
+
+                done = True
+                break
+            except ChildProcessError:
+                # try again
+                repeat += 1
+                ml.warning('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
+
+        if repeat >= 5 and not done:
+            ml.warning(
+                'There is an issue with hybrid-ss-min, that it does not work for certain combination of energies,'
+                ' window parameters and desired number of structures.'
+                'The issue also appears to be related to exact order of sequences in the input file'
+                'we well try to resolve this by predicting each sequence separetly'
+            )
+
+            repeat = 1
+            # get the order of file
+            fasta_file = []
+            with open(in_path, 'r') as f:
+                for seqr in SeqIO.parse(f, 'fasta'):
+                    fasta_file.append(seqr)
+
+            while repeat < 5:
+                try:
+                    # shuffle input file
+                    # the shuffle operates directly on the list, it doesnt return anything
+                    shuff_fasta = fasta_file.copy()
+                    shuffle(shuff_fasta)
+
+                    # write shuffled file and rewrite input path
+                    fd, retry_path = mkstemp(prefix='rba_', suffix='_05', dir=CONFIG.tmpdir)
+                    with os.fdopen(fd, 'w') as fp:
+                        for r in shuff_fasta:
+                            fp.write('>{}\n{}\n'.format(r.id, str(r.seq)))
+                    cmd2 = [
+                            '{}hybrid-ss-min'.format(CONFIG.mfold_path),
+                            '--suffix=DAT',
+                            '--NA=RNA',
+                            '--noisolate',
+                            '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
+                            retry_path
+                        ]
+                    ml.debug(cmd2)
+                    if ml.getEffectiveLevel() == 10:
+                        rt = call(cmd2, cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])))
+                    else:
+                        rt = call(
+                            cmd2,
+                            cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])),
+                            stdout=FNULL,
+                            stderr=FNULL
+                        )
+
+                    if rt:
+                        print('exit code of child process: {}'.format(rt))
+                        raise ChildProcessError('Execution of hybrid-ss-min failed')
+
+                    # well, there is only one file, with the same name as the input file had
+
+                    if not os.path.isfile(retry_path + '.ct'):
+                        raise ChildProcessError('Execution of hybrid-ss-min failed - not output file\n'
+                                                'expected {} to be present'.format(retry_path + '.ct'))
+
+                    with open(retry_path + '.ct', 'r') as sout:
+                        shuff_suboptimals = ct2db(sout)
+
+                    # rearrange entries (maybe unnecessary, but to be sure)
+                    suboptimals = []
+                    s_s_names = [i.id for i in shuff_suboptimals]
+                    for seqr in fasta_file:
+                        suboptimals.append(shuff_suboptimals[s_s_names.index(seqr.id)])
+
+                    done = True
+                    break
+                except ChildProcessError:
+                    # try again
+                    repeat += 1
+                    # adjust the max amount of produced structures
+                    ml.warning('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
+                finally:
+                    if retry_path:
+                        for ext in ['.run', '.plot', '.dG', '.ct', '.ann', '']:
+                            try:
+                                rpath = retry_path + ext
+                                os.remove(rpath.strip())
+                            except FileNotFoundError:
+                                ml.warning('cannot remove file: {}, file not found'.format(retry_path))
+                            except OSError:
+                                ml.warning('cannot remove file: {}, file is directory'.format(retry_path))
+
+            if not done:
+                # make last try: predict one by one
+                ml.warning('Last try to predict structures with hybrid-ss-min')
+                suboptimals = []
+                for seq in fasta_file:
+
+                    fd, retry_path = mkstemp(prefix='rba_', suffix='_06', dir=CONFIG.tmpdir)
+                    with os.fdopen(fd, 'w') as fid:
+                        fid.write('>{}\n{}\n'.format(seq.id, str(seq.seq)))
+                    cmd3 = [
                         '{}hybrid-ss-min'.format(CONFIG.mfold_path),
                         '--suffix=DAT',
                         '--NA=RNA',
@@ -131,127 +199,61 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
                         '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
                         retry_path
                     ]
-                ml.debug(cmd2)
-                if ml.getEffectiveLevel() == 10:
-                    rt = call(cmd2, cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])))
-                else:
-                    rt = call(
-                        cmd2,
-                        cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])),
-                        stdout=FNULL,
-                        stderr=FNULL
-                    )
+                    ml.debug(cmd3)
+                    if ml.getEffectiveLevel() == 10:
+                        rt = call(cmd3, cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])))
+                    else:
+                        rt = call(
+                            cmd3,
+                            cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])),
+                            stdout=FNULL,
+                            stderr=FNULL
+                        )
 
-                if rt:
-                    print('exit code of child process: {}'.format(rt))
-                    raise ChildProcessError('Execution of hybrid-ss-min failed')
+                    if rt:
+                        msgfail = 'Execution of hybrid-ss-min failed'
+                        ml.error(msgfail)
+                        ml.error(cmd3)
+                        raise ChildProcessError(msgfail)
 
-                # well, there is only one file, with the same name as the input file had
+                    if not os.path.isfile(retry_path + '.ct'):
+                        msgfail = 'Execution of hybrid-ss-min failed - not output file'
+                        ml.error(msgfail)
+                        ml.error(cmd3)
+                        raise ChildProcessError(msgfail)
 
-                if not os.path.isfile(retry_path + '.ct'):
-                    raise ChildProcessError('Execution of hybrid-ss-min failed - not output file\n'
-                                            'expected {} to be present'.format(retry_path + '.ct'))
+                    with open(retry_path + '.ct', 'r') as sout:
+                        suboptimals.append(ct2db(sout)[0])
 
-                with open(retry_path + '.ct', 'r') as sout:
-                    shuff_suboptimals = ct2db(sout)
-
-                # rearrange entries (maybe unnecessary, but to be sure)
-                suboptimals = []
-                s_s_names = [i.id for i in shuff_suboptimals]
-                for seqr in fasta_file:
-                    suboptimals.append(shuff_suboptimals[s_s_names.index(seqr.id)])
+                    os.remove(retry_path + '.run')
+                    os.remove(retry_path + '.plot')
+                    os.remove(retry_path + '.dG')
+                    os.remove(retry_path + '.ct')
+                    os.remove(retry_path + '.ann')
+                    os.remove(retry_path)
 
                 done = True
-                break
-            except ChildProcessError:
-                # try again
-                repeat += 1
-                # adjust the max amount of produced structures
-                ml.warning('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
-            finally:
-                if retry_path:
-                    for ext in ['.run', '.plot', '.dG', '.ct', '.ann', '']:
-                        try:
-                            rpath = retry_path + ext
-                            os.remove(rpath.strip())
-                        except FileNotFoundError:
-                            ml.warning('cannot remove file: {}, file not found'.format(retry_path))
-                        except OSError:
-                            ml.warning('cannot remove file: {}, file is directory'.format(retry_path))
 
-        if not done:
-            # make last try: predict one by one
-            ml.warning('Last try to predict structures with hybrid-ss-min')
-            suboptimals = []
-            for seq in fasta_file:
+            if done:
+                pass
+            else:
+                msgfail = 'hybrid-ss-failed with unexpected behaviour, please contact developers'
+                ml.critical(msgfail)
+                raise Exception(msgfail)
 
-                fd, retry_path = mkstemp(prefix='rba_', suffix='_06')
-                with os.fdopen(fd, 'w') as fid:
-                    fid.write('>{}\n{}\n'.format(seq.id, str(seq.seq)))
-                cmd3 = [
-                    '{}hybrid-ss-min'.format(CONFIG.mfold_path),
-                    '--suffix=DAT',
-                    '--NA=RNA',
-                    '--noisolate',
-                    '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
-                    retry_path
-                ]
-                ml.debug(cmd3)
-                if ml.getEffectiveLevel() == 10:
-                    rt = call(cmd3, cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])))
-                else:
-                    rt = call(
-                        cmd3,
-                        cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])),
-                        stdout=FNULL,
-                        stderr=FNULL
-                    )
+        # remove files that hybrid-ss-min created
+        # the source file is removed elsewhere
+        os.remove(in_path + '.run')
+        os.remove(in_path + '.plot')
+        os.remove(in_path + '.dG')
+        os.remove(in_path + '.ct')
+        os.remove(in_path + '.ann')
 
-                if rt:
-                    msgfail = 'Execution of hybrid-ss-min failed'
-                    ml.error(msgfail)
-                    ml.error(cmd3)
-                    raise ChildProcessError(msgfail)
+        with open(in_path, 'r') as fin:
+            inseqs = [s for s in SeqIO.parse(fin, format='fasta')]
+            suboptimals = rebuild_structures_output_from_pred(inseqs, suboptimals, method='hybrid-ss-min')
 
-                if not os.path.isfile(retry_path + '.ct'):
-                    msgfail = 'Execution of hybrid-ss-min failed - not output file'
-                    ml.error(msgfail)
-                    ml.error(cmd3)
-                    raise ChildProcessError(msgfail)
-
-                with open(retry_path + '.ct', 'r') as sout:
-                    suboptimals.append(ct2db(sout)[0])
-
-                os.remove(retry_path + '.run')
-                os.remove(retry_path + '.plot')
-                os.remove(retry_path + '.dG')
-                os.remove(retry_path + '.ct')
-                os.remove(retry_path + '.ann')
-                os.remove(retry_path)
-
-            done = True
-
-        if done:
-            pass
-        else:
-            FNULL.close()
-            msgfail = 'hybrid-ss-failed with unexpected behaviour, please contact developers'
-            ml.critical(msgfail)
-            raise Exception(msgfail)
-
-    # remove files that hybrid-ss-min created
-    # the source file is removed elsewhere
-    os.remove(in_path + '.run')
-    os.remove(in_path + '.plot')
-    os.remove(in_path + '.dG')
-    os.remove(in_path + '.ct')
-    os.remove(in_path + '.ann')
-
-    with open(in_path, 'r') as fin:
-        inseqs = [s for s in SeqIO.parse(fin, format='fasta')]
-        suboptimals = rebuild_structures_output_from_pred(inseqs, suboptimals, method='hybrid-ss-min')
-
-        return suboptimals
+            return suboptimals
 
 
 def ct2db(f, energy_txt='dG'):
@@ -282,7 +284,7 @@ def ct2db(f, energy_txt='dG'):
     q_re = '(?<=' + energy_txt + '\s=)\s*-?\d+\.?\d*'
 
     while txt:
-        seq_len = int(re.search(sl_re,txt).group().lstrip().rstrip())
+        seq_len = int(re.search(sl_re, txt).group().lstrip().rstrip())
         q = re.search(q_re, txt)
         # seq_e = float(q.group().lstrip().rstrip())
         seq_name = txt[q.end():].lstrip().rstrip()
@@ -385,17 +387,25 @@ def rc_hits_2_rna(seqs, strand=None):
     out = []
     for i, seq in enumerate(seqs):
         if strand[i] == p_type:
-            out.append(SeqRecord(seq.seq.transcribe(),
-                            id=seq.id + 'fw',
-                            name=seq.name + 'fw',
-                            annotations=seq.annotations,
-                            description=seq.description))
+            out.append(
+                SeqRecord(
+                    seq.seq.transcribe(),
+                    id=seq.id + 'fw',
+                    name=seq.name + 'fw',
+                    annotations=seq.annotations,
+                    description=seq.description
+                )
+            )
         else:
-            out.append(SeqRecord(seq.seq.reverse_complement().transcribe(),
-                            id=seq.id + 'rc',
-                            name=seq.name + 'rc',
-                            annotations=seq.annotations,
-                            description=seq.description))
+            out.append(
+                SeqRecord(
+                    seq.seq.reverse_complement().transcribe(),
+                    id=seq.id + 'rc',
+                    name=seq.name + 'rc',
+                    annotations=seq.annotations,
+                    description=seq.description
+                )
+            )
     return out
 
 
@@ -488,13 +498,13 @@ def prevent_mem_in_fasta_name(func):
 
 
 @prevent_mem_in_fasta_name
-def generate_random_name(len, rn=()):
+def generate_random_name(lenght, rn=()):
     # generate random names
     l = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'
 
-    s = ''.join([choice(l) for i in range(len)])
+    s = ''.join([choice(l) for _ in range(lenght)])
     while s in rn:
-         s = ''.join([choice(l) for i in range(len)])
+        s = ''.join([choice(l) for _ in range(lenght)])
     return s
 
 
@@ -570,6 +580,7 @@ def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
     :param fasta_file:
     :param out_file:
     :param muscle_params:
+    :param reorder:
     :return:
     """
     ml.info('Running muscle.')
@@ -577,17 +588,22 @@ def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
     if out_file:
         cl_file = out_file
     else:
-        cl_fd, cl_file = mkstemp(prefix='rba_', suffix='_07')
+        cl_fd, cl_file = mkstemp(prefix='rba_', suffix='_07', dir=CONFIG.tmpdir)
         os.close(cl_fd)
 
-    cmd = '{}muscle -clwstrict -seqtype rna -out {} -in {} {} -quiet'.format(
-        CONFIG.muscle_path,
-        cl_file,
-        fasta_file,
-        muscle_params
-    )
+    cmd = [
+        '{}muscle'.format(CONFIG.muscle_path),
+        '-clwstrict',
+        '-seqtype', 'rna',
+        '-out', cl_file,
+        '-in', fasta_file,
+        '-quiet']
+    if muscle_params != '':
+        cmd += [
+            ' '.join([shlex.quote(i) for i in shlex.split(muscle_params)])
+        ]
     ml.debug(cmd)
-    r = call(cmd, shell=True)
+    r = call(cmd)
     if r:
         msgfail = 'call to muscle failed'
         ml.error(msgfail)
@@ -677,19 +693,19 @@ def rebuild_structures_output_from_pred(reference_sequences_list, predicted_stru
     return structures_list
 
 
-def blast_in(blast_in, b='guess'):
+def blast_in(blast_input_file, b='guess'):
     """
     gueses blast format
     :returns list of SearchIO objects, one set of hits per per query sequence per field
     """
     ml.debug(fname())
     multiq = []
-    with open(blast_in, 'r') as f:
+    with open(blast_input_file, 'r') as f:
         if b == 'guess':
             # gues the format
             l = f.readline()
-            f.seek(0,0)     # seek to begining
-            if re.search('^BLASTN \d+\.\d+\.\d+',l):
+            f.seek(0, 0)     # seek to begining
+            if re.search('^BLASTN \d+\.\d+\.\d+', l):
                 # blast object prob plaintext
                 b_type = 'plain'
                 ml.info('Infered BLAST format: txt.')
@@ -708,13 +724,13 @@ def blast_in(blast_in, b='guess'):
                 for p in blast_minimal_parser(f):
                     multiq.append(p)
             except:
-                raise IOError('Failed to parse provided file {} as text blast output'.format(blast_in))
+                raise IOError('Failed to parse provided file {} as text blast output'.format(blast_input_file))
         elif b_type == 'xml':
             try:
                 for p in NCBIXML.parse(f):
                     multiq.append(p)
             except:
-                raise IOError('Failed to parse provided file {} as xml'.format(blast_in))
+                raise IOError('Failed to parse provided file {} as xml'.format(blast_input_file))
         else:
             raise AttributeError('Type not known: allowed types: plain, xml, guess')
 
@@ -743,7 +759,7 @@ def run_rnaplot(seq, structure=None, format='svg', outfile=None):
     if format not in allowed_formats:
         raise TypeError('Format can be only from {}.'.format(allowed_formats))
 
-    fd, tempfile = mkstemp(prefix='rba_', suffix='_08')
+    fd, tempfile = mkstemp(prefix='rba_', suffix='_08', dir=CONFIG.tmpdir)
 
     rnaname = tempfile.split('/')[-1].split('\\')[-1]
 
@@ -758,10 +774,10 @@ def run_rnaplot(seq, structure=None, format='svg', outfile=None):
             structure
         ))
 
-    cmd = '{}RNAplot --output-format={} < {}'.format(
-        CONFIG.viennarna_path,
-        format,
-        tempfile
+    cmd = '{} --output-format={} < {}'.format(
+        shlex.quote('{}RNAplot'.format(CONFIG.viennarna_path)),
+        shlex.quote(format),
+        shlex.quote(tempfile)
     )
     ml.debug(cmd)
     r = call(cmd, shell=True)
@@ -796,9 +812,8 @@ class Subsequences(object):
         if not isinstance(rec, SeqRecord):
             raise Exception('Class can only be invoked with its source sequence in SeqRecord format from Biopython'
                             ' package')
-        self.subs = {}
+        self.extension = None
         self.source = rec
-        self.ret_keys = None
         self.query_name = ''
         self.best_start = None
         self.best_end = None
@@ -817,8 +832,8 @@ def format_blast_hit(hit, linelength=90, delim='_'):
     qe = hit.query_end
     ss = hit.sbjct_start
     se = hit.sbjct_end
-    ml = max([len(i) for i in [str(qs), str(qe), str(ss), str(se)]])
-    ad = linelength - (2*ml + 10 + 4)
+    max_l = max([len(i) for i in [str(qs), str(qe), str(ss), str(se)]])
+    ad = linelength - (2 * max_l + 10 + 4)
     qq = StringIO(hit.query)
     mm = StringIO(hit.match)
     sss = StringIO(hit.sbjct)
@@ -840,15 +855,15 @@ def format_blast_hit(hit, linelength=90, delim='_'):
             else:
                 se = ss - l + s.count('-') + 1
 
-            f_string = f_string + 'Query' + delim + delim*(ml-len(str(qs))) + str(qs) + \
+            f_string = f_string + 'Query' + delim + delim * (max_l - len(str(qs))) + str(qs) + \
                        ' ' + q + ' ' + \
-                       str(qe) + delim*(ml-len(str(qe))) + '\n' + \
-                       delim*(ml + 6) + \
+                       str(qe) + delim * (max_l - len(str(qe))) + '\n' + \
+                       delim * (max_l + 6) + \
                        ' ' + m + ' ' + \
-                       delim*(ml) + '\n' + \
-                       'Sbjct' + delim + delim*(ml-len(str(ss))) + str(ss) + \
+                       delim * max_l + '\n' + \
+                       'Sbjct' + delim + delim * (max_l - len(str(ss))) + str(ss) + \
                        ' ' + s + ' ' + \
-                       str(se) + delim*(ml-len(str(se))) + '\n\n'
+                       str(se) + delim * (max_l - len(str(se))) + '\n\n'
 
             qs = qe + 1
             if hit.sbjct_start < hit.sbjct_end:
@@ -871,17 +886,13 @@ def format_blast_hit(hit, linelength=90, delim='_'):
     return f_string
 
 
-def devprint(s, **kwargs):
-    print('{} - {}'.format(os.getpid(), s), **kwargs)
-
-
 def blasthsp2pre(bhsp):
     """
     printing method for blast high scoring pair
     :param bhsp: Bio.Blast.Record.HSP
     :return:
     """
-    eformat='.2E'
+    eformat = '.2E'
 
     if bhsp.sbjct_start < bhsp.sbjct_end:
         strand = 'Plus'
@@ -1038,3 +1049,17 @@ def filter_by_length_diff(sequences, ref_len, len_diff_):
     return [
         seq for seq in sequences if ref_len * (1 - len_diff_) < len(seq) < ref_len * (1 + len_diff_)
     ]
+
+
+def sel_seq_simple(all_seqs, query, len_diff):
+    """Select nr seqs simply
+
+    Will return non redundant non-ambiguous seqs with cm bit_sc > 0 (must be precomputed)
+
+    """
+    q_all = [query] + all_seqs
+    q_cm = [s for s in q_all if s.annotations['cmstat'].bit_sc > 0]
+    not_amb = filter_ambiguous_seqs_from_list(q_cm)
+    nr_na = non_redundant_seqs(not_amb)
+    nr_na_ld = filter_by_length_diff(nr_na, len(query), len_diff)
+    return nr_na_ld

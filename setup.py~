@@ -4,17 +4,17 @@ from setuptools import setup, find_packages
 # - directly related to code
 # - 3rd_party_data as data_files not working to expectations
 
-with open('rna_blast_analyze/VERSION', 'r') as o:
+with open('VERSION', 'r') as o:
     version = o.read().strip()
 
 package_data = {
     'rna_blast_analyze': [
         'BR_core/config.txt',
         'BR_core/prediction_parameters.json',
-        'BR_core/output/*',
+        'BR_core/output/*.html',
+        'BR_core/output/style.css',
         '3rd_party_source/RSEARCH_matrices/*',
-        'docs/*',
-        'VERSION'
+        'docs/*'
     ]
 }
 

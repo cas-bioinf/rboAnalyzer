@@ -1,31 +1,27 @@
 import copy
-import itertools
 import logging
 import os
 import re
 import unicodedata
 from shutil import rmtree
 from subprocess import call
-from tempfile import mkstemp, mkdtemp
+from tempfile import mkstemp
+import shlex
 
-import numpy as np
 from Bio import AlignIO, SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from rna_blast_analyze.BR_core.BA_support import read_seq_str, write_fasta_from_list_of_seqrecords,\
     sanitize_fasta_names_in_seqrec_list, desanitize_fasta_names_in_seqrec_list, run_hybrid_ss_min,\
-    run_muscle, ct2db, devprint, remove_files_with_try
-from rna_blast_analyze.BR_core.RNAshapes import rapid_shapes_list, read_rapid_shapes_list_outfile, structures2shape
-from rna_blast_analyze.BR_core.alifold4all import compute_refold, compute_clustalo_clasic, compute_alifold,\
-    compute_constrained_prediction
-from rna_blast_analyze.BR_core.cmalign import build_stockholm_from_clustal_alig, extract_ref_structure_fromRFAM_CM, run_cmalign_on_fasta, cm_strucutre2br, \
-    get_cm_model
+    run_muscle, remove_files_with_try
+from rna_blast_analyze.BR_core.alifold4all import compute_refold, compute_clustalo_clasic, compute_alifold
+from rna_blast_analyze.BR_core.cmalign import build_stockholm_from_clustal_alig, run_cmalign_on_fasta, cm_strucutre2br
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.db2shape import nesting
 from rna_blast_analyze.BR_core.decorators import timeit_decorator
 from rna_blast_analyze.BR_core.fname import fname
-from rna_blast_analyze.BR_core.infer_homology import _alignment_column_conservation
+from rna_blast_analyze.BR_core.infer_homology import alignment_column_conservation
 from rna_blast_analyze.BR_core.par_distance_no_RNAlib import distances_one_thread as rnadistance_one_thread
 from rna_blast_analyze.BR_core.stockholm_parser import read_st, trim_cmalign_sequence_by_refseq_one_seq
 
@@ -59,9 +55,7 @@ def _map_alignment_columns_from_profile_match(original_match, new_match):
     #  main introduced gaps are preserved in alignment
     # reality
     #  alignment is organized differently
-    # t-coffe has similar functionality but alignment to profile is also shifted
-    # different approach - generate mapping by column - it should help to
-    # look into cmalign optional output, they deel there with stuff like this
+
     oseq = str(original_match.seq).upper()
     nseq = str(new_match.seq).upper()
 
@@ -115,11 +109,6 @@ def _refold_with_unpaired_conservation(stockholm_msa, repred_tr='8', conseq_cons
     take that and use the scoring
     as a score the PP line in cmalign can be probably used
 
-    # can i use scoring as an SHAPE reactivity constrain somehow?
-    # probably yee but on what basis? The SHAPE reactivity is reactivity for nucleotides in very specific conformations
-    # (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4337229/)
-    # It would be better to add the probabilities directly as energy contribution in the RNAfold_compound,
-    #  but it would need some serious benchmark and error check
     :param stockholm_msa:
     :return:
     """
@@ -127,7 +116,7 @@ def _refold_with_unpaired_conservation(stockholm_msa, repred_tr='8', conseq_cons
     st_msa = read_st(stockholm_msa)
 
     # identify consensus unpaired nucleotides
-    consensus_conservation_score = _alignment_column_conservation(st_msa, gap_chars='-')
+    consensus_conservation_score = alignment_column_conservation(st_msa, gap_chars='-')
 
     # transform it to PPlike annotation
     pplike_line = _transform_score_to_pplike_line(consensus_conservation_score)
@@ -221,25 +210,14 @@ def rnafoldc(seqr, constraints_id='cons'):
     :param constraints_id:
     :return:
     """
-    new_str = _foldme_rnafoldc_noRNA(str(seqr.seq), seqr.letter_annotations[constraints_id])
-    return new_str
 
-
-def _foldme_rnafoldc_noRNA(seq, constraints):
-    """
-    mfe rnafold function without RNA lib
-    :param seq:
-    :param constraints:
-    :return:
-    """
-
-    fd, tempfile = mkstemp(prefix='rba_', suffix='_31')
+    fd, tempfile = mkstemp(prefix='rba_', suffix='_31', dir=CONFIG.tmpdir)
     with os.fdopen(fd, 'w') as fh:
         fh.write('>seq01\n{}\n{}\n'.format(
-            seq,
-            constraints
+            str(seqr.seq),
+            seqr.letter_annotations[constraints_id]
         ))
-    structure, _ = rnafold_prediction(tempfile, params='-C')
+    structure = rnafold_prediction(tempfile, params='-C')
     os.remove(tempfile)
     return structure[0].letter_annotations['ss0']
 
@@ -293,7 +271,7 @@ def encode_structure_unicode(structure, br=('(', ')'), gap_mark=49, warn=True):
             structure_nest[f] = max_structure + shift
             shift += 1
 
-    # thisi is to ensure that all chars returned are printable
+    # this is to ensure that all chars returned are printable
     mut_str = copy.deepcopy(structure_nest)
     mx = max(structure_nest)
     for i, j in enumerate(structure_nest):
@@ -356,7 +334,7 @@ def grouped(iterable, n):
 
 
 def sanitize_fasta_file(infasta, used_dict=None):
-    fd, out_path = mkstemp(prefix='rba_', suffix='_32')
+    fd, out_path = mkstemp(prefix='rba_', suffix='_32', dir=CONFIG.tmpdir)
     with open(infasta, 'r') as inh, os.fdopen(fd, 'w') as outh:
         k = [i for i in SeqIO.parse(inh, format='fasta')]
         san_seqs, san_dict = sanitize_fasta_names_in_seqrec_list(k, used_dict=used_dict)
@@ -382,23 +360,19 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
 
     ref_pred = ['refold', 'refold_rnafoldc', 'conserved_ss_rnafoldc']
     if refold not in ref_pred:
-        raise Exception('refold procedure not recognized: {}, possible vaues are {}'.format(refold,
-                                                                                            ' '.join(ref_pred)))
+        raise Exception('refold procedure not recognized: {}, possible values are {}'.format(
+            refold, ' '.join(ref_pred))
+        )
 
     cl_file = _aligner_block(nr_path, params, msa_alg, threads)
 
-    # cannot rely on that, the order of a cl_file would be the same as the orded of the nr_homolog_hits_file
-
-    if 'alifold' in params:
-        ali_file = compute_alifold(cl_file, alifold_params=params['alifold'])
-    else:
-        ali_file = compute_alifold(cl_file)
+    # cannot rely on that, the order of a cl_file would be the same as the order of the nr_homolog_hits_file
+    ali_file = compute_alifold(cl_file, alifold_params=params.get('alifold', ''))
 
     consensus_record = read_seq_str(ali_file)[0]
 
     clustalo_profile_params = '--outfmt clustal '
-    if 'clustalo_profile' in params:
-        clustalo_profile_params += params['clustalo_profile']
+    clustalo_profile_params += params.get('clustalo_profile', '')
     if threads:
         clustalo_profile_params += ' --threads {}'.format(threads)
     realign_file = run_clustal_profile2seqs_align(cl_file, all_path, clustalo_params=clustalo_profile_params)
@@ -425,40 +399,45 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
 
     # map and repair structure when mapping is unbiguous
     cs_encode = encode_structure_unicode(consensus_record.letter_annotations['ss0'])
-    new_consensus_structure_encoded = _repair_consensus_structure_by_maping(cs_encode,
-                                                                            mapping,
-                                                                            len(match_original_seq_in_new_alig.seq),
-                                                                            gap_char=49)
+    new_consensus_structure_encoded = _repair_consensus_structure_by_maping(
+        cs_encode,
+        mapping,
+        len(match_original_seq_in_new_alig.seq),
+        gap_char=49
+    )
     new_consensus_structure_repaired = repair_structure_any_variant(new_consensus_structure_encoded)
 
     new_consensus_structure = decode_structure_unicode(new_consensus_structure_repaired)
 
-    new_consensus_sequence = _repair_consensus_structure_by_maping(str(consensus_record.seq),
-                                                                   mapping,
-                                                                   len(match_original_seq_in_new_alig.seq),
-                                                                   gap_char=ord('_'))
+    new_consensus_sequence = _repair_consensus_structure_by_maping(
+        str(consensus_record.seq),
+        mapping,
+        len(match_original_seq_in_new_alig.seq),
+        gap_char=ord('_')
+    )
 
     # write new consensus to a file
-    a_fd, new_alifold_consensus_file = mkstemp(prefix='rba_', suffix='_33')
+    a_fd, new_alifold_consensus_file = mkstemp(prefix='rba_', suffix='_33', dir=CONFIG.tmpdir)
     with os.fdopen(a_fd, 'w') as f:
         f.write(new_consensus_sequence + '\n')
         f.write(new_consensus_structure + '\n')
 
     # write sliced alignment to a file
-    sa_fd, sliced_alignment_file = mkstemp(prefix='rba_', suffix='_34')
+    sa_fd, sliced_alignment_file = mkstemp(prefix='rba_', suffix='_34', dir=CONFIG.tmpdir)
     with os.fdopen(sa_fd, 'w') as f:
         AlignIO.write(new_alig_for_refold, f, 'clustal')
 
-    # now process the file, and map alignment to consensus structure (how)
-    #  take 1 sequence from original alignment and map it to new sequence alignment ?
-
+    # now process the file, and map alignment to consensus structure
     if refold in ['refold', 'refold_rnafoldc']:
         refold_file = compute_refold(sliced_alignment_file, new_alifold_consensus_file)
 
         if refold == 'refold_rnafoldc':
-            structures_rnafold_c_file = compute_constrained_prediction(refold_file)
-            seq_str = read_seq_str(structures_rnafold_c_file)
-            os.remove(structures_rnafold_c_file)
+            rnafold_parameters = params.get('RNAfold', '')
+            if '-C' not in rnafold_parameters:
+                rnafold_parameters += ' -C'
+
+            seq_str = rnafold_prediction(refold_file, params=rnafold_parameters)
+
         else:
             seq_str = read_seq_str(refold_file)
 
@@ -466,17 +445,14 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
 
     else:
         st_alig_file = build_stockholm_from_clustal_alig(sliced_alignment_file, new_alifold_consensus_file)
-        if 'repred_unpaired_tr' in params:
-            repred_tr = str(params['repred_unpaired_tr'])
-        else:
-            repred_tr = '9'
-        if 'conseq_conserved' in params:
-            conseq_conserved = params['conseq_conserved']
-        else:
-            conseq_conserved = 1
-        seq_str = _refold_with_unpaired_conservation(st_alig_file,
-                                                     repred_tr=repred_tr,
-                                                     conseq_conserved=conseq_conserved)
+        repred_tr = str(params.get('repred_unpaired_tr', '9'))
+        conseq_conserved = params.get('conseq_conserved', 1)
+
+        seq_str = _refold_with_unpaired_conservation(
+            st_alig_file,
+            repred_tr=repred_tr,
+            conseq_conserved=conseq_conserved
+        )
         os.remove(st_alig_file)
 
     structures_out = desanitize_fasta_names_in_seqrec_list(seq_str, san_dict)
@@ -493,7 +469,7 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
 
 
 @timeit_decorator
-def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refold='refold', threads=None, params=None):
+def rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refold='refold', threads=None, params=None):
     """
     return predicted structures for all hits based on provided sequence homologs
     possible param keys: "clustal", "alifold", "clustalo_profile", "repred_unpaired_tr"
@@ -504,11 +480,12 @@ def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refo
 
     ref_pred = ['refold', 'refold_rnafoldc', 'conserved_ss_rnafoldc']
     if refold not in ref_pred:
-        raise Exception('refold procedure not recognized: {}, possible vaues are {}'.format(refold,
-                                                                                            ' '.join(ref_pred)))
+        raise Exception('refold procedure not recognized: {}, possible values are {}'.format(
+            refold, ' '.join(ref_pred))
+        )
     # sanitize names input to a new file, sanitize all hits fasta also.
-    fid, nr_sanitized_fasta_file = mkstemp(prefix='rba_', suffix='_35')
-    fid2, all_hits_fasta_sanitized = mkstemp(prefix='rba_', suffix='_36')
+    fid, nr_sanitized_fasta_file = mkstemp(prefix='rba_', suffix='_35', dir=CONFIG.tmpdir)
+    fid2, all_hits_fasta_sanitized = mkstemp(prefix='rba_', suffix='_36', dir=CONFIG.tmpdir)
 
     with open(nr_homolog_hits_file, 'r') as f, os.fdopen(fid, 'w') as nr_fid:
         nr_seqs2san = [nrseq for nrseq in SeqIO.parse(f, 'fasta')]
@@ -521,30 +498,27 @@ def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refo
         SeqIO.write(all_san_seq_hits, all_fid, 'fasta')
 
     # ================================================================================================
-    # run tcoffee initial alignment of homologous seqs for consensus prediction
-
+    # run rcoffee initial alignment of homologous seqs for consensus prediction
     tcoffee_rcoffe_p = '-quiet '
-    if 'tcoffee_rcoffee' in params:
-        tcoffee_rcoffe_p += params['tcoffee_rcoffee']
+    tcoffee_rcoffe_p += params.get('rcoffee', '')
 
-    cl_file = run_tcoffee(nr_sanitized_fasta_file,
-                          tcoffee_rcoffee_params=tcoffee_rcoffe_p,
-                          threads=threads)
+    cl_file = run_tcoffee(
+        nr_sanitized_fasta_file,
+        mode='rcoffee',
+        tcoffee_rcoffee_params=tcoffee_rcoffe_p,
+        threads=threads
+    )
 
     # ================================================================================================
-    # prdict consensus structure
-    if 'alifold' in params:
-        ali_file = compute_alifold(cl_file, alifold_params=params['alifold'])
-    else:
-        ali_file = compute_alifold(cl_file)
+    # predict consensus structure
+    ali_file = compute_alifold(cl_file, alifold_params=params.get('alifold', ''))
 
     consensus_record = read_seq_str(ali_file)[0]
 
     # ================================================================================================
     # align all sequence to sequence profile
     tcoffe_profile_params = ' -quiet'
-    if 'tcoffee_profile' in params:
-        tcoffe_profile_params = params['tcoffee_profile']
+    tcoffe_profile_params += params.get('rcoffee_profile', '')
 
     realign_file = run_tcoffee_profile_aling(
         all_hits_fasta_sanitized,
@@ -601,7 +575,7 @@ def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refo
                                                                    gap_char=ord('_'))
 
     # write new consensus to a file
-    a_fd, new_alifold_consensus_file = mkstemp(prefix='rba_', suffix='_37')
+    a_fd, new_alifold_consensus_file = mkstemp(prefix='rba_', suffix='_37', dir=CONFIG.tmpdir)
     with os.fdopen(a_fd, 'w') as f:
         f.write(new_consensus_sequence + '\n')
         f.write(new_consensus_structure + '\n')
@@ -609,7 +583,7 @@ def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refo
     new_alig_for_refold_san, used_dict_2 = sanitize_fasta_names_in_seqrec_list(new_alig_for_refold)
 
     # write sliced alignment to a file
-    sa_fd, sliced_alignment_file = mkstemp(prefix='rba_', suffix='_38')
+    sa_fd, sliced_alignment_file = mkstemp(prefix='rba_', suffix='_38', dir=CONFIG.tmpdir)
     with os.fdopen(sa_fd, 'w') as f:
         AlignIO.write(
             AlignIO.MultipleSeqAlignment(new_alig_for_refold_san),
@@ -620,15 +594,16 @@ def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refo
         refold_file = compute_refold(sliced_alignment_file, new_alifold_consensus_file)
 
         if refold == 'refold_rnafoldc':
-            structures_rnafold_c_file = compute_constrained_prediction(refold_file)
-            seq_str = read_seq_str(structures_rnafold_c_file)
-            os.remove(structures_rnafold_c_file)
+            rnafold_parameters = params.get('RNAfold', '')
+            if '-C' not in rnafold_parameters:
+                rnafold_parameters += ' -C'
+
+            seq_str = rnafold_prediction(refold_file, params=rnafold_parameters)
+
         else:
             seq_str = read_seq_str(refold_file)
 
         os.remove(refold_file)
-        os.remove(new_alifold_consensus_file)
-        os.remove(sliced_alignment_file)
     else:
         st_alig_file = build_stockholm_from_clustal_alig(sliced_alignment_file, new_alifold_consensus_file)
         if 'repred_unpaired_tr' in params:
@@ -651,13 +626,15 @@ def tcoffee_rcoffee_refold_prediction(nr_homolog_hits_file, all_hits_fasta, refo
     os.remove(realign_file)
     os.remove(nr_sanitized_fasta_file)
     os.remove(all_hits_fasta_sanitized)
+    os.remove(sliced_alignment_file)
+    os.remove(new_alifold_consensus_file)
 
     return structures_out
 
 
 @timeit_decorator
 def decouple_homologs_alifold_refold_prediction(nr_homolog_hits_file, homologous_seqs, all_hits_fasta, refold='refold',
-                                                threads=None, align='tcoffee',
+                                                threads=None, align='rcoffee',
                                                 params=None):
     """
     return predicted structures for all hits based on provided sequence homologs
@@ -684,17 +661,13 @@ def decouple_homologs_alifold_refold_prediction(nr_homolog_hits_file, homologous
         raise Exception('refold procedure not recognized: {}, possible vaues are {}'.format(refold,
                                                                                             ' '.join(ref_pred)))
 
-    clustalo_params = '--outfmt clustal '
-    if 'clustalo' in params:
-        clustalo_params += params['clustalo']
+    clustalo_params = '--outfmt clustal --force'
+    clustalo_params += params.get('clustalo', '')
     if threads:
         clustalo_params += ' --threads={}'.format(threads)
     cl_file = compute_clustalo_clasic(nr_homolog_hits_file, clustalo_params=clustalo_params)
 
-    if 'alifold' in params:
-        ali_file = compute_alifold(cl_file, alifold_params=params['alifold'])
-    else:
-        ali_file = compute_alifold(cl_file)
+    ali_file = compute_alifold(cl_file, alifold_params=params.get('alifold', ''))
 
     consensus_record = read_seq_str(ali_file)[0]
 
@@ -711,10 +684,10 @@ def decouple_homologs_alifold_refold_prediction(nr_homolog_hits_file, homologous
             all_seqs_db.append(seq)
             if str(seq.seq) not in hom_seq_db:
                 nonhom_seqs.append(seq)
-        ah_fd, all_h_seq_fasta = mkstemp(prefix='rba_', suffix='_39')
-        an_fd, all_n_seq_fasta = mkstemp(prefix='rba_', suffix='_40')
+        ah_fd, all_h_seq_fasta = mkstemp(prefix='rba_', suffix='_39', dir=CONFIG.tmpdir)
+        an_fd, all_n_seq_fasta = mkstemp(prefix='rba_', suffix='_40', dir=CONFIG.tmpdir)
 
-        if len(nonhom_seqs) == 1 and align != 'tcoffee':
+        if len(nonhom_seqs) == 1 and align != 'rcoffee':
             print('Warning: Only 1 sequence which is considered non-homologous. \n'
                   '         Duplicating record for succesfull execution of profile alignment. '
                   'Added duplicid will be removed\n'
@@ -732,7 +705,7 @@ def decouple_homologs_alifold_refold_prediction(nr_homolog_hits_file, homologous
             write_fasta_from_list_of_seqrecords(an, san_nonhom_seqs)
 
     # now predict for homologs and non homologs separately
-    # clustal and mafft cannot align only one sequence to profile, which can be the case - need to use tcoffee
+    # clustal cannot align only one sequence to profile, which can be the case - need to use tcoffee (rcoffee)
     # skipp the computations, if none sequence is in the part
 
     if len(homologous_seqs) > 0:
@@ -808,6 +781,12 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
     if '--notrunc' not in cmalign_params:
         cmalign_params += ' --notrunc'
 
+    # rnafold params
+    rnafold_params = params.get('RNAfold', '-C')
+    if '-C' not in rnafold_params:
+        # some parameters given but -C not present
+        rnafold_params += ' -C'
+
     alig_file = run_cmalign_on_fasta(allhits_fasta_file, cmmodel_file, cmalign_params=cmalign_params)
     os.remove(allhits_fasta_file)
     # multiple sequence cm align
@@ -823,7 +802,7 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
 
         # constraint prediction
         # write constraint file
-        fd, temp_constraint_file = mkstemp(prefix='rba_', suffix='_41')
+        fd, temp_constraint_file = mkstemp(prefix='rba_', suffix='_41', dir=CONFIG.tmpdir)
         with os.fdopen(fd, 'w') as tmpf:
             tmpf.write('>{}\n{}\n{}\n'.format(
                 trimmed_seq.id,
@@ -831,7 +810,7 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
                 trimmed_seq.letter_annotations['constrains']
             ))
 
-        single_structure, _ = rnafold_prediction(temp_constraint_file, params='-C')
+        single_structure = rnafold_prediction(temp_constraint_file, params=rnafold_params)
 
         os.remove(temp_constraint_file)
 
@@ -927,19 +906,21 @@ def _profile_alig_prediction(params, usethreads, cl_file, seqs_to_align_and_pred
             clustalo_profile_params += ' --threads {}'.format(usethreads)
         realign_file = run_clustal_profile2seqs_align(cl_file, seqs_to_align_and_predict_fasta_file,
                                                       clustalo_params=clustalo_profile_params)
-    elif align == 'tcoffee':
-        tcoffe_profile_params = ' -quiet'
-        if 'tcoffee_profile' in params:
-            tcoffe_profile_params = params['tcoffee_profile']
+    elif align == 'rcoffee':
+        rcoffee_profile_params = ' -quiet'
+        if 'rcoffee_profile' in params:
+            rcoffee_profile_params = params['rcoffee_profile']
 
-        realign_file = run_tcoffee_profile_aling(seqs_to_align_and_predict_fasta_file,
-                                                 'rcoffee',
-                                                 cl_file,
-                                                 threads=usethreads,
-                                                 tcoffee_rcoffee_params=tcoffe_profile_params)
+        realign_file = run_tcoffee_profile_aling(
+            seqs_to_align_and_predict_fasta_file,
+            'rcoffee',
+            cl_file,
+            threads=usethreads,
+            tcoffee_rcoffee_params=rcoffee_profile_params
+        )
 
     else:
-        raise AttributeError('"{}" is not recognized aligner, known are "tcoffee" and "clustalo"')
+        raise AttributeError('"{}" is not recognized aligner, known are "rcoffee" and "clustalo"')
 
     realign_alig = AlignIO.read(realign_file, format='clustal')
 
@@ -956,8 +937,9 @@ def _profile_alig_prediction(params, usethreads, cl_file, seqs_to_align_and_pred
     first_nr_record = _parse_first_record_only(homolog_profile_fasta_file)
 
     # need to run tcoffee line sanitize because name could be changed.
-    if align == 'tcoffee':
-        realign_allseq_possition = [i for i, seq in enumerate(realign_alig) if seq.id == tcoffee_line_sanitizer(first_nr_record.id)]
+    if align == 'rcoffee':
+        realign_allseq_possition = [i for i, seq in enumerate(realign_alig) if seq.id == tcoffee_line_sanitizer(
+            first_nr_record.id)]
     else:
         realign_allseq_possition = [i for i, seq in enumerate(realign_alig) if seq.id == first_nr_record.id]
 
@@ -968,8 +950,9 @@ def _profile_alig_prediction(params, usethreads, cl_file, seqs_to_align_and_pred
 
     first_original_alignment_record = orig_alignment[0]
 
-    if align == 'tcoffee':
-        match_original_seq_in_new_alig = [i for i in old_alig_in_new if i.id == tcoffee_line_sanitizer(first_original_alignment_record.id)][0]
+    if align == 'rcoffee':
+        match_original_seq_in_new_alig = [i for i in old_alig_in_new if i.id == tcoffee_line_sanitizer(
+            first_original_alignment_record.id)][0]
     else:
         match_original_seq_in_new_alig = [i for i in old_alig_in_new if i.id == first_original_alignment_record.id][0]
 
@@ -992,44 +975,42 @@ def _profile_alig_prediction(params, usethreads, cl_file, seqs_to_align_and_pred
                                                                    gap_char=ord('_'))
 
     # write new consensus to a file
-    a_fd, new_alifold_consensus_file = mkstemp(prefix='rba_', suffix='_42')
+    a_fd, new_alifold_consensus_file = mkstemp(prefix='rba_', suffix='_42', dir=CONFIG.tmpdir)
     with os.fdopen(a_fd, 'w') as f:
         f.write(new_consensus_sequence + '\n')
         f.write(new_consensus_structure + '\n')
 
     # write sliced alignment to a file
-    sa_fd, sliced_alignment_file = mkstemp(prefix='rba_', suffix='_43')
+    sa_fd, sliced_alignment_file = mkstemp(prefix='rba_', suffix='_43', dir=CONFIG.tmpdir)
     with os.fdopen(sa_fd, 'w') as f:
         AlignIO.write(new_alig_for_refold, f, 'clustal')
 
     # now process the file, and map alignment to consensus structure (how)
-    #  take 1 sequence from original alignment and map it to new sequence alignment ?
-    #  mozna lepsi obracene, protoze se gapy mohou pridat v novem alignmentu spis nez by zmizely
 
     if refold in ['refold', 'refold_rnafoldc']:
         refold_file = compute_refold(sliced_alignment_file, new_alifold_consensus_file)
 
         if refold == 'refold_rnafoldc':
-            structures_rnafold_c_file = compute_constrained_prediction(refold_file)
-            seq_str = read_seq_str(structures_rnafold_c_file)
-            os.remove(structures_rnafold_c_file)
+            rnafold_parameters = params.get('RNAfold', '')
+            if '-C' not in rnafold_parameters:
+                rnafold_parameters += ' -C'
+
+            seq_str = rnafold_prediction(refold_file, params=rnafold_parameters)
+
         else:
             seq_str = read_seq_str(refold_file)
 
         os.remove(refold_file)
     else:
         st_alig_file = build_stockholm_from_clustal_alig(sliced_alignment_file, new_alifold_consensus_file)
-        if 'repred_unpaired_tr' in params:
-            repred_tr = str(params['repred_unpaired_tr'])
-        else:
-            repred_tr = '9'
-        if 'conseq_conserved' in params:
-            conseq_conserved = params['conseq_conserved']
-        else:
-            conseq_conserved = 1
-        seq_str = _refold_with_unpaired_conservation(st_alig_file,
-                                                     repred_tr=repred_tr,
-                                                     conseq_conserved=conseq_conserved)
+        repred_tr = str(params.get('repred_unpaired_tr', '9'))
+        conseq_conserved = params.get('conseq_conserved', 1)
+
+        seq_str = _refold_with_unpaired_conservation(
+            st_alig_file,
+            repred_tr=repred_tr,
+            conseq_conserved=conseq_conserved
+        )
         os.remove(st_alig_file)
 
     os.remove(new_alifold_consensus_file)
@@ -1049,10 +1030,9 @@ def _aligner_block(nr_homolog_hits_file, params, msa_alg, threads=None):
     """
     ml.debug(fname())
     if msa_alg == 'clustalo':
-        if params and ('clustalo' in params) and params['clustalo']:
-            clustal_params = '--outfmt=clustal {}'.format(params['clustalo'])
-        else:
-            clustal_params = '--outfmt=clustal'
+        clustal_params = '--outfmt=clustal --force'
+        clustal_params += params.get('clustalo', '')
+
         if threads:
             clustal_params += ' --threads={}'.format(threads)
         alig_file = compute_clustalo_clasic(nr_homolog_hits_file, clustalo_params=clustal_params)
@@ -1068,7 +1048,7 @@ def _aligner_block(nr_homolog_hits_file, params, msa_alg, threads=None):
         nr_hits_list = [i for i in SeqIO.parse(nr_homolog_hits_file, format='fasta')]
         san_nr_hits, san_dict = sanitize_fasta_names_in_seqrec_list(nr_hits_list)
 
-        nrfd, nr_sanitized_fasta_file = mkstemp(prefix='rba_', suffix='_44')
+        nrfd, nr_sanitized_fasta_file = mkstemp(prefix='rba_', suffix='_44', dir=CONFIG.tmpdir)
         with os.fdopen(nrfd, 'w') as f:
             SeqIO.write(san_nr_hits, f, format='fasta')
 
@@ -1090,7 +1070,7 @@ def _aligner_block(nr_homolog_hits_file, params, msa_alg, threads=None):
         os.remove(alig_file)
         del alig_file
 
-        afd, alig_file = mkstemp(prefix='rba_', suffix='_45')
+        afd, alig_file = mkstemp(prefix='rba_', suffix='_45', dir=CONFIG.tmpdir)
         with os.fdopen(afd, 'w') as f:
             AlignIO.write(alignment, f, format='clustal')
 
@@ -1106,24 +1086,6 @@ def _aligner_block(nr_homolog_hits_file, params, msa_alg, threads=None):
         raise AttributeError()
 
     return alig_file
-
-
-def remove_sharp_hairpins(structure):
-    """
-    input is an RNA structure in dot bracket format
-    it removes the sharp hairpins "(.)" and "(..)" should they be present in the structure
-
-    Intended as a preprocess step after extraction of a template structure from cm model file and before
-        the shape extraction analysis.
-        The RNAshapes raises error when structure with those aforementioned hairpin substructure are encountered.
-
-    :param structure:
-    :return:
-    """
-
-    intermediate = re.sub('\(\.\)', '...', structure)
-    final = re.sub('\(\.\.\)', '\.\.\.\.', intermediate)
-    return final
 
 
 @timeit_decorator
@@ -1162,328 +1124,6 @@ def rfam_subopt_pred(all_sequence_fasta, cm_ref_str, params=None):
             new_structures.append(seq)
 
     return new_structures
-
-
-@timeit_decorator
-def cmscan_rapidshapes(all_sequence_fasta, query_file, params=None, threads=None):
-    """
-    need to pass --allowLP 1 parameter to all Rapidshapes and RNAshapes calls because in rfam reference there can be
-    lonely pairs
-    """
-    ml.debug(fname())
-    # todo rapidshapes in parallel
-    if params is None:
-        params = dict()
-
-    best_model = get_cm_model(query_file, params=params, threads=threads)
-
-    # select best hiting model
-    # todo what if not suficient hit is not reached
-
-    cm_ref_str = extract_ref_structure_fromRFAM_CM(best_model)
-
-    # need to precheck extracted structure
-    # (.) and (..) are not allowed by RNAshapes
-    san_cm_ref_str = remove_sharp_hairpins(cm_ref_str)
-    if cm_ref_str != san_cm_ref_str:
-        print('reference structure for the {} contains sharp hairpins, which are forbiden in RNAshapes, '
-              'removal of this hairpins is essential for sucessful shape extraction and further structure'
-              ' computation'.format(best_model))
-        print('reference structure:' + cm_ref_str)
-        print('repaired ref struct:' + san_cm_ref_str)
-
-    # cm_shape = db2shape(cm_ref_str)
-    # or to leverage possibility of selecting shape level
-    fd, temp_str_file = mkstemp(prefix='rba_', suffix='_46')
-    with os.fdopen(fd, 'w') as f:
-        f.write(san_cm_ref_str + '\n')
-
-    if params and ('shape_level' in params) and params['shape_level']:
-        sh_level = params['shape_level']
-    else:
-        sh_level = 5
-    out_shape_list = structures2shape(infile=temp_str_file, shape_level=sh_level, params='--allowLP 1')
-
-    out_shape = ' '.join([i.shape for i in out_shape_list])
-
-    os.remove(temp_str_file)
-    del temp_str_file
-
-    # same as below to prevent unnecesary computation
-    all_seqs_list = [s for s in SeqIO.parse(all_sequence_fasta, format='fasta')]
-
-    uniq_all_seqs_dict = uniquify_seq_list(all_seqs_list)
-    uniq_all_structures_dict = dict()
-
-    for i, seq_str in enumerate(uniq_all_seqs_dict.keys()):
-        # check if sequence contains noncanonical bases
-        if re.search('[^ACGTU]', seq_str, flags=re.IGNORECASE):
-            print('running rapid shapes ambiguos prediction #{}'.format(i), flush=True)
-            print('for {}'.format(' '.join(uniq_all_seqs_dict[seq_str])))
-
-            if params and ('rapidshapes' in params) and params['rapidshapes']:
-                a_structure = rapidshapes_ambigous_prediction(seq_str, out_shape, params.get('rapidshapes') + '--allowLP 1', shape_level=sh_level)
-            else:
-                a_structure = rapidshapes_ambigous_prediction(seq_str, out_shape, '--allowLP 1', shape_level=sh_level)
-            uniq_all_structures_dict[seq_str] = a_structure
-
-            del a_structure
-
-        else:
-            devprint('rapidshapes - normal sequence #{}'.format(i), flush=True)
-            tp, temp_fasta = mkstemp(prefix='rba_', suffix='_47')
-            with os.fdopen(tp, 'w') as f:
-                f.write('>seq{}\n{}\n'.format(i, seq_str))
-
-            if params and ('rapidshapes' in params) and params['rapidshapes']:
-                rs_file = rapid_shapes_list(temp_fasta, out_shape,
-                                            rapidshapes_params=params.get('rapidshapes') + ' --allowLP 1',
-                                            shapeLevel=sh_level)
-            else:
-                rs_file = rapid_shapes_list(temp_fasta, out_shape,
-                                            rapidshapes_params='--allowLP 1',
-                                            shape_level=sh_level)
-            try:
-                r_structure = read_rapid_shapes_list_outfile(rs_file)
-            except IndexError as e:
-                # catch error when structure is not predicted by rapidshapes despite being fed correct parameters and
-                # no error is reported whatsoever
-                r_structure = [
-                    SeqRecord(
-                        Seq(seq_str),
-                        letter_annotations={out_shape: 'X'*len(seq_str)},
-                    )
-                ]
-                print(e)
-                print('Rapidshapes prediction failed - no structure predicted.')
-
-            uniq_all_structures_dict[seq_str] = r_structure[0].letter_annotations[out_shape]
-
-            del tp
-            os.remove(temp_fasta)
-            os.remove(rs_file)
-
-    # rebuild seq list
-    for seq in all_seqs_list:
-        seq.annotations['sss'] = ['ss0']
-        if 'X' in uniq_all_structures_dict[str(seq.seq)] and all(['X' == i for i in uniq_all_structures_dict[str(seq.seq)]]):
-            seq.letter_annotations['ss0'] = '.'*len(seq)
-            seq.annotations['predicted'] = False
-        else:
-            seq.letter_annotations['ss0'] = uniq_all_structures_dict[str(seq.seq)]
-            seq.annotations['predicted'] = True
-
-    return all_seqs_list
-
-
-@timeit_decorator
-def msa_alifold_rapidshapes(all_sequence_fasta, nr_homolog_hits_file, params=None, threads=True, msa_alg=''):
-    ml.debug(fname())
-    # rapidshapes can only work with canonical sequence encoding
-    #  ie ACGUT - IUPAC ambigous encoding is no supported
-    # but automaticly retrieved sequences frm a database has this encoding
-    # todo rapidshapes in parallel
-    if params is None:
-        params = dict()
-
-    print('aligner block')
-    alig_file = _aligner_block(nr_homolog_hits_file, params, msa_alg, threads=threads)
-
-    print('compute alifold')
-    if params and ('alifold' in params) and params['alifold']:
-        alif_file = compute_alifold(alig_file, alifold_params=params['alifold'])
-    else:
-        alif_file = compute_alifold(alig_file)
-
-    # possibly need to decode alifold structure
-    alif_str = read_seq_str(alif_file)[0]
-    consensus_structure = alif_str.letter_annotations['ss0']
-
-    # get shape from consensus
-    # shape = db2shape(consensus_structure)
-    # shape_str = ''.join(shape[0])
-
-    if params and ('shape_level' in params) and params['shape_level']:
-        sh_level = params['shape_level']
-    else:
-        sh_level = 5
-
-    san_template_str = remove_sharp_hairpins(consensus_structure)
-    # get shape from consensus
-    fd, temp_str_file = mkstemp(prefix='rba_', suffix='_48')
-    with os.fdopen(fd, 'w') as f:
-        f.write(san_template_str + '\n')
-    out_shape_list = structures2shape(infile=temp_str_file, shape_level=sh_level, params='--allowLP 1')
-    shape_str = ' '.join([i.shape for i in out_shape_list])
-
-    os.remove(temp_str_file)
-    del temp_str_file
-
-    # predict sequences with that shape
-    # use rapidshapes sequence by sequence detenct sequences with ambiguos encoding and do not run for them
-    # or use both variants ?
-    all_seqs_list = [s for s in SeqIO.parse(all_sequence_fasta, format='fasta')]
-
-    uniq_all_seqs_dict = uniquify_seq_list(all_seqs_list)
-    uniq_all_structures_dict = dict()
-
-    for i, seq_str in enumerate(uniq_all_seqs_dict.keys()):
-        # check if sequence contains noncanonical bases
-        if re.search('[^ACGTU]', seq_str, flags=re.IGNORECASE):
-            devprint('running rapid shapes ambiguos prediction #{}'.format(i), flush=True)
-            print('for {}'.format(' '.join(uniq_all_seqs_dict[seq_str])))
-
-            if params and ('rapidshapes' in params) and params['rapidshapes']:
-                a_structure = rapidshapes_ambigous_prediction(seq_str, shape_str, params.get('rapidshapes'), shape_level=sh_level)
-            else:
-                a_structure = rapidshapes_ambigous_prediction(seq_str, shape_str, '', shape_level=sh_level)
-            uniq_all_structures_dict[seq_str] = a_structure
-
-            del a_structure
-
-        else:
-            devprint('rapidshapes - normal sequence #{}'.format(i), flush=True)
-            tp, temp_fasta = mkstemp(prefix='rba_', suffix='_49')
-            with os.fdopen(tp, 'w') as f:
-                f.write('>seq{}\n{}\n'.format(i, seq_str))
-
-            if params and ('rapidshapes' in params) and params['rapidshapes']:
-                rs_file = rapid_shapes_list(temp_fasta, shape_str, rapidshapes_params=params.get('rapidshapes'), shape_level=sh_level)
-            else:
-                rs_file = rapid_shapes_list(temp_fasta, shape_str, shape_level=sh_level)
-
-            try:
-                r_structure = read_rapid_shapes_list_outfile(rs_file)
-            except IndexError as e:
-                # catch error when structure is not predicted by rapidshapes despite being fed correct parameters and
-                # no error is reported whatsoever
-                r_structure = [
-                    SeqRecord(
-                        Seq(seq_str),
-                        letter_annotations={shape_str: 'X'*len(seq_str)},
-                    )
-                ]
-                print(e)
-                print('Rapidshapes prediction failed - no structure predicted.')
-
-            uniq_all_structures_dict[seq_str] = r_structure[0].letter_annotations[shape_str]
-
-            del tp
-            os.remove(temp_fasta)
-            os.remove(rs_file)
-
-    # rebuild seq list
-    for seq in all_seqs_list:
-        seq.annotations['sss'] = ['ss0']
-        if 'X' in uniq_all_structures_dict[str(seq.seq)] and all(['X' == i for i in uniq_all_structures_dict[str(seq.seq)]]):
-            seq.letter_annotations['ss0'] = '.'*len(seq)
-            seq.annotations['predicted'] = False
-        else:
-            seq.letter_annotations['ss0'] = uniq_all_structures_dict[str(seq.seq)]
-            seq.annotations['predicted'] = True
-
-    os.remove(alig_file)
-    os.remove(alif_file)
-    return all_seqs_list
-
-
-def rapidshapes_ambigous_prediction(sequence_string, shape_str, rs_params, shape_level):
-    ml.debug(fname())
-    # get all variants
-    all_seq_vars = expand_ambiguous_RNA(sequence_string)
-
-    structures = []
-    # dum_str = ''.join(['.'] * len(all_seq_vars[0]))
-    for i, var_seq in enumerate(all_seq_vars):
-        tf, tempfile = mkstemp(prefix='rba_', suffix='_50')
-        with os.fdopen(tf, 'w') as f:
-            f.write('>seq{}\n{}\n'.format(i, var_seq))
-
-        # todo define exceptions
-        try:
-            rs_file = rapid_shapes_list(tempfile, shape_str, rs_params, shape_level=shape_level)
-            rs_str = read_rapid_shapes_list_outfile(rs_file)
-            os.remove(rs_file)
-            structures.append(rs_str[0].letter_annotations[shape_str])
-        except:
-            # add empty structure
-            structures.append(None)
-
-        os.remove(tempfile)
-
-    # count empty structures
-    e_count = structures.count(None)
-    if e_count != 0:
-        print('rapidshapes ambiguos prediction - {} form {} were not successfully predicted'.format(
-            e_count, len(structures)
-        ))
-
-    folded = [fs for fs in structures if fs is not None]
-
-    # expect that all structures should be same
-    if (len(folded) != 0) and all([True for i in folded if i == folded[0]]):
-        print('rapidshapes ambigous - all structures same: success')
-
-        structure = folded[0]
-    else:
-
-        if len(folded) == 0:
-            print('rapidshapes ambiguos - prediction failed')
-            structure = 'X' * len(sequence_string)
-        else:
-            print('rapidshapes ambigous - not all structure same: selecting structure most similar to others')
-            comb_folded = itertools.combinations(folded, 2)
-            comb_dist = rnadistance_one_thread(comb_folded)
-
-            # reformat output distance
-            od = np.zeros((len(folded), len(folded)))
-            for i in range(len(folded)):
-                for j in range(len(folded)):
-                    if i == j:
-                        continue
-                    od[i, j] = comb_dist[i + j]
-
-            sum_dists = od.sum()
-            mini = sum_dists.index(min(sum_dists))
-            structure = folded[mini]
-
-    return structure
-
-
-def expand_ambiguous_RNA(rnaseq):
-    """
-    expand possibilities in ambigously encoded RNA sequence
-    with IUPAC code
-    :return:
-    """
-
-    iupac = IUPACmapping()
-
-    def spawn_branch(seqstr):
-        ns = []
-        for i, b, in enumerate(seqstr):
-            if b in iupac.ambiguous:
-                rs = ''.join(ns)
-                bb = []
-                for j in iupac.rnamapping[b]:
-                    bb.append(rs + j + seqstr[i+1:])
-                return bb
-            else:
-                ns.append(b)
-        return []
-
-    seqs = spawn_branch(rnaseq)
-    while len(seqs) > 0:
-        new_seqs = []
-        for seq in seqs:
-            new_seqs += spawn_branch(seq)
-
-        if len(new_seqs) == 0:
-            # comple enumeration in previous step
-            break
-        seqs = new_seqs
-
-    return seqs
 
 
 class IUPACmapping(object):
@@ -1528,23 +1168,6 @@ class IUPACmapping(object):
         return rnamapping
 
 
-def uniquify_seq_list(seq_list):
-    """
-    return dictionary with sequences as keys and sequence ids as values in list
-    :param seq_list:
-    :return:
-    """
-    out_dict = dict()
-    for seq in seq_list:
-        seq_str = str(seq.seq)
-        if seq_str in out_dict:
-            out_dict[seq_str].append(seq.id)
-        else:
-            out_dict[seq_str] = []
-            out_dict[seq_str].append(seq.id)
-    return out_dict
-
-
 def run_tcoffee_profile_aling(fasta_file, mode, profile_file, threads=None, outfile=None, tcoffee_rcoffee_params=''):
     """
     only aligner which can handle only one sequence input
@@ -1585,7 +1208,7 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
     """
     ml.info('Running t-coffee.')
     ml.debug(fname())
-    fd, fp = mkstemp(prefix='rba_', suffix='_51')
+    fd, fp = mkstemp(prefix='rba_', suffix='_51', dir=CONFIG.tmpdir)
     os.close(fd)
 
     exe_path = fp + 'dir'
@@ -1598,37 +1221,27 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
     FNULL = open(os.devnull, 'w')
     try:
         if not outfile:
-            of, outfile = mkstemp(prefix='rba_', suffix='_52')
+            of, outfile = mkstemp(prefix='rba_', suffix='_52', dir=CONFIG.tmpdir)
             os.close(of)
 
-        tfd, tcoffee_temp_files = mkstemp(prefix='rba_', suffix='_53')
-        os.close(tfd)
+        # build commandline
+        cmd = [
+            '{}t_coffee'.format(CONFIG.tcoffee_path),
+            fasta_file,
+            '-mode', mode,
+            '-outfile', outfile,
+        ]
+        if threads is not None:
+            cmd += ['-n_core', str(threads)]
+        if tcoffee_rcoffee_params != '':
+            cmd += tcoffee_rcoffee_params.split()
 
-        if threads:
-            cmd = '{}t_coffee {} -mode {} -n_core={} -outfile {} {} > {}'.format(
-                CONFIG.tcoffee_path,
-                fasta_file,
-                mode,
-                threads,
-                outfile,
-                tcoffee_rcoffee_params,
-                tcoffee_temp_files
-            )
-        else:
-            cmd = '{}t_coffee {} -mode {} -outfile {} {} > {}'.format(
-                CONFIG.tcoffee_path,
-                fasta_file,
-                mode,
-                outfile,
-                tcoffee_rcoffee_params,
-                tcoffee_temp_files
-            )
         ml.debug(cmd)
 
         if ml.getEffectiveLevel() == 10:
-            r = call(cmd, shell=True)
+            r = call(cmd, stdout=FNULL)
         else:
-            r = call(cmd, shell=True, stderr=FNULL)
+            r = call(cmd, stdout=FNULL, stderr=FNULL)
 
         # clean after t-coffee
         try:
@@ -1637,7 +1250,7 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
             ml.warning('cleanup after tcoffee unsuccessfull - Directory: {} not found.'.format(exe_path))
 
         remove_files_with_try(
-            (tcoffee_temp_files, outfile + '.html'),
+            [outfile + '.html'],
             msg_template='cleanup after tcoffee unsuccessfull -'
         )
 
@@ -1655,15 +1268,34 @@ def run_tcoffee(fasta_file, mode='rcoffee', threads=None, outfile=None, tcoffee_
 
 
 @timeit_decorator
+def rnafold_wrap_for_predict(*args, **kwargs):
+    return rnafold_prediction(*args, **kwargs)
+
+
 def rnafold_prediction(fasta2predict, params=''):
     ml.debug(fname())
-    a, b = mkstemp(prefix='rba_', suffix='_54')
-    os.close(a)
-    cmd = '{}RNAfold --noPS {} < {} > {}'.format(
-        CONFIG.viennarna_path,
-        params,
-        fasta2predict,
-        b
+    fd, structure_output_file = mkstemp(prefix='rba_', suffix='_54', dir=CONFIG.tmpdir)
+    os.close(fd)
+
+    structure_output_file = rnafold(fasta2predict, structure_output_file, params)
+
+    structures = read_seq_str(structure_output_file)
+    os.remove(structure_output_file)
+    return structures
+
+
+def rnafold(fastafile, outfile, parameters=''):
+    """Run RNAfold on commandline
+
+    issue --noPS to prevent plotting of postscript structure
+    """
+    if '--noPS' not in parameters:
+        parameters += ' --noPS'
+    cmd = '{} {} < {} > {}'.format(
+        shlex.quote('{}RNAfold'.format(CONFIG.viennarna_path)),
+        ' '.join([shlex.quote(i) for i in parameters.split()]),
+        shlex.quote(fastafile),
+        shlex.quote(outfile)
     )
     r = call(cmd, shell=True)
 
@@ -1672,14 +1304,11 @@ def rnafold_prediction(fasta2predict, params=''):
         ml.error(msgfail)
         ml.error(cmd)
         raise ChildProcessError(msgfail)
-
-    structures = read_seq_str(b)
-    os.remove(b)
-    return structures
+    return outfile
 
 
 @timeit_decorator
-def subopt_fold_query(all_fasta_hits_file, query, params=None):
+def subopt_fold_query(all_fasta_hits_file, query_file, params=None):
     """
     use folded query sequence as a reference,
     fold all sequences by Unafold, then select structure most similar to query
@@ -1693,15 +1322,9 @@ def subopt_fold_query(all_fasta_hits_file, query, params=None):
     ml.debug(fname())
     if params is None:
         params = dict()
-    # get single query structure
-    a, qf = mkstemp(prefix='rba_', suffix='_55')
-    with os.fdopen(a, 'w') as fd:
-        fd.write('>query\n{}\n'.format(str(query.seq)))
 
-    if params and ('RNAfold' in params) and params['RNAfold']:
-        query_structure, _ = rnafold_prediction(qf, params=params['RNAfold'])
-    else:
-        query_structure, _ = rnafold_prediction(qf)
+    # get single query structure
+    query_structure = rnafold_prediction(query_file, params.get('RNAfold', ''))
 
     if params and ('mfold' in params) and params['mfold']:
         assert isinstance(params['mfold'], (tuple, list)) and 3 == len(params['mfold'])
@@ -1724,15 +1347,16 @@ def subopt_fold_query(all_fasta_hits_file, query, params=None):
 
             # select best ie lowes score
             mindisti = rnadist_score.index(min(rnadist_score))
-            new_structures.append(SeqRecord(seq.seq,
-                                            id=seq.id,
-                                            annotations={'sss': ['ss0']},
-                                            letter_annotations={'ss0': seq.letter_annotations[key_list[mindisti]]}
-                                            ))
+            new_structures.append(
+                SeqRecord(
+                    seq.seq,
+                    id=seq.id,
+                    annotations={'sss': ['ss0']},
+                    letter_annotations={'ss0': seq.letter_annotations[key_list[mindisti]]}
+                )
+            )
         else:
             new_structures.append(seq)
-
-    os.remove(qf)
 
     return new_structures
 
@@ -1749,39 +1373,28 @@ def subopt_fold_alifold(all_fasta_hits_file, homologs_file, aligner='muscle', pa
     # run aligner
     # =================================================================================================================
     if 'clustalo' == aligner:
-        if params and ('clustalo' in params) and params['clustalo']:
-            clustal_params = ' --outfmt=clustal {}'.format(params['clustalo'])
-        else:
-            clustal_params = ' --outfmt=clustal'
+        clustal_params = ' --outfmt=clustal --force'
+        clustal_params += params.get('clustalo', '')
+
         if threads:
             clustal_params += ' --threads={}'.format(threads)
         alig_file = compute_clustalo_clasic(homologs_file, clustalo_params=clustal_params)
 
     elif 'muscle' == aligner:
-        if params and ('muscle' in params) and params['muscle']:
-            alig_file = run_muscle(homologs_file, muscle_params=params['muscle'], reorder=False)
-        else:
-            alig_file = run_muscle(homologs_file, reorder=False)
+        alig_file = run_muscle(homologs_file, muscle_params=params.get('muscle', ''), reorder=False)
 
     else:
         raise KeyError('provided key ({}) not recognized - avalible: "clustalo" "muscle"'.format(aligner))
 
     # run consensus prediction
     # =================================================================================================================
-    if params and ('alifold' in params) and params['alifold']:
-        alif_file = compute_alifold(alig_file, alifold_params=params['alifold'])
-    else:
-        alif_file = compute_alifold(alig_file)
+    alif_file = compute_alifold(alig_file, alifold_params=params.get('alifold', ''))
 
     # possibly need to decode alifold structure
     alif_str = read_seq_str(alif_file)[0]
     consensus_structure = alif_str.letter_annotations['ss0']
 
-    if params and ('mfold' in params) and params['mfold']:
-        assert isinstance(params['mfold'], (tuple, list)) and 3 == len(params['mfold'])
-        subs = run_hybrid_ss_min(all_fasta_hits_file, mfold=params['mfold'])
-    else:
-        subs = run_hybrid_ss_min(all_fasta_hits_file)
+    subs = run_hybrid_ss_min(all_fasta_hits_file, mfold=params.get('mfold', (10, 2, 20)))
 
     new_structures = []
 
@@ -1797,11 +1410,14 @@ def subopt_fold_alifold(all_fasta_hits_file, homologs_file, aligner='muscle', pa
 
             # select best ie lowes score
             mindisti = rnadist_score.index(min(rnadist_score))
-            new_structures.append(SeqRecord(seq.seq,
-                                            id=seq.id,
-                                            annotations={'sss': ['ss0']},
-                                            letter_annotations={'ss0': seq.letter_annotations[key_list[mindisti]]}
-                                            ))
+            new_structures.append(
+                SeqRecord(
+                    seq.seq,
+                    id=seq.id,
+                    annotations={'sss': ['ss0']},
+                    letter_annotations={'ss0': seq.letter_annotations[key_list[mindisti]]}
+                )
+            )
         else:
             new_structures.append(seq)
     os.remove(alif_file)
@@ -1825,52 +1441,72 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
 
     def _try_rescue(profile_file):
         # beware AlignIO truncates sequence names so they become non-unique, then clustalo also fails
-        ml.warning('Trying rescue for profile alignment if profile ha no gaps clustalo things, '
-                'that sequences are no aligned. Appendig trailing gap to overcome the issue.')
+        ml.warning(
+            'Trying rescue for profile alignment if profile ha no gaps clustalo things, '
+            'that sequences are no aligned. Appendig trailing gap to overcome the issue.'
+        )
         a = AlignIO.read(profile_file, format='clustal')
         s = [SeqRecord(Seq(str(i.seq) + '-'), id=i.id) for i in a]
         fa = AlignIO.MultipleSeqAlignment(s)
 
-        fd, temp = mkstemp(prefix='rba_', suffix='_56')
+        fd, temp = mkstemp(prefix='rba_', suffix='_56', dir=CONFIG.tmpdir)
         with os.fdopen(fd, 'w') as fh:
-            # AlignIO.write(fa, fh, format='clustal')
             AlignIO.write(fa, fh, format='fasta')
         return temp
 
     if outfile:
         clustalo_file = outfile
     else:
-        c_fd, clustalo_file = mkstemp(prefix='rba_', suffix='_57')
+        c_fd, clustalo_file = mkstemp(prefix='rba_', suffix='_57', dir=CONFIG.tmpdir)
         os.close(c_fd)
 
     with open(os.devnull, 'w') as FNULL:
-        cmd = '{}clustalo {} --force -i {} --profile1 {} -o {}'.format(
-            CONFIG.clustal_path,
-            clustalo_params,
-            fasta_seq_file,
-            msa_file,
-            clustalo_file
-        )
+        cmd = [
+            '{}clustalo'.format(CONFIG.clustal_path),
+            '--force',
+            '-i', fasta_seq_file,
+            '--profile1', msa_file,
+            '-o', clustalo_file
+        ]
+        if clustalo_params != '':
+            cmd += clustalo_params.split()
+
+        # cmd = '{}clustalo {} --force -i {} --profile1 {} -o {}'.format(
+        #     CONFIG.clustal_path,
+        #     clustalo_params,
+        #     fasta_seq_file,
+        #     msa_file,
+        #     clustalo_file
+        # )
         ml.debug(cmd)
         if ml.getEffectiveLevel() == 10:
-            r = call(cmd, shell=True)
+            r = call(cmd)
         else:
-            r = call(cmd, shell=True, stdout=FNULL, stderr=FNULL)
+            r = call(cmd, stdout=FNULL, stderr=FNULL)
 
         if r:
             ml.warning('Profile align failed.')
 
             # Initiate rescue attempt
             rewriten_msa = _try_rescue(msa_file)
-            cmd2 = '{}clustalo {} --force -i {} --profile1 {} -o {}'.format(
-                CONFIG.clustal_path,
-                clustalo_params,
-                fasta_seq_file,
-                rewriten_msa,
-                clustalo_file
-            )
+            cmd2 = [
+                '{}clustalo'.format(CONFIG.clustal_path),
+                '--force',
+                '-i', fasta_seq_file,
+                '--profile1', rewriten_msa,
+                '-o', clustalo_file
+            ]
+            if clustalo_params:
+                cmd2 += clustalo_params.split()
+            # cmd2 = '{}clustalo {} --force -i {} --profile1 {} -o {}'.format(
+            #     CONFIG.clustal_path,
+            #     clustalo_params,
+            #     fasta_seq_file,
+            #     rewriten_msa,
+            #     clustalo_file
+            # )
             ml.debug(cmd2)
-            r2 = call(cmd2, shell=True)
+            r2 = call(cmd2)
 
             os.remove(rewriten_msa)
 
@@ -1881,129 +1517,6 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
                 ml.error(cmd2)
                 raise ChildProcessError(msgfail + ' ' + cmd)
     return clustalo_file
-
-
-@timeit_decorator
-def turbofold_conservative_prediction(all_sequence_fasta, homologous_file, params=None):
-    """
-    specific turbofold wrapper
-    tasks:
-        write conf file
-        read and convert output ct structures to db
-        handle the files used
-
-    Turbofold instalation
-    classic turbofold installation is needed
-        RNAstructure/exe must be in PATH
-
-        then enviroment variable must be set, if not, then the RNAstucture (Turbofold) will not work
-        export DATAPATH=[directory in which RNAstructure resides]/RNAstructure/data_tables/
-    """
-
-    ml.debug(fname())
-    env = os.environ.copy()
-    if 'DATAPATH' not in env:
-        env['DATAPATH'] = CONFIG.rnastructure_datapath
-
-    def _run_turbofold(turbofold_conf_file):
-        """
-        input is properly configured input file
-        exepath is path for turbofold to be able to execute the function will cd to the provided directory and cd out
-         after execution - usually the directory data_tables in RNAstructure package suffice
-        all paths in conf file must be given in full
-        """
-        ml.info('Run Turbofold.')
-        ml.debug(fname())
-        with open(os.devnull, 'w') as FNULL:
-            cmd = '{}TurboFold {}'.format(
-                CONFIG.turbofold_path,
-                turbofold_conf_file
-            )
-            ml.debug(cmd)
-            if ml.getEffectiveLevel() == 10:
-                r = call(cmd, shell=True, env=env)
-            else:
-                r = call(cmd, shell=True, stdout=FNULL, env=env)
-
-            if r:
-                msgfail = 'Call to turbofold failed, cmd below:'
-                ml.error(msgfail)
-                ml.error(cmd)
-                raise ChildProcessError(msgfail)
-
-    if (params is not None) and ('turbofold_mode' in params):
-        turbo_mode = params['turbofold_mode']
-    else:
-        turbo_mode = 'MEA'
-
-    tmpdir = mkdtemp()
-
-    # read all sequences
-    o = open(all_sequence_fasta, 'r')
-    all_seqs = [i for i in SeqIO.parse(o, format='fasta')]
-    o.close()
-
-    h = open(homologous_file, 'r')
-    homologs = [i for i in SeqIO.parse(h, format='fasta')]
-    h.close()
-
-    # write sequences by one in fasta file format
-    hom_paths = []
-    for i, hseq in enumerate(homologs):
-        fastaname = os.path.join(tmpdir, 'hseq{}.fasta'.format(i))
-        with open(fastaname, 'w') as f:
-            f.write('>{}\n{}\n'.format(
-                'hseq{}'.format(i),
-                str(hseq.seq)
-            ))
-        hom_paths.append(fastaname)
-
-    hom_out_paths = [os.path.join(tmpdir, 'hseq{}.ct'.format(i)) for i in range(len(homologs))]
-
-    # ==================================================
-    # prediction phase
-    #  write predicted seq to a file
-    #  write conf file
-    #  run prediction
-    new_structures = []
-    for i, aseq in enumerate(all_seqs):
-        fastaname = os.path.join(tmpdir, 'qa_seq{}.fasta'.format(i))
-        o_name = os.path.join(tmpdir, 'qa_seq{}_out.ct'.format(i))
-        # write the query fasta file
-        with open(fastaname, 'w') as f:
-            f.write('>{}\n{}\n'.format(
-                'qaseq{}'.format(i),
-                str(aseq.seq)
-            ))
-
-        # write the configuration file
-        conf_file = os.path.join(tmpdir, 'conf_file{}.conf'.format(i))
-        with open(conf_file, 'w') as c:
-            c.write('Mode = {}\n'.format(turbo_mode))
-
-            in_files = '{' + ';'.join(hom_paths) + ';' + fastaname + '}'
-            out_files = '{' + ';'.join(hom_out_paths) + ';' + o_name + '}'
-
-            c.write('InSeq = {}\n'.format(in_files))
-            c.write('OutCT = {}\n'.format(out_files))
-
-        _run_turbofold(conf_file)
-
-        # convert ct structure 2 db
-        o = open(o_name, 'r')
-        seq_with_pred_str = ct2db(o, energy_txt='ENERGY')
-        o.close()
-
-        new_structures.append(
-            SeqRecord(aseq.seq,
-                      id=aseq.id,
-                      annotations={'sss': ['ss0']},
-                      letter_annotations={'ss0': seq_with_pred_str[0].letter_annotations['ss0']}
-                      )
-        )
-
-    rmtree(tmpdir)
-    return new_structures
 
 
 def check_lonely_bp(structure, gap_char='.'):
@@ -2023,13 +1536,3 @@ def check_lonely_bp(structure, gap_char='.'):
     repaired_structure = decode_structure_unicode(repaired, gap_char=gap_char, gap_mark=gapmark)
     # go into another round
     return check_lonely_bp(repaired_structure)
-
-
-if __name__ == '__main__':
-    print('encode structure unicode example')
-    sample_structure = '(((((((((....((((((((..(((..((((..((....))..))))..)))...)))))).))(((((((.....(((((.(((....))))))))....)))))))))))))))).'
-    encoding_example = encode_structure_unicode(sample_structure)
-    print(sample_structure)
-    print(encoding_example)
-
-

@@ -1,4 +1,5 @@
 import os
+import logging
 from subprocess import call
 from tempfile import mkstemp
 
@@ -7,32 +8,40 @@ from Bio.SeqRecord import SeqRecord
 
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.decorators import timeit_decorator
-from rna_blast_analyze.BR_core.BA_support import parse_one_rec_in_multiline_structure
+from rna_blast_analyze.BR_core import BA_support
+from rna_blast_analyze.BR_core.fname import fname
+
+ml = logging.getLogger(__name__)
 
 
 def run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_params='', outfile=None):
     if outfile:
         ch_outfile = outfile
     else:
-        ch, ch_outfile = mkstemp(prefix='rba_', suffix='_09')
+        ch, ch_outfile = mkstemp(prefix='rba_', suffix='_09', dir=CONFIG.tmpdir)
         os.close(ch)
 
-    r = call(
-        '{}centroid_homfold -H {} {} -o {} {}'.format(
-            CONFIG.centriod_path,
-            fasta_homologous_seqs,
-            centroid_homfold_params,
-            ch_outfile,
-            fasta2predict
-        ),
-        shell=True
-    )
-
+    # build commandline
+    cmd = [
+        '{}centroid_homfold'.format(CONFIG.centriod_path),
+        '-H', fasta_homologous_seqs,
+    ]
+    if centroid_homfold_params != '':
+        cmd += centroid_homfold_params.split()
+    cmd += [
+        '-o', ch_outfile,
+        fasta2predict
+    ]
+    r = call(cmd)
     if r:
-        raise ChildProcessError('call to run centroid_homfold failed for files'
-                                ' in:{} homologs:{} outfile:{}'.format(fasta2predict,
-                                                                       fasta_homologous_seqs,
-                                                                       ch_outfile))
+        raise ChildProcessError(
+            'call to run centroid_homfold failed for files'
+            ' in:{} homologs:{} outfile:{}'.format(
+                fasta2predict,
+                fasta_homologous_seqs,
+                ch_outfile
+            )
+        )
     return ch_outfile
 
 
@@ -69,6 +78,37 @@ def me_centroid_homfold(fasta2predict, fasta_homologous_seqs, params=None):
     return structures2return
 
 
+@timeit_decorator
+def centroid_homfold_fast(all_seqs, query, all_seqs_fasta, n, centroid_homfold_params, len_diff):
+    ml.debug(fname())
+
+    homologous_file = centroid_homfold_fast_prep(all_seqs, query, n, len_diff)
+
+    structures, _ = me_centroid_homfold(all_seqs_fasta, homologous_file, params=centroid_homfold_params)
+    os.remove(homologous_file)
+    return structures
+
+
+def centroid_homfold_fast_prep(all_seqs, query, n, len_diff):
+    ml.debug(fname())
+
+    assert n >= 1
+
+    if query.annotations['ambiguous']:
+        msgfail = "Query sequence contains ambiguous characters. Can't use centroid_homfold_fast."
+        ml.error(msgfail)
+        raise ValueError(msgfail)
+
+    nr_na_ld = BA_support.sel_seq_simple(all_seqs, query, len_diff)
+    nr_na_ld_n = nr_na_ld[:int(n)]
+
+    ch, ch_hom = mkstemp(prefix='rba_', suffix='_74', dir=CONFIG.tmpdir)
+    with os.fdopen(ch, 'w') as h:
+        BA_support.write_fasta_from_list_of_seqrecords(h, nr_na_ld_n)
+
+    return ch_hom
+
+
 def centroid_homfold_select_best(first_structures):
     for cen_hom_proposed_structures in _parse_centroid_homefold_output_file(first_structures):
         best_structure_by_e = dict()
@@ -91,7 +131,7 @@ def centroid_homfold_select_best(first_structures):
 
 def _parse_centroid_homefold_output_file(file):
     with open(file, 'r') as f:
-        for sr in parse_one_rec_in_multiline_structure(f):
+        for sr in BA_support.parse_one_rec_in_multiline_structure(f):
             cf = sr.strip().splitlines()
 
             cfr = SeqRecord(Seq(cf[1]), id=cf[0])
@@ -103,4 +143,3 @@ def _parse_centroid_homefold_output_file(file):
                 cfr.annotations['sss'].append('ss' + str(i))
 
             yield cfr
-

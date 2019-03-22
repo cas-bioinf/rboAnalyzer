@@ -10,24 +10,24 @@ import json
 
 class TestDirectExecution_with_prediction(unittest.TestCase):
     def setUp(self):
-        ff, csv = tempfile.mkstemp()
+        ff, csv = tempfile.mkstemp(prefix='rba_', suffix='_t25')
         os.close(ff)
         self.csv = csv
 
-        ff, html = tempfile.mkstemp()
+        ff, html = tempfile.mkstemp(prefix='rba_', suffix='_t26')
         os.close(ff)
         self.html = html
 
-        ff, pandas_dump = tempfile.mkstemp()
+        ff, pandas_dump = tempfile.mkstemp(prefix='rba_', suffix='_t27')
         os.close(ff)
         self.pandas_dump = pandas_dump
 
-        ff, json_file = tempfile.mkstemp()
+        ff, json_file = tempfile.mkstemp(prefix='rba_', suffix='_t28')
         os.close(ff)
         self.json = json_file
 
         ppfile = os.path.join(root, 'rna_blast_analyze', 'BR_core', 'prediction_parameters.json')
-        np_fd, self.np_file = tempfile.mkstemp()
+        np_fd, self.np_file = tempfile.mkstemp(prefix='rba_', suffix='_t29')
         with open(ppfile, 'r') as f, os.fdopen(np_fd, 'w') as np:
             prediction_parameters = json.load(f)
 
@@ -41,9 +41,9 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
             json.dump(prediction_parameters, np)
 
         self.cmd = base_script + [
-            '-blast_in', os.path.join(fwd, test_data_dir, 'RF00001_short.blastout'),
-            '-blast_query', os.path.join(fwd, test_data_dir, 'RF00001.fasta'),
-            '-blast_db', os.path.join(fwd, test_data_dir, 'blastdb', 'RF00001-art.blastdb'),
+            '--blast_in', os.path.join(fwd, test_data_dir, 'RF00001_short.blastout'),
+            '--blast_query', os.path.join(fwd, test_data_dir, 'RF00001.fasta'),
+            '--blast_db', os.path.join(fwd, test_data_dir, 'blastdb', 'RF00001-art.blastdb'),
             '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
             '--b_type', 'plain',
             '--mode', 'simple',
@@ -52,7 +52,8 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
             '--csv', self.csv,
             '--pandas_dump', self.pandas_dump,
             '--threads', '2',
-            '--pm_param_file', self.np_file
+            '--pm_param_file', self.np_file,
+            '--enable_overwrite'
         ]
 
         def run(mm):
@@ -84,72 +85,65 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
     def test_TurboFold_fast(self):
         self.run('TurboFold_fast')
 
-    def test_alifold_refold(self):
-        self.run('alifold_refold')
+    def test_clustalo_alifold_refold_rnafoldc(self):
+        self.run('clustalo_alifold_refold_rnafoldc')
 
-    def test_alifold_refold_rnafold_c(self):
-        self.run('alifold_refold_rnafold_c')
+    def test_clustalo_alifold_unpaired_conserved_refold_rnafoldc(self):
+        self.run('clustalo_alifold_unpaired_conserved_refold_rnafoldc')
 
-    def test_alifold_unpaired_conserved_refold(self):
-        self.run('alifold_unpaired_conserved_refold')
-
-    def test_dh_clustal_alifold_conserved_ss_rnafoldc(self):
-        self.run('dh_clustal_alifold_conserved_ss_rnafoldc')
-
-    def test_dh_clustal_alifold_refold(self):
-        self.run('dh_clustal_alifold_refold')
+    def test_dh_clustal_alifold_unpaired_conserved_rnafoldc(self):
+        self.run('dh_clustal_alifold_unpaired_conserved_rnafoldc')
 
     def test_dh_clustal_alifold_refold_rnafoldc(self):
         self.run('dh_clustal_alifold_refold_rnafoldc')
 
-    def test_dh_tcoffee_alifold_conserved_ss_rnafoldc(self):
-        self.run('dh_tcoffee_alifold_conserved_ss_rnafoldc')
+    def test_dh_rcoffee_alifold_unpaired_conserved_rnafoldc(self):
+        self.run('dh_rcoffee_alifold_unpaired_conserved_rnafoldc')
 
-    def test_dh_tcoffee_alifold_refold(self):
-        self.run('dh_tcoffee_alifold_refold')
+    def test_dh_rcoffee_alifold_refold_rnafoldc(self):
+        self.run('dh_rcoffee_alifold_refold_rnafoldc')
 
-    def test_dh_tcoffee_alifold_refold_rnafoldc(self):
-        self.run('dh_tcoffee_alifold_refold_rnafoldc')
+    def test_muscle_alifold_refold_rnafoldc(self):
+        self.run('muscle_alifold_refold_rnafoldc')
 
-    def test_muscle_alifold_refold(self):
-        self.run('muscle_alifold_refold')
+    def test_muscle_alifold_unpaired_conserved_refold_rnafoldc(self):
+        self.run('muscle_alifold_unpaired_conserved_refold_rnafoldc')
 
-    def test_muscle_alifold_refold_rnafold_c(self):
-        self.run('muscle_alifold_refold_rnafold_c')
+    def test_centroid_homfold(self):
+        self.run('centroid_homfold')
 
-    def test_muscle_alifold_unpaired_conserved_refold(self):
-        self.run('muscle_alifold_unpaired_conserved_refold')
+    def test_centroid_homfold_fast(self):
+        self.run('centroid_homfold_fast')
 
-    def test_pairwise_centroid_homfold(self):
-        self.run('pairwise_centroid_homfold')
+    def test_rfam_centroid_homfold(self):
+        self.run('rfam_centroid_homfold')
 
     def test_rfam_rnafoldc(self):
         self.run('rfam_rnafoldc')
 
     # ----only if mfold is installed----
-    # def test_rfam_subopt(self):
-    #     self.run('rfam_subopt')
-    #
-    # def test_subopt_fold_query(self):
-    #     self.run('subopt_fold_query')
-    #
-    # def test_subopt_fold_clustal_alifold(self):
-    #     self.run('subopt_fold_clustal_alifold')
-    #
-    # def test_subopt_fold_muscle_alifold(self):
-    #     self.run('subopt_fold_muscle_alifold')
+    # As most of the testing is done internally, we expect that this is True
+    def test_rfam_subopt(self):
+        self.run('rfam_subopt')
+
+    def test_subopt_fold_query(self):
+        self.run('subopt_fold_query')
+
+    def test_subopt_fold_clustal_alifold(self):
+        self.run('subopt_fold_clustal_alifold')
+
+    def test_subopt_fold_muscle_alifold(self):
+        self.run('subopt_fold_muscle_alifold')
+    # -----------------------------------
 
     def test_rnafold(self):
         self.run('rnafold')
 
-    def test_tcoffee_rcoffee_alifold_conserved_ss_rnafoldc(self):
-        self.run('tcoffee_rcoffee_alifold_conserved_ss_rnafoldc')
+    def test_rcoffee_alifold_unpaired_conserved_refold_rnafoldc(self):
+        self.run('rcoffee_alifold_unpaired_conserved_refold_rnafoldc')
 
-    def test_tcoffee_rcoffee_alifold_refold(self):
-        self.run('tcoffee_rcoffee_alifold_refold')
-
-    def test_tcoffee_rcoffee_alifold_refold_rnafoldc(self):
-        self.run('tcoffee_rcoffee_alifold_refold_rnafoldc')
+    def test_rcoffee_alifold_refold_rnafoldc(self):
+        self.run('rcoffee_alifold_refold_rnafoldc')
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import os
 import tempfile
 import unittest
+import json
 from subprocess import call
 
 from rna_blast_analyze.BR_core.BA_support import remove_files_with_try
@@ -8,20 +9,21 @@ from test_func.test_execution import fwd, test_data_dir, tab_output_equal, base_
 
 
 class TestDirectExecution_with_prediction(unittest.TestCase):
+    # check if prediction works with empty parameters
     def setUp(self):
-        ff, csv = tempfile.mkstemp(prefix='rba_', suffix='_t17')
+        ff, csv = tempfile.mkstemp(prefix='rba_', suffix='_t21')
         os.close(ff)
         self.csv = csv
 
-        ff, html = tempfile.mkstemp(prefix='rba_', suffix='_t18')
+        ff, html = tempfile.mkstemp(prefix='rba_', suffix='_t22')
         os.close(ff)
         self.html = html
 
-        ff, pandas_dump = tempfile.mkstemp(prefix='rba_', suffix='_t19')
+        ff, pandas_dump = tempfile.mkstemp(prefix='rba_', suffix='_t23')
         os.close(ff)
         self.pandas_dump = pandas_dump
 
-        ff, json_file = tempfile.mkstemp(prefix='rba_', suffix='_t20')
+        ff, json_file = tempfile.mkstemp(prefix='rba_', suffix='_t24')
         os.close(ff)
         self.json = json_file
 
@@ -37,6 +39,7 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
             '--csv', self.csv,
             '--pandas_dump', self.pandas_dump,
             '--threads', '2',
+            '--pm_param_file', os.path.join(fwd, test_data_dir, 'empty_params.json'),
             '--enable_overwrite'
         ]
 
@@ -50,6 +53,11 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
                 pdfile=self.pandas_dump,
             )
             self.assertTrue(t)
+
+            with open(self.json, 'r') as j:
+                data = json.load(j)
+                # check if prediction params are empty
+                self.assertEqual(data['args']['pred_params'][mm], {})
 
             remove_files_with_try(
                 [

@@ -19,7 +19,7 @@ class Test1WithCMfile(unittest.TestCase):
     def clean_object(self):
         self.data.query.annotations = dict()
         for h in self.data.hits:
-            h.subs[h.ret_keys[0]].annotations = dict()
+            h.extension.annotations = dict()
 
     def test_simple(self):
         self.clean_object()

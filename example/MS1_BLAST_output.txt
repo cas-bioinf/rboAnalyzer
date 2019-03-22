@@ -1,0 +1,1675 @@
+BLASTN 2.8.0+
+Reference: Stephen F. Altschul, Thomas L. Madden, Alejandro
+A. Schaffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and
+David J. Lipman (1997), "Gapped BLAST and PSI-BLAST: a new
+generation of protein database search programs", Nucleic
+Acids Res. 25:3389-3402.
+
+
+RID: U1WRPYNA01N
+
+
+Database: Nucleotide collection (nt)
+           48,014,062 sequences; 198,041,598,103 total letters
+Query= 
+Length=304
+
+
+                                                                   Score     E
+Sequences producing significant alignments:                       (Bits)  Value
+
+CP022927.1  Mycobacterium shigaense strain SCY chromosome, com...  213     2e-51
+AF092842.1  Mycobacterium marinum G13 promoter construct           175     7e-40
+CP023445.1  Actinosynnema pretiosum strain X47 chromosome, com...  56.8    3e-04
+CP029607.1  Actinosynnema pretiosum subsp. pretiosum strain AT...  54.0    0.002
+CP024894.1  Amycolatopsis sp. AA4 chromosome, complete genome      54.0    0.002
+CP001630.1  Actinosynnema mirum DSM 43827, complete genome         54.0    0.002
+CP016077.1  Actinoalloteichus sp. GBA129-24, complete genome       52.5    0.006
+CP016076.1  Actinoalloteichus sp. ADI127-7, complete genome        52.5    0.006
+CP027657.1  Pseudomonas mendocina strain NEB698 chromosome, co...  51.1    0.017
+LN850107.1  Alloactinosynnema sp. L-07 genome assembly Alloact...  51.1    0.017
+CP015163.1  Amycolatopsis albispora strain WP1 chromosome, com...  49.7    0.045
+LN877229.1  Kibdelosporangium sp. MJ126-NF4 complete genome        49.7    0.045
+HE804045.1  Saccharothrix espanaensis DSM 44229 complete genome    49.7    0.045
+CP016353.1  Prauserella marina strain DSM 45268, complete genome   48.3    0.12 
+CP016793.1  Lentzea guizhouensis strain DHS C013, complete genome  46.8    0.33 
+LS992085.1  Triticum aestivum genome assembly, chromosome: 2D      45.4    0.88 
+LS480641.1  Triticum aestivum genome assembly, chromosome: II      45.4    0.88 
+CP025958.1  Gemmata obscuriglobus strain DSM 5831 chromosome, ...  45.4    0.88 
+CP029210.1  Aquabacterium olei strain NBRC 110486 chromosome, ...  45.4    0.88 
+CP017780.1  Amycolatopsis sp. BJA-103 chromosome, complete genome  45.4    0.88 
+CP023641.1  Pseudomonas mendocina strain MAE1-K chromosome, co...  45.4    0.88 
+CP022521.1  Actinoalloteichus hoggarensis strain DSM 45943, co...  45.4    0.88 
+LT629797.1  Pseudomonas sihuiensis strain KCTC 32246 genome as...  45.4    0.88 
+LT629789.1  Amycolatopsis keratiniphila strain FH 1893 genome ...  45.4    0.88 
+CP016174.1  Amycolatopsis orientalis strain B-37, complete genome  45.4    0.88 
+LN997848.1  Magnetospirillum sp. XM-1 genome assembly XM-1, ch...  45.4    0.88 
+CP008953.1  Amycolatopsis japonica strain MG417-CF17, complete...  45.4    0.88 
+CP003777.1  Amycolatopsis mediterranei RB, complete genome         45.4    0.88 
+CP003410.1  Amycolatopsis orientalis HCCB10007, complete genome    45.4    0.88 
+CP003729.1  Amycolatopsis mediterranei S699, complete genome       45.4    0.88 
+CP002896.1  Amycolatopsis mediterranei S699, complete genome       45.4    0.88 
+CP002000.1  Amycolatopsis mediterranei U32, complete genome        45.4    0.88 
+CP001644.1  Ralstonia pickettii 12D chromosome 1, complete seq...  45.4    0.88 
+CP025774.1  Achromobacter xylosoxidans strain SOLR10 chromosome    44.0    2.4  
+LS483395.1  Achromobacter xylosoxidans strain NCTC10808 genome...  44.0    2.4  
+CP014028.2  Achromobacter xylosoxidans strain FDAARGOS_150, co...  44.0    2.4  
+CP018228.1  Rhizobium leguminosarum strain Vaf-108, complete g...  44.0    2.4  
+CP013290.1  Janibacter indicus strain YFY001, complete genome      44.0    2.4  
+CP016286.1  Rhizobium leguminosarum strain Vaf10, complete genome  44.0    2.4  
+XM_015424287.1  PREDICTED: Gekko japonicus homeobox protein ot...  44.0    2.4  
+CP012752.1  Kibdelosporangium phytohabitans strain KLBMP1111, ...  44.0    2.4  
+CP011371.1  [Polyangium] brachysporum strain DSM 7029, complet...  44.0    2.4  
+XM_012343062.1  Saprolegnia parasitica CBS 223.65 hypothetical...  44.0    2.4  
+LN831029.1  Achromobacter xylosoxidans genome assembly NCTC108...  44.0    2.4  
+CP009448.1  Achromobacter xylosoxidans C54, complete genome        44.0    2.4  
+XM_007881210.1  Anthracocystis flocculosa PF-1 hypothetical pr...  44.0    2.4  
+HG916765.1  Castellaniella defragrans 65Phen complete genome       44.0    2.4  
+CP007045.1  Rhizobium leguminosarum bv. trifolii WSM1689, comp...  44.0    2.4  
+HE798385.1  Achromobacter xylosoxidans NH44784-1996 complete g...  44.0    2.4  
+AM236080.1  Rhizobium leguminosarum bv. viciae chromosome comp...  44.0    2.4  
+AF518736.1  Gallotia stehlini OTX5 protein mRNA, partial cds       44.0    2.4  
+CP031606.1  Pseudomonas sp. phDV1 chromosome, complete genome      42.5    6.4  
+LS992092.1  Triticum aestivum genome assembly, chromosome: 5A      42.5    6.4  
+AP017626.1  Pleomorphomonas sp. SM30 DNA, complete genome          42.5    6.4  
+XM_024079149.1  PREDICTED: Bicyclus anynana RING finger protei...  42.5    6.4  
+XM_024079148.1  PREDICTED: Bicyclus anynana RING finger protei...  42.5    6.4  
+CP020370.1  Candidatus Thiodictyon syntrophicum strain Cad16T ...  42.5    6.4  
+CP023422.1  Janthinobacterium svalbardensis strain PAMC 27463 ...  42.5    6.4  
+CP023335.1  Drosophila melanogaster strain rover (forR) chromo...  42.5    6.4  
+CP023329.1  Drosophila melanogaster strain sitter (fors) chrom...  42.5    6.4  
+CP016162.1  Pseudomonas alcaliphila JAB1, complete genome          42.5    6.4  
+CP011319.1  Janthinobacterium sp. 1_2014MBL_MicDiv, complete g...  42.5    6.4  
+LT629734.1  Agrococcus carbonis strain DSM 22965 genome assemb...  42.5    6.4  
+LT607754.1  Micromonospora inositola strain DSM 43819 genome a...  42.5    6.4  
+XM_016173635.1  Drosophila simulans uncharacterized protein (D...  42.5    6.4  
+XM_006759519.2  PREDICTED: Myotis davidii NCK adaptor protein ...  42.5    6.4  
+CP006368.1  Aureimonas sp. AU20 plasmid pAU20a, complete sequence  42.5    6.4  
+CP012184.1  Pseudonocardia sp. EC080619-01, complete genome        42.5    6.4  
+CP012181.1  Pseudonocardia sp. EC080610-09, complete genome        42.5    6.4  
+CP010989.1  Pseudonocardia sp. EC080625-04, complete genome        42.5    6.4  
+LN847264.1  Pseudomonas sp. CCOS 191 genome assembly Pseudomon...  42.5    6.4  
+CP010892.1  Pseudomonas sp. MRSN12121, complete genome             42.5    6.4  
+XM_009315388.1  Trypanosoma grayi hypothetical protein partial...  42.5    6.4  
+CP009110.1  Amycolatopsis methanolica 239, complete genome         42.5    6.4  
+AE014298.5  Drosophila melanogaster chromosome X                   42.5    6.4  
+NM_001298094.1  Drosophila melanogaster uncharacterized protei...  42.5    6.4  
+LK391695.1  Pseudomonas pseudoalcaligenes genome assembly Ppse...  42.5    6.4  
+CP007236.1  Ensifer adhaerens OV14 chromosome 1 sequence           42.5    6.4  
+HG916826.1  Pseudomonas pseudoalcaligenes CECT 5344 complete g...  42.5    6.4  
+CP003969.1  Sorangium cellulosum So0157-2, complete genome         42.5    6.4  
+NM_001272421.1  Drosophila melanogaster uncharacterized protei...  42.5    6.4  
+NM_001272420.1  Drosophila melanogaster uncharacterized protei...  42.5    6.4  
+NM_132269.3  Drosophila melanogaster uncharacterized protein, ...  42.5    6.4  
+CP000628.1  Agrobacterium radiobacter K84 chromosome 1, comple...  42.5    6.4  
+CP001068.1  Ralstonia pickettii 12J chromosome 1, complete seq...  42.5    6.4  
+CP000680.1  Pseudomonas mendocina ymp, complete genome             42.5    6.4  
+AY069607.1  Drosophila melanogaster LD36568 full length cDNA       42.5    6.4  
+AC023743.4  Drosophila melanogaster X BAC RP98-40O10 (Roswell ...  42.5    6.4  
+
+ALIGNMENTS
+>CP022927.1 Mycobacterium shigaense strain SCY chromosome, complete genome
+Length=5207883
+
+ Score = 213 bits (148),  Expect = 2e-51
+ Identities = 231/298 (78%), Gaps = 9/298 (3%)
+ Strand=Plus/Plus
+
+Query  1        ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+                |||| |||  ||  ||||| ||  | | ||||||||||||| | | |||||||| ||  |
+Sbjct  4876166  ACGGCAGCCCGGTTAGGCCTAGGTCGATCCGGAAGAGAAGGGTCGGTCTCCCGATCCGGG  4876225
+
+Query  61       CTCCTAGCACGGATACCGAGCACCCACGCGGAG-CACATGCCGCGGAATAGGCAAAAGTG  119
+                | || ||||||| ||||  |||||||||||||| |||| |||||| |   |||| | |||
+Sbjct  4876226  CACCCAGCACGG-TACCCGGCACCCACGCGGAGTCACA-GCCGCGAAGATGGCAGAGGTG  4876283
+
+Query  120      TTGCGGACCTGCGTAGTTTCGAAAAGCGGACGGCCACGACGGCCCTTTGGGTGGGGTTGC  179
+                |||||| |||||||| || |||| | |  | ||   ||||||| |||||||||| | |||
+Sbjct  4876284  TTGCGGGCCTGCGTAATTGCGAAGATCAAATGGTGTCGACGGCTCTTTGGGTGGAGCTGC  4876343
+
+Query  180      AGCCGTAGCGCATCGCAAAGACGCCGAGGTC-ACCCACGCAACCCACA-TCGCACGCTTG  237
+                ||||| |  |  ||||||   |||||||| | ||||||||| |||||| | |||||||||
+Sbjct  4876344  AGCCGGAAGG--TCGCAAGATCGCCGAGGCCAACCCACGCAGCCCACAGTTGCACGCTTG  4876401
+
+Query  238      GTCACTCGGGGTCCGTGCTAGCGGGCGGCGAACCGGACATTGTCCGGGACGCCGCCCG  295
+                || || || | ||||||||||||||||||| |||| | |   | ||||||||||||||
+Sbjct  4876402  GTAAC-CGAGTTCCGTGCTAGCGGGCGGCGGACCGAAGA-AATTCGGGACGCCGCCCG  4876457
+
+
+>AF092842.1 Mycobacterium marinum G13 promoter construct
+Length=766
+
+ Score = 175 bits (121),  Expect = 7e-40
+ Identities = 196/255 (77%), Gaps = 9/255 (4%)
+ Strand=Plus/Plus
+
+Query  1    ACGGAAGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAG  60
+            |||| |||  || || ||||||  | | ||||||||||||| | |  ||||||||||  |
+Sbjct  213  ACGGCAGCCCGGTGAAGCCAAGGTCGAACCGGAAGAGAAGGTTCGTCCTCCCGACCCGGG  272
+
+Query  61   CTCCTAGCACGGATACCGAGCACCCACGCGGAG-CACATGCCGCGGAATAGGCAAAAGTG  119
+            | || |||||||   ||| | |||||||||||| || | ||||||  |  |||| |||||
+Sbjct  273  CACCCAGCACGGCCCCCG-GAACCCACGCGGAGTCATA-GCCGCGATAATGGCAGAAGTG  330
+
+Query  120  TTGCGGACCTGCGTAGTTTCGAAAAGCGGACGGCCACGACGGCCCTTTGGGTGGGGTTGC  179
+            |||||| |||||||| || |||||  | || ||   || ||||||||||||||||| |||
+Sbjct  331  TTGCGGGCCTGCGTAATTGCGAAATTCAGATGGTGCCGGCGGCCCTTTGGGTGGGGCTGC  390
+
+Query  180  AGCC-GTAGCGCATCGCAAAGACGCCGAGGTC-ACCCACGCAACCCAC-ATCGCACGCTT  236
+            |||| | || |  |||||||  |||||||| | ||||||||| ||||| |  ||||||||
+Sbjct  391  AGCCAGAAGGG--TCGCAAAAGCGCCGAGGCCAACCCACGCAGCCCACAAATGCACGCTT  448
+
+Query  237  GGTCACTCGGGGTCC  251
+            ||| || || | |||
+Sbjct  449  GGTAAC-CGAGATCC  462
+
+
+>CP023445.1 Actinosynnema pretiosum strain X47 chromosome, complete genome
+Length=8131572
+
+ Features flanking this part of subject sequence:
+   378 bp at 5' side: beta-N-acetylhexosaminidase
+   125 bp at 3' side: HAD-IB family hydrolase
+
+ Score = 56.8 bits (38),  Expect = 3e-04
+ Identities = 65/90 (72%), Gaps = 2/90 (2%)
+ Strand=Plus/Minus
+
+Query  16      GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+               ||||| |  |  | ||||||||||| |  | || |||   |  ||||||  || ||||  
+Sbjct  275847  GGCCAGGGGCGGGGCGGAAGAGAAGCCCTGCTCACCCCGGCGGAGCTCCGTGCGCGGACT  275788
+
+Query  76      CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                |||||||||||||| |||||  |||||||
+Sbjct  275787  TCGAGCACCCACGCGCAGCAC--GCCGCGG  275760
+
+
+>CP029607.1 Actinosynnema pretiosum subsp. pretiosum strain ATCC 31280 chromosome, 
+complete genome
+Length=8340266
+
+ Score = 54.0 bits (36),  Expect = 0.002
+ Identities = 57/76 (75%), Gaps = 2/76 (3%)
+ Strand=Plus/Minus
+
+Query  30      CGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCACGC  89
+               ||||||||||| |  | || |||   |  ||||||  || ||||   |||||||||||||
+Sbjct  280407  CGGAAGAGAAGCCCTGCTCACCCCGGCAGAGCTCCGTGCGCGGACTTCGAGCACCCACGC  280348
+
+Query  90      GGAGCACATGCCGCGG  105
+               | |||||  |||||||
+Sbjct  280347  GCAGCAC--GCCGCGG  280334
+
+
+>CP024894.1 Amycolatopsis sp. AA4 chromosome, complete genome
+Length=8800179
+
+ Features flanking this part of subject sequence:
+   157 bp at 5' side: HAD-IB family hydrolase
+   418 bp at 3' side: beta-N-acetylhexosaminidase
+
+ Score = 54.0 bits (36),  Expect = 0.002
+ Identities = 64/90 (71%), Gaps = 2/90 (2%)
+ Strand=Plus/Plus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+                ||||| |||  ||   ||||||||| ||   || |||    ||| ||||  || ||||  
+Sbjct  7906821  GGCCAGGACAGAGGTAGAAGAGAAGCCTCTGTCACCCCGAGCAACCTCCGTGCGCGGACT  7906880
+
+Query  76       CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                ||| | ||||||||| |||||  |||||||
+Sbjct  7906881  CCGGGTACCCACGCGCAGCAC--GCCGCGG  7906908
+
+
+>CP001630.1 Actinosynnema mirum DSM 43827, complete genome
+Length=8248144
+
+ Score = 54.0 bits (36),  Expect = 0.002
+ Identities = 57/76 (75%), Gaps = 2/76 (3%)
+ Strand=Plus/Minus
+
+Query  30      CGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCACGC  89
+               ||||||||||| |  | || |||   |  ||||||  || ||||   |||||||||||||
+Sbjct  298543  CGGAAGAGAAGCCCTGCTCACCCCGGCAGAGCTCCGTGCGCGGACTTCGAGCACCCACGC  298484
+
+Query  90      GGAGCACATGCCGCGG  105
+               | |||||  |||||||
+Sbjct  298483  GCAGCAC--GCCGCGG  298470
+
+
+>CP016077.1 Actinoalloteichus sp. GBA129-24, complete genome
+Length=7215977
+
+ Features flanking this part of subject sequence:
+   416 bp at 5' side: beta-glucosidase-like glycosyl hydrolase
+   213 bp at 3' side: HAD-superfamily subfamily IB hydrolase, TIGR01490
+
+ Score = 52.5 bits (35),  Expect = 0.006
+ Identities = 65/91 (71%), Gaps = 3/91 (3%)
+ Strand=Plus/Minus
+
+Query  16      GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+               ||||| || |  | | ||||||||| || | ||||||     |||||||  |  ||  ||
+Sbjct  299307  GGCCAGGAACGCGGCAGAAGAGAAGCCTCGTTCTCCCTGTAGAAGCTCCGTGTGCGAGTA  299248
+
+Query  76      CC-GAGCACCCACGCGGAGCACATGCCGCGG  105
+               || || |||||||||  |||||  |||||||
+Sbjct  299247  CCGGATCACCCACGCTCAGCAC--GCCGCGG  299219
+
+
+>CP016076.1 Actinoalloteichus sp. ADI127-7, complete genome
+Length=7120854
+
+ Features flanking this part of subject sequence:
+   416 bp at 5' side: beta-glucosidase-like glycosyl hydrolase
+   213 bp at 3' side: HAD-superfamily subfamily IB hydrolase, TIGR01490
+
+ Score = 52.5 bits (35),  Expect = 0.006
+ Identities = 65/91 (71%), Gaps = 3/91 (3%)
+ Strand=Plus/Minus
+
+Query  16      GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+               ||||| || |  | | ||||||||| || | ||||||     |||||||  |  ||  ||
+Sbjct  299334  GGCCAGGAACGCGGCAGAAGAGAAGCCTCGTTCTCCCTGTAGAAGCTCCGTGTGCGAGTA  299275
+
+Query  76      CC-GAGCACCCACGCGGAGCACATGCCGCGG  105
+               || || |||||||||  |||||  |||||||
+Sbjct  299274  CCGGATCACCCACGCTCAGCAC--GCCGCGG  299246
+
+
+>CP027657.1 Pseudomonas mendocina strain NEB698 chromosome, complete genome
+Length=5773548
+
+ Features in this part of subject sequence:
+   hypothetical protein
+   ABC transporter permease
+
+ Score = 51.1 bits (34),  Expect = 0.017
+ Identities = 52/70 (74%), Gaps = 0/70 (0%)
+ Strand=Plus/Plus
+
+Query  149      ACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGG  208
+                ||||||| |||| ||  ||||  | | | | |||||||||||| ||| | | ||||||||
+Sbjct  2403845  ACGGCCATGACGTCCGGTTGGTAGCGCTGGTAGCCGTAGCGCACCGCCAGGTCGCCGAGG  2403904
+
+Query  209      TCACCCACGC  218
+                 | ||  |||
+Sbjct  2403905  CCGCCGCCGC  2403914
+
+
+>LN850107.1 Alloactinosynnema sp. L-07 genome assembly Alloactinosynnema 
+sp. L-07, chromosome : I
+Length=7405112
+
+ Score = 51.1 bits (34),  Expect = 0.017
+ Identities = 58/76 (76%), Gaps = 5/76 (7%)
+ Strand=Plus/Minus
+
+Query  32       GAAGAGAAGGCTAGATCT--CCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCACGC  89
+                ||||||||| ||  |||   ||||| | || ||||  || ||   |||||||||||||||
+Sbjct  6195139  GAAGAGAAGCCTCAATCCACCCCGAGCGAA-CTCCGTGCGCGAGCACCGAGCACCCACGC  6195081
+
+Query  90       GGAGCACATGCCGCGG  105
+                | |||||  |||||||
+Sbjct  6195080  GCAGCAC--GCCGCGG  6195067
+
+
+>CP015163.1 Amycolatopsis albispora strain WP1 chromosome, complete genome
+Length=9121443
+
+ Features in this part of subject sequence:
+   carbon monoxide dehydrogenase
+
+ Score = 49.7 bits (33),  Expect = 0.045
+ Identities = 76/107 (71%), Gaps = 9/107 (8%)
+ Strand=Plus/Plus
+
+Query  2        CGGA-AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCT--CCCGACCCA  58
+                |||| | |||| ||  |||| |  | || || |||||||| ||   ||   |||||   |
+Sbjct  5803815  CGGACATCTTGTCG--GCCAGGGACGAGGCG-AAGAGAAGCCTCACTCCACCCCGAAAGA  5803871
+
+Query  59       AGCTCCTAGCACGGATACCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                 |||||  || ||||  ||| ||||||||||| |||||  |||||||
+Sbjct  5803872  -GCTCCGTGCGCGGACTCCGGGCACCCACGCGCAGCAC--GCCGCGG  5803915
+
+
+>LN877229.1 Kibdelosporangium sp. MJ126-NF4 complete genome
+Length=12113479
+
+ Score = 49.7 bits (33),  Expect = 0.045
+ Identities = 63/89 (71%), Gaps = 3/89 (3%)
+ Strand=Plus/Minus
+
+Query  17       GCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATAC  76
+                |||| |  |||  || ||||||||  | |  | |||   |  ||||||  || ||||  |
+Sbjct  6538858  GCCAGGGACCAAACG-AAGAGAAGCTTGGTCCACCCTGACAGAGCTCCGTGCGCGGACTC  6538800
+
+Query  77       CGAGCACCCACGCGGAGCACATGCCGCGG  105
+                || ||||||||||| |||||  |||||||
+Sbjct  6538799  CGGGCACCCACGCGCAGCAC--GCCGCGG  6538773
+
+
+>HE804045.1 Saccharothrix espanaensis DSM 44229 complete genome
+Length=9360653
+
+ Score = 49.7 bits (33),  Expect = 0.045
+ Identities = 65/91 (71%), Gaps = 4/91 (4%)
+ Strand=Plus/Minus
+
+Query  16      GGCCAAG-ACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGAT  74
+               ||||| | ||  ||| ||||||||||    | || |||   |  ||||||  || |||| 
+Sbjct  315681  GGCCAGGGACGGAGC-GGAAGAGAAGCGCCGTTCACCCCGACAGAGCTCCGTGCGCGGAC  315623
+
+Query  75      ACCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                 ||||||||||||||  ||||  |||||||
+Sbjct  315622  TTCGAGCACCCACGCGCGGCAC--GCCGCGG  315594
+
+
+>CP016353.1 Prauserella marina strain DSM 45268, complete genome
+Length=6851918
+
+ Features flanking this part of subject sequence:
+   147 bp at 5' side: inhibition of morphological differentiation protein
+   297 bp at 3' side: beta-N-acetylhexosaminidase
+
+ Score = 48.3 bits (32),  Expect = 0.12
+ Identities = 73/106 (69%), Gaps = 6/106 (6%)
+ Strand=Plus/Plus
+
+Query  2        CGGA-AGCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCA-A  59
+                |||| | |||| ||  |||| |  | || | ||||||||| || |  | |||     | |
+Sbjct  6319129  CGGACATCTTGTCG--GCCAGGGGCAAGGCAGAAGAGAAGCCTTGTCCACCCCGGAAAGA  6319186
+
+Query  60       GCTCCTAGCACGGATACCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                 ||||  || ||||  ||| |||||||||| | ||||  |||||||
+Sbjct  6319187  TCTCCGTGCGCGGACTCCGGGCACCCACGCTGGGCAC--GCCGCGG  6319230
+
+
+>CP016793.1 Lentzea guizhouensis strain DHS C013, complete genome
+Length=9997872
+
+ Features flanking this part of subject sequence:
+   250 bp at 5' side: inhibition of morphological differentiation protein
+   259 bp at 3' side: beta-N-acetylhexosaminidase
+
+ Score = 46.8 bits (31),  Expect = 0.33
+ Identities = 68/93 (73%), Gaps = 8/93 (9%)
+ Strand=Plus/Plus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACC--CA-AGCTCCTAGCACGG  72
+                ||||| |  || | || |||||||| | ||| ||||   ||  || ||||||  || |||
+Sbjct  2553849  GGCCAGGGACCTGGCG-AAGAGAAGCC-AGA-CTCCACCCCGGCAGAGCTCCGTGCGCGG  2553905
+
+Query  73       ATACCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                |   |||| ||||||||| |||||  |||||||
+Sbjct  2553906  ACTTCGAGTACCCACGCGCAGCAC--GCCGCGG  2553936
+
+
+>LS992085.1 Triticum aestivum genome assembly, chromosome: 2D
+Length=651852609
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 78/116 (67%), Gaps = 8/116 (7%)
+ Strand=Plus/Minus
+
+Query  178        GCAGCCGTAGC-GCATCGCAAAGACGCCGAGGTCACCCACGCAACCCACATCGCACGCTT  236
+                  |||||||  || ||||| ||  |  || | || | ||  |||  |||||  |||||||| 
+Sbjct  356526004  GCAGCCGCCGCTGCATCTCAG-GCGGCGGCGGCCTCCTTCGCCGCCCACCACGCACGCTC  356525946
+
+Query  237        GGTCACTCGGGGTCCGTGCTAGCGGGCGGCGAACCGGACAT-TGTCCGGGACGCCG  291
+                  || ||| |||||   | |||||  |  |||  | || |||| || ||| | || ||
+Sbjct  356525945  GGCCACCCGGGG---GCGCTAGATG--GGCAGATCGAACATCTGCCCGAGGCGACG  356525895
+
+
+>LS480641.1 Triticum aestivum genome assembly, chromosome: II
+Length=563502314
+
+ Features flanking this part of subject sequence:
+   447077 bp at 5' side: unnamed protein product
+   779 bp at 3' side: unnamed protein product
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 78/116 (67%), Gaps = 8/116 (7%)
+ Strand=Plus/Minus
+
+Query  178        GCAGCCGTAGC-GCATCGCAAAGACGCCGAGGTCACCCACGCAACCCACATCGCACGCTT  236
+                  |||||||  || ||||| ||  |  || | || | ||  |||  |||||  |||||||| 
+Sbjct  306725193  GCAGCCGCCGCTGCATCTCAG-GCGGCGGCGGCCTCCTTCGCCGCCCACCACGCACGCTC  306725135
+
+Query  237        GGTCACTCGGGGTCCGTGCTAGCGGGCGGCGAACCGGACAT-TGTCCGGGACGCCG  291
+                  || ||| |||||   | |||||  |  |||  | || |||| || ||| | || ||
+Sbjct  306725134  GGCCACCCGGGG---GCGCTAGATG--GGCAGATCGAACATCTGCCCGAGGCGACG  306725084
+
+
+>CP025958.1 Gemmata obscuriglobus strain DSM 5831 chromosome, complete genome
+Length=8998893
+
+ Features in this part of subject sequence:
+   monooxygenase
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 66/100 (66%), Gaps = 1/100 (1%)
+ Strand=Plus/Minus
+
+Query  144      AGCGGACGGCCACGACGGCCCTTTGGG-TGGGGTTGCAGCCGTAGCGCATCGCAAAGACG  202
+                ||||| || ||     ||  ||| ||| |  ||| |  |||||  |||||||| |||| |
+Sbjct  5094569  AGCGGGCGCCCGAACAGGTACTTCGGGATCAGGTGGACGCCGTGCCGCATCGCCAAGAAG  5094510
+
+Query  203      CCGAGGTCACCCACGCAACCCACATCGCACGCTTGGTCAC  242
+                  | ||||  | ||||    ||| ||||||||   |||||
+Sbjct  5094509  GTGCGGTCGGCGACGCGCGACACCTCGCACGCGATGTCAC  5094470
+
+
+>CP029210.1 Aquabacterium olei strain NBRC 110486 chromosome, complete genome
+Length=3890087
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 53/72 (74%), Gaps = 3/72 (4%)
+ Strand=Plus/Minus
+
+Query  184     GTAGCGCATCGCAAAGACGCCGA-GGTCACC--CACGCAACCCACATCGCACGCTTGGTC  240
+               |||| |||| ||||||||||||| | ||| |  ||||||||||| || |  | | | |  
+Sbjct  316271  GTAGAGCATGGCAAAGACGCCGACGATCAGCAACACGCAACCCAGATAGACCACATTGCG  316212
+
+Query  241     ACTCGGGGTCCG  252
+               || ||| || ||
+Sbjct  316211  ACCCGGCGTGCG  316200
+
+
+>CP017780.1 Amycolatopsis sp. BJA-103 chromosome, complete genome
+Length=9488490
+
+ Features flanking this part of subject sequence:
+   169 bp at 5' side: inhibition of morphological differentiation protein
+   363 bp at 3' side: beta-N-acetylhexosaminidase
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 61/90 (68%), Gaps = 2/90 (2%)
+ Strand=Plus/Plus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+                ||||| |   |||   ||||||||| ||    | |||   | || ||||  |  |||| |
+Sbjct  7129531  GGCCAGGGAACAGGTAGAAGAGAAGCCTGTTCCACCCCGGCGAATCTCCGTGTGCGGACA  7129590
+
+Query  76       CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                ||| | ||||||||| ||| |  |||||||
+Sbjct  7129591  CCGGGTACCCACGCGCAGCGC--GCCGCGG  7129618
+
+
+>CP023641.1 Pseudomonas mendocina strain MAE1-K chromosome, complete genome
+Length=5157724
+
+ Features in this part of subject sequence:
+   AraC family transcriptional regulator
+   ABC transporter permease
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 50/70 (71%), Gaps = 0/70 (0%)
+ Strand=Plus/Plus
+
+Query  149     ACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGG  208
+               |||||||  ||| ||   |||  | | | | |||||||||||| ||| | | ||||||||
+Sbjct  416973  ACGGCCATCACGTCCGGCTGGTAGCGCTGGTAGCCGTAGCGCACCGCCAGGTCGCCGAGG  417032
+
+Query  209     TCACCCACGC  218
+                | ||  |||
+Sbjct  417033  CCGCCGCCGC  417042
+
+
+>CP022521.1 Actinoalloteichus hoggarensis strain DSM 45943, complete genome
+Length=6606717
+
+ Features flanking this part of subject sequence:
+   436 bp at 5' side: putative lipoprotein YbbD precursor
+   215 bp at 3' side: haloacid dehalogenase-like hydrolase
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 62/90 (69%), Gaps = 3/90 (3%)
+ Strand=Plus/Minus
+
+Query  17      GCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATAC  76
+               ||||||  |  | | ||||||||| || |  |||||     |||||||  |  ||  |||
+Sbjct  289446  GCCAAGGGCGCGGCAGAAGAGAAGCCTCGTCCTCCCTGATGAAGCTCCGTGTGCGAGTAC  289387
+
+Query  77      C-GAGCACCCACGCGGAGCACATGCCGCGG  105
+               | |  |||||||||  |||||  |||||||
+Sbjct  289386  CGGTCCACCCACGCTCAGCAC--GCCGCGG  289359
+
+
+>LT629797.1 Pseudomonas sihuiensis strain KCTC 32246 genome assembly, chromosome: 
+I
+Length=5476367
+
+ Features in this part of subject sequence:
+   D-methionine transport system permease protein
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 50/70 (71%), Gaps = 0/70 (0%)
+ Strand=Plus/Minus
+
+Query  149      ACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGG  208
+                |||||||  ||| ||  ||||  | | | | ||||||||||||  || | | ||||||||
+Sbjct  3976671  ACGGCCATCACGTCCGGTTGGTAGCGCTGGTAGCCGTAGCGCACGGCCAGGTCGCCGAGG  3976612
+
+Query  209      TCACCCACGC  218
+                 | ||  |||
+Sbjct  3976611  CCGCCGCCGC  3976602
+
+
+>LT629789.1 Amycolatopsis keratiniphila strain FH 1893 genome assembly, chromosome: 
+I
+Length=9472622
+
+ Features flanking this part of subject sequence:
+   321 bp at 5' side: beta-N-acetylhexosaminidase
+   169 bp at 3' side: HAD-superfamily subfamily IB hydrolase, TIGR01490
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 61/90 (68%), Gaps = 2/90 (2%)
+ Strand=Plus/Minus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+                ||||| |   |||   ||||||||| ||    | |||   | || ||||  |  |||| |
+Sbjct  7151342  GGCCAGGGAACAGGTAGAAGAGAAGCCTGTTCCACCCCGGCGAATCTCCGTGTGCGGACA  7151283
+
+Query  76       CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                ||| | ||||||||| ||| |  |||||||
+Sbjct  7151282  CCGGGTACCCACGCGCAGCGC--GCCGCGG  7151255
+
+
+>CP016174.1 Amycolatopsis orientalis strain B-37, complete genome
+Length=9490992
+
+ Features flanking this part of subject sequence:
+   365 bp at 5' side: beta-N-acetylhexosaminidase
+   169 bp at 3' side: inhibition of morphological differentiation protein
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 61/90 (68%), Gaps = 2/90 (2%)
+ Strand=Plus/Minus
+
+Query  16      GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+               ||||| |   |||   ||||||||| ||    | |||   | || ||||  |  |||| |
+Sbjct  547893  GGCCAGGGAACAGGTAGAAGAGAAGCCTGTTCCACCCCGGCGAATCTCCGTGTGCGGACA  547834
+
+Query  76      CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+               ||| | ||||||||| ||| |  |||||||
+Sbjct  547833  CCGGGTACCCACGCGCAGCGC--GCCGCGG  547806
+
+
+>LN997848.1 Magnetospirillum sp. XM-1 genome assembly XM-1, chromosome : 
+I
+Length=4825187
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 69/100 (69%), Gaps = 4/100 (4%)
+ Strand=Plus/Minus
+
+Query  193      CGCAAAGACGCCGAGGTCACCCACGCAACCCACATCGCACGCTTGGTCACTCGGGGTCCG  252
+                |||||   || |||||||||||||| |  || || ||| ||| |  |  | ||||| || 
+Sbjct  4715348  CGCAATTGCGTCGAGGTCACCCACGAAGGCCGCACCGCCCGCAT-CTATCCCGGGG-CCA  4715291
+
+Query  253      TGCTAGCG-GGCGGCGAACCGGACATTGTCCGGGACGCCG  291
+                | ||  || | |||||| | || |   |||| ||||| ||
+Sbjct  4715290  T-CTTCCGCGTCGGCGACCAGGCCCCGGTCCAGGACGACG  4715252
+
+
+>CP008953.1 Amycolatopsis japonica strain MG417-CF17, complete genome
+Length=8961318
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 61/90 (68%), Gaps = 2/90 (2%)
+ Strand=Plus/Plus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+                ||||| |   |||   ||||||||| ||    | |||   | || ||||  |  |||| |
+Sbjct  8401397  GGCCAGGGAACAGGTAGAAGAGAAGCCTGTTCCACCCCGGCGAATCTCCGTGTGCGGACA  8401456
+
+Query  76       CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                ||| | ||||||||| ||| |  |||||||
+Sbjct  8401457  CCGGGTACCCACGCGCAGCGC--GCCGCGG  8401484
+
+
+>CP003777.1 Amycolatopsis mediterranei RB, complete genome
+Length=10246864
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 61/90 (68%), Gaps = 2/90 (2%)
+ Strand=Plus/Plus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+                ||||| |   |||   ||||||||| ||    | |||   | || ||||  || ||||  
+Sbjct  9672261  GGCCAGGGAACAGGTAGAAGAGAAGCCTGTTCCACCCCGGCAAACCTCCGTGCGCGGACT  9672320
+
+Query  76       CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                ||| | ||||||||| ||| |  |||||||
+Sbjct  9672321  CCGGGTACCCACGCGCAGCGC--GCCGCGG  9672348
+
+
+>CP003410.1 Amycolatopsis orientalis HCCB10007, complete genome
+Length=8948591
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 61/90 (68%), Gaps = 2/90 (2%)
+ Strand=Plus/Plus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+                ||||| |   |||   ||||||||| ||    | |||   | || ||||  |  |||| |
+Sbjct  8399184  GGCCAGGGAACAGGTAGAAGAGAAGCCTGTTCCACCCCGGCGAATCTCCGTGTGCGGACA  8399243
+
+Query  76       CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                ||| | ||||||||| ||| |  |||||||
+Sbjct  8399244  CCGGGTACCCACGCGCAGCGC--GCCGCGG  8399271
+
+
+>CP003729.1 Amycolatopsis mediterranei S699, complete genome
+Length=10246920
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 61/90 (68%), Gaps = 2/90 (2%)
+ Strand=Plus/Plus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+                ||||| |   |||   ||||||||| ||    | |||   | || ||||  || ||||  
+Sbjct  9672318  GGCCAGGGAACAGGTAGAAGAGAAGCCTGTTCCACCCCGGCAAACCTCCGTGCGCGGACT  9672377
+
+Query  76       CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                ||| | ||||||||| ||| |  |||||||
+Sbjct  9672378  CCGGGTACCCACGCGCAGCGC--GCCGCGG  9672405
+
+
+>CP002896.1 Amycolatopsis mediterranei S699, complete genome
+Length=10236779
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 61/90 (68%), Gaps = 2/90 (2%)
+ Strand=Plus/Plus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+                ||||| |   |||   ||||||||| ||    | |||   | || ||||  || ||||  
+Sbjct  9662346  GGCCAGGGAACAGGTAGAAGAGAAGCCTGTTCCACCCCGGCAAACCTCCGTGCGCGGACT  9662405
+
+Query  76       CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                ||| | ||||||||| ||| |  |||||||
+Sbjct  9662406  CCGGGTACCCACGCGCAGCGC--GCCGCGG  9662433
+
+
+>CP002000.1 Amycolatopsis mediterranei U32, complete genome
+Length=10236715
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 61/90 (68%), Gaps = 2/90 (2%)
+ Strand=Plus/Plus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+                ||||| |   |||   ||||||||| ||    | |||   | || ||||  || ||||  
+Sbjct  9662286  GGCCAGGGAACAGGTAGAAGAGAAGCCTGTTCCACCCCGGCAAACCTCCGTGCGCGGACT  9662345
+
+Query  76       CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                ||| | ||||||||| ||| |  |||||||
+Sbjct  9662346  CCGGGTACCCACGCGCAGCGC--GCCGCGG  9662373
+
+
+>CP001644.1 Ralstonia pickettii 12D chromosome 1, complete sequence
+Length=3647724
+
+ Score = 45.4 bits (30),  Expect = 0.88
+ Identities = 75/116 (65%), Gaps = 3/116 (3%)
+ Strand=Plus/Minus
+
+Query  151      GGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGA-CGC--CGAG  207
+                ||||||||| ||  |    || ||||||  ||  | |  |  ||||| || |||  | | 
+Sbjct  1535159  GGCCACGACCGCGTTCACCGTCGGGTTGTGGCGATCGATCTGCGCAAGGAACGCTTCCAT  1535100
+
+Query  208      GTCACCCACGCAACCCACATCGCACGCTTGGTCACTCGGGGTCCGTGCTAGCGGGC  263
+                | |  |||||||   |||||||| ||| |||  || | ||| | || | | || ||
+Sbjct  1535099  GACTTCCACGCACGACACATCGCGCGCGTGGATACGCCGGGACAGTTCGATCGCGC  1535044
+
+
+>CP025774.1 Achromobacter xylosoxidans strain SOLR10 chromosome
+Length=6300041
+
+ Features in this part of subject sequence:
+   ABC transporter permease
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 49/69 (71%), Gaps = 0/69 (0%)
+ Strand=Plus/Minus
+
+Query  150     CGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGGT  209
+               ||||||  ||| |    |||  | | | | |||||||||| ||||| | | |||||||| 
+Sbjct  967111  CGGCCATCACGTCGGACTGGAAGCGCTGGTAGCCGTAGCGGATCGCCAGGTCGCCGAGGC  967052
+
+Query  210     CACCCACGC  218
+               ||||  |||
+Sbjct  967051  CACCGCCGC  967043
+
+
+>LS483395.1 Achromobacter xylosoxidans strain NCTC10808 genome assembly, 
+chromosome: 1
+Length=6735421
+
+ Features in this part of subject sequence:
+   D-methionine transport system permease protein metI
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 49/69 (71%), Gaps = 0/69 (0%)
+ Strand=Plus/Minus
+
+Query  150     CGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGGT  209
+               ||||||  ||| |    |||  | | | | |||||||||| ||||| | | |||||||| 
+Sbjct  897280  CGGCCATCACGTCGGACTGGAAGCGCTGGTAGCCGTAGCGGATCGCCAGGTCGCCGAGGC  897221
+
+Query  210     CACCCACGC  218
+               ||||  |||
+Sbjct  897220  CACCGCCGC  897212
+
+
+>CP014028.2 Achromobacter xylosoxidans strain FDAARGOS_150, complete genome
+Length=6268754
+
+ Features in this part of subject sequence:
+   TonB-dependent receptor
+   ABC transporter permease
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 49/69 (71%), Gaps = 0/69 (0%)
+ Strand=Plus/Minus
+
+Query  150      CGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGGT  209
+                ||||||  ||| |    |||  | | | | |||||||||| ||||| | | |||||||| 
+Sbjct  3781552  CGGCCATCACGTCGGACTGGAAGCGCTGGTAGCCGTAGCGGATCGCCAGGTCGCCGAGGC  3781493
+
+Query  210      CACCCACGC  218
+                ||||  |||
+Sbjct  3781492  CACCGCCGC  3781484
+
+
+>CP018228.1 Rhizobium leguminosarum strain Vaf-108, complete genome
+Length=5119898
+
+ Features in this part of subject sequence:
+   hypothetical protein
+   delayed-early response protein/equilibrative nucleoside t...
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 62/87 (71%), Gaps = 5/87 (6%)
+ Strand=Plus/Minus
+
+Query  156      CGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCG-CATCGCAAAGACGCCGAGGTCACCC  214
+                || |||| | | || ||| ||||| || | | || |||| |   ||||  ||||  ||||
+Sbjct  4926515  CGGCGGCGCCT-GGCTGGTGTTGC-GCGGCACCGGCATCACGCTGACG--GAGGCGACCC  4926460
+
+Query  215      ACGCAACCCACATCGCACGCTTGGTCA  241
+                ||||||   | |||||| |||| ||||
+Sbjct  4926459  ACGCAATGGAGATCGCAAGCTTCGTCA  4926433
+
+
+>CP013290.1 Janibacter indicus strain YFY001, complete genome
+Length=3401189
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 47/65 (72%), Gaps = 0/65 (0%)
+ Strand=Plus/Minus
+
+Query  149      ACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGG  208
+                ||| ||| |||| |  | | |  | ||||| ||||||||| ||| || | | ||||||||
+Sbjct  1841998  ACGACCATGACGTCGGTCTCGAAGCGGTTGTAGCCGTAGCTCATGGCCACGGCGCCGAGG  1841939
+
+Query  209      TCACC  213
+                 | ||
+Sbjct  1841938  CCGCC  1841934
+
+
+>CP016286.1 Rhizobium leguminosarum strain Vaf10, complete genome
+Length=5035299
+
+ Features in this part of subject sequence:
+   radical SAM protein
+   delayed-early response protein/equilibrative nucleoside t...
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 62/87 (71%), Gaps = 5/87 (6%)
+ Strand=Plus/Plus
+
+Query  156      CGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCG-CATCGCAAAGACGCCGAGGTCACCC  214
+                || |||| | | || ||| ||||| || | | || |||| |   ||||  ||||  ||||
+Sbjct  3438254  CGGCGGCGCCT-GGCTGGTGTTGC-GCGGCACCGGCATCACGCTGACG--GAGGCGACCC  3438309
+
+Query  215      ACGCAACCCACATCGCACGCTTGGTCA  241
+                ||||||   | |||||| |||| ||||
+Sbjct  3438310  ACGCAATGGAGATCGCAAGCTTCGTCA  3438336
+
+
+>XM_015424287.1 PREDICTED: Gekko japonicus homeobox protein otx5 (LOC107121371), 
+mRNA
+Length=873
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 60/87 (69%), Gaps = 2/87 (2%)
+ Strand=Plus/Plus
+
+Query  11   GGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCAC  70
+            ||| |||||||  |||  ||||   |||||   |  ||||||| |||  |   | ||| |
+Sbjct  304  GGCCAGGCCAAAGCCCGCCCGGCGAAGAAGAAGACCTCTCCCG-CCCGGGAGACCAGCTC  362
+
+Query  71   GGATACCGAGCACCCACGCGGAGCACA  97
+            ||| ||| |||||| ||| | || |||
+Sbjct  363  GGAGACC-AGCACCAACGGGCAGTACA  388
+
+
+>CP012752.1 Kibdelosporangium phytohabitans strain KLBMP1111, complete genome
+Length=11759770
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 61/89 (69%), Gaps = 3/89 (3%)
+ Strand=Plus/Minus
+
+Query  17      GCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATAC  76
+               |||| |  |||  || ||||||||  | |  | |||   |   |||||  || ||||  |
+Sbjct  375368  GCCAGGGACCAAACG-AAGAGAAGCTTGGTCCACCCTGACAGGGCTCCGTGCGCGGACTC  375310
+
+Query  77      CGAGCACCCACGCGGAGCACATGCCGCGG  105
+               || ||||||||||| ||| |  |||||||
+Sbjct  375309  CGGGCACCCACGCGCAGCGC--GCCGCGG  375283
+
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 59/84 (70%), Gaps = 3/84 (4%)
+ Strand=Plus/Plus
+
+Query  201      CGCCGAGGTCACCCACG-CAACCCACATCGCACGCT-TGGTCACTCGGGGTCCGTGCTAG  258
+                |||||||||||||  || |  | |||    | |||| ||| | | ||| | |||| |  |
+Sbjct  4864856  CGCCGAGGTCACCGTCGACGGCACACCCGTCCCGCTGTGGACGC-CGGTGACCGTTCCGG  4864914
+
+Query  259      CGGGCGGCGAACCGGACATTGTCC  282
+                |||||||||| |  ||||| | ||
+Sbjct  4864915  CGGGCGGCGAGCTCGACATCGGCC  4864938
+
+
+>CP011371.1 [Polyangium] brachysporum strain DSM 7029, complete genome
+Length=6476147
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 50/71 (70%), Gaps = 0/71 (0%)
+ Strand=Plus/Minus
+
+Query  148      GACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAG  207
+                |||| |||  ||  |  | |||  | | | | |||||||||| ||||| | | |||| ||
+Sbjct  2107250  GACGACCATCACCTCGGTCTGGAAGCGCTGGTAGCCGTAGCGGATCGCCAGGTCGCCCAG  2107191
+
+Query  208      GTCACCCACGC  218
+                | ||||| |||
+Sbjct  2107190  GCCACCCCCGC  2107180
+
+
+>XM_012343062.1 Saprolegnia parasitica CBS 223.65 hypothetical protein mRNA
+Length=1346
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 72/103 (70%), Gaps = 8/103 (8%)
+ Strand=Plus/Minus
+
+Query  189  GCATCGCAAAGACGCCGAGGTCACCCACGCAACCCACATCGCACGCTTGGTCACTCGGGG  248
+            ||||| |||||||||||||||  ||| |||  ||  || ||| | | | | | | |||  
+Sbjct  434  GCATCACAAAGACGCCGAGGT--CCCGCGCCGCCGCCAGCGC-CTCGTCGACGC-CGGCC  379
+
+Query  249  TCCGTGCTAGCGGGCGGCGAACCGGACATTGTCCGGGACGCCG  291
+              |||| | | || |||  ||  ||||| ||| | ||||||||
+Sbjct  378  ATCGTG-TCGTGGTCGGTCAA--GGACA-TGTACTGGACGCCG  340
+
+
+>LN831029.1 Achromobacter xylosoxidans genome assembly NCTC10807, chromosome 
+: 1
+Length=6813182
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 49/69 (71%), Gaps = 0/69 (0%)
+ Strand=Plus/Minus
+
+Query  150     CGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGGT  209
+               ||||||  ||| |    |||  | | | | |||||||||| ||||| | | |||||||| 
+Sbjct  897279  CGGCCATCACGTCGGACTGGAAGCGCTGGTAGCCGTAGCGGATCGCCAGGTCGCCGAGGC  897220
+
+Query  210     CACCCACGC  218
+               ||||  |||
+Sbjct  897219  CACCGCCGC  897211
+
+
+>CP009448.1 Achromobacter xylosoxidans C54, complete genome
+Length=6131060
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 49/69 (71%), Gaps = 0/69 (0%)
+ Strand=Plus/Minus
+
+Query  150     CGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGGT  209
+               ||||||  ||| |    |||  | | | | |||||||||| ||||| | | |||||||| 
+Sbjct  894677  CGGCCATCACGTCGGACTGGAAGCGCTGGTAGCCGTAGCGGATCGCCAGGTCGCCGAGGC  894618
+
+Query  210     CACCCACGC  218
+               ||||  |||
+Sbjct  894617  CACCGCCGC  894609
+
+
+>XM_007881210.1 Anthracocystis flocculosa PF-1 hypothetical protein partial mRNA
+Length=1746
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 76/115 (66%), Gaps = 5/115 (4%)
+ Strand=Plus/Minus
+
+Query  187  GCGCATCGCAAAGACGCCGAGGTCACCCACGCAACCCACATCGCACGCTTGGTCACTCGG  246
+            ||| | || |  |||||||||||| | || |    |||| |||| |||     | |||||
+Sbjct  315  GCGGACCGTATTGACGCCGAGGTCGCGCAGGTTGGCCACGTCGCGCGCGCACGC-CTCGG  257
+
+Query  247  GGTCCGTGCTAGCGGG-CGGCGAACCGGACATTGTCCGGGACGCCGCCCGATTTC  300
+            |  | | || |||||| |||   | | | |    ||||||| |||| ||| ||||
+Sbjct  256  G--CAGCGCCAGCGGGTCGGTATAGCTGTCGGGCTCCGGGAAGCCG-CCGTTTTC  205
+
+
+>HG916765.1 Castellaniella defragrans 65Phen complete genome
+Length=3952818
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 50/71 (70%), Gaps = 0/71 (0%)
+ Strand=Plus/Plus
+
+Query  148      GACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAG  207
+                ||| |||| |||| | |  |||  | | | | |||||||||||| ||| | | |||| ||
+Sbjct  3601939  GACCGCCATGACGTCGCCCTGGTAGCGCTGGTAGCCGTAGCGCACCGCCAGGTCGCCCAG  3601998
+
+Query  208      GTCACCCACGC  218
+                | | ||  |||
+Sbjct  3601999  GCCGCCGCCGC  3602009
+
+
+>CP007045.1 Rhizobium leguminosarum bv. trifolii WSM1689, complete genome
+Length=4854518
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 62/87 (71%), Gaps = 5/87 (6%)
+ Strand=Plus/Plus
+
+Query  156      CGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCG-CATCGCAAAGACGCCGAGGTCACCC  214
+                || |||| | | || ||| ||||| || | | || |||| |   ||||  ||||  ||||
+Sbjct  3856211  CGGCGGCGCCT-GGCTGGTGTTGC-GCGGCACCGGCATCACGCTGACG--GAGGCGACCC  3856266
+
+Query  215      ACGCAACCCACATCGCACGCTTGGTCA  241
+                ||||||   | |||||| |||| ||||
+Sbjct  3856267  ACGCAATGGAGATCGCAAGCTTCGTCA  3856293
+
+
+>HE798385.1 Achromobacter xylosoxidans NH44784-1996 complete genome
+Length=6916670
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 49/69 (71%), Gaps = 0/69 (0%)
+ Strand=Plus/Plus
+
+Query  150      CGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGGT  209
+                ||||||  ||| |    |||  | | | | |||||||||| ||||| | | |||||||| 
+Sbjct  1391552  CGGCCATCACGTCGGACTGGAAGCGCTGGTAGCCGTAGCGGATCGCCAGGTCGCCGAGGC  1391611
+
+Query  210      CACCCACGC  218
+                ||||  |||
+Sbjct  1391612  CACCGCCGC  1391620
+
+
+>AM236080.1 Rhizobium leguminosarum bv. viciae chromosome complete genome, 
+strain 3841
+Length=5057142
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 62/87 (71%), Gaps = 5/87 (6%)
+ Strand=Plus/Plus
+
+Query  156      CGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCG-CATCGCAAAGACGCCGAGGTCACCC  214
+                || |||| | | || ||| ||||| || | | || |||| |   ||||  ||||  ||||
+Sbjct  4407670  CGGCGGCGCCT-GGCTGGTGTTGC-GCGGCACCGGCATCACGCTGACG--GAGGCGACCC  4407725
+
+Query  215      ACGCAACCCACATCGCACGCTTGGTCA  241
+                ||||||   | |||||| |||| ||||
+Sbjct  4407726  ACGCAATGGAGATCGCAAGCTTCGTCA  4407752
+
+
+>AF518736.1 Gallotia stehlini OTX5 protein mRNA, partial cds
+Length=813
+
+ Score = 44.0 bits (29),  Expect = 2.4
+ Identities = 62/89 (70%), Gaps = 4/89 (4%)
+ Strand=Plus/Plus
+
+Query  10   TGGCGAGGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTC-CCGACCCAAGCTCCTAGC  68
+            |||  |||||||| ||| |||||   |||||   ||| ||| ||| |||  |   | |||
+Sbjct  264  TGGGCAGGCCAAGGCCCGGCCGGCGAAGAAG--AAGACCTCTCCGGCCCGGGAAACCAGC  321
+
+Query  69   ACGGATACCGAGCACCCACGCGGAGCACA  97
+             | || ||| |||||| ||| | || |||
+Sbjct  322  TCCGAGACC-AGCACCAACGGGCAGTACA  349
+
+
+>CP031606.1 Pseudomonas sp. phDV1 chromosome, complete genome
+Length=4727682
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 49/70 (70%), Gaps = 0/70 (0%)
+ Strand=Plus/Minus
+
+Query  149      ACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGG  208
+                |||||||  ||| ||  ||||  | | | | ||||||||||||  || | | | ||||||
+Sbjct  4572369  ACGGCCATCACGTCCGGTTGGTAGCGCTGGTAGCCGTAGCGCACGGCCAGGTCTCCGAGG  4572310
+
+Query  209      TCACCCACGC  218
+                 | ||  |||
+Sbjct  4572309  CCGCCGCCGC  4572300
+
+
+>LS992092.1 Triticum aestivum genome assembly, chromosome: 5A
+Length=709773743
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 43/56 (77%), Gaps = 1/56 (2%)
+ Strand=Plus/Plus
+
+Query  229        GCACGCTTGGTCACTCGGGGTCCGTGC-TAGCGGGCGGCGAACCGGACATTGTCCG  283
+                  ||||||   | |||| | ||||||||  | || ||||||| | |||||| ||||||
+Sbjct  137615836  GCACGCGGCGCCACTGGTGGTCCGTGGATGGCTGGCGGCGGAGCGGACAATGTCCG  137615891
+
+
+>AP017626.1 Pleomorphomonas sp. SM30 DNA, complete genome
+Length=4841392
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 64/94 (68%), Gaps = 5/94 (5%)
+ Strand=Plus/Plus
+
+Query  199      GACGCCGAGGTCACCCACGCAACCCACATCGCACGCTTGGTCACTCGGGGTCCGTGCTAG  258
+                ||| ||| || | ||  || || |  | ||||  ||  || | |||||   ||| ||| |
+Sbjct  3706642  GACCCCGCGGCCGCCGCCG-AAGCGGCGTCGCTGGCGCGGAC-CTCGG---CCGCGCTCG  3706696
+
+Query  259      CGGGCGGCGAACCGGACATTGTCCGGGACGCCGC  292
+                | |||||||| |  ||||| ||| |  |||||||
+Sbjct  3706697  CCGGCGGCGACCGCGACATCGTCAGCAACGCCGC  3706730
+
+
+>XM_024079149.1 PREDICTED: Bicyclus anynana RING finger protein 17 (LOC112043641), 
+transcript variant X2, mRNA
+Length=6191
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 64/90 (71%), Gaps = 7/90 (8%)
+ Strand=Plus/Minus
+
+Query  50    CCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCACGCGGAGCACATGCCGCGGAATA  109
+             ||||||   ||||||| ||||  | |||| || ||||| | | || |||||||| |   |
+Sbjct  2586  CCCGAC---AGCTCCT-GCACC-ACACCGCGCGCCCACACCGTGCCCATGCCGC-GCCCA  2533
+
+Query  110   GGCAAAAGTGTTGCGGAC-CTGCGTAGTTT  138
+             | || ||||   ||| || ||||||  |||
+Sbjct  2532  GACACAAGTACCGCGTACGCTGCGTCCTTT  2503
+
+
+>XM_024079148.1 PREDICTED: Bicyclus anynana RING finger protein 17 (LOC112043641), 
+transcript variant X1, mRNA
+Length=6278
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 64/90 (71%), Gaps = 7/90 (8%)
+ Strand=Plus/Minus
+
+Query  50    CCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCACGCGGAGCACATGCCGCGGAATA  109
+             ||||||   ||||||| ||||  | |||| || ||||| | | || |||||||| |   |
+Sbjct  2673  CCCGAC---AGCTCCT-GCACC-ACACCGCGCGCCCACACCGTGCCCATGCCGC-GCCCA  2620
+
+Query  110   GGCAAAAGTGTTGCGGAC-CTGCGTAGTTT  138
+             | || ||||   ||| || ||||||  |||
+Sbjct  2619  GACACAAGTACCGCGTACGCTGCGTCCTTT  2590
+
+
+>CP020370.1 Candidatus Thiodictyon syntrophicum strain Cad16T chromosome, 
+complete genome
+Length=6837296
+
+ Features in this part of subject sequence:
+   hypothetical protein
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 66/94 (70%), Gaps = 8/94 (9%)
+ Strand=Plus/Minus
+
+Query  208      GTCACCCACGCAACCCACATCGCACGCTTGGTCACTCG-GGGTCCGTGCTAGCGGGCGGC  266
+                |||| | |||||  | ||||||| ||  |||| ||||| |||  || || |  |||| ||
+Sbjct  6755025  GTCAGCGACGCAGACAACATCGCGCGGATGGT-ACTCGCGGGCGCGGGCGACGGGGCCGC  6754967
+
+Query  267      GAAC----CGGACATTGTCCGGGACGCCGCCCGA  296
+                || |    ||  ||| |||| ||| ||| |||||
+Sbjct  6754966  GATCAACGCGATCATCGTCCCGGA-GCC-CCCGA  6754935
+
+
+>CP023422.1 Janthinobacterium svalbardensis strain PAMC 27463 chromosome, 
+complete genome
+Length=6274078
+
+ Features in this part of subject sequence:
+   methionine ABC transporter ATP-binding protein
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 53/78 (68%), Gaps = 0/78 (0%)
+ Strand=Plus/Minus
+
+Query  148      GACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAG  207
+                |||| ||| || | || | | |  | ||| | |||||||||| || || | | |||||| 
+Sbjct  4494669  GACGACCATGATGTCCGTCTCGAAGCGGTAGTAGCCGTAGCGGATGGCCAGGTCGCCGAT  4494610
+
+Query  208      GTCACCCACGCAACCCAC  225
+                | | ||  |||   ||||
+Sbjct  4494609  GCCGCCGCCGCCCACCAC  4494592
+
+
+>CP023335.1 Drosophila melanogaster strain rover (forR) chromosome X
+Length=22422823
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 35/42 (83%), Gaps = 0/42 (0%)
+ Strand=Plus/Minus
+
+Query  45       GATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCA  86
+                |||||||  | || |||||||||||| ||| || ||||||||
+Sbjct  8581068  GATCTCCTAATCCTAGCTCCTAGCACCGATTCCTAGCACCCA  8581027
+
+
+>CP023329.1 Drosophila melanogaster strain sitter (fors) chromosome X
+Length=22422435
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 35/42 (83%), Gaps = 0/42 (0%)
+ Strand=Plus/Minus
+
+Query  45       GATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCA  86
+                |||||||  | || |||||||||||| ||| || ||||||||
+Sbjct  8581069  GATCTCCTAATCCTAGCTCCTAGCACCGATTCCTAGCACCCA  8581028
+
+
+>CP016162.1 Pseudomonas alcaliphila JAB1, complete genome
+Length=5340293
+
+ Features in this part of subject sequence:
+   metal ABC transporter permease
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 49/70 (70%), Gaps = 0/70 (0%)
+ Strand=Plus/Minus
+
+Query  149      ACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGG  208
+                |||||||  ||| ||   |||  | | | | ||||||||||||  || | | ||||||||
+Sbjct  5238163  ACGGCCATCACGTCCGGCTGGTAGCGCTGGTAGCCGTAGCGCACGGCCAGGTCGCCGAGG  5238104
+
+Query  209      TCACCCACGC  218
+                 | ||  |||
+Sbjct  5238103  CCGCCGCCGC  5238094
+
+
+>CP011319.1 Janthinobacterium sp. 1_2014MBL_MicDiv, complete genome
+Length=6453540
+
+ Features in this part of subject sequence:
+   chromosomal replication initiator protein DnaA
+   methionine ABC transporter ATP-binding protein
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 53/78 (68%), Gaps = 0/78 (0%)
+ Strand=Plus/Plus
+
+Query  148      GACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAG  207
+                |||| ||| || | || | | |  | ||| | |||||||||| || || | | |||||| 
+Sbjct  1813040  GACGACCATGATGTCCGTCTCGAAGCGGTAGTAGCCGTAGCGGATGGCCAGGTCGCCGAT  1813099
+
+Query  208      GTCACCCACGCAACCCAC  225
+                | | ||  |||   ||||
+Sbjct  1813100  GCCGCCGCCGCCTACCAC  1813117
+
+
+>LT629734.1 Agrococcus carbonis strain DSM 22965 genome assembly, chromosome: 
+I
+Length=2773310
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 70/104 (67%), Gaps = 7/104 (7%)
+ Strand=Plus/Plus
+
+Query  187     GCGCATCGCAAAGACGCCGAGGTCACCCACGCAACCCACATCGCACGCTTGGTCACTCGG  246
+               ||||| ||||  || |||||||||  | |||    |  | |||| | | ||  | | |||
+Sbjct  681685  GCGCAGCGCAGCGAGGCCGAGGTCGTCGACG---GCTTCCTCGCGCACGTGCGCGC-CGG  681740
+
+Query  247     GGTCCGTGCTAGCG-GGCGGCGAACCGGACATTGTCCGGGACGC  289
+                ||| | || |||| ||||  ||  ||||  | ||||| |||||
+Sbjct  681741  CGTCGGGGCGAGCGAGGCG--GAGGCGGAGCTCGTCCGCGACGC  681782
+
+
+>LT607754.1 Micromonospora inositola strain DSM 43819 genome assembly, chromosome: 
+I
+Length=6708094
+
+ Features in this part of subject sequence:
+   sensor histidine kinase inhibitor, KipI family
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 97/152 (64%), Gaps = 13/152 (9%)
+ Strand=Plus/Minus
+
+Query  148      GACGGCCACGAC--GGCCCTTTGGGTGGGGTTGC-AGCCGTAGCGCAT-CGCAAAGACGC  203
+                |||| || ||||  || ||   | |||| |   | ||| || ||||   ||| | | || 
+Sbjct  1803382  GACGACCCCGACCAGGTCCAG-GCGTGGCGGGCCGAGCTGTGGCGCCGGCGCGACGCCGG  1803324
+
+Query  204      CGAGGTCACCCACGCAACCCACATCGCACGCTTGGTCACTCGGGGTCCGTGCTAGCGGGC  263
+                |||| | |||   || ||| | ||||  |     | | | ||| | |||||||   || |
+Sbjct  1803323  CGAGCTGACC---GCCACCGAGATCGTCCC----GGC-CGCGGCGACCGTGCTGCTGGAC  1803272
+
+Query  264      GGCGAACCGGACATTGTCCGGGACGCCGCCCG  295
+                |||| |||||||   | |  || |||||||||
+Sbjct  1803271  GGCGTACCGGACCCCGCCGAGGCCGCCGCCCG  1803240
+
+
+>XM_016173635.1 Drosophila simulans uncharacterized protein (Dsim\GD16911), mRNA
+Length=1892
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 35/42 (83%), Gaps = 0/42 (0%)
+ Strand=Plus/Minus
+
+Query  45   GATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCA  86
+            |||||||  | || |||||||||||| ||| || ||||||||
+Sbjct  611  GATCTCCTAATCCTAGCTCCTAGCACCGATTCCTAGCACCCA  570
+
+
+>XM_006759519.2 PREDICTED: Myotis davidii NCK adaptor protein 2 (NCK2), mRNA
+Length=2358
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 57/80 (71%), Gaps = 3/80 (4%)
+ Strand=Plus/Plus
+
+Query  7    GCTTGGCGAGGCCAAGACCCAGCCGGAAGAGAAG-GCTAGATCTCCCGACCCAAGCTCCT  65
+            ||| |||  || ||||||| ||  ||||||  || || ||   | |   ||||| | || 
+Sbjct  409  GCTGGGCCTGGGCAAGACCAAGA-GGAAGACGAGCGCGAGGGATGCATCCCCAA-CGCCC  466
+
+Query  66   AGCACGGATACCGAGCACCC  85
+            ||||||||| ||||| ||||
+Sbjct  467  AGCACGGATGCCGAGTACCC  486
+
+
+>CP006368.1 Aureimonas sp. AU20 plasmid pAU20a, complete sequence
+Length=488888
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 58/86 (67%), Gaps = 3/86 (3%)
+ Strand=Plus/Plus
+
+Query  149     ACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGG  208
+               ||||||| |||||   | | |  | | | | |||||||||| || || |   ||||||| 
+Sbjct  251417  ACGGCCATGACGGTGGTGTCGAAGCGCTGGTAGCCGTAGCGGATGGCGAGATCGCCGAGC  251476
+
+Query  209     TCACCCACGCAACCCACATCGCACGC  234
+                | ||| ||   |||||  ||| |||
+Sbjct  251477  CCGCCCGCG---CCCACCGCGCCCGC  251499
+
+
+>CP012184.1 Pseudonocardia sp. EC080619-01, complete genome
+Length=6149338
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 84/124 (68%), Gaps = 12/124 (10%)
+ Strand=Plus/Minus
+
+Query  15       AGGCCAAGACCCAGCCGGAAGAGAAG-GCTAGATCTCCC-GACCCAAGCTCCTAGCACGG  72
+                |||||| |  |    |||| |||||| ||  | |||||| |  ||  |||||   | || 
+Sbjct  2445133  AGGCCAGGGGCGGTTCGGAGGAGAAGAGCCCG-TCTCCCCGGGCCGGGCTCCGTACGCGA  2445075
+
+Query  73       ATACCGAGCA--CCCACGCGGAGCACATGCCGCGGAATAGGCAAAAGT-GTTGCGGACCT  129
+                   |||||||  ||||||| ||||||  |||||||   ||||  | || || | || |||
+Sbjct  2445074  GACCCGAGCACTCCCACGCCGAGCAC--GCCGCGG--GAGGC--ATGTCGTCGTGGGCCT  2445021
+
+Query  130      GCGT  133
+                ||||
+Sbjct  2445020  GCGT  2445017
+
+
+>CP012181.1 Pseudonocardia sp. EC080610-09, complete genome
+Length=6138223
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 84/124 (68%), Gaps = 12/124 (10%)
+ Strand=Plus/Minus
+
+Query  15      AGGCCAAGACCCAGCCGGAAGAGAAG-GCTAGATCTCCC-GACCCAAGCTCCTAGCACGG  72
+               |||||| |  |    |||| |||||| ||  | |||||| |  ||  |||||   | || 
+Sbjct  740146  AGGCCAGGGGCGGTTCGGAGGAGAAGAGCCCG-TCTCCCCGGGCCGGGCTCCGTACGCGA  740088
+
+Query  73      ATACCGAGCA--CCCACGCGGAGCACATGCCGCGGAATAGGCAAAAGT-GTTGCGGACCT  129
+                  |||||||  ||||||| ||||||  |||||||   ||||  | || || | || |||
+Sbjct  740087  GACCCGAGCACTCCCACGCCGAGCAC--GCCGCGG--GAGGC--ATGTCGTCGTGGGCCT  740034
+
+Query  130     GCGT  133
+               ||||
+Sbjct  740033  GCGT  740030
+
+
+>CP010989.1 Pseudonocardia sp. EC080625-04, complete genome
+Length=6135769
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 84/124 (68%), Gaps = 12/124 (10%)
+ Strand=Plus/Minus
+
+Query  15       AGGCCAAGACCCAGCCGGAAGAGAAG-GCTAGATCTCCC-GACCCAAGCTCCTAGCACGG  72
+                |||||| |  |    |||| |||||| ||  | |||||| |  ||  |||||   | || 
+Sbjct  5250418  AGGCCAGGGGCGGTTCGGAGGAGAAGAGCCCG-TCTCCCCGGGCCGGGCTCCGTACGCGA  5250360
+
+Query  73       ATACCGAGCA--CCCACGCGGAGCACATGCCGCGGAATAGGCAAAAGT-GTTGCGGACCT  129
+                   |||||||  ||||||| ||||||  |||||||   ||||  | || || | || |||
+Sbjct  5250359  GACCCGAGCACTCCCACGCCGAGCAC--GCCGCGG--GAGGC--ATGTCGTCGTGGGCCT  5250306
+
+Query  130      GCGT  133
+                ||||
+Sbjct  5250305  GCGT  5250302
+
+
+>LN847264.1 Pseudomonas sp. CCOS 191 genome assembly Pseudomonas sp. strain 
+CCOS 191, chromosome : I
+Length=6012947
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 72/106 (68%), Gaps = 8/106 (8%)
+ Strand=Plus/Minus
+
+Query  188      CGCATCG-CAAAGACGCCGAGG-TCACCCACGCAACCCACATCGCACGCTTGGTCACTCG  245
+                ||||| | | | | |||||||  ||| || || | ||  | | | ||||  ||||||  |
+Sbjct  3353544  CGCATTGGCCAGGCCGCCGAGCATCAGCC-CGGATCCGGCCTTGAACGCCAGGTCAC--G  3353488
+
+Query  246      GGGTCCGTGCTAGCGGGCGGCGAACCGGACATTGTCCGGGACGCCG  291
+                ||  ||||   |||| ||||||||   | |  ||||||| ||| ||
+Sbjct  3353487  GGCGCCGT---AGCGTGCGGCGAAGATGTCCATGTCCGGCACGTCG  3353445
+
+
+>CP010892.1 Pseudomonas sp. MRSN12121, complete genome
+Length=6929263
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 53/78 (68%), Gaps = 0/78 (0%)
+ Strand=Plus/Plus
+
+Query  148    GACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAG  207
+              |||  ||| |||| |  | |||  | | | | ||||| |||| ||||| | | |||||||
+Sbjct  68833  GACCACCATGACGTCGGTCTGGAAGCGCTGGTAGCCGAAGCGGATCGCCAGGTCGCCGAG  68892
+
+Query  208    GTCACCCACGCAACCCAC  225
+                | ||| |||   ||||
+Sbjct  68893  ACCGCCCGCGCCCACCAC  68910
+
+
+>XM_009315388.1 Trypanosoma grayi hypothetical protein partial mRNA
+Length=1176
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 51/70 (73%), Gaps = 5/70 (7%)
+ Strand=Plus/Plus
+
+Query  150  CGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAG-ACGCCGAGG  208
+            || || |||||  ||    ||||| | ||| | || |||||||||||| | ||| |||||
+Sbjct  549  CGACCGCGACGCGCC----GGTGGAGGTGCTGTCGGAGCGCATCGCAATGCACGTCGAGG  604
+
+Query  209  TCACCCACGC  218
+            |  || ||||
+Sbjct  605  TGGCCGACGC  614
+
+
+>CP009110.1 Amycolatopsis methanolica 239, complete genome
+Length=7237391
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 61/90 (68%), Gaps = 3/90 (3%)
+ Strand=Plus/Plus
+
+Query  16       GGCCAAGACCCAGCCGGAAGAGAAGGCTAGATCTCCCGACCCAAGCTCCTAGCACGGATA  75
+                |||| ||  | || || ||||  || || | ||  ||    ||| ||||  || ||||  
+Sbjct  6769703  GGCCCAGGACGAGACG-AAGATGAGCCTCGTTCCTCCCCGACAACCTCCGTGCGCGGACT  6769761
+
+Query  76       CCGAGCACCCACGCGGAGCACATGCCGCGG  105
+                ||  ||||||||||| ||| |  |||||||
+Sbjct  6769762  CCAGGCACCCACGCGCAGCGC--GCCGCGG  6769789
+
+
+>AE014298.5 Drosophila melanogaster chromosome X
+Length=23542271
+
+ Features flanking this part of subject sequence:
+   6736 bp at 5' side: uncharacterized protein, isoform B
+   229 bp at 3' side: uncharacterized protein, isoform C
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 35/42 (83%), Gaps = 0/42 (0%)
+ Strand=Plus/Minus
+
+Query  45       GATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCA  86
+                |||||||  | || |||||||||||| ||| || ||||||||
+Sbjct  8687039  GATCTCCTAATCCTAGCTCCTAGCACCGATTCCTAGCACCCA  8686998
+
+
+>NM_001298094.1 Drosophila melanogaster uncharacterized protein, transcript variant 
+E (CG11284), mRNA
+Length=2309
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 35/42 (83%), Gaps = 0/42 (0%)
+ Strand=Plus/Minus
+
+Query  45   GATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCA  86
+            |||||||  | || |||||||||||| ||| || ||||||||
+Sbjct  922  GATCTCCTAATCCTAGCTCCTAGCACCGATTCCTAGCACCCA  881
+
+
+>LK391695.1 Pseudomonas pseudoalcaligenes genome assembly Ppseudo_Pac ,chromosome 
+: I
+Length=4696984
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 49/70 (70%), Gaps = 0/70 (0%)
+ Strand=Plus/Minus
+
+Query  149      ACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGG  208
+                |||||||  ||| ||  ||||  | | | | ||||||||||||  || | | | ||||||
+Sbjct  4497151  ACGGCCATCACGTCCGGTTGGTAGCGCTGGTAGCCGTAGCGCACGGCCAGGTCTCCGAGG  4497092
+
+Query  209      TCACCCACGC  218
+                 | ||  |||
+Sbjct  4497091  CCGCCGCCGC  4497082
+
+
+>CP007236.1 Ensifer adhaerens OV14 chromosome 1 sequence
+Length=3956045
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 34/40 (85%), Gaps = 0/40 (0%)
+ Strand=Plus/Plus
+
+Query  195     CAAAGACGCCGAGGTCACCCACGCAACCCACATCGCACGC  234
+               ||| |||| || ||||||| ||||||||| ||||| ||||
+Sbjct  225288  CAAGGACGGCGTGGTCACCGACGCAACCCGCATCGAACGC  225327
+
+
+>HG916826.1 Pseudomonas pseudoalcaligenes CECT 5344 complete genome
+Length=4686340
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 49/70 (70%), Gaps = 0/70 (0%)
+ Strand=Plus/Minus
+
+Query  149      ACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGG  208
+                |||||||  ||| ||  ||||  | | | | ||||||||||||  || | | | ||||||
+Sbjct  4486508  ACGGCCATCACGTCCGGTTGGTAGCGCTGGTAGCCGTAGCGCACGGCCAGGTCTCCGAGG  4486449
+
+Query  209      TCACCCACGC  218
+                 | ||  |||
+Sbjct  4486448  CCGCCGCCGC  4486439
+
+
+>CP003969.1 Sorangium cellulosum So0157-2, complete genome
+Length=14782125
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 74/110 (67%), Gaps = 7/110 (6%)
+ Strand=Plus/Minus
+
+Query  184      GTAGCGCATCGCAAAGACGCCGAGGTC-ACCCACGCAACCCACATCGCACGCTTGGTCAC  242
+                |||||||  |   |||  | ||||  | ||||  ||  ||| |||||  ||| ||| | |
+Sbjct  1970817  GTAGCGCGGC---AAGCAGACGAGCCCGACCCCGGCGGCCCCCATCGT-CGCCTGGGC-C  1970763
+
+Query  243      TCGGGGTCCGTGCTAGCGGGCGGCGAACCGGACATTGTCCGGGACGCCGC  292
+                ||| || |  || | |||||||||||  ||  | ||  ||| |||| |||
+Sbjct  1970762  TCGCGGCCGTTGGT-GCGGGCGGCGACGCGCGCCTTCGCCGCGACGGCGC  1970714
+
+
+>NM_001272421.1 Drosophila melanogaster uncharacterized protein, transcript variant 
+C (CG11284), mRNA
+Length=1897
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 35/42 (83%), Gaps = 0/42 (0%)
+ Strand=Plus/Minus
+
+Query  45   GATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCA  86
+            |||||||  | || |||||||||||| ||| || ||||||||
+Sbjct  510  GATCTCCTAATCCTAGCTCCTAGCACCGATTCCTAGCACCCA  469
+
+
+>NM_001272420.1 Drosophila melanogaster uncharacterized protein, transcript variant 
+B (CG11284), mRNA
+Length=1801
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 35/42 (83%), Gaps = 0/42 (0%)
+ Strand=Plus/Minus
+
+Query  45   GATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCA  86
+            |||||||  | || |||||||||||| ||| || ||||||||
+Sbjct  414  GATCTCCTAATCCTAGCTCCTAGCACCGATTCCTAGCACCCA  373
+
+
+>NM_132269.3 Drosophila melanogaster uncharacterized protein, transcript variant 
+A (CG11284), mRNA
+Length=2010
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 35/42 (83%), Gaps = 0/42 (0%)
+ Strand=Plus/Minus
+
+Query  45   GATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCA  86
+            |||||||  | || |||||||||||| ||| || ||||||||
+Sbjct  623  GATCTCCTAATCCTAGCTCCTAGCACCGATTCCTAGCACCCA  582
+
+
+>CP000628.1 Agrobacterium radiobacter K84 chromosome 1, complete sequence
+Length=4005130
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 36/44 (82%), Gaps = 0/44 (0%)
+ Strand=Plus/Plus
+
+Query  195      CAAAGACGCCGAGGTCACCCACGCAACCCACATCGCACGCTTGG  238
+                ||| |||| | |||||||| |||||||||  |||| |||| |||
+Sbjct  2983323  CAAGGACGGCAAGGTCACCGACGCAACCCGTATCGAACGCGTGG  2983366
+
+
+>CP001068.1 Ralstonia pickettii 12J chromosome 1, complete sequence
+Length=3942557
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 74/116 (64%), Gaps = 3/116 (3%)
+ Strand=Plus/Minus
+
+Query  151      GGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGA-CGC--CGAG  207
+                ||||||||||||  |    || |||||    |  | |  |  ||||| || |||  | | 
+Sbjct  1501720  GGCCACGACGGCATTGACCGTCGGGTTATGACGATCGATCTGCGCAAGGAACGCTTCCAT  1501661
+
+Query  208      GTCACCCACGCAACCCACATCGCACGCTTGGTCACTCGGGGTCCGTGCTAGCGGGC  263
+                | |  |||||||   |||||||| ||| |||  || | ||| | || | | || ||
+Sbjct  1501660  GACTTCCACGCACGACACATCGCGCGCGTGGATACGCCGGGACAGTTCGATCGCGC  1501605
+
+
+>CP000680.1 Pseudomonas mendocina ymp, complete genome
+Length=5072807
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 49/70 (70%), Gaps = 0/70 (0%)
+ Strand=Plus/Minus
+
+Query  149      ACGGCCACGACGGCCCTTTGGGTGGGGTTGCAGCCGTAGCGCATCGCAAAGACGCCGAGG  208
+                |||||||  ||| ||   |||  | | | | |||| |||||||  || | | ||||||||
+Sbjct  4938794  ACGGCCATCACGTCCGGCTGGTAGCGCTGGTAGCCATAGCGCACGGCCAGGTCGCCGAGG  4938735
+
+Query  209      TCACCCACGC  218
+                 ||||  |||
+Sbjct  4938734  CCACCGCCGC  4938725
+
+
+>AY069607.1 Drosophila melanogaster LD36568 full length cDNA
+Length=1994
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 35/42 (83%), Gaps = 0/42 (0%)
+ Strand=Plus/Minus
+
+Query  45   GATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCA  86
+            |||||||  | || |||||||||||| ||| || ||||||||
+Sbjct  592  GATCTCCTAATCCTAGCTCCTAGCACCGATTCCTAGCACCCA  551
+
+
+>AC023743.4 Drosophila melanogaster X BAC RP98-40O10 (Roswell Park Cancer 
+Institute Drosophila BAC Library) complete sequence
+Length=185405
+
+ Score = 42.5 bits (28),  Expect = 6.4
+ Identities = 35/42 (83%), Gaps = 0/42 (0%)
+ Strand=Plus/Minus
+
+Query  45      GATCTCCCGACCCAAGCTCCTAGCACGGATACCGAGCACCCA  86
+               |||||||  | || |||||||||||| ||| || ||||||||
+Sbjct  154717  GATCTCCTAATCCTAGCTCCTAGCACCGATTCCTAGCACCCA  154676
+
+
+  Database: Nucleotide collection (nt)
+    Posted date:  Sep 16, 2018  12:43 AM
+  Number of letters in database: 193,789,324,781
+  Number of sequences in database:  47,926,497
+
+Lambda      K        H
+    1.10    0.333    0.549 
+Gapped
+Lambda      K        H
+   0.990    0.170    0.300 
+Matrix: blastn matrix:1 -1
+Gap Penalties: Existence: 2, Extension: 1
+Number of Sequences: 47926497
+Number of Hits to DB: 104898976
+Number of extensions: 13702
+Number of successful extensions: 13702
+Number of sequences better than 10: 2
+Number of HSP's better than 10 without gapping: 0
+Number of HSP's gapped: 13702
+Number of HSP's successfully gapped: 2
+Length of query: 304
+Length of database: 193789324781
+Length adjustment: 88
+Effective length of query: 216
+Effective length of database: 189571793045
+Effective search space: 40947507297720
+Effective search space used: 40947507297720
+A: 0
+X1: 13 (20.6 bits)
+X2: 21 (30.0 bits)
+X3: 70 (100.0 bits)
+S1: 16 (25.4 bits)
+S2: 28 (42.5 bits)
+
+

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # PYTHON_ARGCOMPLETE_OK
-import argcomplete, argparse
+import argcomplete
+import argparse
 import sys
 import json
 import os
@@ -8,18 +9,18 @@ import os
 import logging
 
 # this must precede the CONFIG
-from rna_blast_analyze.BR_core.tools_versions import pred_method_required_tools, pred_params
+from rna_blast_analyze.BR_core.tools_versions import method_required_tools, prediction_methods, pred_params
+from rna_blast_analyze.BR_core.parse_accession import accession_regex
 
 logger = logging.getLogger('rna_blast_analyze')
 
 ch = logging.StreamHandler()
-# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 
 logger.addHandler(ch)
 
-with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'VERSION'), 'r') as o:
+with open(os.path.join(os.path.dirname(__file__), 'VERSION'), 'r') as o:
     version = o.read().strip()
 
 
@@ -57,14 +58,16 @@ def f_parser():
         'MISC'
     )
     input_group.add_argument(
-        '-blast_in',
+        '-in',
+        '--blast_in',
         type=str,
         required=True,
         metavar='PATH',
         help='BLAST output file with hits to analyze.'
     )
     input_group.add_argument(
-        '-blast_query',
+        '-q',
+        '--blast_query',
         default=None,
         required=True,
         type=str,
@@ -72,13 +75,23 @@ def f_parser():
         help='The Blast query fasta file.'
     )
     input_group.add_argument(
-        '-blast_db',
+        '-db',
+        '--blast_db',
         required=True,
         metavar='path',
         type=str,
         help='Provide path to blast database, '
              'that is the complete path with na name without any extensions '
              '(*.nin, nsd, nog, nsi, nhr, nsq, nal).'
+    )
+    misc_group.add_argument(
+        '--db_type',
+        choices=['blastdb', 'fasta', 'gb', 'server'],
+        default='blastdb',
+        help="Type of a database provided. "
+             "If 'fasta' or 'gb' then --blast_db must be directory "
+             "containing files with names in accession.version format. "
+             "Example '/home/my-best-db/' with files like 'CP000001.1'. "
     )
     misc_group.add_argument(
         '--b_type',
@@ -89,7 +102,9 @@ def f_parser():
         '--blast_regexp',
         type=str,
         # default='(?<=\|)[A-Z0-9]*\.?\d*$',
-        default='[A-Z0-9a-z_]+\.[1-9]+',
+        # default='[A-Z0-9a-z_]+\.[1-9]+',
+        # default='[A-Z]+[A-Z_0-9]+\.[0-9]+',
+        default=accession_regex,
         help='Provide python valid regular expression which capture the index key to blastdb'
         ' (usualy the accession.version number).'
     )
@@ -98,17 +113,32 @@ def f_parser():
         type=str,
         default='locarna',
         choices=['simple', 'locarna', 'joined'],
-        help='Choose mode of hit elongation: '
-             'simple (extend by unaligned parts of query) '
-             'locarna (run locarna algorithm - uses secondary structure for better alignment) '
-             'joined (uses both methods and chooses the alignment which has better RSEARCH score).'
+        help=(
+            'Choose mode of hit elongation: '
+            'simple (extend by unaligned parts of query) '
+            'locarna (run locarna algorithm - uses secondary structure for better alignment) '
+            'joined (uses both methods and chooses the alignment which has better RSEARCH score).'
+        )
     )
     parameters_group.add_argument(
-        '--subseq_window',
-        type=int,
-        default=10,
-        help='N of nucleotides of which can subsequence differ in length,'
-        ' also the maximum expansion of sequence ahead and behind the query seq.'
+        '--turbofold_fast_preset',
+        default=False,
+        action='store_true',
+        help=(
+            "Act's as parameter preset for TurboFold_fast setting the max_seqs_in_prediction to 2."
+            " This means that only the query sequence is used as homologous sequence."
+            " It is useful if analyzing very distant BLAST HITs."
+        )
+    )
+    parameters_group.add_argument(
+        '--centroid_fast_preset',
+        default=False,
+        action='store_true',
+        help=(
+            "Parameter preset for centroid_homfold_fast. Set's the max_seqs_in_prediction to 1."
+            " This means that only the query sequence is used as homologous sequence for prediction."
+            " It is useful if analyzing very distant BLAST HITs."
+        )
     )
     output_group.add_argument(
         '--html',
@@ -135,14 +165,15 @@ def f_parser():
         default=None,
         help='Dump all stored data to JSON (developer only - it is possible to convert to all other output formats).'
     )
-    misc_group.add_argument(
+    mu2 = misc_group.add_mutually_exclusive_group()
+    mu2.add_argument(
         '--cm_file',
         default=None,
         type=str,
         metavar='CM_file',
         help='Provided covariance model will be used for homology inference instead of RSEARCH model.'
     )
-    misc_group.add_argument(
+    mu2.add_argument(
         '--use_rfam',
         action='store_true',
         default=False,
@@ -172,19 +203,24 @@ def f_parser():
         nargs='*',
         type=str,
         metavar='prediction_method_name',
-        default=['pairwise_centroid_homfold', 'rfam_rnafoldc', 'rnafold'],
-        choices=pred_method_required_tools.keys(),
-        help='Prediction method to use. Multiple prediction methods are allowed.'
+        default=['centroid_homfold', 'rfam_rnafoldc', 'rnafold'],
+        choices=prediction_methods,
+        help=(
+            'Prediction method to use. Multiple prediction methods are allowed. '
+            'Possible values: {}'.format(' '.join(prediction_methods))
+        )
     )
     parameters_group.add_argument(
         '--pm_param_file',
         type=str,
         metavar='PATH',
         default=None,
-        help="Path to file with parameters for prediction methods in JSON. "
-             "Prediction methods not declared within provided file are used with default values. "
-             "File is in json format. Default values (also example how to provide parameters) are stored in "
-             "'[install location]/rna_blast_analyze/BR_core/prediction_parameters.json'"
+        help=(
+            "Path to file with parameters for prediction methods in JSON. "
+            "Prediction methods not declared within provided file are used with default values. "
+            "File is in json format. Default values (also example how to provide parameters) are stored in "
+            "'[install location]/rna_blast_analyze/BR_core/prediction_parameters.json'"
+        )
     )
     misc_group.add_argument(
         '--logfile',
@@ -268,14 +304,18 @@ def f_parser():
         default=None,
         action=ParseFilter,
         help='Filter the input blast by E-value. Only hits following the rule will be kept. '
-             'Example ">10e-10" will keep only hits with eval greater then 10e-10.'
+             'Example ">10e-10" will keep only hits with eval greater then 10e-10. '
+             'The homologous sequences used with certain prediction methods are taken from all hits '
+             '(regardless of the filtering).'
     )
     mu.add_argument(
         '--filter_by_bitscore',
         default=None,
         action=ParseFilter,
         help='Filter the input blast by bit score. Only hits following the rule will be kept. '
-             'Example "<20" will keep only hits with bit score less then 20.'
+             'Example "<20" will keep only hits with bit score less then 20. '
+             'The homologous sequences used with certain prediction methods are taken from all hits '
+             '(regardless of the filtering).'
     )
     misc_group.add_argument(
         '-v', '--verbose',
@@ -292,6 +332,20 @@ def f_parser():
              ' This may alter the results of bit_score computation (for homology prediction)'
              ' and secondary structure prediction for several methods.'
     )
+    misc_group.add_argument(
+        '--zip_json',
+        action="store_true",
+        default=False,
+        help=argparse.SUPPRESS
+    )
+    misc_group.add_argument(
+        '--enable_overwrite',
+        action='store_true',
+        default=False,
+        # help="Output will overwrite existing file. (default False)"
+        help=argparse.SUPPRESS
+    )
+
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
     args.command = sys.argv
@@ -311,8 +365,13 @@ def f_parser():
             provided_params = json.load(ff)
             params.update(provided_params)
 
-    # set logger level
-    logger.setLevel(max(3 - args.verbose, 1) * 10)
+    if args.turbofold_fast_preset:
+        print('Using Turbofold_fast preset')
+        params['TurboFold_fast']['max_seqs_in_prediction'] = 2
+
+    if args.centroid_fast_preset:
+        print('Using centroid_homfold_fast preset')
+        params['centroid_homfold_fast']['max_seqs_in_prediction'] = 1
 
     # check if prediction method params are valid
     check_params(params)
@@ -341,6 +400,11 @@ def main():
     # ========= perform argument parsing =========
     args = f_parser()
 
+    return lunch_with_args(args)
+
+
+def lunch_with_args(args):
+
     # ========= imports ==========
     # move slow imports here, so the argcomplete would be fast
     from rna_blast_analyze.BR_core import BA_verify
@@ -351,6 +415,10 @@ def main():
     from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
 
     args.logmsgs = []
+
+    # set logger level
+    logger.setLevel(max(3 - args.verbose, 1) * 10)
+
     logger.debug('parsed arguments: {}'.format(args))
 
     # create logging file if requested
@@ -383,17 +451,18 @@ def main():
         cmalign.download_cmmodels_file()
 
     # ========= check if tools needed for requested methods are installed =========
-    BA_verify.check_necessery_tools(methods=args.prediction_method)
+    BA_verify.check_necessery_tools(methods=args.prediction_method + [args.mode])
 
     # ========= run =========
     if args.mode == 'simple':
-        blast_wrapper_inner(args)
+        _, result = blast_wrapper_inner(args)
     elif args.mode == 'locarna':
-        locarna_anchored_wrapper_inner(args)
+        _, result = locarna_anchored_wrapper_inner(args)
     elif args.mode == 'joined':
-        joined_wrapper_inner(args)
+        _, result = joined_wrapper_inner(args)
     else:
         raise ValueError('Unknown option - should be cached by argparse.')
+    return result
 
 
 def check_params(par: dict):
@@ -402,7 +471,7 @@ def check_params(par: dict):
     :param par:
     :return:
     """
-    known_methods = set(pred_method_required_tools.keys())
+    known_methods = set(method_required_tools.keys())
     for provided_key in par.keys():
         if provided_key not in known_methods:
             raise ValueError("Method '{}' does not exist.".format(provided_key))

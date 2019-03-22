@@ -1,39 +1,37 @@
+import logging
+import multiprocessing
 import os
 from shutil import rmtree
 from subprocess import call
 from tempfile import mkdtemp
-import logging
-import multiprocessing
 
 from Bio.SeqRecord import SeqRecord
 
 from rna_blast_analyze.BR_core import BA_support
-from rna_blast_analyze.BR_core.BA_support import NoHomologousSequenceException
 from rna_blast_analyze.BR_core.config import CONFIG
-from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.decorators import timeit_decorator
+from rna_blast_analyze.BR_core.fname import fname
 
 ml = logging.getLogger(__name__)
 
 
 @timeit_decorator
-def turbofold_fast(all_seqs, query, cpu, n, turbofold_params, len_diff):
+def turbofold_fast(all_seqs, seqs2predict, query, cpu, n, turbofold_params, len_diff):
     # ambiguos sequence cannot be predicted with turbofold
     # do not predict sequence twice
+    # seqs2predict must be subset of all_seqs
+    # todo add test for this
+
     ml.debug(fname())
 
     if query.annotations['ambiguous']:
-        msgfail = "Query sequence contains ambiguos characters. Can't use fast_turbofold."
+        msgfail = "Query sequence contains ambiguous characters. Can't use TurboFold_fast."
         ml.error(msgfail)
         raise ValueError(msgfail)
 
-    q_all = [query] + all_seqs
-    q_cm = [s for s in q_all if s.annotations['cmstat'].bit_sc > 0]
-    not_amb = BA_support.filter_ambiguous_seqs_from_list(q_cm)
-    nr_na = BA_support.non_redundant_seqs(not_amb)
-    nr_na_ld = BA_support.filter_by_length_diff(nr_na, len(query), len_diff)
+    nr_na_ld = BA_support.sel_seq_simple(all_seqs, query, len_diff)
 
-    return turbofold_ext_nr_fast(all_seqs, nr_na_ld, cpu, n, turbofold_params)
+    return turbofold_ext_nr_fast(seqs2predict, nr_na_ld, cpu, n, turbofold_params)
 
 
 def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params):
@@ -61,7 +59,7 @@ def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params):
 
         if len(seq_set) < 2:
             ml.error("Turbofold can't be used with less then 2 sequences.")
-            raise NoHomologousSequenceException
+            raise BA_support.NoHomologousSequenceException
 
         if len(seq_set) < n:
             ml.warning(msg_short_list)
@@ -211,7 +209,7 @@ def turbofold_with_homologous(all_sequences, nr_homologous, params, n, cpu):
     nr_homologous_set = {str(seq.seq) for seq in nr_homologous}
 
     if len(nr_homologous_set) < 1:
-        raise NoHomologousSequenceException
+        raise BA_support.NoHomologousSequenceException
 
     list2predict = []
     for seq in all_sequences:
@@ -219,7 +217,7 @@ def turbofold_with_homologous(all_sequences, nr_homologous, params, n, cpu):
 
         if len(seq_set) < 2:
             ml.error("Turbofold can't be used with less then 2 sequences.")
-            raise NoHomologousSequenceException
+            raise BA_support.NoHomologousSequenceException
 
         if len(seq_set) < n:
             ml.warning(msg_short_list)

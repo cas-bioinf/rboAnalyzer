@@ -1,46 +1,30 @@
 import json as json_package
 import os
 from argparse import Namespace
+from rna_blast_analyze.BR_core.parse_accession import accession_regex
 
 
 class Pseudoargs(Namespace):
     def __init__(
             self,
-            query_in,
+            blast_query,
             blast_in,
             blast_db,
             b_type='guess',
-            o_tbl=None,
-            blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
+            blast_regexp=accession_regex,
             keep_all=False,
-            max_shapes=5,
-            subseq_step=3,
             subseq_window_locarna=30,
-            subseq_window_muscle=30,
-            subseq_window_mafft=50,
             subseq_window_simple_ext=10,
-            reldev=(10, 20, 30),
             dump=None,
             pandas_dump=None,
             logfile=None,
             locarna_params='--struct-local 0 --sequ-local 0 --free-endgaps ++++',
-            muscle_params='-distance1 kbit20_3 -distance2 pctidlog -objscore sp -weight1 threeway -weight2 none',
-            mafft_params=' --quiet',
-            mafft_mode='qinsi',
-            mlocarna_params=None,
             locarna_anchor_length=7,
             repredict_file=None,
-            pred_sim_threshold_percent=90,
-            prediction_method=('alifold_unpaired_conserved_refold',),
-            dill=None,
+            prediction_method=('clustalo_alifold_unpaired_conserved_refold_rnafoldc',),
             pred_params=None,
             dev_pred=False,
             threads=1,
-            ribosum=os.path.abspath(
-                os.path.dirname(__file__) + '/../rna_blast_analyze/3rd_party_source/RSEARCH_matrices/RIBOSUM65.mat'
-            ),
-            structures2write=('best',),
-            subseq_window=30,
             cm_file=None,
             use_rfam=False,
             config_file=None,
@@ -53,21 +37,19 @@ class Pseudoargs(Namespace):
             filter_by_eval=None,
             filter_by_bitscore=None,
             skipp_missing=False,
+            enable_overwrite=False,
+            db_type="blastdb",
+            mode='locarna',
+            verbose=0,
             **kwargs):
         super().__init__(**kwargs)
         self.blast_in = blast_in
         self.b_type = b_type
-        self.o_tbl = o_tbl
         self.blast_db = blast_db
         self.blast_regexp = blast_regexp
         self.keep_all = keep_all
-        self.max_shapes = max_shapes
-        self.blast_query = query_in
-        self.subseq_step = subseq_step
-        self.subseq_window = subseq_window
+        self.blast_query = blast_query
         self.subseq_window_locarna = subseq_window_locarna
-        self.subseq_window_mafft = subseq_window_mafft
-        self.subseq_window_muscle = subseq_window_muscle
         self.subseq_window_simple_ext = subseq_window_simple_ext
         self.dump = dump
         self.pandas_dump = pandas_dump
@@ -76,13 +58,6 @@ class Pseudoargs(Namespace):
         self.locarna_anchor_length = locarna_anchor_length
         self.repredict_file = repredict_file
         self.prediction_method = prediction_method
-        self.dill = dill
-        self.structures2write = structures2write
-        self.ribosum = ribosum
-        self.muscle_params = muscle_params
-        self.mlocarna_params = mlocarna_params
-        self.mafft_params = mafft_params
-        self.mafft_mode = mafft_mode
         self.threads = threads
         self.cm_file = cm_file
         self.use_rfam = use_rfam
@@ -98,19 +73,13 @@ class Pseudoargs(Namespace):
         self.skip_missing = skipp_missing
         self.logmsgs = []
         self.dev_pred = dev_pred
-
-        if 0 < pred_sim_threshold_percent <= 100:
-            self.pred_sim_threshold_percent = pred_sim_threshold_percent
-        else:
-            raise AttributeError('pred_sim_threshold_percent must be between 0 and 100')
+        self.enable_overwrite = enable_overwrite
+        self.db_type = db_type
+        self.mode = mode
+        self.verbose = verbose
 
         if self.filter_by_eval is not None and self.filter_by_bitscore is not None:
             raise AttributeError('filter_by_eval is not allowed with filter_by_bitscore')
-
-        if isinstance(reldev, list):
-            self.reldev = reldev
-        else:
-            self.reldev = list(reldev)
 
         # manage default parameters
         default_file = os.path.abspath(

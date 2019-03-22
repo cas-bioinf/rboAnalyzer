@@ -31,7 +31,7 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
     if outfile:
         out = outfile
     else:
-        fd, out = mkstemp(prefix='rba_', suffix='_10')
+        fd, out = mkstemp(prefix='rba_', suffix='_10', dir=CONFIG.tmpdir)
         os.close(fd)
 
     if threads:
@@ -44,22 +44,19 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
 
     with open(os.devnull, 'w') as FNULL:
 
-        cmd = '{}cmscan {} --tblout {} {} {}'.format(
-            CONFIG.infernal_path,
-            params,
-            out,
-            cm_file,
-            fastafile
-        )
+        # build commandline
+        cmd = ['{}cmscan'.format(CONFIG.infernal_path)]
+        if params != '':
+            cmd += params.split()
+        cmd += [
+            '--tblout', out,
+            cm_file, fastafile
+        ]
         ml.debug(cmd)
         if ml.getEffectiveLevel() == 10:
-            r = call(cmd, shell=True)
+            r = call(cmd)
         else:
-            r = call(
-                cmd,
-                shell=True,
-                stdout=FNULL
-            )
+            r = call(cmd, stdout=FNULL)
 
         if r:
             msgfail = 'cmscan failed'
@@ -82,25 +79,22 @@ def run_cmfetch(cmfile, modelid, outfile=None):
     if outfile:
         out = outfile
     else:
-        fd, out = mkstemp(prefix='rba_', suffix='_11')
+        fd, out = mkstemp(prefix='rba_', suffix='_11', dir=CONFIG.tmpdir)
         os.close(fd)
 
     with open(os.devnull, 'w') as FNULL:
-        cmd = '{}cmfetch -o {} {} {}'.format(
-            CONFIG.infernal_path,
-            out,
+        cmd = [
+            '{}cmfetch'.format(CONFIG.infernal_path),
+            '-o', out,
             cmfile,
             modelid
-        )
+        ]
         ml.debug(cmd)
         if ml.getEffectiveLevel() == 10:
-            r = call(cmd, shell=True)
+            r = call(cmd)
         else:
-            r = call(
-                cmd,
-                shell=True,
-                stdout=FNULL
-            )
+            r = call(cmd, stdout=FNULL)
+
         if r:
             msgfail = 'call to cmfetch failed'
             ml.error(msgfail)
@@ -121,25 +115,22 @@ def run_cmemit(model, params='', out_file=None):
     if out_file:
         out = out_file
     else:
-        fd, out = mkstemp(prefix='rba_', suffix='_12')
+        fd, out = mkstemp(prefix='rba_', suffix='_12', dir=CONFIG.tmpdir)
         os.close(fd)
 
     with open(os.devnull, 'w') as FNULL:
-        cmd = '{}cmemit {} -o {} {}'.format(
-            CONFIG.infernal_path,
-            params,
-            out,
-            model
-        )
+        # build commandline
+        cmd = ['{}cmemit'.format(CONFIG.infernal_path)]
+        if params != '':
+            cmd += params.split()
+        cmd += ['-o', out, model]
+
         ml.debug(cmd)
         if ml.getEffectiveLevel() == 10:
-            r = call(cmd, shell=True)
+            r = call(cmd)
         else:
-            r = call(
-                cmd,
-                shell=True,
-                stdout=FNULL
-            )
+            r = call(cmd, stdout=FNULL)
+
         if r:
             msgfail = 'call to cmemit failed'
             ml.error(msgfail)
@@ -259,12 +250,12 @@ def download_cmmodels_file(path=None, url=None):
     :param url:
     :return:
     """
-    ml.info('Running CM download from RFAM.')
+    print('Running CM download from RFAM.')
     ml.debug(fname())
     rfam = RfamInfo()
-    if not path:
+    if path is None:
         path = rfam.rfam_dir
-    if not url:
+    if url is None:
         url = rfam.url
 
     if not os.path.exists(path):
@@ -273,7 +264,7 @@ def download_cmmodels_file(path=None, url=None):
     cmd = ['wget', '-N', '-P', path, url]
     ml.debug(cmd)
 
-    print('Downloading RFAM database (aprox 300Mb). This may take a while...')
+    ml.info('Downloading RFAM database (aprox 300Mb). This may take a while...')
     r = check_output(cmd, stderr=STDOUT)
 
     if not r:
@@ -301,15 +292,13 @@ def run_cmpress(file2process):
     ml.info('Running cmpress.')
     ml.debug(fname())
     with open(os.devnull, 'w') as FNULL:
-        cmd = '{}cmpress -F {}'.format(
-            CONFIG.infernal_path,
-            file2process
-        )
+        cmd = ['{}cmpress'.format(CONFIG.infernal_path), '-F', file2process]
         ml.debug(cmd)
         if ml.getEffectiveLevel() == 10:
-            r = call(cmd, shell=True)
+            r = call(cmd)
         else:
-            r = call(cmd, shell=True, stdout=FNULL, stderr=FNULL)
+            r = call(cmd, stdout=FNULL, stderr=FNULL)
+
         if r:
             msgfail = 'call to cmpress failed'
             ml.error(msgfail)
@@ -330,22 +319,20 @@ def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
     """
     ml.info('Runing cmbuild.')
     ml.debug(fname())
-    cm_fd, cm_file = mkstemp(prefix='rba_', suffix='_13')
+    cm_fd, cm_file = mkstemp(prefix='rba_', suffix='_13', dir=CONFIG.tmpdir)
     os.close(cm_fd)
 
     FNULL = open(os.devnull, 'w')
     try:
-        cmd = '{}cmbuild -F {} {} {}'.format(
-            CONFIG.infernal_path,
-            cmbuild_params,
-            cm_file,
-            cmbuild_input_file
-        )
+        cmd = ['{}cmbuild'.format(CONFIG.infernal_path), '-F']
+        if cmbuild_params != '':
+            cmd += cmbuild_params.split()
+        cmd += [cm_file, cmbuild_input_file]
         ml.debug(cmd)
         if ml.getEffectiveLevel() == 10:
-            r = call(cmd, shell=True)
+            r = call(cmd)
         else:
-            r = call(cmd, shell=True, stdout=FNULL)
+            r = call(cmd, stdout=FNULL)
 
         if r:
             msgfail = 'Call to cmbuild failed'
@@ -375,23 +362,25 @@ def run_cmalign_on_fasta(fasta_file, model_file, cmalign_params='--notrunc', ali
     """
     ml.info('Runing cmaling.')
     ml.debug(fname())
-    cma_fd, cma_file = mkstemp(prefix='rba_', suffix='_14')
+    cma_fd, cma_file = mkstemp(prefix='rba_', suffix='_14', dir=CONFIG.tmpdir)
     os.close(cma_fd)
     FNULL = open(os.devnull, 'w')
     try:
-        cmd = '{}cmalign --informat fasta --outformat {} {} -o {} {} {}'.format(
-            CONFIG.infernal_path,
-            alig_format,
-            cmalign_params,
-            cma_file,
-            model_file,
-            fasta_file,
-        )
+        cmd = [
+            '{}cmalign'.format(CONFIG.infernal_path),
+            '--informat', 'fasta',
+            '--outformat', alig_format,
+        ]
+        if cmalign_params != '':
+            cmd += cmalign_params.split()
+        cmd += ['-o', cma_file, model_file, fasta_file]
+
         ml.debug(cmd)
         if ml.getEffectiveLevel() == 10:
-            r = call(cmd, shell=True)
+            r = call(cmd)
         else:
-            r = call(cmd, shell=True, stdout=FNULL)
+            r = call(cmd, stdout=FNULL)
+
         if r:
             msgfail = 'call to cmalign failed'
             ml.error(msgfail)
@@ -425,7 +414,7 @@ def build_stockholm_from_clustal_alig(clustal_file, alif_file):
             if i == 0:
                 break
 
-        st_fd, st_file = mkstemp(prefix='rba_', suffix='_15')
+        st_fd, st_file = mkstemp(prefix='rba_', suffix='_15', dir=CONFIG.tmpdir)
         with os.fdopen(st_fd, 'w') as sf:
             st_alig.write_stockholm(sf)
 

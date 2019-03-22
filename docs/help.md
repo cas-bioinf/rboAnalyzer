@@ -109,14 +109,11 @@ In the secondary structure prediction the pipeline can use multiple approaches (
 The prediction methods can be (roughly) divided to following groups:
 
 - Predict structure independently on other extended sequences
-
-    The main advantage here is that these methods can be used even if
-     only fragments and low scoring hits are in the output.
+    The advantage here is robustness to possible improper parameter choice.
     - [rnafold](prediction_methods.md#rnafold)
     - [subopt_fold_query](prediction_methods.md#subopt_fold_query)
     - [rfam_rnafoldc](prediction_methods.md#rfam_rnafoldc)
     - [rfam_subopt](prediction_methods.md#rfam_subopt)
-    - [TurboFold_fast](prediction_methods.md#TurboFold_fast) (with max_seqs_in_prediction = 2)
 
 - Use _trusted_ extended sequences as reference
     - [centroid_homfold](prediction_methods.md#centroid_homfold)
@@ -124,12 +121,12 @@ The prediction methods can be (roughly) divided to following groups:
     - [TurboFold_fast](prediction_methods.md#TurboFold_fast)
 
 - Use _trusted_ extended sequences to build consensus secondary structure
-    - [alifold_refold_rnafold_c](prediction_methods.md#alifold_refold_rnafold_c)
-    - [muscle_alifold_refold_rnafold_c](prediction_methods.md#muscle_alifold_refold_rnafold_c)
-    - [tcoffee_rcoffee_alifold_refold_rnafoldc](prediction_methods.md#tcoffe_rcoffee_alifold_refold_rnafoldc)
-    - [alifold_unpaired_conserved_refold](prediction_methods.md#alifold_unpaired_conserved_refold)
-    - [muscle_alifold_unpaired_conserved_refold](prediction_methods.md#muscle_alifold_unpaired_conserved_refold)
-    - [tcoffee_rcoffee_alifold_conserved_ss_rnafoldc](prediction_methods.md#tcoffee_rcoffee_alifold_conserved_ss_rnafoldc)
+    - [clustalo_alifold_refold_rnafoldc](prediction_methods.md#clustalo_alifold_refold_rnafoldc)
+    - [muscle_alifold_refold_rnafoldc](prediction_methods.md#muscle_alifold_refold_rnafoldc)
+    - [rcoffee_alifold_refold_rnafoldc](prediction_methods.md#tcoffe_rcoffee_alifold_refold_rnafoldc)
+    - [clustalo_alifold_unpaired_conserved_refold_rnafoldc](prediction_methods.md#clustalo_alifold_unpaired_conserved_refold_rnafoldc)
+    - [muscle_alifold_unpaired_conserved_refold_rnafoldc](prediction_methods.md#muscle_alifold_unpaired_conserved_refold_rnafoldc)
+    - [rcoffee_alifold_unpaired_conserved_refold_rnafoldc](prediction_methods.md#rcoffee_alifold_unpaired_conserved_refold_rnafoldc)
     - [subopt_fold_clustal_alifold](prediction_methods.md#subopt_fold_clustal_alifold)
     - [subopt_fold_muscle_alifold](prediction_methods.md#subopt_fold_muscle_alifold)
 

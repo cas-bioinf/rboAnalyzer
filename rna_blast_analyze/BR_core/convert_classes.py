@@ -7,7 +7,7 @@ from argparse import Namespace
 from Bio.Blast import Record
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from pandas import read_json
+import pandas as pd
 
 import rna_blast_analyze.BR_core.BA_methods
 from rna_blast_analyze.BR_core.BA_support import Subsequences
@@ -42,8 +42,10 @@ def seqrecord2dict(seqrec):
     :param seqrec:
     :return:
     """
+    if seqrec is None:
+        return None
     if not isinstance(seqrec, SeqRecord):
-        raise TypeError('accepts only Bio.SeqRecord')
+        raise TypeError('accepts only Bio.SeqRecord but "{}" provided'.format(type(seqrec)))
     out = {
         'Bio.Seq': seq2dict(seqrec.seq),
         'annotations': annotations_items2dict(seqrec.annotations),
@@ -58,6 +60,8 @@ def seqrecord2dict(seqrec):
 
 
 def seqrecordfromdict(indict):
+    if indict is None:
+        return None
     return SeqRecord(
         seqfromdict(indict['Bio.Seq']),
         annotations=annotations_items_from_dict(indict['annotations']),
@@ -70,12 +74,45 @@ def seqrecordfromdict(indict):
     )
 
 
+class NativeDict(dict):
+    """
+        Helper class to ensure that only native types are in the dicts produced by
+        :func:`to_dict() <pandas.DataFrame.to_dict>`
+
+        .. note::
+
+            Needed until `#21256 <https://github.com/pandas-dev/pandas/issues/21256>`_ is resolved.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(((k, self.convert_if_needed(v)) for row in args for k, v in row), **kwargs)
+
+    @staticmethod
+    def convert_if_needed(value):
+        """
+            Converts `value` to native python type.
+
+            .. warning::
+
+                Only :class:`Timestamp <pandas.Timestamp>` and numpy :class:`dtypes <numpy.dtype>` are converted.
+        """
+        if pd.isnull(value):
+            return None
+        if isinstance(value, pd.Timestamp):
+            return value.to_pydatetime()
+        if hasattr(value, 'dtype'):
+            mapper = {'i': int, 'u': int, 'f': float}
+            _type = mapper.get(value.dtype.kind, lambda x: x)
+            return _type(value)
+        return value
+
+
 def annotations_items2dict(item):
     out = item.copy()
     if 'blast' in item:
         out['blast'] = (item['blast'][0], hsptodict(item['blast'][1]))
     if 'cmstat' in item:
-        out['cmstat'] = item['cmstat'].to_json()
+        out['cmstat'] = item['cmstat'].to_dict(into=NativeDict)
+
     return out
 
 
@@ -83,7 +120,8 @@ def annotations_items_from_dict(indict):
     if 'blast' in indict:
         indict['blast'] = (indict['blast'][0], hspfromdict(indict['blast'][1]))
     if 'cmstat' in indict:
-        indict['cmstat'] = read_json(indict['cmstat'], typ='series')
+        if isinstance(indict['cmstat'], str):
+            indict['cmstat'] = pd.read_json(indict['cmstat'], typ='series')
     return indict
 
 
@@ -91,9 +129,8 @@ def subsequences2dict(subsequences):
     if not isinstance(subsequences, Subsequences):
         raise TypeError('accepts only BA_support.Subsequences')
     out = {
-        'subs': {key: seqrecord2dict(subsequences.subs[key]) for key in subsequences.subs.keys()},
+        'extension': seqrecord2dict(subsequences.extension),
         'source': seqrecord2dict(subsequences.source),
-        'ret_keys': subsequences.ret_keys,
         'query_name': subsequences.query_name,
         'best_start': subsequences.best_start,
         'best_end': subsequences.best_end,
@@ -106,9 +143,13 @@ def subsequencesfromdict(indict):
     out = Subsequences(
         seqrecordfromdict(indict['source'])
     )
-    for key in indict['subs'].keys():
-        out.subs[key] = seqrecordfromdict(indict['subs'][key])
-    out.ret_keys = indict['ret_keys']
+    if 'extension' in indict:
+        out.extension = seqrecordfromdict(indict['extension'])
+    elif 'subs' in indict and 'ret_keys' in indict:
+        # this is for backward compatibility
+        out.extension = seqrecordfromdict(indict['subs'][indict['ret_keys'][0]])
+    else:
+        raise KeyError
     out.query_name = indict['query_name']
     out.best_start = indict['best_start']
     out.best_end = indict['best_end']
@@ -119,17 +160,26 @@ def subsequencesfromdict(indict):
 def hitlist2dict(hl):
     if not isinstance(hl, rna_blast_analyze.BR_core.BA_methods.HitList):
         raise TypeError('Accepts only BA_methods.HitList. {} given.'.format(type(hl)))
-    out = {}
-    for i in range(len(hl)):
-        out[str(i)] = subsequences2dict(hl[i])
-    return out
+    return [subsequences2dict(i) for i in hl]
+    # out = {}
+    # for i in range(len(hl)):
+    #     out[str(i)] = subsequences2dict(hl[i])
+    # return out
 
 
 def hitlistfromdict(indict):
     out = rna_blast_analyze.BR_core.BA_methods.HitList()
-    for i in range(len(indict)):
-        out.append(subsequencesfromdict(indict[str(i)]))
-    return out
+    if isinstance(indict, list):
+        for i in indict:
+            out.append(subsequencesfromdict(i))
+        return out
+    elif isinstance(indict, dict):
+        # for backward compatibility
+        for i in range(len(indict)):
+            out.append(subsequencesfromdict(indict[str(i)]))
+        return out
+    else:
+        raise TypeError
 
 
 def blastsearchrecompute2dict(bsr):

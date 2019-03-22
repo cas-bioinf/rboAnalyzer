@@ -21,7 +21,7 @@ These tools are used for specific tasks and the parameters controlling
   (io flags, mode flags, etc.)
 
 
-#### rnafold: "RNAFOLD PARAMETERS"
+#### RNAfold: "RNAFOLD PARAMETERS"
 is string with commandline arguments for `RNAfold`
   (see RNAFold [documentation](https://www.tbi.univie.ac.at/RNA/RNAfold.1.html)).
   It must be specified with double quotes.
@@ -81,7 +81,7 @@ is a string argument for `muscle` aligner. For more details, see muscle
 
 By default `-seqtype rna -quiet -clwstrict` are used and cannot be changed.
 
-#### tcoffee_rcoffee_params: "TCOFFEE RCOFFEE PARAMETERS"
+#### rcoffee: "RCOFFEE PARAMETERS"
 is string argument for `t_coffee -mode rcoffee` program. All supplied
   arguments must be compatible with `-mode rcoffee` (a dedicated mode for
   aligning RNAs). More info in `t_coffee` [documentation](https://tcoffee.readthedocs.io/en/latest/).
@@ -114,7 +114,7 @@ The inclusion threshold is computed by `CMSCORE_PERCENT`&nbsp;*&nbsp;`QUERY_BITS
 The higher the threshold, the more conservative setting for trusted sequences
   (i.e. more similarity to cm is required).
 
-#### len_diff: MAX_LEN_DIFF_to_QUERY
+#### query_max_len_diff: MAX_LEN_DIFF_to_QUERY
 Defines a maximum length difference from query sequence for extended sequence.
 This serves complementary to cmscore_percent to allow setting low cmscore_percent,
 while preventing truncated hits (for any reason) to be part of trusted sequence set.
@@ -160,7 +160,7 @@ Predict secondary structure for each extended sequence with RNAFold.
 parameters:
 ```
     {"rnafold" : {
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```
@@ -173,7 +173,7 @@ Obtain the related CM (either find highest scoring one in Rfam by `cmscan`
 parameters:
 ```
   {"rfam_rnafoldc": {
-      "rnafold": "RNAFOLD PARAMETERS",
+      "RNAfold": "RNAFOLD PARAMETERS",
       "cmscan": "CMSCAN PARAMETERS",
       "cmalign": "CMALIGN PARAMETERS"
     }
@@ -208,7 +208,7 @@ Predict structure of query with RNAFold and take it as reference,
 parameters:
 ```
     {"subopt_fold_query" : {
-        "rnafold": "RNAFOLD PARAMETERS",
+        "RNAfold": "RNAFOLD PARAMETERS",
         "mfold": [P, W, X]
         }
     }
@@ -226,7 +226,7 @@ parameters:
     {"subopt_fold_clustal_alifold" : {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "clustalo": "CLUSTALO PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
         "mfold": [P, W, X]
@@ -251,7 +251,7 @@ parameters:
     }
 ```
 
-## alifold_refold_rnafold_c
+## clustalo_alifold_refold_rnafoldc
 Select trusted sequences subset, compute alignment with `clustalo` for
   the trusted sequences, compute consensus structure with `RNAalifold`,
   then compute profile alignment of aligned trusted sequences with all extended sequences,
@@ -260,19 +260,19 @@ Select trusted sequences subset, compute alignment with `clustalo` for
 
 parameters:
 ```
-    {"alifold_refold_rnafold_c": {
+    {"clustalo_alifold_refold_rnafoldc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "clustalo": "CLUSTALO PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```
 
 
-## alifold_unpaired_conserved_refold
+## clustalo_alifold_unpaired_conserved_refold_rnafoldc
 Select trusted sequences subset, compute alignment with `clustalo` in those
   sequences, compute consensus structure with `RNAalifold`,
   compute profile alignment of selected sequences with all sequences,
@@ -282,22 +282,22 @@ Select trusted sequences subset, compute alignment with `clustalo` in those
 
 parameters:
 ```
-    {"alifold_unpaired_conserved_refold": {
+    {"clustalo_alifold_unpaired_conserved_refold_rnafoldc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "repred_unpaired_tr": REPRED_UNPAIRED_TR,
         "conseq_conserved": CONSEQ_CONSERVED,
         "clustalo": "CLUSTALO PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```
 
 
 
-## muscle_alifold_refold_rnafold_c
+## muscle_alifold_refold_rnafoldc
 Select trusted sequences subset, compute alignment with `muscle` for
   the trusted sequences, compute consensus structure with `RNAalifold`,
   then compute profile alignment of aligned trusted sequences with all extended sequences,
@@ -306,18 +306,18 @@ Select trusted sequences subset, compute alignment with `muscle` for
 
 parameters:
 ```
-    {"muscle_alifold_refold_rnafold_c": {
+    {"muscle_alifold_refold_rnafoldc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "muscle": "MUSCLE PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```
 
-## muscle_alifold_unpaired_conserved_refold
+## muscle_alifold_unpaired_conserved_refold_rnafoldc
 Select trusted sequences subset, compute alignment with `muscle` for these
   sequences, compute consensus structure with `RNAalifold`,
   compute profile alignment of selected sequences with all sequences,
@@ -327,20 +327,20 @@ Select trusted sequences subset, compute alignment with `muscle` for these
 
 parameters:
 ```
-    {"muscle_alifold_refold_rnafold_c": {
+    {"muscle_alifold_refold_rnafoldc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "repred_unpaired_tr": REPRED_UNPAIRED_TR,
         "conseq_conserved": CONSEQ_CONSERVED,
         "muscle": "MUSCLE PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```
 
-## pairwise_centroid_homfold
+## centroid_homfold
 Select trusted sequences. Then pass the selected sequences to `centroid_homfold` as
   homologous sequence set and predict all sequences. The `centroid_homfold`
   is by default called with `-g -1` parameter. With this setting the
@@ -349,30 +349,69 @@ Select trusted sequences. Then pass the selected sequences to `centroid_homfold`
 
 parameters:
 ```
-    {"pairwise_centroid_homfold": {
+    {"centroid_homfold": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "centroid_homfold": "CENTROID_HOMFOLD PARAMETERS"
+        }
+    }
+```
+
+## centroid_homfold_fast
+With centroid_homfold_fast we take non-redundant sequences without ambiguous
+ bases with cm_score > 0 within allowed length query difference as trusted sequences.
+ We take up to `N` trusted sequences as homologous sequences for centroid_homfold.
+ The sequences are added in order of the original BLAST hits, starting with query.
+ For this method there is also parameter preset avalible which sets `N` to 1
+ meaning that only query will be used as homologous sequence in prediction.
+
+parameters:
+```
+    {"centroid_homfold_fast": {
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
+        "centroid_homfold": "CENTROID_HOMFOLD PARAMETERS",
+        "max_seqs_in_prediction": MAX_SEQS_IN_PREDICTION,
+        }
+    }
+```
+
+## rfam_centroid_homfold
+Use covariance model (CM) to generate set of sequences considered homologous.
+By default the highest scoring CM in Rfam is found by `cmscan`
+ (or provided one is used `--cm_file` option). Then requested number of
+ sequences is generated under the covariance model with `cmemit` which
+ are used as homologous sequences.
+ The generated sequences can differ between runs. If repeatable behaviour
+ is desired the `cmemit` can be seeded (see it's options).
+
+parameters:
+```
+    {"rfam_centroid_homfold": {
+        "n_seqs": N_SEQS,
+        "cmscan": "CMSCAN PARAMETERS",
+        "cmemit": "CMEMIT PARAMETERS",
         }
     }
 ```
 
 ## TurboFold_fast
 With TurboFold_fast we take non-redundant sequences without ambiguous
- bases with cm_score > 0 within specified length query diff as trusted sequences.
+ bases with cm_score > 0 within allowed length query difference as trusted sequences.
  For each predicted sequence, we make non-redundant group of sequences
  consisting of the predicted sequence and up to `N` trusted sequences.
  The sequences are added in order of the original BLAST hits, starting with query.
  That means that if `N` is 2 and query does not contain ambiguous bases,
  then each extended sequence secondary structure is computed with query sequence as a reference.
+ This setting is also available as commandline argument with `--turbofold_fast_preset` flag and
+ will override the `"max_seqs_in_prediction"` value from prediction_parameters file.
 
  The `N` can be defined in parameters as `"max_seqs_in_prediction": MAX_SEQS_IN_PREDICTION`.
 
 parameters:
 ```
     {"TurboFold_fast": {
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "max_seqs_in_prediction": MAX_SEQS_IN_PREDICTION,
         "TurboFold": "TurboFold PARAMETERS"
         }
@@ -387,14 +426,14 @@ parameters:
     {"TurboFold": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "max_seqs_in_prediction": MAX_SEQS_IN_PREDICTION,
         "TurboFold": "TurboFold PARAMETERS"
         }
     }
 ```
 
-## tcoffee_rcoffee_alifold_refold_rnafoldc
+## rcoffee_alifold_refold_rnafoldc
 Select trusted sequences subset, compute alignment with `t_coffee -mode rcoffee` for
   the trusted sequences, compute consensus structure with `RNAalifold`,
   then compute profile alignment of aligned trusted sequences with all extended sequences,
@@ -403,19 +442,19 @@ Select trusted sequences subset, compute alignment with `t_coffee -mode rcoffee`
 
 parameters:
 ```
-    {"tcoffee_rcoffee_alifold_refold_rnafoldc": {
+    {"rcoffee_alifold_refold_rnafoldc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
-        "tcoffee_rcoffee_params": "TCOFFEE RCOFFEE PARAMETERS",
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
+        "rcoffee": "RCOFFEE PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```
 
 
-## tcoffee_rcoffee_alifold_conserved_ss_rnafoldc
+## rcoffee_alifold_unpaired_conserved_refold_rnafoldc
 Select trusted sequences subset, compute alignment with `t_coffee -mode rcoffee` for
   the trusted sequences, compute consensus structure with `RNAalifold`,
   then compute profile alignment of aligned trusted sequences with all extended sequences,
@@ -425,20 +464,20 @@ Select trusted sequences subset, compute alignment with `t_coffee -mode rcoffee`
 
 parameters:
 ```
-    {"tcoffee_rcoffee_alifold_refold_rnafoldc": {
+    {"rcoffee_alifold_refold_rnafoldc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "repred_unpaired_tr": REPRED_UNPAIRED_TR,
         "conseq_conserved": CONSEQ_CONSERVED,
-        "tcoffee_rcoffee_params": "TCOFFEE RCOFFEE PARAMETERS",
+        "rcoffee": "RCOFFEE PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```
 
-## dh_tcoffee_alifold_refold_rnafoldc
+## dh_rcoffee_alifold_refold_rnafoldc
 Select trusted sequences, then compute alignment with `t_coffee -mode rcoffee` for these
   sequences, compute consensus structure with `RNAalifold`. Then run profile
   alignment separately for trusted and for remaining sequences.
@@ -447,19 +486,19 @@ Select trusted sequences, then compute alignment with `t_coffee -mode rcoffee` f
 
 parameters:
 ```
-    {"alifold_refold_rnafold_c": {
+    {"dh_rcoffee_alifold_refold_rnafoldc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "clustalo": "CLUSTALO PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```
 
 
-## dh_tcoffee_alifold_conserved_ss_rnafoldc
+## dh_rcoffee_alifold_unpaired_conserved_rnafoldc
 Select trusted sequences, then compute alignment with `t_coffee -mode rcoffee` for these
   sequences, compute consensus structure with `RNAalifold`. Then run profile
   alignment separately for trusted and for remaining sequences.
@@ -469,15 +508,15 @@ Select trusted sequences, then compute alignment with `t_coffee -mode rcoffee` f
 
 parameters:
 ```
-    {"alifold_unpaired_conserved_refold": {
+    {"dh_rcoffee_alifold_unpaired_conserved_rnafoldc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "repred_unpaired_tr": REPRED_UNPAIRED_TR,
         "conseq_conserved": CONSEQ_CONSERVED,
-        "tcoffee_rcoffee_params": "TCOFFEE RCOFFEE PARAMETERS",
+        "rcoffee": "RCOFFEE PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```
@@ -491,19 +530,19 @@ Select trusted sequences, then compute alignment with `clustalo` for these
 
 parameters:
 ```
-    {"alifold_refold_rnafold_c": {
+    {"dh_clustal_alifold_refold_rnafoldc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
-        "tcoffee_rcoffee_params": "TCOFFEE RCOFFEE PARAMETERS",
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
+        "rcoffee": "RCOFFEE PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```
 
 
-## dh_clustal_alifold_conserved_ss_rnafoldc
+## dh_clustal_alifold_unpaired_conserved_rnafoldc
 Select trusted sequences, then compute alignment with `clustalo` for these
   sequences, compute consensus structure with `RNAalifold`. Then run profile
   alignment separately for trusted and for remaining sequences.
@@ -513,15 +552,15 @@ Select trusted sequences, then compute alignment with `clustalo` for these
 
 parameters:
 ```
-    {"alifold_unpaired_conserved_refold": {
+    {"dh_clustal_alifold_unpaired_conserved_rnafoldc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
-        "len_diff": MAX_LEN_DIFF_to_QUERY,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "repred_unpaired_tr": REPRED_UNPAIRED_TR,
         "conseq_conserved": CONSEQ_CONSERVED,
         "clustalo": "CLUSTALO PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
-        "rnafold": "RNAFOLD PARAMETERS"
+        "RNAfold": "RNAFOLD PARAMETERS"
         }
     }
 ```

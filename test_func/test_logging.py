@@ -8,18 +8,19 @@ test_dir = 'test_data'
 
 class TestDirectExecution(unittest.TestCase):
     def setUp(self):
-        ff, log = tempfile.mkstemp()
+        ff, log = tempfile.mkstemp(prefix='rba_', suffix='_t12')
         os.close(ff)
         self.log = log
         self.cmd = base_script + [
-            '-blast_in', blast_in,
-            '-blast_query', blast_query,
-            '-blast_db', blast_db,
+            '--blast_in', blast_in,
+            '--blast_query', blast_query,
+            '--blast_db', blast_db,
             '--mode', 'simple',
             '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
             '--b_type', 'plain',
             '--prediction_method', 'rnafold',
             '--logfile', self.log,
+            '--enable_overwrite'
         ]
 
     def test_logger_warn(self):

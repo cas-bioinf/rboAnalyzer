@@ -13,9 +13,6 @@ Sequences are analyzed with RSEARCH and its bit-score is used as
 Next sequences are predicted with one or more methods and predicted
  structures are merged with blast output to be easy to understand.
 
-More information on the pipeline is avalible in the [docs](docs/help.md) section.
-
-
 ## Installation
 
 ### Install via Conda
@@ -25,18 +22,34 @@ More information on the pipeline is avalible in the [docs](docs/help.md) section
  If you don't have conda, install it from [here](https://conda.io/docs/index.html).
 
  Then open terminal and run
-```
-# for system-wide installation
-conda install -c conda-forge -c bioconda rna_blast_analyze
 
-# install to virtual environment (not tested)
-conda create YOUR_VIRTUAL_ENV_NAME
-source activate YOUR_VIRTUAL_ENV_NAME
+System wide installation
+ The `rna_blast_analyze` and `genomes_from_blast` executables and their
+  dependencies will be available from terminal.
+
+```shell
 conda install -c conda-forge -c bioconda rna_blast_analyze
 ```
-If virtual environment is used, then you need to activate virtual
- environment before usage
 
+Installation to virtual enviroment
+ The `rna_blast_analyze` and its dependencies will be available only in shell
+  for which the virtual environment was activated. If virtual environment is
+  used, then you need to activate virtual environment before usage.
+
+```shell
+# create virtual environment
+conda create -n YOUR_VIRTUAL_ENV_NAME
+
+# activate it
+# new conda version (> 4.4)
+conda activate YOUR_VIRTUAL_ENV_NAME
+
+## old conda version
+#source activate YOUR_VIRTUAL_ENV_NAME
+
+# run installation
+conda install -c conda-forge -c bioconda rna_blast_analyze
+```
 
 ### Install from source
 
@@ -59,13 +72,15 @@ Optional (some prediction methods are not avalible without these):
 * UNAFold >= 3.8
 
 Clone or download this repository. Go to root folder and run
-```
+
+```shell
 python3 setup.py install
 ```
 
 The rna_blast_analyze executable should be created.
 To test it, restart terminal (close and open new) and run
-```
+
+```shell
 rna_blast_analyze --version
 ```
 Which should return installed version number.
@@ -76,7 +91,8 @@ The pipeline is equipped with argument completion for bash shell.
 To enable this feature you need to register the script (more info [here](https://pypi.org/project/argcomplete/)).
 
 To get the autocompletion working run:
-```
+
+```shell
 register-python-argcomplete rna_blast_analyze >> ~/.bashrc
 ```
 
@@ -84,7 +100,8 @@ register-python-argcomplete rna_blast_analyze >> ~/.bashrc
 For each analysis you need to provide the BLAST database which was used for BLAST search.
 The latest databases are rather non-intuitively provided here [NCBI LATEST](ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST).
 And this code snippet can be used to obtain and update the database:
-```
+
+```shell
 for the "nt" database
 wget -N ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST/nt*
 
@@ -95,7 +112,8 @@ wget -N ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST/[database name]*
 If you do not wish to download whole blastdb you may use prepared script
  `genomes_from_blast`, which downloads only the needed sequences
   (those in the BLAST output) and build the blastdb from them.
-```
+
+```shell
 genomes_from_blast -email YOUR_EMAIL -blast_in BLAST_OUT_FILE -out FASTA_FILE_OUT
 ```
 This command will download all needed genomes and create blast database for you (if `makeblastdb` command is avalible).
@@ -117,44 +135,83 @@ This will download Rfam covariance models to designated directory
 
 ## Basic Usage
 ### Help
-```
+```shell
 rna_blast_analyze -h
 ```
 
 ### Usage
-```
-rna_blast_analyze -blast_in BLAST_OUTPUT.txt -blast_db USED_DATABASE_PATH -blast_query BLAST_QUERY.fasta
+```shell
+rna_blast_analyze -in BLAST_OUTPUT.txt -db USED_DATABASE_PATH -q BLAST_QUERY.fasta
 ```
 
 ## Example
 Examples are provided in example directory.
+
+To try examples you will need to:
+
+  1) Install rna_blast_analyze.
+
+  2) Obtain a copy of `example` directory
+   [here](https://github.com/cas-bioinf/rna_blast_analyze/tree/master/example).
+
+  3) cd to `example` directory.
+
 #### Example 1:
 
-Analyzing subset of NCBI blast HITs for 6S ncRNA.
-1) Install rna_blast_analyze.
-2) Obtain a copy of `example` directory.
-3) cd to `example` directory.
-4) Now you need to obtain a copy of the BLAST database with all
+Analyzing subset of NCBI blast HITs for [6S RNA](https://doi.org/10.1038%2F229147a0).
+
+1) Now you need to obtain a copy of the BLAST database with all
  accessions which are in the BLAST output. This is most simply
   done by using the `genomes_from_blast` by calling:
+    ```shell
+    genomes_from_blast -email YOUR_EMAIL -in 6S_short.xml -out genomes.fasta
     ```
-    genomes_from_blast -email YOUR_EMAIL -blast_in 6S_short.xml -out 6S.fasta
-    ```
+    The `YOUR_EMAIL` should be valid email on which NCBI staff could contact you
+    if they need to. It is not saved nor logged by the tool.
     The 6S.fasta file is not needed if the blast database was created
     successfully and you can delete it.
 
-    The blast database with name 6S.fasta.bdb was created for you if everything was successful.
+    The blast database with name genomes.fasta.bdb was created for you if everything was successful.
     You will need in next step.
 
-5) Now you can run the pipeline itself:
-    ```
-    if first time (if rfam was not downloaded):
-    rna_blast_analyze -blast_in 6S_short.xml -blast_query 6S_query.fasta -blast_db 6S.fasta.bdb -html 6S_out.html --download_rfam
+2) Now you can run the pipeline itself:
+    ```shell
+    If this is the first time you run the tool (if rfam was not downloaded):
+    rna_blast_analyze -in 6S_short.xml -q 6S_query.fasta -db genomes.fasta.bdb -html 6S_out.html --download_rfam
 
-    else:
-    rna_blast_analyze -blast_in 6S_short.xml -blast_query 6S_query.fasta -blast_db 6S.fasta.bdb -html 6S_out.html
+    otherwise:
+    rna_blast_analyze -in 6S_short.xml -q 6S_query.fasta -db genomes.fasta.bdb -html 6S_out.html
     ```
-6) The output is single html file. On open the NCBI genome viewer will fetch data to render the genomic loci of the hit.
+3) The output is single html file. On open the NCBI genome viewer will fetch data to render the genomic loci of the hit.
+
+#### Example 2:
+Analyzing possible remote homologs for [MS1 RNA](https://doi.org/10.1093%2Fnar%2Fgku793).
+
+The BLAST was run with database where Streptomycetaceae and Mycobacteriaceae where
+excluded. As the MS1 RNA is primarily known from Mycobacteriaceae we can expect
+incomplete HITs and many false positives.
+
+Also you can notice, that the BLAST output is now in text format.
+
+We get the BLAST database as in previous example. (If the `genomes_from_blast`
+  script was used, you can now run the same command with `MS1_BLAST_output.txt`
+  as input and only the genomes not in the db will be downloaded)
+
+With the database (assume genomes.fasta.bdb) we can run the main pipeline.
+We expect that the hits contain many false positives, so we choose prediction
+methods which do not rely on homology information in the BLAST output itself.
+These are:
+- rnafold
+- rfam_rnafoldc
+- rfam_centroid_homfold
+- Turbofold_fast with "max_seqs_in_prediction" parameter set to 2 (--turbofold_fast_preset flag)
+- centroid_homfold_fast with "max_seqs_in_prediction" parameter set to 1 (--centroid_fast_preset flag)
+
+In this case we will use the rnafold, rfam_rnafoldc and Turbofold_fast with preset.
+```shell
+    # assume the rfam was downloaded
+    rna_blast_analyze -in MS1_BLAST_output -q MS1_query.fasta -db genomes.fasta.bdb -html MS1_out.html --prediction_method rnafold rfam_rnafoldc TurboFold_fast --turbofold_fast_preset
+```
 
 ### Solving issues:
 1) One or more records not found.
@@ -167,6 +224,10 @@ Analyzing subset of NCBI blast HITs for 6S ncRNA.
     and RSEARCH score and some prediction methods may be influenced
     by that missing sequence.
 
+2) The `genomes_from_blast` failed
+    The `genomes_from_blast` script has build in failed download handling
+    but by default it tries only 10 times. If you are on instable connection
+    you might get better results by setting the `--retry` to some larger number.
 
 ### Notes
 This is Beta version. Especially the default parameters for prediction can change.

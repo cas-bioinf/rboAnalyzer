@@ -8,8 +8,8 @@ from rna_blast_analyze.BR_core import cmalign
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.tools_versions import blast_minimal_version, locarna_minimal_version, \
     infernal_minimal_version, vrna_minimal_version, clustalo_minimal_version, muscle_minimal_version, \
-    tcoffee_rcoffee_minimal_version, centroid_homfold_minimal_version, turbofold_minimal_version, mfold_minimal_version, \
-    pred_method_required_tools
+    tcoffee_rcoffee_minimal_version, centroid_homfold_minimal_version, turbofold_minimal_version,\
+    mfold_minimal_version, method_required_tools
 
 ml = logging.getLogger(__name__)
 
@@ -186,11 +186,8 @@ def verify_vrna_refold():
     try:
         try:
             a = check_output(
-                [
-                    CONFIG.refold_path + 'refold.pl',
-                    '-h'
-                ],
-                stderr=STDOUT
+                ['{}refold.pl'.format(CONFIG.refold_path), '-h'],
+                stderr=STDOUT,
             )
         except CalledProcessError as e:
             a = e.output
@@ -549,19 +546,23 @@ def check_necessery_tools(methods):
     avalible_tools |= check_3rd_party_prediction_tools()
 
     for met in methods:
-        needed = pred_method_required_tools[met] - avalible_tools
+        needed = method_required_tools[met] - avalible_tools
 
         if 'refold.pl' in needed:
+            # This solves the issue of refold.pl script not being added to PATH with conda installs
+
             msgfail = 'Please add the refold.pl to PATH or add the path to refold.pl to configfile.'
             is_conda = os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
             if is_conda:
                 ml.info('Trying to find refold.pl in "CONDA_ROOT/share"')
-                out = check_output('find {}/share -type f -name refold.pl'.format(sys.prefix), shell=True)
+                out = check_output('find {}/share -type f -name "refold\.pl"'.format(sys.prefix), shell=True)
                 op = out.decode().strip()
                 if op != '':
-                    op = os.path.dirname(op.split('/n')[0])
+                    op = os.path.dirname(op.split('/n')[0]) + os.sep
+
                     ml.info('Inferred refold.pl in {}'.format(op))
                     ml.info('writing configuration to {}'.format(CONFIG.conf_file))
+
                     CONFIG.tool_paths['refold'] = op
                     if 'TOOL_PATHS' not in CONFIG.config_obj:
                         CONFIG.config_obj['TOOL_PATHS'] = {}
@@ -607,6 +608,7 @@ def check_necessery_tools(methods):
             else:
                 ml.error(msgfail)
                 raise EnvironmentError(msgfail)
+
 
 if __name__ == '__main__':
     print(check_3rd_party_tools())

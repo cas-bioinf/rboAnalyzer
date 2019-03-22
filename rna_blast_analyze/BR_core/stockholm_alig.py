@@ -149,8 +149,6 @@ class StockholmAlig(object):
         and gap characters will be removed from it
         :return:
         """
-        # todo if this will be used, make little more compicated code which will allow to seek through gaps and remove
-        # todo them, but this is simpler to code
         for aligned_seq in self.__iter__():
 
             seq = str(aligned_seq.seq)
@@ -195,8 +193,6 @@ class StockholmAlig(object):
         :param index:
         :return:
         """
-
-        # TODO check if letter annotations are also sliced or not
 
         if isinstance(index, int):
             return self._records[index]

@@ -5,11 +5,12 @@ import tempfile
 import hashlib
 
 from rna_blast_analyze.BR_core import convert_classes
+from rna_blast_analyze.BR_core.output.htmloutput import write_html_output
 
 
 class TestHTMLoutput(unittest.TestCase):
     def setUp(self):
-        htmlfd, htmlo = tempfile.mkstemp()
+        htmlfd, htmlo = tempfile.mkstemp(prefix='rba_', suffix='_t11')
         os.close(htmlfd)
         self.json_file = os.path.abspath(os.path.dirname(__file__) + '/test_data/RF00001_output.json')
         self.htmlo = htmlo
@@ -19,7 +20,8 @@ class TestHTMLoutput(unittest.TestCase):
         mydata = json.load(f)
         f.close()
         bb = convert_classes.blastsearchrecomputefromdict(mydata)
-        bb.to_html(self.htmlo)
+        with open(self.htmlo, 'w') as h:
+            h.write(write_html_output(bb))
         try:
             with open(self.htmlo, 'rb') as f, open(
                 os.path.abspath(

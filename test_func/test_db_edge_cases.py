@@ -28,6 +28,7 @@ class TestExecution(unittest.TestCase):
             prediction_method=['rnafold'],
             blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
             subseq_window_simple_ext=10,
+            enable_overwrite=True
         )
 
         with open(source_fasta, 'r') as fh:

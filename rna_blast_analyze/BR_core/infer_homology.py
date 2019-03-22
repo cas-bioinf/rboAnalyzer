@@ -25,7 +25,7 @@ def infer_homology(analyzed_hits, args):
     if args.cm_file:
         # use provided cm file
         ml.info('Infer homology - using provided CM file: {}'.format(args.cm_file))
-        fd, cm_model_file = mkstemp(prefix='rba_', suffix='_27')
+        fd, cm_model_file = mkstemp(prefix='rba_', suffix='_27', dir=CONFIG.tmpdir)
         os.close(fd)
         ml.debug('Making a copy of provided cm model file to: {}'.format(cm_model_file))
         shutil.copy(args.cm_file, cm_model_file)
@@ -45,13 +45,13 @@ def infer_homology(analyzed_hits, args):
 
     # do i need to include query in fasta file?
     # yes - to get idea of cm_conservation score value - it does not affect bit score for others
-    fd_f, fd_fasta = mkstemp(prefix='rba_', suffix='_28')
+    fd_f, fd_fasta = mkstemp(prefix='rba_', suffix='_28', dir=CONFIG.tmpdir)
     with os.fdopen(fd_f, 'w') as f:
         for seq in [analyzed_hits.query] + analyzed_hits.res_2_record_list():
             f.write('>{}\n{}\n'.format(seq.id,
                                        str(seq.seq)))
 
-    fd_sfile, cm_sfile_path = mkstemp(prefix='rba_', suffix='_29')
+    fd_sfile, cm_sfile_path = mkstemp(prefix='rba_', suffix='_29', dir=CONFIG.tmpdir)
     os.close(fd_sfile)
     if args.threads:
         cm_params = '--notrunc --cpu {} --sfile {}'.format(args.threads, cm_sfile_path)
@@ -76,7 +76,7 @@ def infer_homology(analyzed_hits, args):
     _add_rsearch_align_scores2anal_hits(analyzed_hits, cm_align_scores)
 
     # remove first 1 (query) from the prediction scores
-    prediction = _infer_hits_cm(cm_align_scores[1:].bit_sc)
+    prediction = infer_hits_cm(cm_align_scores[1:].bit_sc)
 
     # write scores to a table, compute it for all data and run some correlation statistics
 
@@ -99,7 +99,7 @@ def infer_homology(analyzed_hits, args):
     os.remove(cm_sfile_path)
     os.remove(cm_msa_file)
 
-    selected_hits = [hit.subs[hit.ret_keys[0]] for b, hit in zip(prediction, analyzed_hits.hits) if b]
+    selected_hits = [hit.extension for b, hit in zip(prediction, analyzed_hits.hits) if b]
 
     if args.cm_file or args.use_rfam:
         r_cm_file = cm_model_file
@@ -119,7 +119,7 @@ def build_cm_model_rsearch(query_seq, path2selected_sim_array):
     st_like.append(query_seq)
     st_like.column_annotations['SS_cons'] = query_structure
 
-    fds, stock_file = mkstemp(prefix='rba_', suffix='_30')
+    fds, stock_file = mkstemp(prefix='rba_', suffix='_30', dir=CONFIG.tmpdir)
     with os.fdopen(fds, 'w') as f:
         st_like.write_stockholm(f)
 
@@ -145,12 +145,12 @@ def _add_rsearch_align_scores2anal_hits(ahits, s_table):
     ahits.query.annotations['cmstat'] = s_table.iloc[0]
 
     for hit, (i, row) in zip(ahits.hits, s_table[1:].iterrows()):
-        assert hit.subs[hit.ret_keys[0]].id == row.seq_name
-        hit.subs[hit.ret_keys[0]].annotations['cmstat'] = row
+        assert hit.extension.id == row.seq_name
+        hit.extension.annotations['cmstat'] = row
     return
 
 
-def _infer_hits_cm(bit_sc, tr=0):
+def infer_hits_cm(bit_sc, tr=0):
     ml.debug(fname())
     pred = []
     for i in bit_sc:
@@ -185,9 +185,8 @@ def alignment_sequence_conservation(msa, gap_chars='-'):
     :return:
     """
     ml.debug(fname())
-    column_cons = _alignment_column_conservation(msa, gap_chars=gap_chars)
+    column_cons = alignment_column_conservation(msa, gap_chars=gap_chars)
 
-    # todo continue here
     conservation_score_v = []
     for aligned_seq in msa:
         msa_score = 0
@@ -199,7 +198,7 @@ def alignment_sequence_conservation(msa, gap_chars='-'):
     return conservation_score_v
 
 
-def _alignment_column_conservation(msa, gap_chars='-'):
+def alignment_column_conservation(msa, gap_chars='-'):
     """
     computes column non-weighted column conservation
     :param msa: multiple alignment iterable over columns and with get_alignment_length() method
@@ -231,8 +230,8 @@ def hit_cons_characteristic(sequence_hits):
         eval.append(hit.source.annotations['blast'][1].expect)
 
         # locarna score is not defined for SE and others
-        if 'score' in hit.subs[hit.ret_keys[0]].annotations:
-            align_score.append(hit.subs[hit.ret_keys[0]].annotations['score'])
+        if 'score' in hit.extension.annotations:
+            align_score.append(hit.extension.annotations['score'])
         else:
             align_score.append(None)
         alig_l.append(hit.source.annotations['blast'][1].align_length)
