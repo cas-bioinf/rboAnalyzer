@@ -53,8 +53,10 @@ def joined_wrapper_inner(args_inner, shared_list=None):
         args.repredict_file = repred_file + str(i)
         args.dev_pred = False
         args.logfile = None
+        args.json = None
+        args.html = None
 
-    _, blast_seq = blast_wrapper_inner(blast_args)
+    _, simple_seq = blast_wrapper_inner(blast_args)
     _, locarna_seq = locarna_anchored_wrapper_inner(locarna_args)
 
     if not shared_list:
@@ -67,9 +69,16 @@ def joined_wrapper_inner(args_inner, shared_list=None):
     p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
     # this is done for each query
 
+    assert len(p_blast) == len(simple_seq) == len(locarna_seq)
+
+    if len(p_blast) > 1:
+        multi_query = True
+    else:
+        multi_query = False
+
     ml_out_line = []
     all_analyzed = []
-    for (iteration, bhp), b_hits, l_hits in zip(enumerate(p_blast), blast_seq, locarna_seq):
+    for (iteration, bhp), b_hits, l_hits in zip(enumerate(p_blast), simple_seq, locarna_seq):
         # now, the blast, muscle and locarna are precomputed
         # only thing needed is to make a CMmodel based on rsearch and evaluate which expansion is the best one
         # maybe even not needed, as the homology haw been already computed when running hmology inference with rsearch
@@ -83,6 +92,7 @@ def joined_wrapper_inner(args_inner, shared_list=None):
 
         # add query from simple extension to analyzed hits of joined pred (need cm bit score for html out)
         analyzed_hits.query = query = b_hits.query
+        analyzed_hits.best_matching_model = b_hits.best_matching_model
 
         all_analyzed.append(analyzed_hits)
         order_out = []
@@ -99,8 +109,10 @@ def joined_wrapper_inner(args_inner, shared_list=None):
 
         # build the repredict file here if needed
         if args_inner.repredict_file:
-            with open(blast_args.repredict_file, 'r') as barf, open(locarna_args.repredict_file, 'r') as larf, \
-                    open(args_inner.repredict_file, 'w') as reprf:
+            b_repredict = BA_support.iter2file_name(blast_args.repredict_file, multi_query, iteration)
+            l_repredict = BA_support.iter2file_name(blast_args.repredict_file, multi_query, iteration)
+            o_repredict = BA_support.iter2file_name(args_inner.repredict_file, multi_query, iteration)
+            with open(b_repredict, 'r') as barf, open(l_repredict, 'r') as larf, open(o_repredict, 'w') as reprf:
                 """
                 please note that order of files to merge must be same as the order of methods in previous for cycle
                 ie same as the one in which order_out var is set
@@ -214,11 +226,11 @@ def joined_wrapper_inner(args_inner, shared_list=None):
                     wrapped_ending_with_prediction(
                         args_inner=ah.args,
                         analyzed_hits=ah,
-                        all_hits_fasta=all_hits_fasta,
-                        query=query,
                         pred_method=method,
                         method_params=method_params,
                         used_cm_file=cm_file,
+                        multi_query=multi_query,
+                        iteration=iteration,
                     )
                     success = True
                     out_line.append(to_tab_delim_line_simple(ah.args))
@@ -231,9 +243,9 @@ def joined_wrapper_inner(args_inner, shared_list=None):
             wrapped_ending_with_prediction(
                 args_inner=args_inner,
                 analyzed_hits=analyzed_hits,
-                all_hits_fasta=all_hits_fasta,
-                query=query,
-                used_cm_file=cm_file
+                used_cm_file=cm_file,
+                multi_query=multi_query,
+                iteration=iteration,
             )
             out_line.append(to_tab_delim_line_simple(args_inner))
 
@@ -244,11 +256,12 @@ def joined_wrapper_inner(args_inner, shared_list=None):
 
         # remove repredict files for each method
         for i in range(2):
-            os.remove(repred_file + str(i))
-
-        if args_inner.repredict_file is None:
-            os.remove(repred_file)
+            rpi = BA_support.iter2file_name(repred_file + str(i), multi_query, iteration)
+            os.remove(rpi)
 
         os.remove(all_hits_fasta)
+
+    if args_inner.repredict_file is None:
+        os.remove(repred_file)
 
     return '\n'.join(ml_out_line), all_analyzed

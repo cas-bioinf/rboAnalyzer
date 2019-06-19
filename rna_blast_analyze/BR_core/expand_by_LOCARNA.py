@@ -18,7 +18,7 @@ import rna_blast_analyze.BR_core.extend_hits
 from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
 from rna_blast_analyze.BR_core.alifold4all import compute_refold
 from rna_blast_analyze.BR_core.config import CONFIG, tools_paths
-from rna_blast_analyze.BR_core.infer_homology import infer_homology
+from rna_blast_analyze.BR_core.infer_homology import infer_homology, find_and_extract_cm_model
 from rna_blast_analyze.BR_core.locarna_clustal_like_2stockholm import parse_locarna_alignment
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
 from rna_blast_analyze.BR_core.stockholm_parser import StockholmFeatureStock, trim_alignment_by_sequence
@@ -125,13 +125,22 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
                                                      'cA2': 'anchor number tag'})
 
     p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
-    # this is done for each query
+    query_seqs = [i for i in SeqIO.parse(args_inner.blast_query, 'fasta')]
 
+    if len(p_blast) != len(query_seqs):
+        ml.error('Number of query sequences in provided BLAST output file ({}) does not match number of query sequences'
+                 ' in query FASTA file ({})'.format(len(p_blast), len(query_seqs)))
+        exit(0)
+
+    if len(p_blast) > 1:
+        multi_query = True
+    else:
+        multi_query = False
+
+    # this is done for each query
     ml_out_line = []
     all_analyzed = []
-    for iteration, (bhp, query) in enumerate(
-            itertools.zip_longest(p_blast, SeqIO.parse(args_inner.blast_query, 'fasta'))
-    ):
+    for iteration, (bhp, query) in enumerate(itertools.zip_longest(p_blast, query_seqs)):
         print('processing query: {}'.format(query.id))
         # check query and blast
         if bhp is None:
@@ -141,20 +150,33 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
 
         BA_verify.verify_query_blast(blast=bhp, query=query)
 
+        analyzed_hits = BlastSearchRecompute()
+        analyzed_hits.args = args_inner
+        analyzed_hits.query = query
+        all_analyzed.append(analyzed_hits)
+
+        # run cm model build
+        # allows to fail fast if rfam was selected and we dont find the model
+        ih_model, analyzed_hits = find_and_extract_cm_model(args_inner, analyzed_hits)
+
         # select all
         all_blast_hits = BA_support.blast_hsps2list(bhp)
 
+        if len(all_blast_hits) == 0:
+            ml.error('No hits found in {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
+            continue
+
         # filter if needed
         if args_inner.filter_by_eval is not None:
-            tmp = filter_by_eval(all_blast_hits, *args_inner.filter_by_eval)
+            tmp = filter_by_eval(all_blast_hits, BA_support.blast_hit_getter_from_hits, *args_inner.filter_by_eval)
             if len(tmp) == 0 and len(all_blast_hits) != 0:
-                ml.error('The requested filter removed all BLAST hits. Nothing to do.')
-                exit(0)
+                ml.error('The requested filter removed all BLAST hits {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
+                continue
         elif args_inner.filter_by_bitscore is not None:
-            tmp = filter_by_bits(all_blast_hits, *args_inner.filter_by_bitscore)
+            tmp = filter_by_bits(all_blast_hits, BA_support.blast_hit_getter_from_hits, *args_inner.filter_by_bitscore)
             if len(tmp) == 0 and len(all_blast_hits) != 0:
-                ml.error('The requested filter removed all BLAST hits. Nothing to do.')
-                exit(0)
+                ml.error('The requested filter removed all BLAST hits {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
+                continue
 
         all_short = all_blast_hits
 
@@ -169,7 +191,7 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
                 skip_missing=args_inner.skip_missing,
                 msgs=args_inner.logmsgs,
             )
-        elif args_inner.db_type in ["fasta", "gb"]:
+        elif args_inner.db_type in ["fasta", "gb", "server"]:
             shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits_from_fasta(
                 all_short,
                 args_inner.blast_db,
@@ -189,14 +211,9 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
 
         shorts_expanded = BA_support.rc_hits_2_rna(shorts_expanded)
 
-        analyzed_hits = BlastSearchRecompute()
-        analyzed_hits.args = args_inner
-        all_analyzed.append(analyzed_hits)
-
         query_seq = query.seq.transcribe()
 
         # compute alignment here
-        analyzed_hits.query = query
 
         if args_inner.threads == 1:
             result = []
@@ -239,7 +256,9 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
         analyzed_hits.write_results_fasta(all_hits_fasta)
 
         # this part predicts homology - it is not truly part of repredict
-        homology_prediction, homol_seqs, cm_file = infer_homology(analyzed_hits=analyzed_hits, args=args_inner)
+        homology_prediction, homol_seqs, cm_file_rfam_user = infer_homology(
+            analyzed_hits=analyzed_hits, args=args_inner, cm_model_file=ih_model, multi_query=multi_query, iteration=iteration
+        )
 
         # add homology prediction to the data
         for hit, pred in zip(analyzed_hits.hits, homology_prediction):
@@ -259,10 +278,10 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
                 dpfile = args_inner.json.strip('json')
 
             # optimization so the rfam cm file is used only once
-            if cm_file is None and 'rfam' in ''.join(args_inner.prediction_method):
+            if cm_file_rfam_user is None and 'rfam' in ''.join(args_inner.prediction_method):
                 best_model = get_cm_model(args_inner.blast_query, threads=args_inner.threads)
                 rfam = RfamInfo()
-                cm_file = run_cmfetch(rfam.file_path, best_model)
+                cm_file_rfam_user = run_cmfetch(rfam.file_path, best_model)
 
             for method in args_inner.prediction_method:
                 # cycle the prediction method settings
@@ -302,11 +321,11 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
                     wrapped_ending_with_prediction(
                         args_inner=ah.args,
                         analyzed_hits=ah,
-                        all_hits_fasta=all_hits_fasta,
-                        query=query,
                         pred_method=method,
                         method_params=method_params,
-                        used_cm_file=cm_file,
+                        used_cm_file=cm_file_rfam_user,
+                        multi_query=multi_query,
+                        iteration=iteration,
                     )
                     success = True
                     out_line.append(to_tab_delim_line_simple(ah.args))
@@ -320,16 +339,16 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
             wrapped_ending_with_prediction(
                 args_inner=args_inner,
                 analyzed_hits=analyzed_hits,
-                all_hits_fasta=all_hits_fasta,
-                query=query,
-                used_cm_file=cm_file,
+                used_cm_file=cm_file_rfam_user,
+                multi_query=multi_query,
+                iteration=iteration,
             )
             out_line.append(to_tab_delim_line_simple(args_inner))
 
         ml_out_line.append('\n'.join(out_line))
 
-        if cm_file is not None and os.path.exists(cm_file):
-            os.remove(cm_file)
+        if cm_file_rfam_user is not None and os.path.exists(cm_file_rfam_user):
+            os.remove(cm_file_rfam_user)
 
         os.remove(all_hits_fasta)
 

@@ -1,7 +1,6 @@
 import logging
 import os
 import pickle
-import re
 import gzip
 import dill
 import numpy as np
@@ -14,21 +13,21 @@ from Bio.SeqRecord import SeqRecord
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
 from rna_blast_analyze.BR_core.BA_methods import add_loc_to_description
-from rna_blast_analyze.BR_core.BA_support import NoHomologousSequenceException, filter_ambiguous_seqs_from_list, \
-    AmbiguousQuerySequenceException
+from rna_blast_analyze.BR_core.BA_support import iter2file_name
 from rna_blast_analyze.BR_core.centroid_homfold import me_centroid_homfold, centroid_homfold_fast
 from rna_blast_analyze.BR_core.cmalign import RfamInfo, run_cmfetch, get_cm_model, extract_ref_from_cm, run_cmemit
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.infer_homology import infer_hits_cm
-from rna_blast_analyze.BR_core.predict_structures import alifold_refold_prediction, rcoffee_refold_prediction, \
-    decouple_homologs_alifold_refold_prediction, rnafold_wrap_for_predict, subopt_fold_query,\
+from rna_blast_analyze.BR_core.predict_structures import alifold_refold_prediction, \
+    rnafold_wrap_for_predict, subopt_fold_query,\
     subopt_fold_alifold, cmmodel_rnafold_c, rfam_subopt_pred
-from rna_blast_analyze.BR_core.predict_structures import find_nc_and_remove, check_lonely_bp, IUPACmapping
+from rna_blast_analyze.BR_core.predict_structures import find_nc_and_remove, check_lonely_bp
 from rna_blast_analyze.BR_core.turbofold import turbofold_fast, turbofold_with_homologous
 from rna_blast_analyze.BR_core.output.htmloutput import write_html_output
 from rna_blast_analyze.BR_core.convert_classes import blastsearchrecompute2dict
 from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
 from rna_blast_analyze.BR_core.config import CONFIG
+from rna_blast_analyze.BR_core import exceptions
 
 ml = logging.getLogger(__name__)
 
@@ -41,7 +40,7 @@ safe_prediction_method = [
 
 
 def wrapped_ending_with_prediction(
-        args_inner, analyzed_hits, all_hits_fasta, query, pred_method=None, method_params=None, used_cm_file=None
+        args_inner, analyzed_hits, pred_method=None, method_params=None, used_cm_file=None, multi_query=False, iteration=0
 ):
     """
     wrapper for prediction of secondary structures
@@ -71,10 +70,14 @@ def wrapped_ending_with_prediction(
     all_hits = analyzed_hits.hits.copy()
 
     if args_inner.filter_by_eval is not None:
-        hits2predict = filter_by_eval(analyzed_hits.hits, *args_inner.filter_by_eval)
+        hits2predict = filter_by_eval(
+            analyzed_hits.hits, BA_support.blast_hit_getter_from_subseq, *args_inner.filter_by_eval
+        )
         analyzed_hits.hits = hits2predict
     elif args_inner.filter_by_bitscore is not None:
-        hits2predict = filter_by_bits(analyzed_hits.hits, *args_inner.filter_by_bitscore)
+        hits2predict = filter_by_bits(
+            analyzed_hits.hits, BA_support.blast_hit_getter_from_subseq, *args_inner.filter_by_bitscore
+        )
         analyzed_hits.hits = hits2predict
 
     new_structures, exe_time = repredict_structures_for_homol_seqs(
@@ -120,41 +123,46 @@ def wrapped_ending_with_prediction(
 
     # write html if requested
     if args_inner.html:
-        ml.info('Writing html to {}.'.format(args_inner.html))
-        with open(args_inner.html, 'w') as h:
+        html_file = iter2file_name(args_inner.html, multi_query, iteration)
+        ml.info('Writing html to {}.'.format(html_file))
+        with open(html_file, 'w') as h:
             h.write(write_html_output(analyzed_hits))
 
     # write csv file if requested
     if args_inner.csv:
-        ml.info('Writing csv to {}.'.format(args_inner.csv))
-        analyzed_hits.to_csv(args_inner.csv)
+        csv_file = iter2file_name(args_inner.csv, multi_query, iteration)
+        ml.info('Writing csv to {}.'.format(csv_file))
+        analyzed_hits.to_csv(csv_file)
 
     # replace with json
     if args_inner.json:
-        ml.info('Writing json to {}.'.format(args_inner.json))
+        json_file = iter2file_name(args_inner.json, multi_query, iteration)
+        ml.info('Writing json to {}.'.format(json_file))
         j_obj = json.dumps(blastsearchrecompute2dict(analyzed_hits), indent=2)
         if getattr(args_inner, 'zip_json', False):
-            with open(args_inner.json + '.gz', 'wb') as ff:
+            with open(json_file + '.gz', 'wb') as ff:
                 ff.write(
                     gzip.compress(j_obj.encode())
                 )
         else:
-            with open(args_inner.json, 'w') as ff:
+            with open(json_file, 'w') as ff:
                 ff.write(j_obj)
 
     if args_inner.pandas_dump:
-        ml.info('Writing pandas pickle to {}.'.format(args_inner.pandas_dump))
-        pandas.to_pickle(analyzed_hits.pandas, args_inner.pandas_dump)
+        pickle_file = iter2file_name(args_inner.pandas_dump, multi_query, iteration)
+        ml.info('Writing pandas pickle to {}.'.format(pickle_file))
+        pandas.to_pickle(analyzed_hits.pandas, pickle_file)
 
     if args_inner.dump:
-        ml.info('Writing dump files base: {}.'.format(args_inner.dump))
-        with open(args_inner.dump, 'wb') as pp:
+        dump_file = iter2file_name(args_inner.dump, multi_query, iteration)
+        ml.info('Writing dump files base: {}.'.format(dump_file))
+        with open(dump_file, 'wb') as pp:
             pickle.dump(analyzed_hits, pp, pickle.HIGHEST_PROTOCOL)
 
-        with open(args_inner.dump + '.time_dump', 'wb') as pp:
+        with open(dump_file + '.time_dump', 'wb') as pp:
             pickle.dump(exe_time, pp, pickle.HIGHEST_PROTOCOL)
 
-        with open(args_inner.dump + '.dill', 'wb') as pp:
+        with open(dump_file + '.dill', 'wb') as pp:
             dill.dump(analyzed_hits, pp, pickle.HIGHEST_PROTOCOL)
 
 
@@ -187,7 +195,7 @@ def create_nr_trusted_hits_file_MSA_safe(
     # because it is used as an reference during distance computation and subsequence selection,
     # however i dont need to have all homologous seqs there
     if check_unambiguous:
-        all_hits = filter_ambiguous_seqs_from_list(all_hits)
+        all_hits = BA_support.filter_ambiguous_seqs_from_list(all_hits)
 
     dist_table, homologous_seqs = _trusted_hits_selection_wrapper(
         all_hits,
@@ -198,7 +206,7 @@ def create_nr_trusted_hits_file_MSA_safe(
     )
 
     if dist_table.size == 0:
-        raise NoHomologousSequenceException
+        raise exceptions.NoHomologousSequenceException
 
     to_include = BA_support.select_sequences_from_similarity_rec(
         dist_table,
@@ -224,9 +232,9 @@ def create_nr_trusted_hits_file_MSA_safe(
         del dis_hom_index
 
     elif len(nr_homolog_hits) < 2 and check_unambiguous:
-        if len(filter_ambiguous_seqs_from_list(nr_homolog_hits)) == 0:
+        if len(BA_support.filter_ambiguous_seqs_from_list(nr_homolog_hits)) == 0:
             # this mean query contain ambiguos bases
-            raise NoHomologousSequenceException
+            raise exceptions.NoHomologousSequenceException
         else:
             ml.warning(
                 'Only one sequence is unique under defined sim_threshold_percent (including query)\n'
@@ -236,20 +244,20 @@ def create_nr_trusted_hits_file_MSA_safe(
             dis_hom_index = dist_table[:, 0].argmin()
             nr_homolog_hits.append(SeqRecord(homologous_seqs[dis_hom_index].seq, id='dummy_seq_01'))
             del dis_hom_index
-        homologous_seqs = filter_ambiguous_seqs_from_list(homologous_seqs)
+        homologous_seqs = BA_support.filter_ambiguous_seqs_from_list(homologous_seqs)
 
     elif len(nr_homolog_hits) >= 2 and not check_unambiguous:
         pass
 
     elif len(nr_homolog_hits) > 2 and check_unambiguous:
-        nr_homolog_hits = filter_ambiguous_seqs_from_list(nr_homolog_hits)
-        homologous_seqs = filter_ambiguous_seqs_from_list(homologous_seqs)
+        nr_homolog_hits = BA_support.filter_ambiguous_seqs_from_list(nr_homolog_hits)
+        homologous_seqs = BA_support.filter_ambiguous_seqs_from_list(homologous_seqs)
 
     elif len(nr_homolog_hits) == 2 and check_unambiguous:
-        homologous_seqs = filter_ambiguous_seqs_from_list(homologous_seqs)
-        if len(filter_ambiguous_seqs_from_list(nr_homolog_hits)) == 1:
+        homologous_seqs = BA_support.filter_ambiguous_seqs_from_list(homologous_seqs)
+        if len(BA_support.filter_ambiguous_seqs_from_list(nr_homolog_hits)) == 1:
             # this mean that query contains ambiguous base
-            raise NoHomologousSequenceException
+            raise exceptions.NoHomologousSequenceException
 
     else:
         raise Exception()
@@ -395,28 +403,6 @@ def nonhomseqwarn(method_name):
     ml.warning(msg)
 
 
-def annotate_ambiguos_bases(seqlist):
-    iupac = IUPACmapping()
-    reg = re.compile("[^" + "^".join(iupac.unambiguous) + "]+", re.IGNORECASE)
-    for seq in seqlist:
-        m = re.search(reg, str(seq.seq))
-        if m:
-            msg = "Ambiguous base dected in {}, violating base {}, pos {}".format(
-                seq.id,
-                m.group(),
-                m.start()
-            )
-            ml.warning(msg)
-            seq.annotations['ambiguous'] = True
-            if 'msgs' not in seq.annotations:
-                seq.annotations['msgs'] = []
-            seq.annotations['msgs'].append(msg)
-        else:
-            seq.annotations['ambiguous'] = False
-
-    return seqlist
-
-
 def repredict_structures_for_homol_seqs(
         query, seqs2predict,
         threads=None,
@@ -446,9 +432,9 @@ def repredict_structures_for_homol_seqs(
             )
 
     # output are structures for all_hits
-    all_hits_list = annotate_ambiguos_bases([i.extension for i in all_hits])
-    query = annotate_ambiguos_bases([query])[0]
-    seqs2predict_list = annotate_ambiguos_bases([i.extension for i in seqs2predict])
+    all_hits_list = BA_support.annotate_ambiguos_bases([i.extension for i in all_hits])
+    query = BA_support.annotate_ambiguos_bases([query])[0]
+    seqs2predict_list = BA_support.annotate_ambiguos_bases([i.extension for i in seqs2predict])
 
     if not isinstance(pred_method_params, dict):
         raise Exception('prediction method parameters must be python dict')
@@ -555,7 +541,8 @@ def repredict_structures_for_homol_seqs(
         structures[pkey], exec_time[pkey] = rfam_subopt_pred(
             seqs2predict_fasta,
             ref_structure,
-            params=pred_method_params.get(pkey, None)
+            params=pred_method_params.get(pkey, None),
+            threads=threads,
         )
 
         if use_cm_file is None:
@@ -585,7 +572,8 @@ def repredict_structures_for_homol_seqs(
         structures[pkey], exec_time[pkey] = subopt_fold_query(
             seqs2predict_fasta,
             qf,
-            params=pred_method_params.get(pkey, None)
+            params=pred_method_params.get(pkey, None),
+            threads=threads
         )
 
         os.remove(qf)
@@ -626,7 +614,7 @@ def repredict_structures_for_homol_seqs(
             os.remove(homologous_sequence_file)
             del homologous_sequence_file
             del homologous_seqs
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
         finally:
             del pkey
@@ -665,7 +653,7 @@ def repredict_structures_for_homol_seqs(
             os.remove(homologous_sequence_file)
             del homologous_sequence_file
             del homologous_seqs
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
         finally:
             del pkey
@@ -697,7 +685,7 @@ def repredict_structures_for_homol_seqs(
 
             os.remove(nr_homo_hits_file)
             del nr_homo_hits_file
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
         finally:
             del pkey
@@ -728,7 +716,7 @@ def repredict_structures_for_homol_seqs(
 
             os.remove(nr_homo_hits_file)
             del nr_homo_hits_file
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
         finally:
             del pkey
@@ -759,7 +747,7 @@ def repredict_structures_for_homol_seqs(
 
             os.remove(nr_homo_hits_file)
             del nr_homo_hits_file
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
         finally:
             del pkey
@@ -790,139 +778,7 @@ def repredict_structures_for_homol_seqs(
 
             os.remove(nr_homo_hits_file)
             del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'dh_rcoffee_alifold_refold_rnafoldc' in prediction_method:
-        pkey = 'dh_rcoffee_alifold_refold_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            method_parameters = pred_method_params.get(pkey, {})
-
-            nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                all_hits=all_hits_list,
-                query=query,
-                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
-                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
-                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
-                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
-            )
-            structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                nr_homo_hits_file,
-                homologous_seqs,
-                seqs2predict_fasta,
-                refold='refold_rnafoldc',
-                threads=threads,
-                params=method_parameters,
-                align='rcoffee'
-            )
-
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-            del homologous_seqs
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'dh_rcoffee_alifold_unpaired_conserved_rnafoldc' in prediction_method:
-        pkey = 'dh_rcoffee_alifold_unpaired_conserved_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            method_parameters = pred_method_params.get(pkey, {})
-
-            nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                all_hits=all_hits_list,
-                query=query,
-                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
-                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
-                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
-                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
-            )
-            structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                nr_homo_hits_file,
-                homologous_seqs,
-                seqs2predict_fasta,
-                refold='conserved_ss_rnafoldc',
-                threads=threads,
-                params=method_parameters,
-                align='rcoffee',
-            )
-
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-            del homologous_seqs
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'dh_clustal_alifold_refold_rnafoldc' in prediction_method:
-        pkey = 'dh_clustal_alifold_refold_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            method_parameters = pred_method_params.get(pkey, {})
-
-            nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                all_hits=all_hits_list,
-                query=query,
-                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
-                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
-                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
-                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
-            )
-            structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                nr_homo_hits_file,
-                homologous_seqs,
-                seqs2predict_fasta,
-                refold='refold_rnafoldc',
-                threads=threads,
-                params=method_parameters,
-                align='clustalo'
-            )
-
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-            del homologous_seqs
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'dh_clustal_alifold_unpaired_conserved_rnafoldc' in prediction_method:
-        pkey = 'dh_clustal_alifold_unpaired_conserved_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            method_parameters = pred_method_params.get(pkey, {})
-
-            nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                all_hits=all_hits_list,
-                query=query,
-                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
-                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
-                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
-                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
-            )
-            structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                nr_homo_hits_file,
-                homologous_seqs,
-                seqs2predict_fasta,
-                refold='conserved_ss_rnafoldc',
-                threads=threads,
-                params=method_parameters,
-                align='clustalo'
-            )
-
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-            del homologous_seqs
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
         finally:
             del pkey
@@ -977,35 +833,41 @@ def repredict_structures_for_homol_seqs(
         ml.info(pkey)
 
         method_parameters = pred_method_params.get(pkey, {})
+        try:
+            if query.annotations['ambiguous']:
+                raise exceptions.AmbiguousQuerySequenceException
 
-        raw_structures, exec_time[pkey] = centroid_homfold_fast(
-            all_seqs=all_hits_list,
-            query=query,
-            all_seqs_fasta=seqs2predict_fasta,
-            n=method_parameters.get('max_seqs_in_prediction', 10),
-            centroid_homfold_params=method_parameters,
-            len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff)
-        )
+            raw_structures, exec_time[pkey] = centroid_homfold_fast(
+                all_seqs=all_hits_list,
+                query=query,
+                all_seqs_fasta=seqs2predict_fasta,
+                n=method_parameters.get('max_seqs_in_prediction', 10),
+                centroid_homfold_params=method_parameters,
+                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff)
+            )
 
-        # check noncanonical
-        if pkey in pred_method_params and pred_method_params[pkey]:
-            allow_nc = pred_method_params[pkey].get('allow_noncanonical', False)
-            allow_lp = pred_method_params[pkey].get('allow_lonely_pairs', False)
-        else:
-            allow_nc = False
-            allow_lp = False
-        if not allow_nc:
-            for seq in raw_structures:
-                repstr = find_nc_and_remove(str(seq.seq), structure=seq.letter_annotations['ss0'])
-                seq.letter_annotations['ss0'] = repstr
+            # check noncanonical
+            if pkey in pred_method_params and pred_method_params[pkey]:
+                allow_nc = pred_method_params[pkey].get('allow_noncanonical', False)
+                allow_lp = pred_method_params[pkey].get('allow_lonely_pairs', False)
+            else:
+                allow_nc = False
+                allow_lp = False
+            if not allow_nc:
+                for seq in raw_structures:
+                    repstr = find_nc_and_remove(str(seq.seq), structure=seq.letter_annotations['ss0'])
+                    seq.letter_annotations['ss0'] = repstr
 
-        # check lonely basepairs
-        if not allow_lp:
-            for seq in raw_structures:
-                repstr = check_lonely_bp(seq.letter_annotations['ss0'])
-                seq.letter_annotations['ss0'] = repstr
+            # check lonely basepairs
+            if not allow_lp:
+                for seq in raw_structures:
+                    repstr = check_lonely_bp(seq.letter_annotations['ss0'])
+                    seq.letter_annotations['ss0'] = repstr
 
-        structures[pkey] = raw_structures
+            structures[pkey] = raw_structures
+        except exceptions.AmbiguousQuerySequenceException:
+            msgfail = "Query sequence contains ambiguous characters. Can't use centroid_homfold_fast."
+            ml.error(msgfail)
         del pkey
 
     if 'TurboFold' in prediction_method:
@@ -1016,13 +878,13 @@ def repredict_structures_for_homol_seqs(
         #  with Trurbofold. The structure of redundant sequences will be set according to the one in prediction
 
         try:
-            all_hits_filtered = filter_ambiguous_seqs_from_list(all_hits_list)
-            seqs2predict_filtered = filter_ambiguous_seqs_from_list(seqs2predict_list)
+            all_hits_filtered = BA_support.filter_ambiguous_seqs_from_list(all_hits_list)
+            seqs2predict_filtered = BA_support.filter_ambiguous_seqs_from_list(seqs2predict_list)
 
             if query.annotations['ambiguous']:
                 msgfail = "Query sequence contains ambiguous characters. Can't use Turbofold."
                 ml.error(msgfail)
-                raise AmbiguousQuerySequenceException(msgfail)
+                raise exceptions.AmbiguousQuerySequenceException(msgfail)
 
             method_parameters = pred_method_params.get(pkey, {})
 
@@ -1055,10 +917,10 @@ def repredict_structures_for_homol_seqs(
             del structures_t
             del nr_homo_hits
             del nr_homo_hits_file
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
 
-        except AmbiguousQuerySequenceException:
+        except exceptions.AmbiguousQuerySequenceException:
             pass
 
         finally:
@@ -1073,7 +935,7 @@ def repredict_structures_for_homol_seqs(
             if query.annotations['ambiguous']:
                 msgfail = "Query sequence contains ambiguous characters. Can't use Turbofold."
                 ml.error(msgfail)
-                raise AmbiguousQuerySequenceException(msgfail)
+                raise exceptions.AmbiguousQuerySequenceException(msgfail)
 
             structures_t, exec_time[pkey] = turbofold_fast(
                 all_seqs=all_hits_list,
@@ -1091,73 +953,15 @@ def repredict_structures_for_homol_seqs(
             )
 
             del structures_t
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
 
-        except AmbiguousQuerySequenceException:
+        except exceptions.AmbiguousQuerySequenceException:
             pass
 
         finally:
             del pkey
 
-    if 'rcoffee_alifold_refold_rnafoldc' in prediction_method:
-        pkey = 'rcoffee_alifold_refold_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            method_parameters = pred_method_params.get(pkey, {})
-
-            nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                all_hits=all_hits_list,
-                query=query,
-                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
-                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
-                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
-                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
-            )
-            structures[pkey], exec_time[pkey] = rcoffee_refold_prediction(
-                nr_homo_hits_file,
-                seqs2predict_fasta,
-                refold='refold_rnafoldc',
-                threads=threads,
-                params=method_parameters
-            )
-
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'rcoffee_alifold_unpaired_conserved_refold_rnafoldc' in prediction_method:
-        pkey = 'rcoffee_alifold_unpaired_conserved_refold_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            method_parameters = pred_method_params.get(pkey, {})
-
-            nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                all_hits=all_hits_list,
-                query=query,
-                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
-                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
-                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
-                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
-            )
-            structures[pkey], exec_time[pkey] = rcoffee_refold_prediction(
-                nr_homo_hits_file,
-                seqs2predict_fasta,
-                refold='conserved_ss_rnafoldc',
-                threads=threads,
-                params=method_parameters
-            )
-
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
+    os.remove(seqs2predict_fasta)
 
     return structures, exec_time

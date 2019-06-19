@@ -4,7 +4,6 @@ infernal_minimal_version = [1, 1, 2]
 vrna_minimal_version = [2, 3, 5]
 clustalo_minimal_version = [1, 2, 4]
 muscle_minimal_version = [3, 8, 31]
-tcoffee_rcoffee_minimal_version = [10, 0]
 centroid_homfold_minimal_version = [0, 0, 15]
 turbofold_minimal_version = [6, 0]
 mfold_minimal_version = [3, 6]
@@ -12,9 +11,9 @@ mfold_minimal_version = [3, 6]
 # ===== All possible prediction methods =====
 #  list only methods which are not required by default
 method_required_tools = {
-    'locarna': {'locarna', 'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'refold.pl'},
-    'simple': {'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle'},
-    'joined': {'locarna', 'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'refold.pl'},
+    'locarna': {'locarna', 'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'refold.pl', 'rfam'},
+    'simple': {'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'rfam'},
+    'joined': {'locarna', 'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'refold.pl', 'rfam'},
     'rfam_rnafoldc': {'rfam'},
     'rfam_subopt': {'mfold', 'rfam'},
     'rnafold': set(),
@@ -25,15 +24,11 @@ method_required_tools = {
     'muscle_alifold_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
     'clustalo_alifold_unpaired_conserved_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
     'muscle_alifold_unpaired_conserved_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
-    'dh_rcoffee_alifold_refold_rnafoldc': {'RNAalifold', 'refold.pl', 'rcoffee'},
-    'dh_rcoffee_alifold_unpaired_conserved_rnafoldc': {'RNAalifold', 'refold.pl', 'rcoffee'},
     'dh_clustal_alifold_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
     'dh_clustal_alifold_unpaired_conserved_rnafoldc': {'RNAalifold', 'refold.pl'},
     'centroid_homfold': {'centroid_homfold'},
     'TurboFold_fast': {'turbofold'},
     'TurboFold': {'turbofold'},
-    'rcoffee_alifold_refold_rnafoldc': {'rcoffee', 'RNAalifold', 'refold.pl'},
-    'rcoffee_alifold_unpaired_conserved_refold_rnafoldc': {'rcoffee', 'RNAalifold', 'refold.pl'},
     'centroid_homfold_fast': {'centroid_homfold'},
     'rfam_centroid_homfold': {'centroid_homfold', 'rfam'}
 }
@@ -52,10 +47,7 @@ pred_params = {
     'clustalo',
     'alifold',
     'turbofold_mode',
-    'rcoffee',
-    'rcoffee_profile',
     'cmalign',
-    'rcoffee',
     'RNAfold',
     'centroid_homfold',
     'max_seqs_in_prediction',
@@ -93,12 +85,6 @@ allowed_params = {
     'muscle_alifold_unpaired_conserved_refold_rnafoldc': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "repred_unpaired_tr", "conseq_conserved", "muscle", "alifold", "RNAfold"
     },
-    'dh_rcoffee_alifold_refold_rnafoldc': {
-        "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "repred_unpaired_tr", "conseq_conserved", "rcoffee", "alifold", "RNAfold"
-    },
-    'dh_rcoffee_alifold_unpaired_conserved_rnafoldc': {
-        "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "rcoffee", "alifold", "RNAfold", "repred_unpaired_tr", "conseq_conserved"
-    },
     'dh_clustal_alifold_refold_rnafoldc': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "clustalo", "alifold", "RNAfold"
     },
@@ -114,12 +100,6 @@ allowed_params = {
     'TurboFold': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "max_seqs_in_prediction", "TurboFold"
     },
-    'rcoffee_alifold_refold_rnafoldc': {
-        "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "rcoffee", "alifold", "RNAfold"
-    },
-    'rcoffee_alifold_unpaired_conserved_refold_rnafoldc': {
-        "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "repred_unpaired_tr", "conseq_conserved", "rcoffee", "alifold", "RNAfold"
-    },
     'centroid_homfold_fast': {
         "query_max_len_diff", "centroid_homfold", "max_seqs_in_prediction"
     },
@@ -128,6 +108,6 @@ allowed_params = {
     }
 }
 
-commandline_params = {"rcoffee", "alifold", "RNAfold", "cmscan", "cmemit", "TurboFold", "clustalo", "muscle"}
+commandline_params = {"alifold", "RNAfold", "cmscan", "cmemit", "TurboFold", "clustalo", "muscle"}
 
 allowed_pm_params_server = {k: allowed_params[k] - commandline_params for k in allowed_params.keys()}

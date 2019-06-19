@@ -18,6 +18,7 @@ class BlastSearchRecompute(object):
         self._runstat = 1
         self.args = None
         self.date_of_run = time.localtime()
+        self.best_matching_model = None
 
     def stop_timer(self):
         if self._runstat:

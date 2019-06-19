@@ -82,18 +82,6 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
     def test_clustalo_alifold_unpaired_conserved_refold_rnafoldc(self):
         self.run('clustalo_alifold_unpaired_conserved_refold_rnafoldc')
 
-    def test_dh_clustal_alifold_unpaired_conserved_rnafoldc(self):
-        self.run('dh_clustal_alifold_unpaired_conserved_rnafoldc')
-
-    def test_dh_clustal_alifold_refold_rnafoldc(self):
-        self.run('dh_clustal_alifold_refold_rnafoldc')
-
-    def test_dh_rcoffee_alifold_unpaired_conserved_rnafoldc(self):
-        self.run('dh_rcoffee_alifold_unpaired_conserved_rnafoldc')
-
-    def test_dh_rcoffee_alifold_refold_rnafoldc(self):
-        self.run('dh_rcoffee_alifold_refold_rnafoldc')
-
     def test_muscle_alifold_refold_rnafoldc(self):
         self.run('muscle_alifold_refold_rnafoldc')
 
@@ -129,12 +117,6 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
 
     def test_rnafold(self):
         self.run('rnafold')
-
-    def test_rcoffee_alifold_unpaired_conserved_refold_rnafoldc(self):
-        self.run('rcoffee_alifold_unpaired_conserved_refold_rnafoldc')
-
-    def test_rcoffee_alifold_refold_rnafoldc(self):
-        self.run('rcoffee_alifold_refold_rnafoldc')
 
 
 if __name__ == '__main__':

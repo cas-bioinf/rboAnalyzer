@@ -42,6 +42,7 @@
         position: -webkit-sticky;
         position: sticky;
         top: 0px;
+        z-index: 30;
     }
     .onehit_body {
         margin-left: 10px;
@@ -201,5 +202,8 @@
     /* Show the tooltip text when you mouse over the tooltip container */
     .tooltip:hover .tooltiptext {
         visibility: visible;
+    }
+    .rnapic {
+        height: 300px;
     }
 </style>

@@ -1,9 +1,11 @@
 import os
 from tempfile import mkstemp
+from copy import deepcopy
 import logging
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
-from rna_blast_analyze.BR_core.cmalign import run_cmalign_on_fasta, read_cmalign_sfile, run_cmbuild, get_cm_model, run_cmfetch, RfamInfo
+from rna_blast_analyze.BR_core.cmalign import run_cmalign_on_fasta, read_cmalign_sfile, run_cmbuild, run_cmfetch, \
+    RfamInfo, get_cm_model_table, select_best_matching_model_from_cmscan
 from rna_blast_analyze.BR_core.stockholm_alig import StockholmAlig
 from rna_blast_analyze.BR_core.stockholm_parser import read_st
 from rna_blast_analyze.BR_core.config import CONFIG
@@ -13,14 +15,15 @@ import shutil
 ml = logging.getLogger(__name__)
 
 
-def infer_homology(analyzed_hits, args):
-    """
-    This is wrapper for infer homology methods. It deals with different options for generating CM.
-    :return:
-    """
-    ml.info('Infering homology...')
-    ml.debug(fname())
-    bits, eval, loc_score, alig_length = hit_cons_characteristic(analyzed_hits.hits)
+def find_and_extract_cm_model(args, analyzed_hits):
+    rfam = RfamInfo()
+    ml.info('Infer homology - searching RFAM for best matching model.')
+    cmscan_results = get_cm_model_table(args.blast_query, threads=args.threads)
+    best_matching_cm_model = select_best_matching_model_from_cmscan(cmscan_results)
+    if best_matching_cm_model['score'] > 0:
+        analyzed_hits.best_matching_model = best_matching_cm_model
+    best_cm_model_name = analyzed_hits.best_matching_model['target_name']
+    ml.info('Infer homology - best matching RFAM model: {}'.format(best_cm_model_name))
 
     if args.cm_file:
         # use provided cm file
@@ -31,20 +34,42 @@ def infer_homology(analyzed_hits, args):
         shutil.copy(args.cm_file, cm_model_file)
 
     elif args.use_rfam:
-        ml.info('Infer homology - using RFAM')
-        # find and extract cm model
-        rfam = RfamInfo()
-        best_matching_model_name = get_cm_model(args.blast_query, threads=args.threads)
-        ml.info('Infer homology - best matching model: {}'.format(best_matching_model_name))
-        cm_model_file = run_cmfetch(rfam.file_path, best_matching_model_name)
+        ml.info('Infer homology - using RFAM CM file as reference model.')
+        if analyzed_hits.best_matching_model is None:
+            ml.error('No RFAM model was matched with score > 0. Nothing to build homology to.')
+            exit(0)
+
+        cm_model_file = run_cmfetch(rfam.file_path, best_cm_model_name)
     else:
         ml.info('Infer homology - using RSEARCH to build model')
         # default to using RSEARCH
         # cm_model_file = build_cm_model_rsearch(analyzed_hits.query, args.ribosum)
         cm_model_file = build_cm_model_rsearch(analyzed_hits.query, CONFIG.rsearch_ribosum)
 
-    # do i need to include query in fasta file?
-    # yes - to get idea of cm_conservation score value - it does not affect bit score for others
+    return cm_model_file, analyzed_hits
+
+
+def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iteration=0):
+    """
+    This is wrapper for infer homology methods. It deals with different options for generating CM.
+    :return:
+    """
+    ml.info('Infering homology...')
+    ml.debug(fname())
+    bits, eval, loc_score, alig_length = hit_cons_characteristic(analyzed_hits.hits)
+
+    # always run cmscan on rfam for informative reasons
+    #  but use inferred CM only if --use_rfam was given
+    #  if CM provided, also run inference but use provided file
+    # print explanation alongside this information
+    # todo - rfam is always required - move it to requirements
+    #  download during install?
+
+    # find and extract cm model
+    # This code is moved to each extension method to allow fail-fast if model is found in RFAM
+    # cm_model_file, analyzed_hits = find_and_extract_cm_model(args, analyzed_hits)
+
+    # include query seq in fasta file to get relevant bit score
     fd_f, fd_fasta = mkstemp(prefix='rba_', suffix='_28', dir=CONFIG.tmpdir)
     with os.fdopen(fd_f, 'w') as f:
         for seq in [analyzed_hits.query] + analyzed_hits.res_2_record_list():
@@ -81,7 +106,8 @@ def infer_homology(analyzed_hits, args):
     # write scores to a table, compute it for all data and run some correlation statistics
 
     if args.repredict_file:
-        with open(args.repredict_file, 'w') as f:
+        repredict_file = BA_support.iter2file_name(args.repredict_file, multi_query, iteration)
+        with open(repredict_file, 'w') as f:
             _print_table_for_corelation(
                 f,
                 cm_align_scores.seq_name[1:],
@@ -113,10 +139,16 @@ def infer_homology(analyzed_hits, args):
 def build_cm_model_rsearch(query_seq, path2selected_sim_array):
     ml.debug(fname())
     query_structure = BA_support.RNAfold(str(query_seq.seq))[1]
+
+    # remove any annotations from query:
+    qs_clean = deepcopy(query_seq)
+    qs_clean.annotations = dict()
+    qs_clean.letter_annotations = dict()
+
     # query_structure = RNA.fold(str(analyzed_hits.query.seq))[0]
     # build stockholm like file for use in cm mohdel build
     st_like = StockholmAlig()
-    st_like.append(query_seq)
+    st_like.append(qs_clean)
     st_like.column_annotations['SS_cons'] = query_structure
 
     fds, stock_file = mkstemp(prefix='rba_', suffix='_30', dir=CONFIG.tmpdir)

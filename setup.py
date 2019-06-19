@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 # package_data
 # - directly related to code
@@ -36,11 +36,10 @@ setup(
         'numpy',
         'Jinja2>=2, <3',
         'pandas>=0.22',
-        'PyPDF2',
         'biopython',
         'argcomplete',
     ],
-    packages=find_packages(),
+    packages=['rna_blast_analyze', 'rna_blast_analyze.BR_core', 'rna_blast_analyze.BR_core.output'],
     package_data=package_data,
     include_package_data=True,
 )

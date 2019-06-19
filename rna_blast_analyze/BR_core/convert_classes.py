@@ -3,6 +3,7 @@ import pickle
 import time
 import copy
 from argparse import Namespace
+import json
 
 from Bio.Blast import Record
 from Bio.Seq import Seq
@@ -122,6 +123,8 @@ def annotations_items_from_dict(indict):
     if 'cmstat' in indict:
         if isinstance(indict['cmstat'], str):
             indict['cmstat'] = pd.read_json(indict['cmstat'], typ='series')
+        elif isinstance(indict['cmstat'], dict):
+            indict['cmstat'] = pd.read_json(json.dumps(indict['cmstat']), typ='series')
     return indict
 
 
@@ -191,7 +194,8 @@ def blastsearchrecompute2dict(bsr):
         'creation': bsr.creation,
         '_runstat': bsr._runstat,
         'args': vars(bsr.args),
-        'date_of_run': list(bsr.date_of_run)
+        'date_of_run': list(bsr.date_of_run),
+        'best_matching_model': bsr.best_matching_model,
     }
     return out
 
@@ -204,6 +208,8 @@ def blastsearchrecomputefromdict(indict):
     out._runstat = indict['_runstat']
     out.args = Namespace(**indict['args'])
     out.date_of_run = time.struct_time(indict['date_of_run'])
+    if 'best_matching_model' in indict:
+        out.best_matching_model = indict['best_matching_model']
     return out
 
 

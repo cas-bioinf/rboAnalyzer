@@ -429,21 +429,24 @@ def read_aligns(f, R):
                         re.search('(?<=Expect =)-? *[0-9]+\.?[0-9]*(?:[Ee] *-? *[0-9]+)?', txt).group(0).lstrip()
                     )
                 elif txt[:13] == " Identities =":
-                    curr_hsp.identities = tuple(
-                        [
-                            int(i) for i in re.search(
-                                '(?<=Identities =) *\d+/\d+(?= *\()', txt
-                            ).group(0).lstrip().split('/')
-                        ]
-                    )
-                    curr_hsp.gaps = tuple(
-                        [
-                            int(i) for i in re.search(
-                                '(?<=Gaps =) *\d+/\d+(?= *\()', txt
-                            ).group(0).lstrip().split('/')
-                        ]
-                    )
-                    curr_hsp.align_length = curr_hsp.identities[1]
+                    # return only first int in identities field to mimic the XML parser
+
+                    tmp_idtts = [
+                        int(i) for i in re.search('(?<=Identities =) *\d+/\d+(?= *\()', txt).group(0).lstrip().split('/')
+                    ]
+                    tmp_gaps = [
+                        int(i) for i in re.search('(?<=Gaps =) *\d+/\d+(?= *\()', txt).group(0).lstrip().split('/')
+                    ]
+                    curr_hsp.identities = tmp_idtts[0]
+                    curr_hsp.gaps = tmp_gaps[0]
+
+                    assert tmp_gaps[1] == tmp_idtts[1]
+
+                    curr_hsp.align_length = tmp_idtts[1]
+
+                    del tmp_idtts
+                    del tmp_gaps
+
                 elif txt[:8] == " Strand=":
                     curr_hsp.strand = tuple(
                         re.search(

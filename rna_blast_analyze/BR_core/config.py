@@ -17,7 +17,6 @@ class tools_paths(object):
             'mfold': '',
             'blast': '',
             'mafft': '',
-            't-coffee': '',
             'centroid': '',
             'turbofold': '',
         }
@@ -117,10 +116,6 @@ class tools_paths(object):
     @property
     def mafft_path(self):
         return self.tool_paths['mafft']
-
-    @property
-    def tcoffee_path(self):
-        return self.tool_paths['t-coffee']
 
     @property
     def centriod_path(self):

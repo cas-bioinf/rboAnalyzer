@@ -13,7 +13,7 @@ import rna_blast_analyze.BR_core.BA_support as BA_support
 import rna_blast_analyze.BR_core.extend_hits
 from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
 from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
-from rna_blast_analyze.BR_core.infer_homology import infer_homology
+from rna_blast_analyze.BR_core.infer_homology import infer_homology, find_and_extract_cm_model
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
 from rna_blast_analyze.BR_core.stockholm_alig import StockholmFeatureStock
 from rna_blast_analyze.BR_core import BA_verify
@@ -107,6 +107,53 @@ def compute_true_location_se(hit, ql):
     return s, e
 
 
+def create_blast_only_report_object(exp_hit, query_len):
+    # init new Subsequences object
+    #  here the object source shadows the final hit
+    hit = BA_support.Subsequences(exp_hit)
+
+    # init new SeqRecord object
+    ns = deepcopy(exp_hit)
+    ann = ns.annotations
+    tss = ann['trimmed_ss']
+    tse = ann['trimmed_se']
+    tes = ann['trimmed_es']
+    tee = ann['trimmed_ee']
+
+    ns.letter_annotations['ss0'] = '.' * len(ns.seq)
+    ns.annotations['sss'] = ['ss0']
+    ns.description = ''
+
+    hit.extension = ns
+
+    pos_match = re.search(str(ns.seq), str(ns.seq), flags=re.IGNORECASE)
+    if not pos_match:
+        raise Exception('Subsequnce not found in supersequence.')
+
+    bl = ns.annotations['blast'][1]
+
+    if bl.sbjct_start < bl.sbjct_end:
+        bls = bl.sbjct_start - bl.query_start + 1
+        ble = bl.sbjct_end + (query_len - bl.query_end)
+    elif bl.sbjct_end < bl.sbjct_start:
+        bls = bl.sbjct_end - (query_len - bl.query_end)
+        ble = bl.sbjct_start + bl.query_start - 1
+    else:
+        raise Exception('Unknown strand option.')
+
+    # if whole subject sequence too short, this assertion will fail
+    if tss or tse or tes or tee:
+        ml.warning('Skipping check ({}) - subject sequence too short.'.format(ns.id))
+    else:
+        assert len(ns.seq) == abs(bls - ble) + 1
+        assert bls == ns.annotations['extended_start']
+        assert ble == ns.annotations['extended_end']
+
+    hit.best_start, hit.best_end = compute_true_location_se(hit, query_len)
+
+    return hit
+
+
 def blast_wrapper_inner(args_inner, shared_list=None):
     ml.debug(fname())
     if not shared_list:
@@ -124,13 +171,22 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                                                      'cA2': 'anchor number tag'})
 
     p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
-    # this is done for each query
+    query_seqs = [i for i in SeqIO.parse(args_inner.blast_query, 'fasta')]
 
+    if len(p_blast) != len(query_seqs):
+        ml.error('Number of query sequences in provided BLAST output file ({}) does not match number of query sequences'
+                 ' in query FASTA file ({})'.format(len(p_blast), len(query_seqs)))
+        exit(0)
+
+    if len(p_blast) > 1:
+        multi_query = True
+    else:
+        multi_query = False
+
+    # this is done for each query
     ml_out_line = []
     all_analyzed = []
-    for iteration, (bhp, query) in enumerate(
-            itertools.zip_longest(p_blast, SeqIO.parse(args_inner.blast_query, 'fasta'))
-    ):
+    for iteration, (bhp, query) in enumerate(itertools.zip_longest(p_blast, query_seqs)):
         print('processing query: {}'.format(query.id))
         ml.info('processing query: {}'.format(query.id))
         # check query and blast
@@ -141,20 +197,33 @@ def blast_wrapper_inner(args_inner, shared_list=None):
 
         BA_verify.verify_query_blast(blast=bhp, query=query)
 
+        analyzed_hits = BlastSearchRecompute()
+        analyzed_hits.args = args_inner
+        analyzed_hits.query = query
+        all_analyzed.append(analyzed_hits)
+
+        # run cm model build
+        # allows to fail fast if rfam was selected and we dont find the model
+        ih_file, analyzed_hits = find_and_extract_cm_model(args_inner, analyzed_hits)
+
         # select all
         all_blast_hits = BA_support.blast_hsps2list(bhp)
 
+        if len(all_blast_hits) == 0:
+            ml.error('No hits found in {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
+            continue
+
         # filter if needed
         if args_inner.filter_by_eval is not None:
-            tmp = filter_by_eval(all_blast_hits, *args_inner.filter_by_eval)
+            tmp = filter_by_eval(all_blast_hits, BA_support.blast_hit_getter_from_hits, *args_inner.filter_by_eval)
             if len(tmp) == 0 and len(all_blast_hits) != 0:
-                ml.error('The requested filter removed all BLAST hits. Nothing to do.')
-                exit(0)
+                ml.error('The requested filter removed all BLAST hits {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
+                continue
         elif args_inner.filter_by_bitscore is not None:
-            tmp = filter_by_bits(all_blast_hits, *args_inner.filter_by_bitscore)
+            tmp = filter_by_bits(all_blast_hits, BA_support.blast_hit_getter_from_hits, *args_inner.filter_by_bitscore)
             if len(tmp) == 0 and len(all_blast_hits) != 0:
-                ml.error('The requested filter removed all BLAST hits. Nothing to do.')
-                exit(0)
+                ml.error('The requested filter removed all BLAST hits {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
+                continue
 
         all_short = all_blast_hits
 
@@ -191,59 +260,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
 
         shorts_expanded = BA_support.rc_hits_2_rna(shorts_expanded)
 
-        analyzed_hits = BlastSearchRecompute()
-        analyzed_hits.args = args_inner
-        all_analyzed.append(analyzed_hits)
-
         query_seq = query.seq.transcribe()
-
-        analyzed_hits.query = query
-
-        def create_blast_only_report_object(exp_hit, query_len):
-            # init new Subsequences object
-            #  here the object source shadows the final hit
-            hit = BA_support.Subsequences(exp_hit)
-
-            # init new SeqRecord object
-            ns = deepcopy(exp_hit)
-            ann = ns.annotations
-            tss = ann['trimmed_ss']
-            tse = ann['trimmed_se']
-            tes = ann['trimmed_es']
-            tee = ann['trimmed_ee']
-
-            ns.letter_annotations['ss0'] = '.' * len(ns.seq)
-            ns.annotations['sss'] = ['ss0']
-            ns.description = ''
-
-            hit.extension = ns
-
-            pos_match = re.search(str(ns.seq), str(ns.seq), flags=re.IGNORECASE)
-            if not pos_match:
-                raise Exception('Subsequnce not found in supersequence.')
-
-            bl = ns.annotations['blast'][1]
-
-            if bl.sbjct_start < bl.sbjct_end:
-                bls = bl.sbjct_start - bl.query_start + 1
-                ble = bl.sbjct_end + (query_len - bl.query_end)
-            elif bl.sbjct_end < bl.sbjct_start:
-                bls = bl.sbjct_end - (query_len - bl.query_end)
-                ble = bl.sbjct_start + bl.query_start - 1
-            else:
-                raise Exception('Unknown strand option.')
-
-            # if whole subject sequence too short, this assertion will fail
-            if tss or tse or tes or tee:
-                ml.warning('Skipping check ({}) - subject sequence too short.'.format(ns.id))
-            else:
-                assert len(ns.seq) == abs(bls - ble) + 1
-                assert bls == ns.annotations['extended_start']
-                assert ble == ns.annotations['extended_end']
-
-            hit.best_start, hit.best_end = compute_true_location_se(hit, query_len)
-
-            return hit
 
         # blast only extension
         for exp_hit in shorts_expanded:
@@ -258,7 +275,6 @@ def blast_wrapper_inner(args_inner, shared_list=None):
         # write all hits to fasta
         fda, all_hits_fasta = mkstemp(prefix='rba_', suffix='_17', dir=CONFIG.tmpdir)
         with os.fdopen(fda, 'w') as fah:
-            # analyzed_hits.write_results_fasta(fah)
             for hit in analyzed_hits.hits:
                 if len(hit.extension.seq) == 0:
                     continue
@@ -268,7 +284,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 )
 
         # this part predicts homology - it is not truly part of repredict
-        homology_prediction, homol_seqs, cm_file = infer_homology(analyzed_hits=analyzed_hits, args=args_inner)
+        homology_prediction, homol_seqs, cm_file_rfam_user = infer_homology(analyzed_hits=analyzed_hits, args=args_inner, cm_model_file=ih_file, multi_query=multi_query, iteration=iteration)
         # add homology prediction to the data
         for hit, pred in zip(analyzed_hits.hits, homology_prediction):
             hit.hpred = pred
@@ -287,10 +303,10 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 dpfile = args_inner.json.strip('json')
 
             # optimization so the rfam cm file is used only once
-            if cm_file is None and 'rfam' in ''.join(args_inner.prediction_method):
+            if cm_file_rfam_user is None and 'rfam' in ''.join(args_inner.prediction_method):
                 best_model = get_cm_model(args_inner.blast_query, threads=args_inner.threads)
                 rfam = RfamInfo()
-                cm_file = run_cmfetch(rfam.file_path, best_model)
+                cm_file_rfam_user = run_cmfetch(rfam.file_path, best_model)
 
             for method in args_inner.prediction_method:
                 method = method
@@ -331,11 +347,11 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                     wrapped_ending_with_prediction(
                         args_inner=ah.args,
                         analyzed_hits=ah,
-                        all_hits_fasta=all_hits_fasta,
-                        query=query,
                         pred_method=method,
                         method_params=method_params,
-                        used_cm_file=cm_file,
+                        used_cm_file=cm_file_rfam_user,
+                        multi_query=multi_query,
+                        iteration=iteration,
                     )
                     success = True
                     out_line.append(to_tab_delim_line_simple(ah.args))
@@ -348,16 +364,16 @@ def blast_wrapper_inner(args_inner, shared_list=None):
             wrapped_ending_with_prediction(
                 args_inner=args_inner,
                 analyzed_hits=analyzed_hits,
-                all_hits_fasta=all_hits_fasta,
-                query=query,
-                used_cm_file=cm_file
+                used_cm_file=cm_file_rfam_user,
+                multi_query=multi_query,
+                iteration=iteration
             )
             out_line.append(to_tab_delim_line_simple(args_inner))
 
         ml_out_line.append('\n'.join(out_line))
 
-        if cm_file is not None and os.path.exists(cm_file):
-            os.remove(cm_file)
+        if cm_file_rfam_user is not None and os.path.exists(cm_file_rfam_user):
+            os.remove(cm_file_rfam_user)
 
         os.remove(all_hits_fasta)
 

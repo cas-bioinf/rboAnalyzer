@@ -5,9 +5,9 @@
     "query_max_len_diff": 0.05
   },
   "TurboFold": {
-    "cmscore_percent": 0,
-    "query_max_len_diff": 0.05,
-    "max_seqs_in_prediction": 3
+    "cmscore_percent": 20,
+    "query_max_len_diff": 0.15,
+    "max_seqs_in_prediction": 4
   },
   "TurboFold_fast": {
     "query_max_len_diff": 0.05,
@@ -16,21 +16,6 @@
   "rfam_subopt": {
     "mfold": [10, 2, 80]
   },
-  "rcoffee_alifold_refold_rnafoldc": {
-    "cmscore_percent": 0,
-    "pred_sim_threshold": 70,
-    "query_max_len_diff": 0.05
-  },
-  "dh_clustal_alifold_unpaired_conserved_rnafoldc": {
-    "cmscore_percent": 40,
-    "pred_sim_threshold": 60,
-    "query_max_len_diff": 0.05
-  },
-  "dh_rcoffee_alifold_unpaired_conserved_rnafoldc": {
-    "cmscore_percent": 50,
-    "pred_sim_threshold": 70,
-    "query_max_len_diff": 0.15
-  }, 
   "muscle_alifold_unpaired_conserved_refold_rnafoldc": {
     "cmscore_percent": 40,
     "pred_sim_threshold": 50,
@@ -39,15 +24,19 @@
     "repred_unpaired_tr": "*"
   }, 
   "subopt_fold_muscle_alifold": {
-    "cmscore_percent": 90,
-    "query_max_len_diff": 0.1
+    "cmscore_percent": 0,
+    "pred_sim_threshold": 50,
+    "query_max_len_diff": 0.1,
+    "mfold": [10, 2, 50]
   }, 
   "subopt_fold_query": {
     "mfold": [5, 2, 5]
   },
   "subopt_fold_clustal_alifold": {
-    "cmscore_percent": 80,
-    "query_max_len_diff": 0.1
+    "cmscore_percent": 0,
+    "pred_sim_threshold": 50,
+    "query_max_len_diff": 0.1,
+    "mfold": [5, 2, 50]
   }, 
   "rfam_rnafoldc": {}, 
   "muscle_alifold_refold_rnafoldc": {
@@ -67,21 +56,6 @@
     "query_max_len_diff": 0.1,
     "conseq_conserved": 3,
     "repred_unpaired_tr": "*"
-  }, 
-  "rcoffee_alifold_unpaired_conserved_refold_rnafoldc": {
-    "cmscore_percent": 90,
-    "pred_sim_threshold": 80,
-    "query_max_len_diff": 0.1
-  },
-  "dh_clustal_alifold_refold_rnafoldc": {
-    "cmscore_percent": 0,
-    "pred_sim_threshold": 70,
-    "query_max_len_diff": 0.1
-  },
-  "dh_rcoffee_alifold_refold_rnafoldc": {
-    "cmscore_percent": 0,
-    "pred_sim_threshold": 70,
-    "query_max_len_diff": 0.05
   },
   "rnafold": {},
   "centroid_homfold_fast": {
@@ -90,7 +64,7 @@
     "centroid_homfold": "--engine_s CONTRAfold"
   },
   "rfam_centroid_homfold": {
-    "n_seqs": 3,
-    "centroid_homfold": "--engine_s CONTRAfold"
+    "n_seqs": 9,
+    "centroid_homfold": "--engine_s McCaskill"
   }
 }

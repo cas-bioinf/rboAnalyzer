@@ -6,7 +6,16 @@
 {% endblock %}
 
 {% block header %}
-<p>pipeline output for {{hea.input}}</p>
+<div>
+<pre>BLAST output file:   {{hea.input}}
+Query sequence file: {{hea.query}}
+{% if hea.best_matching_model %}
+RFAM model with best score to a query sequence   <div class="tooltip">?<pre class="tooltiptext">Infered from query sequence by cmscan program.</pre></div>
+Family name: {{hea.best_matching_model['target_name']}}
+E-value:     {{hea.best_matching_model['E-value']}}{% endif %}
+</pre>
+</div>
+
 {% endblock %}
 
 {% block content %}

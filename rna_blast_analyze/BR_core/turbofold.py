@@ -7,6 +7,7 @@ from tempfile import mkdtemp
 
 from Bio.SeqRecord import SeqRecord
 
+import rna_blast_analyze.BR_core.exceptions
 from rna_blast_analyze.BR_core import BA_support
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.decorators import timeit_decorator
@@ -59,7 +60,7 @@ def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params):
 
         if len(seq_set) < 2:
             ml.error("Turbofold can't be used with less then 2 sequences.")
-            raise BA_support.NoHomologousSequenceException
+            raise rna_blast_analyze.BR_core.exceptions.NoHomologousSequenceException
 
         if len(seq_set) < n:
             ml.warning(msg_short_list)
@@ -101,7 +102,7 @@ def write_turbofold_confile(input_sequences, turbofold_params=None, cpus=None, o
     if outdir:
         tmpdir = outdir
     else:
-        tmpdir = mkdtemp()
+        tmpdir = mkdtemp(prefix='rba_')
 
     params2write = {
         'Mode': 'MEA',
@@ -209,7 +210,7 @@ def turbofold_with_homologous(all_sequences, nr_homologous, params, n, cpu):
     nr_homologous_set = {str(seq.seq) for seq in nr_homologous}
 
     if len(nr_homologous_set) < 1:
-        raise BA_support.NoHomologousSequenceException
+        raise rna_blast_analyze.BR_core.exceptions.NoHomologousSequenceException
 
     list2predict = []
     for seq in all_sequences:
@@ -217,7 +218,7 @@ def turbofold_with_homologous(all_sequences, nr_homologous, params, n, cpu):
 
         if len(seq_set) < 2:
             ml.error("Turbofold can't be used with less then 2 sequences.")
-            raise BA_support.NoHomologousSequenceException
+            raise rna_blast_analyze.BR_core.exceptions.NoHomologousSequenceException
 
         if len(seq_set) < n:
             ml.warning(msg_short_list)

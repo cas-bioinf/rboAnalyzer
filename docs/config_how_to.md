@@ -47,7 +47,6 @@ rfam_dir = /home/user/rfamdir/
  - locarna (`locarna`)
  - viennarna_bin (`RNAfold`, `RNAalifold`, `RNAplot`)
  - mfold (`hybrid-ss-min`)
- - t-coffee (`t_coffee`)
  - centroid (`centroid_homfold`)
  - turbofold (`TurboFold`)
  - rnashapes

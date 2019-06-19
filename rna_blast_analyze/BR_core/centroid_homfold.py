@@ -10,6 +10,7 @@ from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.decorators import timeit_decorator
 from rna_blast_analyze.BR_core import BA_support
 from rna_blast_analyze.BR_core.fname import fname
+from rna_blast_analyze.BR_core.exceptions import AmbiguousQuerySequenceException
 
 ml = logging.getLogger(__name__)
 
@@ -97,7 +98,7 @@ def centroid_homfold_fast_prep(all_seqs, query, n, len_diff):
     if query.annotations['ambiguous']:
         msgfail = "Query sequence contains ambiguous characters. Can't use centroid_homfold_fast."
         ml.error(msgfail)
-        raise ValueError(msgfail)
+        raise AmbiguousQuerySequenceException(msgfail)
 
     nr_na_ld = BA_support.sel_seq_simple(all_seqs, query, len_diff)
     nr_na_ld_n = nr_na_ld[:int(n)]

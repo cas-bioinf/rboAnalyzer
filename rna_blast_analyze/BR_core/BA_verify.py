@@ -8,7 +8,7 @@ from rna_blast_analyze.BR_core import cmalign
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.tools_versions import blast_minimal_version, locarna_minimal_version, \
     infernal_minimal_version, vrna_minimal_version, clustalo_minimal_version, muscle_minimal_version, \
-    tcoffee_rcoffee_minimal_version, centroid_homfold_minimal_version, turbofold_minimal_version,\
+    centroid_homfold_minimal_version, turbofold_minimal_version,\
     mfold_minimal_version, method_required_tools
 
 ml = logging.getLogger(__name__)
@@ -268,88 +268,6 @@ def verify_muscle(minimal_version):
         return False
 
 
-def verify_tcoffee(minimal_version):
-    # do not check the revision
-    msgversion = 't_coffee is not installed in required version, required version is {}.{}'.format(*minimal_version)
-    msgpath = '{}t_coffee could not be located (not in PATH).'.format(CONFIG.tcoffee_path)
-    msgsuccess = 't_coffee is installed in required version'
-    try:
-        a = check_output(
-            [
-                '{}t_coffee'.format(CONFIG.tcoffee_path),
-                '-version'
-            ]
-        )
-        a = a.decode()
-        if re.search('PROGRAM: T-COFFEE', a):
-            im = re.search('(?<=version_)[0-9.]+', a, flags=re.IGNORECASE)
-            if im:
-                b = im.group()
-                r = re.finditer('[0-9]+', b)
-                for match, minv in zip(r, minimal_version):
-                    v = int(match.group())
-                    if v > minv:
-                        ml.info(msgsuccess)
-                        return True
-                    elif v < minv:
-                        ml.warning(msgversion)
-                        return False
-                ml.info(msgsuccess)
-                return True
-            else:
-                ml.warning(msgversion)
-                return False
-        else:
-            ml.warning(msgversion)
-            return False
-    except FileNotFoundError:
-        ml.warning(msgpath)
-        return False
-
-
-def verify_rcoffee(minimal_version):
-    msgversion = 't_coffee -mode rcoffee is not installed in required version, required version is {}.{}'.format(*minimal_version)
-    msgpath = '{}t_coffee -mode rcoffee could not be located (not in PATH).'.format(CONFIG.muscle_path)
-    msgsuccess = 't_coffee -mode rcoffee is installed in required version'
-
-    if not verify_tcoffee(minimal_version):
-        ml.warning(
-            't_coffee is not installed in required version, required is {}.{}'.format(
-                *minimal_version
-            )
-        )
-        return False
-    try:
-        try:
-            a = check_output(
-                [
-                    '{}t_coffee'.format(CONFIG.muscle_path),
-                    '-mode',
-                    'rcoffee'
-                ],
-                stderr=STDOUT
-            )
-        except CalledProcessError as e:
-            a = e.output
-
-        a = a.decode()
-        t1 = re.search('-- ERROR: You have not provided any sequence', a)
-        t2 = re.search('-- COM:(.)*t_coffee -mode rcoffee', a)
-
-        n1 = re.search("ERROR: special_mode rcoffee is unknown \[FATAL:T-COFFEE\]", a)
-
-        if t1 and t2 and not n1:
-            ml.info(msgsuccess)
-            return True
-        else:
-            ml.warning(msgversion)
-            return False
-
-    except FileNotFoundError:
-        ml.warning(msgpath)
-        return False
-
-
 def verify_centroid_homfold(minimal_version):
     msgversion = 'centroid_homfold is not installed in required version, required version is {}.{}.{}'.format(*minimal_version)
     msgpath = '{}centroid_homfold could not be located (not in PATH).'.format(CONFIG.centriod_path)
@@ -504,7 +422,6 @@ def check_3rd_party_data():
 def check_3rd_party_prediction_tools():
     # clustalo
     # alifold
-    # tcoffee rcoffee
     # refold
     # centroid_homfold
     # TurboFold
@@ -520,10 +437,6 @@ def check_3rd_party_prediction_tools():
 
     if verify_clustalo(clustalo_minimal_version):
         installed.add('clustalo')
-
-    if verify_rcoffee(tcoffee_rcoffee_minimal_version):
-        installed.add('tcoffee')
-        installed.add('rcoffee')
 
     if verify_centroid_homfold(centroid_homfold_minimal_version):
         installed.add('centroid_homfold')
@@ -560,8 +473,10 @@ def check_necessery_tools(methods):
                 if op != '':
                     op = os.path.dirname(op.split('/n')[0]) + os.sep
 
-                    ml.info('Inferred refold.pl in {}'.format(op))
-                    ml.info('writing configuration to {}'.format(CONFIG.conf_file))
+                    msg_found = 'Inferred refold.pl in {}\n' \
+                                'writing configuration to {}'.format(op, CONFIG.conf_file)
+                    ml.info(msg_found)
+                    print(msg_found)
 
                     CONFIG.tool_paths['refold'] = op
                     if 'TOOL_PATHS' not in CONFIG.config_obj:

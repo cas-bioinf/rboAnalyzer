@@ -211,7 +211,7 @@ def f_parser():
         )
     )
     parameters_group.add_argument(
-        '--pm_param_file',
+        '--pm_param_file',  
         type=str,
         metavar='PATH',
         default=None,
@@ -400,7 +400,11 @@ def main():
     # ========= perform argument parsing =========
     args = f_parser()
 
-    return lunch_with_args(args)
+    _ = lunch_with_args(args)
+
+    # if here exit with 0
+    exit(0)
+
 
 
 def lunch_with_args(args):

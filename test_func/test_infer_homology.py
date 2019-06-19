@@ -23,20 +23,23 @@ class Test1WithCMfile(unittest.TestCase):
 
     def test_simple(self):
         self.clean_object()
-        pred, sel, _ = infer_homology.infer_homology(self.data, self.data.args)
+        cm_file, _ = infer_homology.find_and_extract_cm_model(self.data.args, self.data)
+        pred, sel, _ = infer_homology.infer_homology(self.data, self.data.args, cm_file)
 
     def test_rfam(self):
         self.clean_object()
         self.data.args.use_rfam = True
         self.data.args.blast_query = os.path.join(fwd, test_dir, 'RF00001.fasta')
-        pred, sel, cmfile = infer_homology.infer_homology(self.data, self.data.args)
+        cm_file, _ = infer_homology.find_and_extract_cm_model(self.data.args, self.data)
+        pred, sel, cmfile = infer_homology.infer_homology(self.data, self.data.args, cm_file)
         os.remove(cmfile)
 
     def test_with_cm_file(self):
         self.clean_object()
         self.data.args.use_rfam = False
         self.data.cm_file = os.path.join(fwd, test_dir, 'RF00001.cm')
-        pred, sel, _ = infer_homology.infer_homology(self.data, self.data.args)
+        cm_file, _ = infer_homology.find_and_extract_cm_model(self.data.args, self.data)
+        pred, sel, _ = infer_homology.infer_homology(self.data, self.data.args, cm_file)
 
 
 if __name__ == '__main__':

@@ -5,7 +5,7 @@ import os
 import re
 import shutil
 from io import StringIO
-from random import choice, shuffle
+from random import choice
 from subprocess import call, check_output, CalledProcessError
 from tempfile import mkstemp, gettempdir
 from warnings import warn
@@ -32,322 +32,6 @@ def write_fasta_from_list_of_seqrecords(f, seq_list):
     for seq in seq_list:
         f.write('>{}\n{}\n'.format(seq.id,
                                    str(seq.seq)))
-
-
-def run_hybrid_ss_min(in_path, mfold=(10, 2, 20)):
-    """
-    forbid lonely pairs when calling hybrid-ss-min, rnashapes cannot work with them
-
-    # beware of
-
-    :param in_path: path to file to compute suboptimal structures for
-    :param mfold: mfold parameters (P, W, M)
-    :returns: list of SeqRecord objects wit suboptimal structures as letter_annotations in them
-    """
-    ml.info('Runing hybrid-ss-min')
-    assert isinstance(mfold, (tuple, list)) and 3 == len(mfold)
-
-    P = mfold[0]
-    W = mfold[1]
-    M = mfold[2]
-
-    # use context manager to care about closing FNULL
-    with open(os.devnull, 'w') as FNULL:
-
-        # run_prefix = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(6))
-        # hybrid ss operates from call directory, output are ctfiles
-        if not os.path.isfile(in_path):
-            raise FileNotFoundError('Provided file path not found %s', in_path)
-        repeat = 0
-        done = False
-        while repeat < 5:
-            try:
-                cmd = [
-                    '{}hybrid-ss-min'.format(CONFIG.mfold_path),
-                    '--suffix=DAT',
-                    '--NA=RNA',
-                    '--noisolate',
-                    '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
-                    in_path
-                ]
-                ml.debug(cmd)
-                if ml.getEffectiveLevel() == 10:
-                    rt = call(cmd, cwd=os.path.dirname(in_path))
-                else:
-                    rt = call(
-                        cmd,
-                        cwd=os.path.dirname(in_path),
-                        stdout=FNULL,
-                        stderr=FNULL
-                    )
-
-                if rt:
-                    raise ChildProcessError('Execution of hybrid-ss-min failed')
-
-                # well, there is only one file, with the same name as the input file had
-                if not os.path.isfile(in_path + '.ct'):
-                    raise ChildProcessError('Execution of hybrid-ss-min failed - not output file\n'
-                                            'expected {}'.format(in_path + '.ct'))
-
-                with open(in_path + '.ct', 'r') as sout:
-                    suboptimals = ct2db(sout)
-
-                done = True
-                break
-            except ChildProcessError:
-                # try again
-                repeat += 1
-                ml.warning('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
-
-        if repeat >= 5 and not done:
-            ml.warning(
-                'There is an issue with hybrid-ss-min, that it does not work for certain combination of energies,'
-                ' window parameters and desired number of structures.'
-                'The issue also appears to be related to exact order of sequences in the input file'
-                'we well try to resolve this by predicting each sequence separetly'
-            )
-
-            repeat = 1
-            # get the order of file
-            fasta_file = []
-            with open(in_path, 'r') as f:
-                for seqr in SeqIO.parse(f, 'fasta'):
-                    fasta_file.append(seqr)
-
-            while repeat < 5:
-                try:
-                    # shuffle input file
-                    # the shuffle operates directly on the list, it doesnt return anything
-                    shuff_fasta = fasta_file.copy()
-                    shuffle(shuff_fasta)
-
-                    # write shuffled file and rewrite input path
-                    fd, retry_path = mkstemp(prefix='rba_', suffix='_05', dir=CONFIG.tmpdir)
-                    with os.fdopen(fd, 'w') as fp:
-                        for r in shuff_fasta:
-                            fp.write('>{}\n{}\n'.format(r.id, str(r.seq)))
-                    cmd2 = [
-                            '{}hybrid-ss-min'.format(CONFIG.mfold_path),
-                            '--suffix=DAT',
-                            '--NA=RNA',
-                            '--noisolate',
-                            '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
-                            retry_path
-                        ]
-                    ml.debug(cmd2)
-                    if ml.getEffectiveLevel() == 10:
-                        rt = call(cmd2, cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])))
-                    else:
-                        rt = call(
-                            cmd2,
-                            cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])),
-                            stdout=FNULL,
-                            stderr=FNULL
-                        )
-
-                    if rt:
-                        print('exit code of child process: {}'.format(rt))
-                        raise ChildProcessError('Execution of hybrid-ss-min failed')
-
-                    # well, there is only one file, with the same name as the input file had
-
-                    if not os.path.isfile(retry_path + '.ct'):
-                        raise ChildProcessError('Execution of hybrid-ss-min failed - not output file\n'
-                                                'expected {} to be present'.format(retry_path + '.ct'))
-
-                    with open(retry_path + '.ct', 'r') as sout:
-                        shuff_suboptimals = ct2db(sout)
-
-                    # rearrange entries (maybe unnecessary, but to be sure)
-                    suboptimals = []
-                    s_s_names = [i.id for i in shuff_suboptimals]
-                    for seqr in fasta_file:
-                        suboptimals.append(shuff_suboptimals[s_s_names.index(seqr.id)])
-
-                    done = True
-                    break
-                except ChildProcessError:
-                    # try again
-                    repeat += 1
-                    # adjust the max amount of produced structures
-                    ml.warning('hybrid-ss-min failed, trying again {} times'.format(5-repeat))
-                finally:
-                    if retry_path:
-                        for ext in ['.run', '.plot', '.dG', '.ct', '.ann', '']:
-                            try:
-                                rpath = retry_path + ext
-                                os.remove(rpath.strip())
-                            except FileNotFoundError:
-                                ml.warning('cannot remove file: {}, file not found'.format(retry_path))
-                            except OSError:
-                                ml.warning('cannot remove file: {}, file is directory'.format(retry_path))
-
-            if not done:
-                # make last try: predict one by one
-                ml.warning('Last try to predict structures with hybrid-ss-min')
-                suboptimals = []
-                for seq in fasta_file:
-
-                    fd, retry_path = mkstemp(prefix='rba_', suffix='_06', dir=CONFIG.tmpdir)
-                    with os.fdopen(fd, 'w') as fid:
-                        fid.write('>{}\n{}\n'.format(seq.id, str(seq.seq)))
-                    cmd3 = [
-                        '{}hybrid-ss-min'.format(CONFIG.mfold_path),
-                        '--suffix=DAT',
-                        '--NA=RNA',
-                        '--noisolate',
-                        '--mfold=' + str(P) + ',' + str(W) + ',' + str(M),
-                        retry_path
-                    ]
-                    ml.debug(cmd3)
-                    if ml.getEffectiveLevel() == 10:
-                        rt = call(cmd3, cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])))
-                    else:
-                        rt = call(
-                            cmd3,
-                            cwd=''.join(os.path.join(os.path.split(retry_path)[:-1])),
-                            stdout=FNULL,
-                            stderr=FNULL
-                        )
-
-                    if rt:
-                        msgfail = 'Execution of hybrid-ss-min failed'
-                        ml.error(msgfail)
-                        ml.error(cmd3)
-                        raise ChildProcessError(msgfail)
-
-                    if not os.path.isfile(retry_path + '.ct'):
-                        msgfail = 'Execution of hybrid-ss-min failed - not output file'
-                        ml.error(msgfail)
-                        ml.error(cmd3)
-                        raise ChildProcessError(msgfail)
-
-                    with open(retry_path + '.ct', 'r') as sout:
-                        suboptimals.append(ct2db(sout)[0])
-
-                    os.remove(retry_path + '.run')
-                    os.remove(retry_path + '.plot')
-                    os.remove(retry_path + '.dG')
-                    os.remove(retry_path + '.ct')
-                    os.remove(retry_path + '.ann')
-                    os.remove(retry_path)
-
-                done = True
-
-            if done:
-                pass
-            else:
-                msgfail = 'hybrid-ss-failed with unexpected behaviour, please contact developers'
-                ml.critical(msgfail)
-                raise Exception(msgfail)
-
-        # remove files that hybrid-ss-min created
-        # the source file is removed elsewhere
-        os.remove(in_path + '.run')
-        os.remove(in_path + '.plot')
-        os.remove(in_path + '.dG')
-        os.remove(in_path + '.ct')
-        os.remove(in_path + '.ann')
-
-        with open(in_path, 'r') as fin:
-            inseqs = [s for s in SeqIO.parse(fin, format='fasta')]
-            suboptimals = rebuild_structures_output_from_pred(inseqs, suboptimals, method='hybrid-ss-min')
-
-            return suboptimals
-
-
-def ct2db(f, energy_txt='dG'):
-    """
-    read ct Zuker file
-        there are two versions,
-        first, in ct file there in principle can be pseudoknots encoded and simple db notation cannot handle them
-        second, when pseudoknots are present, wee need to use different king of brackets
-        also, there is WUSS notation for different types of pairs present
-    :returns list of Seq Record objects,
-        each Seq Record object contains suboptimal structures in its 'letter_annotations'
-        in dict with keys termed ss1 ss2 ...,
-        the list of keys to letter_annotations is in annotations under the key 'sss'
-    """
-    ml.debug(fname())
-    # if not isinstance(f, 'file'):
-    #     print('accepts open handle to a file')
-    #     raise FileNotFoundError
-    txt = f.readline()
-    out = []    # list of seq record objects
-    prev_seq = ''
-    prev_name = ''
-
-    # sl_re = '\d+\s*(?=dG)'
-    sl_re = '\d+\s*(?=' + energy_txt + ')'
-
-    # q_re = '(?<=dG\s=)\s*-?\d+\.?\d*'
-    q_re = '(?<=' + energy_txt + '\s=)\s*-?\d+\.?\d*'
-
-    while txt:
-        seq_len = int(re.search(sl_re, txt).group().lstrip().rstrip())
-        q = re.search(q_re, txt)
-        # seq_e = float(q.group().lstrip().rstrip())
-        seq_name = txt[q.end():].lstrip().rstrip()
-
-        seq_seq = bytearray('#' * seq_len, 'utf-8')
-        seq_str = bytearray('#' * seq_len, 'utf-8')
-        txt = f.readline()
-        while txt:
-            # this block parses one structure
-            l = txt.split()
-            # adjust pos for python indexing
-            pos = int(l[0]) - 1
-            # print(str(pos) + ' ' + l[1] + '\n')
-            seq_seq[pos] = ord(l[1])
-
-            # i is position of pair which is pos paired with
-            # adjust for python indexing
-            i = int(l[4]) - 1
-            if i == -1:
-                seq_str[pos] = 46   # '.'
-            elif pos < i:
-                seq_str[pos] = 40   # '('
-                seq_str[i] = 41     # ')'
-            else:
-                seq_str[pos] = 41   # ')'
-                seq_str[i] = 40     # '('
-
-            txt = f.readline()
-            # if txt is EOF the loops break itsefl
-            if pos + 1 == seq_len:
-                # standard end
-                # print('standart_end')
-                break
-            elif 'dG' in txt:
-                # print('didnt_reach_end')
-                # didn't reach end
-                break
-        # add parsed structure
-        if seq_seq == prev_seq and seq_name == prev_name:
-            # only add new structure
-            # get keys to dict
-            n = len(curr_record.annotations.get('sss'))
-            curr_record.letter_annotations['ss' + str(n)] = seq_str.decode('utf-8')
-            curr_record.annotations['sss'].append('ss' + str(n))
-            prev_seq = seq_seq
-            prev_name = seq_name
-            if txt == '':
-                out.append(curr_record)
-
-        else:
-            if not prev_seq == '':
-                out.append(curr_record)
-            # here create an new record
-            curr_record = SeqRecord(Seq(seq_seq.decode('utf-8'), IUPAC.IUPACUnambiguousRNA), id=seq_name, name=seq_name)
-            curr_record.annotations['sss'] = ['ss0']
-            curr_record.letter_annotations['ss0'] = seq_str.decode('utf-8')
-            prev_seq = seq_seq
-            prev_name = seq_name
-
-            if txt == '':
-                out.append(curr_record)
-
-    return out
 
 
 def rc_hits_2_rna(seqs, strand=None):
@@ -552,7 +236,7 @@ def select_sequences_from_similarity_rec(dist_mat: np.ndarray, sim_threshold_per
     ml.debug(fname())
     # dists = np.triu(dist_mat.as_matrix(), 1)          # removes unwanted similarities
     if dist_mat is None:
-        return 0,
+        return [0]
     dists = dist_mat.transpose()
     # row, col = where(dists > sim_threshold_percent) # determine where the similarities are
     include = set()
@@ -980,14 +664,6 @@ def remove_files_with_try(files, msg_template):
     return
 
 
-class NoHomologousSequenceException(Exception):
-    pass
-
-
-class AmbiguousQuerySequenceException(Exception):
-    pass
-
-
 def non_redundant_seqs(sequences: list) -> list:
     """
     return list of non redundant sequences
@@ -1063,3 +739,181 @@ def sel_seq_simple(all_seqs, query, len_diff):
     nr_na = non_redundant_seqs(not_amb)
     nr_na_ld = filter_by_length_diff(nr_na, len(query), len_diff)
     return nr_na_ld
+
+
+def annotate_ambiguos_bases(seqlist):
+    iupac = IUPACmapping()
+    reg = re.compile("[^" + "^".join(iupac.unambiguous) + "]+", re.IGNORECASE)
+    for seq in seqlist:
+        m = re.search(reg, str(seq.seq))
+        if m:
+            msg = "Ambiguous base dected in {}, violating base {}, pos {}".format(
+                seq.id,
+                m.group(),
+                m.start()
+            )
+            ml.warning(msg)
+            seq.annotations['ambiguous'] = True
+            if 'msgs' not in seq.annotations:
+                seq.annotations['msgs'] = []
+            seq.annotations['msgs'].append(msg)
+        else:
+            seq.annotations['ambiguous'] = False
+
+    return seqlist
+
+
+class IUPACmapping(object):
+    """
+    holder for the IUPAC ambigues information
+    """
+    def __init__(self):
+        self.allowed_bases = tuple('ACGTURYSWKMBDHVN')
+        self.ambiguous = tuple('RYSWKMBDHVN')
+        self.unambiguous = tuple(set(self.allowed_bases) - set(self.ambiguous))
+        self.mapping = {
+            # 'A': ('A',),
+            # 'C': ('C',),
+            # 'G': ('G',),
+            # 'T': ('T',),
+            # 'U': ('U',),
+            'R': ('A', 'G'),
+            'Y': ('C', 'T'),
+            'S': ('G', 'C'),
+            'W': ('A', 'T'),
+            'K': ('G', 'T'),
+            'M': ('A', 'C'),
+            'B': ('C', 'G', 'T'),
+            'D': ('A', 'G', 'T'),
+            'H': ('A', 'C', 'T'),
+            'V': ('A', 'C', 'G'),
+            'N': ('A', 'C', 'G', 'T')
+        }
+        self.rnamapping = self._RNAze()
+
+    def _RNAze(self):
+        """
+        change the 'T' to 'U' in mapping
+        :return:
+        """
+        rnamapping = dict()
+        for key in self.mapping.keys():
+            if 'T' in self.mapping[key]:
+                rnamapping[key] = tuple([i for i in self.mapping[key] if i != 'T'] + ['U'])
+            else:
+                rnamapping[key] = self.mapping[key]
+        return rnamapping
+
+
+def iter2file_name(orig_file, multi_query, iteration):
+    if multi_query:
+        if '.' in orig_file:
+            parts = orig_file.split('.')
+            file = '.'.join(parts[:-1]) + '_({}).{}'.format(iteration, parts[-1])
+        else:
+            file = '{}_({})'.format(orig_file, iteration)
+    else:
+        file = orig_file
+    return file
+
+
+def blast_hit_getter_from_hits(x):
+    return x[1]
+
+
+def blast_hit_getter_from_subseq(x):
+    return x.source.annotations['blast'][1]
+
+
+def ct2db(f, energy_txt='dG'):
+    """
+    read ct Zuker file
+        there are two versions,
+        first, in ct file there in principle can be pseudoknots encoded and simple db notation cannot handle them
+        second, when pseudoknots are present, wee need to use different king of brackets
+        also, there is WUSS notation for different types of pairs present
+    :returns list of Seq Record objects,
+        each Seq Record object contains suboptimal structures in its 'letter_annotations'
+        in dict with keys termed ss1 ss2 ...,
+        the list of keys to letter_annotations is in annotations under the key 'sss'
+    """
+    ml.debug(fname())
+    # if not isinstance(f, 'file'):
+    #     print('accepts open handle to a file')
+    #     raise FileNotFoundError
+    txt = f.readline()
+    out = []    # list of seq record objects
+    prev_seq = ''
+    prev_name = ''
+
+    # sl_re = '\d+\s*(?=dG)'
+    sl_re = '\d+\s*(?=' + energy_txt + ')'
+
+    # q_re = '(?<=dG\s=)\s*-?\d+\.?\d*'
+    q_re = '(?<=' + energy_txt + '\s=)\s*-?\d+\.?\d*'
+
+    while txt:
+        seq_len = int(re.search(sl_re, txt).group().lstrip().rstrip())
+        q = re.search(q_re, txt)
+        # seq_e = float(q.group().lstrip().rstrip())
+        seq_name = txt[q.end():].lstrip().rstrip()
+
+        seq_seq = bytearray('#' * seq_len, 'utf-8')
+        seq_str = bytearray('#' * seq_len, 'utf-8')
+        txt = f.readline()
+        while txt:
+            # this block parses one structure
+            l = txt.split()
+            # adjust pos for python indexing
+            pos = int(l[0]) - 1
+            # print(str(pos) + ' ' + l[1] + '\n')
+            seq_seq[pos] = ord(l[1])
+
+            # i is position of pair which is pos paired with
+            # adjust for python indexing
+            i = int(l[4]) - 1
+            if i == -1:
+                seq_str[pos] = 46   # '.'
+            elif pos < i:
+                seq_str[pos] = 40   # '('
+                seq_str[i] = 41     # ')'
+            else:
+                seq_str[pos] = 41   # ')'
+                seq_str[i] = 40     # '('
+
+            txt = f.readline()
+            # if txt is EOF the loops break itsefl
+            if pos + 1 == seq_len:
+                # standard end
+                # print('standart_end')
+                break
+            elif 'dG' in txt:
+                # print('didnt_reach_end')
+                # didn't reach end
+                break
+        # add parsed structure
+        if seq_seq == prev_seq and seq_name == prev_name:
+            # only add new structure
+            # get keys to dict
+            n = len(curr_record.annotations.get('sss'))
+            curr_record.letter_annotations['ss' + str(n)] = seq_str.decode('utf-8')
+            curr_record.annotations['sss'].append('ss' + str(n))
+            prev_seq = seq_seq
+            prev_name = seq_name
+            if txt == '':
+                out.append(curr_record)
+
+        else:
+            if not prev_seq == '':
+                out.append(curr_record)
+            # here create an new record
+            curr_record = SeqRecord(Seq(seq_seq.decode('utf-8'), IUPAC.IUPACUnambiguousRNA), id=seq_name, name=seq_name)
+            curr_record.annotations['sss'] = ['ss0']
+            curr_record.letter_annotations['ss0'] = seq_str.decode('utf-8')
+            prev_seq = seq_seq
+            prev_name = seq_name
+
+            if txt == '':
+                out.append(curr_record)
+
+    return out

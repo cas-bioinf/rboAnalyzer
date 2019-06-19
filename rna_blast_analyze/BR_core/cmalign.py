@@ -430,7 +430,7 @@ def read_cmalign_sfile(f):
     """
     # there is an issue that if the table has more then 10000 entries, the header is repeated
     ml.debug(fname())
-    sfile = pd.read_table(
+    sfile = pd.read_csv(
         f,
         skiprows=4,
         header=None,
@@ -446,7 +446,6 @@ def read_cmalign_sfile(f):
 
 
 def parse_cmalign_infernal_table(tbl):
-    # todo revrite this to be fully featured pd.table read not this hacky function returning strings
     # first row => names but with spaces
     # second row => guide line
     ml.debug(fname())
@@ -520,6 +519,17 @@ def parse_cmalign_infernal_table(tbl):
 
 def get_cm_model(query_file, params=None, threads=None):
     ml.debug(fname())
+    cmscan_data = get_cm_model_table(query_file, params, threads)
+    best_model_row = select_best_matching_model_from_cmscan(cmscan_data)
+
+    best_model = best_model_row['target_name']
+
+    ml.info('Best matching model: {}'.format(best_model))
+    return best_model
+
+
+def get_cm_model_table(query_file, params=None, threads=None):
+    ml.debug(fname())
     if params is None:
         params = dict()
 
@@ -530,13 +540,14 @@ def get_cm_model(query_file, params=None, threads=None):
     f = open(out_table, 'r')
     cmscan_data = parse_cmalign_infernal_table(f)
     f.close()
+    os.remove(out_table)
+    return cmscan_data
 
+
+def select_best_matching_model_from_cmscan(cmscan_data):
     ei = cmscan_data['E-value'].idxmin()
     si = cmscan_data['score'].idxmax()
     assert ei == si
 
-    best_model = cmscan_data['target_name'][ei]
-    ml.info('Best matching model: {}'.format(best_model))
-    os.remove(out_table)
-
+    best_model = cmscan_data.loc[ei].to_dict()
     return best_model

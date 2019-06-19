@@ -1,6 +1,6 @@
-# RNA BLAST ANALYZE pipeline
+# rboAnalyzer
 ## Introduction
-This pipeline is meant as a complementary step when using BLAST algorithm
+rboAnalyzer is pipeline meant as a complementary step when using BLAST algorithm
  to search non-coding RNA (ncRNA) with secondary structure.
 As the BLAST is general sequence alignment algorithm, it's results (output)
  is missing some very useful features in context of ncRNAs.
@@ -8,49 +8,49 @@ As the BLAST is general sequence alignment algorithm, it's results (output)
 Also the output apart from well scoring hits, usually contains sequence
  fragments (subject sequence only partially aligned to query).
 Such hit may bring valuable information by capturing distant homology or
-it could be just ...
+it may be nothing.
 
-With our pipeline we add information to such BLAST search to help researcher
+With our rboAnalyzer we add information to such BLAST search to help researcher
  decide which hits are real ncRNAs and what their secondary structure might be.
 
 ## Functionality overview
 <img src="RBA_pipeline_overview.svg" width="700px" />
 
 The pipeline has 3 stages:
-1) Hit extension.
-2) Inference of homology of extended hit to query sequence.
+1) Hit completion.
+2) Inference of homology of completed hit to query sequence.
 3) Secondary structure prediction.
 
 Each of these stages has dedicated section.
 
-### Hit extension
-The pipeline has 3 modes for extending BLAST hits.
+### Hit completion
+The pipeline has 3 modes for completing BLAST hits to full length of the query.
 
 1) __simple__
 
-    This means that location of extended sequence is computed from
-     unaligned parts of query sequence.
+    This means that location of completed sequence is computed from
+     flanking unaligned parts of query sequence.
 
 2) __locarna__
 
-    In this mode, the hit loci at the subject sequence is realigned to
-     the query sequence with Locarna algorithm. The subject sequence
-     aligned to the query is considered as extended sequence.
+    In this mode, the loci containing hit with flanking regions at the subject sequence is realigned to
+     the query sequence with Locarna algorithm. The sequence
+     aligned to the query is considered to be completed sequence.
 
 3) __joined__
 
-    Here the two aforementioned mode are combined and extended sequences
-     are scored with RSEARCH covariance model. The better scoring sequence
+    Here the two aforementioned modes are combined and extended sequences
+     are scored with covariance model. The better scoring sequence
      is chosen.
 
 #### Extension - simple
 <img src="figure_blast_simple.svg" width="700px" />
 
 
-In this mode we compute the extended hit location by taking length of
- unaligned query sequence (can be at start, end or both) and add or
+In this mode we compute the completed seuence location by taking length of
+ unaligned parts of query sequence in HSP (can be at start, end or both) and add or
  subtract it respectively from hit start/end index.
-In the toy example we have the Plus/Plus BLAST hit with query sequence
+In the toy example we have the Plus/Plus BLAST HSP with query sequence
  aligned from 10 to 21 to subject sequence 1000 to 1009.
 If query is 50 bases long, then length of unaligned query at start is 9
  and length of unaligned query at end is 29.
@@ -65,12 +65,12 @@ With __locarna__ mode we first extract so called _supersequence_. Which is
  region on subject sequence extended by unaligned query region with
  additional regions. This _supersequence_ is then realigned with Locarna
  algorithm to obtain extended sequence.
-The Locarna algorithm utilises secondary structure in it's computations,
- thus it is more suited to align ncRNAs.
+The Locarna algorithm utilises possible pairings in it's computations,
+ thus it is better suited to align ncRNAs then BLAST.
 The Locarna algorithm is by default called with `struct-local=0`,
  `sequ-local=0` and `free-endgaps=++++` parameters.
-In addition the information from BLAST hits is utilized in form of
- providing so called anchor to the Locarna algorithm.
+Additionaly the information about matching nucleotides from BLAST HSPs 
+is used to construct so called anchor to the Locarna algorithm.
 The anchor defines columns of alignment which are considered aligned.
 As the anchor we consider consecutive series of matches of length at
  least `L` in BLAST alignment.
@@ -80,53 +80,55 @@ This way the alignment is anchored and the Locarna algorithm can align
  the algorithm does not put penalty to unaligned ends of _supersequence_.
 
 #### Extension - joined
-This approach combines the __simple__ and __locarna__.
+This approach combines the __simple__ and __locarna__. It computes both and 
+ for each HSPs it chooses completed sequence based on score to covariance model.
 
 ### Homology inference
-Here we compute score for relation between extended sequence and query sequence.
+Here we compute score for relation between completed sequence and query sequence.
 The computation is based on aligning covariance model (CM) to each extended
  sequence with `cmalign` program from the Infernal package.
 
-We implement 3 options on how to get covariance model:
+We've implemented 3 options on how to provide covariance model:
 
 1) build with RSEARCH (default)
 
-    By default we build the covariance model from the query sequence and RIBOSUM65 matrix.
-    The RIBOSUM file used can be changed by [alternative](config_how_to.md) `config.txt` file.
+    By default we build the covariance model from the query sequence (secondary structure predicted by RNAfold) and RIBOSUM matrix.
+    The RIBOSUM is RIBOSUM65 by default and it can be changed in [alternative](config_how_to.md) `config.txt` file.
 
 2) supply your own model (the `--cm_file` option)
 
-    If the covariance model is known it can be provided with `--cm_file` option.
+    If the covariance model is known, it can be provided with `--cm_file` option.
     Only one model per file is allowed (this is not checked by the pipeline).
+    
+    Note that provided covariance model will also be used in all prediction methods using covariance models (starting with `rfam`).
 
-3) infer from Rfam (the `--use_rfam` option)
+3) infer from RFAM (the `--use_rfam` option)
 
     The Rfam database is searched with query sequence for the best matching
     model (`cmscan`).
 
 ### Secondary structure prediction
-In the secondary structure prediction the pipeline can use multiple approaches (prediction methods).
+The rboAnalyzer can use multiple approaches (prediction methods) to predict secondary structures.
 The prediction methods can be (roughly) divided to following groups:
 
-- Predict structure independently on other extended sequences
-    The advantage here is robustness to possible improper parameter choice.
+- Predict structure independently on other completed sequences
+    The advantage for these methods is robustness to possible improper parameter choice.
     - [rnafold](prediction_methods.md#rnafold)
     - [subopt_fold_query](prediction_methods.md#subopt_fold_query)
     - [rfam_rnafoldc](prediction_methods.md#rfam_rnafoldc)
+    - [rfam_centroid_homfold](prediction_methods.md#rfam_centroid_homfold)
     - [rfam_subopt](prediction_methods.md#rfam_subopt)
 
-- Use _trusted_ extended sequences as reference
+- Use _trusted_ completed sequences as reference
     - [centroid_homfold](prediction_methods.md#centroid_homfold)
     - [TurboFold](prediction_methods.md#TurboFold)
     - [TurboFold_fast](prediction_methods.md#TurboFold_fast)
 
-- Use _trusted_ extended sequences to build consensus secondary structure
+- Use _trusted_ completed sequences to build consensus secondary structure
     - [clustalo_alifold_refold_rnafoldc](prediction_methods.md#clustalo_alifold_refold_rnafoldc)
     - [muscle_alifold_refold_rnafoldc](prediction_methods.md#muscle_alifold_refold_rnafoldc)
-    - [rcoffee_alifold_refold_rnafoldc](prediction_methods.md#tcoffe_rcoffee_alifold_refold_rnafoldc)
     - [clustalo_alifold_unpaired_conserved_refold_rnafoldc](prediction_methods.md#clustalo_alifold_unpaired_conserved_refold_rnafoldc)
     - [muscle_alifold_unpaired_conserved_refold_rnafoldc](prediction_methods.md#muscle_alifold_unpaired_conserved_refold_rnafoldc)
-    - [rcoffee_alifold_unpaired_conserved_refold_rnafoldc](prediction_methods.md#rcoffee_alifold_unpaired_conserved_refold_rnafoldc)
     - [subopt_fold_clustal_alifold](prediction_methods.md#subopt_fold_clustal_alifold)
     - [subopt_fold_muscle_alifold](prediction_methods.md#subopt_fold_muscle_alifold)
 
@@ -138,13 +140,13 @@ The pipeline is able to produce several output formats, most handy being
 - html
     Stand-alone web page containing sequences and predicted secondary structures.
     If internet connection is avalible, it can be used to view respective
-    genome loci for each blast hit using NCBI SeqViewer.
+    genome loci for each BLAST HSP using NCBI SeqViewer.
 - json
     Complete json-readable pipeline output (all other output can be produced from this one.).
 - csv
     Output table in comma separated values. Contains all important information
-    including original hit specification, extended sequence location,
-    sequence and secondary structure itself.
+    including original HSP data, extended sequence location,
+    sequence and secondary structure(s) itself.
 
 ## HTML output
 The html output is organized around BLAST output. Each blast hit gets
@@ -154,7 +156,7 @@ it's separate section with five parts:
 
   2) pipeline report with extended sequence indices and RSEARCH bit score
 
-  3) the extended sequence itself (checkbox or avalible for direct copy)
+  3) the completed sequence itself (checkbox or avalible for direct copy)
 
   4) one or multiple predicted secondary structures, each with its own checkbox for export
 
