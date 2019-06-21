@@ -18,6 +18,8 @@ More information on the pipeline is avalible in the [docs](docs/help.md) section
 
 ## Installation
 
+<!---
+
 ### Install via Conda
  The easies way to install this pipeline is to use conda. This package is avalible
  from bioconda channel.
@@ -37,6 +39,7 @@ conda install -c conda-forge -c bioconda rna_blast_analyze
 If virtual environment is used, then you need to activate virtual
  environment before usage
 
+-->
 
 ### Install from source
 
