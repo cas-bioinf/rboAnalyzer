@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # package_data
 # - directly related to code
@@ -26,7 +26,7 @@ setup(
     author_email='marek.schwarz@biomed.cas.cz',
     entry_points={
         'console_scripts': [
-            'rna_blast_analyze = rna_blast_analyze.BA:main',
+            'rboAnalyzer = rna_blast_analyze.BA:main',
             'genomes_from_blast = rna_blast_analyze.download_blast_genomes:main'
         ],
     },
@@ -39,6 +39,7 @@ setup(
         'biopython',
         'argcomplete',
     ],
+    # packages=find_packages(),
     packages=['rna_blast_analyze', 'rna_blast_analyze.BR_core', 'rna_blast_analyze.BR_core.output'],
     package_data=package_data,
     include_package_data=True,

@@ -20,6 +20,9 @@ ch.setFormatter(formatter)
 
 logger.addHandler(ch)
 
+cfg_name = '--config_file'
+download_name = '--donwload_rfam'
+
 with open(os.path.join(os.path.dirname(__file__), 'VERSION'), 'r') as o:
     version = o.read().strip()
 
@@ -180,7 +183,7 @@ def f_parser():
         help='Search in rfam database for covariance model to infer homology with instead of RSEARCH model.'
     )
     misc_group.add_argument(
-        '--download_rfam',
+        download_name,
         action='store_true',
         default=False,
         help='Retrieve RFAM covariance models database. Will download only if new version avalible.'
@@ -191,7 +194,7 @@ def f_parser():
         version='%(prog)s ' + version
     )
     parameters_group.add_argument(
-        '--config_file',
+        cfg_name,   # --config_file
         type=str,
         default=None,
         metavar='PATH',
@@ -211,7 +214,7 @@ def f_parser():
         )
     )
     parameters_group.add_argument(
-        '--pm_param_file',  
+        '--pm_param_file',
         type=str,
         metavar='PATH',
         default=None,
@@ -398,17 +401,28 @@ def main():
 
     # outer envelope for the script
     # ========= perform argument parsing =========
+
+    if download_name in sys.argv and not ('-q' in sys.argv or '--blast_query' in sys.argv):
+        # run download rfam here
+        # do not run, if given with normal run request
+        from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
+        from rna_blast_analyze.BR_core import cmalign
+        if cfg_name in sys.argv:
+            CONFIG.override(tools_paths(config_file=sys.argv[sys.argv.index(cfg_name) + 1]))
+        cmalign.download_cmmodels_file()
+        # rfam database downloaded
+        exit(0)
+
     args = f_parser()
 
     _ = lunch_with_args(args)
 
-    # if here exit with 0
+    # if we reach here, exit with 0
     exit(0)
 
 
 
 def lunch_with_args(args):
-
     # ========= imports ==========
     # move slow imports here, so the argcomplete would be fast
     from rna_blast_analyze.BR_core import BA_verify

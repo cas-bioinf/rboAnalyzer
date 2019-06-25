@@ -62,8 +62,6 @@ def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iterat
     #  but use inferred CM only if --use_rfam was given
     #  if CM provided, also run inference but use provided file
     # print explanation alongside this information
-    # todo - rfam is always required - move it to requirements
-    #  download during install?
 
     # find and extract cm model
     # This code is moved to each extension method to allow fail-fast if model is found in RFAM

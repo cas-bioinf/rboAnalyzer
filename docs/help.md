@@ -1,7 +1,7 @@
 # rboAnalyzer
 ## Introduction
-rboAnalyzer is pipeline meant as a complementary step when using BLAST algorithm
- to search non-coding RNA (ncRNA) with secondary structure.
+rboAnalyzer is pipeline meant as a complementary step when BLAST algorithm
+ was used to search for query that is non-coding RNA (ncRNA) with secondary structure (does not have to be known).
 As the BLAST is general sequence alignment algorithm, it's results (output)
  is missing some very useful features in context of ncRNAs.
 
@@ -227,3 +227,13 @@ The NCBI sequence viewer works only if Internet connection is available.
 It may take some time to load (especially with large genomes) and when the report
  contains many BLAST hits it may required more substantial amount of RAM.
  The data for the sequence viewer are not saved across sessions (after you close the web page), and must be reloaded re-lunch.
+
+## Funding
+
+This work was supported by ELIXIR CZ research infrastructure project (MEYS Grant No: LM2015047) including access to computing and storage facilities.
+
+![elixir logo](ELIXIR_CZECHREPUBLIC_white_background_small.png)
+
+This work was supported from European Regional Development Fund-Project ELIXIR-CZ (No. CZ.02.1.01/0.0/0.0/16_013/0001777).
+
+![msmt logo](logolink_OP_VVV_hor_barva_eng.jpg)
