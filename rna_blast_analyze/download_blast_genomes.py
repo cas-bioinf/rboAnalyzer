@@ -14,14 +14,14 @@ from http.client import HTTPException
 def parser():
     p = argparse.ArgumentParser(
         description=(
-            'Download sequences from BLAST output. The script will download records in BLAST output from '
-            'NCBI nucl database using entrez. The BLAST db needed for running rna_blast_analyze pipeline '
-            'will also be created.'
-            'If the --out FILE exists we assume that it is fasta file - it will be scanned for fasta headers '
-            'containing accession.version. Required records present in the file will not be downloaded.'
-            'New records will be appended to the file. The BLAST db will overwrite old BLAST db of same name.'
+            'Download whole sequences whose accessions are present in BLAST output from NCBI.'
+            ' The script will download records in BLAST output from NCBI nucleotide database using entrez.'
+            ' The BLAST database needed for running rboAnalyzer will also be created.'
+            ' If the --out FILE exists we assume that it is FASTA file - it will be scanned for fasta header IDs in form of accession.version.'
+            ' Required records present in the file will not be downloaded.'
+            ' New records will be appended to the file. The BLAST db will overwrite old BLAST db of same name.'
         ),
-        usage='download_seqs_from_blast -email YOUR@EMAIL -blast_in BLAST_FILE'
+        usage='genomes_from_blast -email YOUR@EMAIL -blast_in BLAST_FILE'
     )
     p.add_argument(
         '-email',
@@ -43,7 +43,7 @@ def parser():
         type=str,
         default=None,
         help=(
-            'Output fasta file. Blast db name is --out FILE + ".bdb". '
+            'Output fasta file. Default "[BLAST IN]+.fasta". The BLAST db name is then --out FILE + ".bdb".'
         )
     )
     p.add_argument(
@@ -123,7 +123,7 @@ def main():
                 # nothing to retrieve & check successful
                 break
 
-            with open(args.out, 'r+') as h:
+            with open(of, 'r+') as h:
                 # seek to EOF
                 h.seek(0, 2)
                 # remove already retrieved accessions
@@ -132,7 +132,7 @@ def main():
 
                 retrieve_and_write(h, accessions)
         else:
-            with open(args.out, 'w+') as h:
+            with open(of, 'w+') as h:
                 retrieve_and_write(h, accessions)
 
         c += 1
@@ -140,10 +140,10 @@ def main():
     # convert to blastdb
     cmd = [
         'makeblastdb',
-        '-in', args.out,
+        '-in', of,
         '-input_type', 'fasta',
         '-dbtype', 'nucl',
-        '-out', args.out + '.bdb',
+        '-out', of + '.bdb',
         '-parse_seqids'
     ]
     r = call(cmd)

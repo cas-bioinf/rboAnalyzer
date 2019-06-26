@@ -254,6 +254,18 @@ rboAnalyzer -in MS1_BLAST_output -q MS1_query.fasta -db genomes.fasta.bdb -html 
   you might get better results by setting the `--retry` to some larger number.
   Also check if NCBI entrez services are functional.
 
+<!--
+3. WARNING - refold.pl could not be located (not in PATH)
+  Issued when refold.pl executable could not be found.
+  If everything was installed with conda to same environment, this will be resolved automatically.
+  If not, you must add refold.pl to PATH or add path to refold.pl to config.txt (see docs/config_how_to.md)
+
+4. WARNING - The turbofold is installed but the DATAPATH environment variable is not set nor present in config.txt
+  Issued when TurboFold's DATAPATH env variable is not set.
+  If everything was installed with conda to same environment, this will be resolved automatically.
+  If not, you must add path to `RNAstructure/data_tables` to config.txt (see docs/config_how_to.md).
+-->
+
 ## Notes
 This is Beta version. Especially the default parameters for prediction can change.
 

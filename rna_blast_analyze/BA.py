@@ -21,7 +21,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 cfg_name = '--config_file'
-download_name = '--donwload_rfam'
+download_name = '--download_rfam'
 
 with open(os.path.join(os.path.dirname(__file__), 'VERSION'), 'r') as o:
     version = o.read().strip()
@@ -411,15 +411,14 @@ def main():
             CONFIG.override(tools_paths(config_file=sys.argv[sys.argv.index(cfg_name) + 1]))
         cmalign.download_cmmodels_file()
         # rfam database downloaded
-        exit(0)
+        sys.exit(0)
 
     args = f_parser()
 
     _ = lunch_with_args(args)
 
     # if we reach here, exit with 0
-    exit(0)
-
+    sys.exit(0)
 
 
 def lunch_with_args(args):

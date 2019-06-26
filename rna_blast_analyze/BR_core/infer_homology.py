@@ -1,4 +1,5 @@
 import os
+import sys
 from tempfile import mkstemp
 from copy import deepcopy
 import logging
@@ -37,7 +38,7 @@ def find_and_extract_cm_model(args, analyzed_hits):
         ml.info('Infer homology - using RFAM CM file as reference model.')
         if analyzed_hits.best_matching_model is None:
             ml.error('No RFAM model was matched with score > 0. Nothing to build homology to.')
-            exit(0)
+            sys.exit(0)
 
         cm_model_file = run_cmfetch(rfam.file_path, best_cm_model_name)
     else:

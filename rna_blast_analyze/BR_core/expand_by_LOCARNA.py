@@ -1,4 +1,5 @@
 import os
+import sys
 import pickle
 import re
 from copy import deepcopy
@@ -118,7 +119,7 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
 
     if not validate_args(args_inner):
         print("There was an error with provided arguments. Please see the error message.")
-        exit(1)
+        sys.exit(1)
 
     stockholm_features = StockholmFeatureStock()
     stockholm_features.add_custom_parser_tags('GC', {'cA1': 'anchor letter tag',
@@ -130,7 +131,7 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
     if len(p_blast) != len(query_seqs):
         ml.error('Number of query sequences in provided BLAST output file ({}) does not match number of query sequences'
                  ' in query FASTA file ({})'.format(len(p_blast), len(query_seqs)))
-        exit(0)
+        sys.exit(0)
 
     if len(p_blast) > 1:
         multi_query = True

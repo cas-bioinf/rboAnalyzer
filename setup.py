@@ -1,8 +1,4 @@
-from setuptools import setup, find_packages
-
-# package_data
-# - directly related to code
-# - 3rd_party_data as data_files not working to expectations
+from setuptools import setup
 
 with open('rna_blast_analyze/VERSION', 'r') as o:
     version = o.read().strip()
@@ -39,7 +35,6 @@ setup(
         'biopython',
         'argcomplete',
     ],
-    # packages=find_packages(),
     packages=['rna_blast_analyze', 'rna_blast_analyze.BR_core', 'rna_blast_analyze.BR_core.output'],
     package_data=package_data,
     include_package_data=True,

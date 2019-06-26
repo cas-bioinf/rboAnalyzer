@@ -1,4 +1,5 @@
 import os
+import sys
 import pickle
 import re
 from copy import deepcopy
@@ -32,7 +33,7 @@ def joined_wrapper_inner(args_inner, shared_list=None):
 
     if not validate_args(args_inner):
         print("There was an error with provided arguments. Please see the error message.")
-        exit(1)
+        sys.exit(1)
 
     blast_args = deepcopy(args_inner)
     locarna_args = deepcopy(args_inner)

@@ -67,4 +67,4 @@ rfam_dir = /home/user/rfamdir/
 
  - rnastructure_datapath
 
-  datapath for RNAstructure (see installation notes for RNAstructure)
+  datapath for RNAstructure (see installation notes for RNAstructure https://rna.urmc.rochester.edu/Text/Thermodynamics.html)
