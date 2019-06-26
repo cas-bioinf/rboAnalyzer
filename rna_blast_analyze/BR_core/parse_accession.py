@@ -67,3 +67,22 @@ refseq_re = [prefix + "[0-9A-Z]+\.[0-9]+" for prefix in refseq]
 
 known_acc_formats = genbank_nucl + genbank_wgs + refseq_re + genbank_mga + genbank_prot
 accession_regex = '|'.join(known_acc_formats)
+
+
+if __name__ == '__main__':
+    import sys
+    import gzip
+    import re
+    import io
+
+    if len(sys.argv) == 1:
+        print('Test for known accession with ncbi accession2taxid gzipped files. Missed accession added to parsing_errors file.')
+
+    regex = re.compile(accession_regex)
+
+    for file in sys.argv[1:]:
+        with gzip.open(file, 'rb') as f, open('parsing_errors', 'a+') as e:
+            for line in io.BufferedReader(f):
+                acc_v = line.decode().split('\t')[1]
+                if not re.search(regex, acc_v):
+                    e.write(acc_v + ' {}\n'.format(file))
