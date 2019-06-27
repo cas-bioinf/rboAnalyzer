@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import sys
+import operator
 from subprocess import check_output, STDOUT, CalledProcessError
 
 from rna_blast_analyze.BR_core import cmalign
@@ -9,7 +10,7 @@ from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.tools_versions import blast_minimal_version, locarna_minimal_version, \
     infernal_minimal_version, vrna_minimal_version, clustalo_minimal_version, muscle_minimal_version, \
     centroid_homfold_minimal_version, turbofold_minimal_version,\
-    mfold_minimal_version, method_required_tools
+    mfold_minimal_version, method_required_tools, blast_maximal_version
 
 ml = logging.getLogger(__name__)
 
@@ -40,10 +41,10 @@ def verify_query_blast(blast, query):
     return
 
 
-def verify_blastdbcmd(minimal_version):
+def verify_blastdbcmd(minimal_version, maximal_version):
     """verify if blastdbcmd is present in supported version
     """
-    msgversion = 'blastcmd not installed in required version, required version is {}.{}.{}'.format(*minimal_version)
+    msgversion = 'blastcmd not installed in required version, required version is between {}.{}.{} and {}.{}.{}'.format(*minimal_version + maximal_version)
     msgpath = '{}blastcmd could not be located (not in PATH)'.format(CONFIG.blast_path)
     msgsuccess = 'blastcmd is installed in required version'
     try:
@@ -58,15 +59,12 @@ def verify_blastdbcmd(minimal_version):
         if r:
             ver = r.group().split('.')
             ver = [int(i) for i in ver]
-            for v, minv in zip(ver, minimal_version):
-                if v > minv:
-                    ml.info(msgsuccess)
-                    return True
-                elif v < minv:
-                    ml.warning(msgversion)
-                    return False
-            ml.info(msgsuccess)
-            return True
+            bb_min = version_check(ver, minimal_version, msgsuccess, msgversion)
+            bb_max = version_check(ver, maximal_version, msgsuccess, msgversion, op=operator.le)
+            if bb_min and bb_max:
+                return True
+            else:
+                return False
         else:
             ml.warning(msgversion)
             return False
@@ -88,17 +86,8 @@ def verify_locarna(minimal_version):
         )
         a = a.decode()
         if a.startswith('LocARNA'):
-            r = re.finditer('[0-9]+', a)
-            for match, minv in zip(r, minimal_version):
-                v = int(match.group())
-                if v > minv:
-                    ml.info(msgsuccess)
-                    return True
-                elif v < minv:
-                    ml.warning(msgversion)
-                    return False
-            ml.info(msgsuccess)
-            return True
+            r = [int(m.group()) for m in re.finditer('[0-9]+', a)]
+            return version_check(r, minimal_version, msgsuccess, msgversion)
         else:
             ml.warning(msgversion)
             return False
@@ -123,15 +112,7 @@ def verify_infernal(program, minimal_version):
             r = re.search('(?<=# INFERNAL )[0-9.]+', a)
             ver = r.group().split('.')
             ver = [int(i) for i in ver]
-            for v, minv in zip(ver, minimal_version):
-                if v > minv:
-                    ml.info(msgsuccess)
-                    return True
-                elif v < minv:
-                    ml.warning(msgversion)
-                    return False
-            ml.info(msgsuccess)
-            return True
+            return version_check(ver, minimal_version, msgsuccess, msgversion)
         else:
             ml.warning(msgversion)
             return False
@@ -153,16 +134,8 @@ def verify_viennarna_program(program, minimal_version):
         )
         a = a.decode()
         if a.startswith(program):
-            ver = a.split()[1].split('.')
-            for v, minv in zip(ver, minimal_version):
-                if int(v) > minv:
-                    ml.info(msgsuccess)
-                    return True
-                elif int(v) < minv:
-                    ml.warning(msgversion)
-                    return False
-            ml.info(msgsuccess)
-            return True
+            ver = [int(i) for i in a.split()[1].split('.')]
+            return version_check(ver, minimal_version, msgsuccess, msgversion)
         else:
             ml.warning(msgversion)
             return False
@@ -217,17 +190,8 @@ def verify_clustalo(minimal_version):
         )
         a = a.decode()
         if a:
-            r = re.finditer('[0-9]+', a)
-            for match, minv in zip(r, minimal_version):
-                v = int(match.group())
-                if v > minv:
-                    ml.info(msgsuccess)
-                    return True
-                elif v < minv:
-                    ml.warning(msgversion)
-                    return False
-            ml.info(msgsuccess)
-            return True
+            r = [int(m.group()) for m in re.finditer('[0-9]+', a)]
+            return version_check(r, minimal_version, msgsuccess, msgversion)
         else:
             ml.warning(msgversion)
             return False
@@ -249,17 +213,8 @@ def verify_muscle(minimal_version):
         )
         a = a.decode()
         if a.startswith('MUSCLE'):
-            r = re.finditer('[0-9]+', a)
-            for match, minv in zip(r, minimal_version):
-                v = int(match.group())
-                if v > minv:
-                    ml.info(msgsuccess)
-                    return True
-                elif v < minv:
-                    ml.warning(msgversion)
-                    return False
-            ml.info(msgsuccess)
-            return True
+            r = [int(m.group()) for m in re.finditer('[0-9]+', a)]
+            return version_check(r, minimal_version, msgsuccess, msgversion)
         else:
             ml.warning(msgversion)
             return False
@@ -288,17 +243,8 @@ def verify_centroid_homfold(minimal_version):
         a = a.decode()
         b = a.split()
         if b[0] == 'CentroidHomfold':
-            r = re.finditer('[0-9]+', b[1])
-            for match, minv in zip(r, minimal_version):
-                v = int(match.group())
-                if v > minv:
-                    ml.info(msgsuccess)
-                    return True
-                elif v < minv:
-                    ml.warning(msgversion)
-                    return False
-            ml.info(msgsuccess)
-            return True
+            r = [int(m.group()) for m in re.finditer('[0-9]+', b[1])]
+            return version_check(r, minimal_version, msgsuccess, msgversion)
         else:
             ml.warning(msgversion)
             return False
@@ -326,17 +272,8 @@ def verify_turbofold(minimal_version):
         a = a.decode()
         b = a.split()
         if b[0] == 'TurboFold:':
-            r = re.finditer('[0-9]+', b[2])
-            for match, minv in zip(r, minimal_version):
-                v = int(match.group())
-                if v > minv:
-                    ml.info(msgsuccess)
-                    return True
-                elif v < minv:
-                    ml.warning(msgversion)
-                    return False
-            ml.info(msgsuccess)
-            return True
+            r = [int(m.group()) for m in re.finditer('[0-9]+', b[2])]
+            return version_check(r, minimal_version, msgsuccess, msgversion)
         else:
             ml.warning(msgversion)
             return False
@@ -374,17 +311,8 @@ def verify_mfold(minimal_version):
         a = a.decode()
         b = a.split()
         if b[0] == 'hybrid-ss-min':
-            r = re.finditer('[0-9]+', b[2])
-            for match, minv in zip(r, minimal_version):
-                v = int(match.group())
-                if v > minv:
-                    ml.info(msgsuccess)
-                    return True
-                elif v < minv:
-                    ml.warning(msgversion)
-                    return False
-            ml.info(msgsuccess)
-            return True
+            r = [int(m.group()) for m in re.finditer('[0-9]+', b[2])]
+            return version_check(r, minimal_version, msgsuccess, msgversion)
         else:
             ml.warning(msgversion)
             return False
@@ -393,9 +321,21 @@ def verify_mfold(minimal_version):
         return False
 
 
+def version_check(r, minimal_version, msgsuccess, msgversion, op=operator.ge):
+    for v, minv in zip(r, minimal_version):
+        if op(v, minv):
+            ml.info(msgsuccess)
+            return True
+        elif op(minv, v):
+            ml.warning(msgversion)
+            return False
+    ml.info(msgsuccess)
+    return True
+
+
 def check_3rd_party_tools():
     installed = set()
-    if verify_blastdbcmd(blast_minimal_version):
+    if verify_blastdbcmd(blast_minimal_version, blast_maximal_version):
         installed.add('blastdbcmd')
 
     if verify_locarna(locarna_minimal_version):
