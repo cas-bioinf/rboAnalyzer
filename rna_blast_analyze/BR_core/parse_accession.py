@@ -25,7 +25,12 @@ genbank_mga = [
 genbank_wgs = [
     '[A-Z]{4}[0-9]{8,}\.[0-9]+',
     '[A-Z]{6}[0-9]{9,}\.[0-9]+',
-    ]
+]
+
+genbank_wgs_scafolds = [
+    '[A-Z]{4}[0-9]{2}S?[0-9]{6,}\.[0-9]+',
+    '[A-Z]{6}[0-9]{2}S?[0-9]{7,}\.[0-9]+',
+]
 
 # ===== RefSeq format =====
 # refseq from: https://www.ncbi.nlm.nih.gov/books/NBK21091/table/ch18.T.refseq_accession_numbers_and_mole/?report=objectonly
@@ -65,7 +70,13 @@ refseq = [
 ]
 refseq_re = [prefix + "[0-9A-Z]+\.[0-9]+" for prefix in refseq]
 
-known_acc_formats = genbank_nucl + genbank_wgs + refseq_re + genbank_mga + genbank_prot
+pdb = ["[0-9A-Z]{4}_[0-9A-Z]{1,2}",]
+
+exceptions = [
+    '1KPD',  # although it has chain, in the NCBI nt database it is listed without chain
+]
+
+known_acc_formats = genbank_nucl + genbank_wgs + refseq_re + genbank_mga + genbank_prot + pdb + genbank_wgs_scafolds + exceptions
 accession_regex = '|'.join(known_acc_formats)
 
 
