@@ -113,7 +113,7 @@ This serves complementary to cmscore_percent to allow setting low cmscore_percen
 while preventing very short or very long estimated full-length sequences (for any reason)
  to be part of selected sequences set.
 
-`MAX_LEN_DIFF_to_QUERY` ranges from 0 to 1, allowed valuse are floating point (with decimal dot).
+`MAX_LEN_DIFF_to_QUERY` ranges from 0 to 1, allowed values are floating point (with decimal dot).
 
 The higher the threshold, the more difference is allowed.
 
@@ -139,7 +139,7 @@ This parameter is always used together with conseq_conserved.
 #### conseq_conserved: CONSEQ_CONSERVED
 Serves for prediction method where the conserved unpaired positions in alignment are taken as constraints.
 Defines how many bases in a row must be conserved to denote the position
-  as singlestrand constraint for `RNAfold`.
+  as single-strand constraint for `RNAfold`.
 This parameter is always used together with repred_unpaired_tr.
 
 #### max_seqs_in_prediction: MAX_SEQS_IN_PREDICTION
@@ -210,6 +210,7 @@ parameters:
 
 ## C-A-sub
 clustalo - RNAalifold - hybrid-ss-min
+
 Select reference estimated full-length sequences, align them with `clustalo` (Clustal Omega),
   predict consensus structure with `RNAalifold`.
 For each estimated full-length sequence compute suboptimal structures with `hybrid-ss-min`
@@ -231,6 +232,7 @@ parameters:
 
 ## M-A-sub
 clustalo - RNAalifold - hybrid-ss-min
+
 Select reference estimated full-length sequences, align them with `muscle`,
   predict consensus structure with `RNAalifold`.
 For each estimated full-length sequence compute suboptimal structures with `hybrid-ss-min`
@@ -252,6 +254,7 @@ parameters:
 
 ## C-A-r-Rc
 clustalo - RNAalifold - refold.pl - rnafold-C
+
 Select reference estimated full-length sequences, compute alignment with `clustalo` (MSA1)
   and then compute consensus secondary structure with `RNAalifold` from the MSA1.
 Then compute profile alignment of MSA1 with all estimated full-length sequences
@@ -274,6 +277,7 @@ parameters:
 
 ## C-A-U-r-Rc
 clustalo - RNAalifold - unpaired conserved - refold.pl - rnafold-C
+
 Select reference estimated full-length sequences, compute alignment with `clustalo` (MSA1)
   and then compute consensus secondary structure with `RNAalifold` from the MSA1.
 Then compute profile alignment of MSA1 with all estimated full-length sequences,
@@ -300,6 +304,7 @@ parameters:
 
 ## M-A-r-Rc
 muscle - RNAalifold - refold.pl - rnafold -C
+
 Select reference estimated full-length sequences, compute alignment with `muscle` (MSA1)
   and then compute consensus secondary structure with `RNAalifold` from the MSA1.
 Then compute profile alignment of MSA1 with all estimated full-length sequences
@@ -321,6 +326,7 @@ parameters:
 
 ## M-A-U-r-Rc
 muscle - RNAalifold - unpaired conserved - refold.pl - rnafold-C
+
 Select reference estimated full-length sequences, compute alignment with `muscle` (MSA1)
   and then compute consensus secondary structure with `RNAalifold` from the MSA1.
 Then compute profile alignment of MSA1 with all estimated full-length sequences,
@@ -344,7 +350,6 @@ parameters:
 ```
 
 ## centroid
-centroid_homfold
 Select reference estimated full-length sequences and pass them to `centroid_homfold` as
   homologous sequences, predict secondary structure for all estimated full-length sequences.
 The `centroid_homfold` is by default called with `-g -1` parameter.

@@ -1,10 +1,9 @@
 # rboAnalyzer
-A tool for analyzing BLAST search output for non-coding RNAs (ncRNAs).
+A tool for analyzing BLAST search output for RNA sequences.
 
 ## Short description
 rboAnalyzer is a tool for complement BLAST algorithm when searching for query
- sequence that is non-coding RNA (ncRNA) with secondary structure
- (which does not have to be known).
+ sequence that is RNA with secondary structure (which does not have to be known).
 
 The HSPs in BLAST output are often incomplete
  (ie. the alignment in HSP does not cover whole query sequence).
@@ -16,7 +15,7 @@ Therefor the rboAnalyzer estimates full-length RNA sequences
  with one or more methods.
 Score for similarity (as proxy to homology) between the estimated full-length sequence
  and query sequence is also computed.
-The BLAST output is combined with computed data and presented in form of inteactive HTML page.
+The BLAST output is combined with computed data and presented in form of interactive HTML page.
 
 For this the rboAnalyzer need the BLAST input and output.
 That is the query sequence, the BLAST database containing sequences within the output
@@ -27,7 +26,7 @@ That is the query sequence, the BLAST database containing sequences within the o
 
 <!---
 ### Install via Conda
- The easies way to install this pipeline is to use conda. This package is avalible
+ The easies way to install this pipeline is to use conda. This package is available
  from bioconda channel.
 
  If you don't have conda, install it. [conda docs](https://conda.io/docs/index.html)
@@ -42,7 +41,7 @@ System wide installation
 conda install -c conda-forge -c bioconda rboAnalyzer
 ```
 
-Installation to virtual enviroment
+Installation to virtual environment
  The `rboAnalyzer` and its dependencies will be available only in shell
   for which the virtual environment was activated. If virtual environment is
   used, then you need to activate virtual environment before usage.
@@ -64,7 +63,7 @@ conda install -c conda-forge -c bioconda rboAnalyzer
 -->
 ### Install from source
 
- __Prequisities__
+ __Prerequisites__
 * python >= 3.4
 * ncbi-blast+ >= 2.6
 * locarna >= 1.9
@@ -77,7 +76,7 @@ For prediction:
 * centroid_homfold
 * RNAstructure >= 6.0 (TurboFold)
 
-Optional (some prediction methods are not avalible without):
+Optional (some prediction methods are not available without):
 * UNAFold >= 3.8
 
 Clone or download this repository. Go to root folder and run
@@ -112,7 +111,7 @@ This will download Rfam covariance models to default directory
 2. Alternatively download the `Rfam.cm.gz` file from
 [Rfam CURRENT](ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT),
 unpack it and add the path to directory containing `Rfam.cm` file to your `config.txt` file.
-Note that running rboAnalyzer with `--download_rfam` will overwrite this manualy installed file.
+Note that running rboAnalyzer with `--download_rfam` will overwrite this manually installed file.
 
 ### BLAST database
 The rboAnalyzer needs to get relevant 5' and 3' regions of subject sequence of HSPs, for this we use the BLAST database used in the BLAST search.
@@ -120,14 +119,14 @@ For each analysis you need to provide the nucleotide BLAST database containing w
 
 #### BLAST on NCBI web
 
-If you used the BLAST using the NCBI web service agains one of preformated databased, you can donwload the whole databse or use a `genomes_from_blast` script for download.
+If you used the BLAST using the NCBI web service against one of preformatted databased, you can download the whole database or use a `genomes_from_blast` script for download.
 
 1. downloading whole database
 The latest databases are provided here [NCBI LATEST](ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST).
 Note that databases included in the BLAST database releases are not the latest ones.
 This code snippet can be used to obtain and update the database:
     ```shell
-    # cd to directory to which you want to donwload the database
+    # cd to directory to which you want to download the database
 
     # for the "nt" database
     wget -N ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST/nt*
@@ -136,11 +135,11 @@ This code snippet can be used to obtain and update the database:
     wget -N ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST/[database name]*
     ```
 
-2. donwloading only relevant sequences
+2. downloading only relevant sequences
   If you do not wish to download whole blastdb you may use prepared script
  `genomes_from_blast`, which downloads only the needed sequences
   (those in the BLAST output) and build the blastdb from them.
-  This command will download all needed genomes and create blast database for you (if `makeblastdb` command is avalible).
+  This command will download all needed genomes and create blast database for you (if `makeblastdb` command is available).
     ```shell
     # The `YOUR_EMAIL` is needed so the NCBI would contact you in case of missuse of their resources.
 
@@ -149,12 +148,12 @@ This code snippet can be used to obtain and update the database:
 
 #### Custom BLAST database
 If custom database was used for the BLAST search you need to ensure multiple things for the rboAnalyzer to find the sequences correctly.
-1. custom database is nucleotide and ith was created with `-parse_seqids` (this makes sequences retrievable by their ids).
+1. custom database is nucleotide and it was created with `-parse_seqids` (this makes sequences retrievable by their ids).
 2. provide regular expression capturing the sequence ids. By default the rboAnalyzer captures the Accession.Version as documented [here](https://www.ncbi.nlm.nih.gov/Sequin/acc.html).
 
 ### Installing UNAFold
 Prediction methods using suboptimal structures need UNAFold software to work.
- It is avalible here <http://unafold.rna.albany.edu/>.
+ It is available here <http://unafold.rna.albany.edu/>.
  Follow installation instructions. The pipeline uses the `hybrid-ss-min` program.
  Either add it to PATH or add path to directory containing the executable to `config.txt` file.
 
@@ -162,7 +161,7 @@ Prediction methods using suboptimal structures need UNAFold software to work.
 The pipeline is equipped with argument completion for bash shell.
 To enable this feature you need to register the script (more info [here](https://pypi.org/project/argcomplete/)).
 
-To get the autocompletion working run:
+To get the autocomplete working run:
 ```shell
 register-python-argcomplete rboAnalyzer >> ~/.bashrc
 ```
@@ -265,7 +264,7 @@ rboAnalyzer -in MS1_BLAST_output -q MS1_query.fasta -db genomes.fasta.bdb -html 
 
 - __The `genomes_from_blast` failed__
   The `genomes_from_blast` script has build in handling of failed downloads,
-  but by default it tries only 10 times. If you are on instable connection
+  but by default it tries only 10 times. If you are on unstable connection
   you might get better results by setting the `--retry` to some larger number.
   Also check if NCBI entrez services are functional.
 
@@ -275,7 +274,7 @@ rboAnalyzer -in MS1_BLAST_output -q MS1_query.fasta -db genomes.fasta.bdb -html 
   If everything was installed with conda to same environment, this will be resolved automatically.
   If not, you must add refold.pl to PATH or add path to refold.pl to config.txt (see docs/config_how_to.md)
 
-4. WARNING - The turbofold is installed but the DATAPATH environment variable is not set nor present in config.txt
+4. WARNING - The TurboFold is installed but the DATAPATH environment variable is not set nor present in config.txt
   Issued when TurboFold's DATAPATH env variable is not set.
   If everything was installed with conda to same environment, this will be resolved automatically.
   If not, you must add path to `RNAstructure/data_tables` to config.txt (see docs/config_how_to.md).

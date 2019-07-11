@@ -61,14 +61,14 @@ Then start of the estimated full-length sequence in subject is 1000 - 9 = 991 an
 
 With __locarna__ mode we first extract so called _supersequence_, which is
  region on subject sequence as with __simple__,
- additionally padded on 5' and 3' ends by extra sequnece from the subject sequence.
+ additionally padded on 5' and 3' ends by extra sequence from the subject sequence.
 This _supersequence_ is then realigned with Locarna algorithm to obtain the estimated full-length sequence.
 
 The Locarna algorithm utilises possible pairings in it's computations,
  thus it is better suited to align RNAs then BLAST algorithm.
 The Locarna is by default called with `struct-local=0`,
  `sequ-local=0` and `free-endgaps=++++` parameters.
-Additionaly the information about matching nucleotides from BLAST HSPs 
+Additionally the information about matching nucleotides from BLAST HSPs
 is used to construct so called anchor for the Locarna algorithm.
 The anchor defines columns of alignment which are considered aligned.
 As the anchor we consider consecutive series of matches of length at
@@ -85,7 +85,7 @@ This approach combines the __simple__ and __locarna__. It computes both and
  for each HSPs it chooses the estimated full-length sequence with higher score to covariance model.
 
 ### Estimation of homology
-Here we compute score for relation between the estimated full-lenght sequence and query sequence.
+Here we compute score for relation between the estimated full-length sequence and query sequence.
 The computation is based on aligning covariance model (CM) to each estimated full-length
  sequence with `cmalign` program from the Infernal package.
 
@@ -140,7 +140,7 @@ The rboAnalyzer is able to produce several output formats, most handy being
   being the `.html`.
 - html
     Stand-alone web page containing estimated full-length sequences and predicted secondary structures.
-    If internet connection is avalible, it can be used to view respective
+    If internet connection is available, it can be used to view respective
     genome loci for each BLAST HSP using NCBI SeqViewer.
 - json
     Json-readable rboAnalyzer output (contains all data).
@@ -166,9 +166,9 @@ Each BLAST HSP gets it's separate section with five parts:
 
   5) NCBI Sequence viewer (optional - by default only load button is shown)
 
-The `html` otuput offers sorting, selecting sequences and structures and
+The `html` outputs offers sorting, selecting sequences and structures and
   their export to fasta format or fasta-like format with predicted secondary structures in dot-bracket notation.
-If internet connection is avalible, the NCBI genome browser can be used
+If internet connection is available, the NCBI genome browser can be used
   to explore synteny and known features of current genome.
 
 The header for each BLAST HSP contains Accession.Version number (based on provided regular expression).
