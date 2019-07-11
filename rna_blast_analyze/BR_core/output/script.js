@@ -7,22 +7,6 @@ var BtnUnselectStrsTxt = "Unselect all Structs.";
 var BtnSortEvalAscTxt = "Sort Eval asc.";
 var BtnSortEvalDescTxt = "Sort Eval desc.";
 
-function select_class_from_colect(colect, cl) {
-  console.log("function select from collect start");
-  var i;
-  for (i = 0; i < colect.length; i++) {
-    if (colect[i].getAttribute("class") === cl) {
-      console.log(colect[i]);
-      return colect[i];
-    }
-  }
-}
-
-function mypicload(ete) {
-  console.log("function mypicload start");
-  ete.href = select_class_from_colect(ete.children, "rnapic").getAttribute("src");
-}
-
 function exportSelected(classname) {
   console.log("export selection");
   /*

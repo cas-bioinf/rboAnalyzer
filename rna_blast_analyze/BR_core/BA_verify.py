@@ -170,10 +170,10 @@ def verify_vrna_refold():
             ml.info(msgsuccess)
             return True
         else:
-            ml.warning(msgversion)
+            ml.info(msgversion)
             return False
     except FileNotFoundError:
-        ml.warning(msgpath)
+        ml.info(msgpath)
         return False
 
 
@@ -298,8 +298,9 @@ def verify_turbofold_datapath():
 
 
 def verify_mfold(minimal_version):
-    msgversion = 'hybrid-ss-min (UNAfold) is not installed in required version, required version is {}.{}'.format(*minimal_version)
-    msgpath = '{}hybrid-ss-min could not be located (not in PATH).'.format(CONFIG.mfold_path)
+    msgversion = 'hybrid-ss-min (UNAfold) is not installed in required version, required version is {}.{}. ' \
+                 'Please see the manual for installation.'.format(*minimal_version)
+    msgpath = '{}hybrid-ss-min could not be located (not in PATH). Please see the manual for installation.'.format(CONFIG.mfold_path)
     msgsuccess = 'hybrid-ss-min (UNAfold) is installed in required version'
     try:
         a = check_output(
@@ -314,10 +315,10 @@ def verify_mfold(minimal_version):
             r = [int(m.group()) for m in re.finditer('[0-9]+', b[2])]
             return version_check(r, minimal_version, msgsuccess, msgversion)
         else:
-            ml.warning(msgversion)
+            ml.info(msgversion)
             return False
     except FileNotFoundError:
-        ml.warning(msgpath)
+        ml.info(msgpath)
         return False
 
 
@@ -404,16 +405,19 @@ def check_necessery_tools(methods):
         if 'refold.pl' in needed:
             # This solves the issue of refold.pl script not being added to PATH with conda installs
 
-            msgfail = 'Please add the refold.pl to PATH or add the path to refold.pl to configfile.'
+            msgfail = 'refold.pl not found in PATH. ' \
+                      'Please add the refold.pl to PATH or add the path to refold.pl to configuration file.'
             is_conda = os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
             if is_conda:
-                ml.info('Trying to find refold.pl in "CONDA_ROOT/share"')
+                status = 'STATUS: refold.pl not found in PATH. Trying to find refold.pl in "CONDA_ROOT/share"'
+                ml.info(status)
+                print(status)
                 out = check_output('find {}/share -type f -name "refold\.pl"'.format(sys.prefix), shell=True)
                 op = out.decode().strip()
                 if op != '':
                     op = os.path.dirname(op.split('/n')[0]) + os.sep
 
-                    msg_found = 'Inferred refold.pl in {}\n' \
+                    msg_found = 'STATUS: Found refold.pl in {}\n' \
                                 'writing configuration to {}'.format(op, CONFIG.conf_file)
                     ml.info(msg_found)
                     print(msg_found)
@@ -427,30 +431,38 @@ def check_necessery_tools(methods):
                     avalible_tools.add('refold.pl')
                     needed.remove('refold.pl')
                 else:
+                    print('STATUS: attempt to localize refold.pl was not successful.')
                     ml.error(msgfail)
-                    raise EnvironmentError(msgfail)
+                    sys.exit(1)
             else:
                 ml.error(msgfail)
+                sys.exit(1)
 
         if needed:
             msgfail = 'Missing {} (needed for {}).'.format(' '.join(needed), met)
             ml.error(msgfail)
             raise EnvironmentError(msgfail)
 
-    if 'TurboFold' in methods or 'TurboFold_conservative' in methods:
-        msgfail = 'Please provide DATAPATH for Turbofold from RNAstructure package. Either as DATAPATH ' \
-                  'environment variable or as rnastructure_DATAPATH entry in config DATA section.'
+    if 'TurboFold' in methods or 'Turbo-fast' in methods:
+        msgfail = 'Please provide DATAPATH for TurboFold from RNAstructure package. Either as DATAPATH ' \
+                  'environment variable or as rnastructure_DATAPATH entry in configuration file - section DATA. ' \
+                  'See the manual for mor information.'
         if not verify_turbofold_datapath():
-            ml.warning('The turbofold is installed but the DATAPATH environment variable is not set nor present in config.txt.')
+            ml.info('The TurboFold is installed but the DATAPATH environment variable is not set nor present in configuration file.')
             is_conda = os.path.exists(os.path.join(sys.prefix, 'conda-meta'))
             if is_conda:
-                ml.info('Trying to find required data in "CONDA_ROOT/share"')
+                print(
+                    'STATUS: The DATAPATH environment variable for TurboFold is not set. '
+                    'Trying to find required data in "CONDA_ROOT/share".'
+                )
                 out = check_output('find {}/share -type d -name data_tables'.format(sys.prefix), shell=True)
                 op = out.decode().strip()
                 if op != '':
                     op = op.split('/n')[0]
-                    ml.info('Inferred datapath in {}'.format(op))
-                    ml.info('writing configuration to {}'.format(CONFIG.conf_file))
+                    msg_found = 'STATUS: Inferred datapath in {}. writing configuration to {}'.format(op, CONFIG.conf_file)
+                    ml.info(msg_found)
+                    print(msg_found)
+
                     CONFIG.data_paths['rnastructure_datapath'] = op
                     if 'DATA' not in CONFIG.config_obj:
                         CONFIG.config_obj['DATA'] = {}
@@ -458,11 +470,12 @@ def check_necessery_tools(methods):
                     with open(CONFIG.conf_file, 'w') as updated_cfh:
                         CONFIG.config_obj.write(updated_cfh)
                 else:
+                    print('STATUS: attempt to localize TurboFold data was not successful.')
                     ml.error(msgfail)
-                    raise EnvironmentError(msgfail)
+                    sys.exit(1)
             else:
                 ml.error(msgfail)
-                raise EnvironmentError(msgfail)
+                sys.exit(1)
 
 
 if __name__ == '__main__':

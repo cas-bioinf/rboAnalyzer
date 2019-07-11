@@ -439,7 +439,9 @@ def lunch_with_args(args):
         fh.setFormatter(formatter)
         logger.addHandler(fh)
 
-    logger.info('RNA BLAST analyze pipeline start.')
+    start_msg = 'rboAnalyzer start.'
+    print(start_msg)
+    logger.info(start_msg)
 
     logger.info('BLAST file: {}'.format(args.blast_in))
     logger.info('Query file: {}'.format(args.blast_query))

@@ -11,7 +11,7 @@ RID: U1WRPYNA01N
 
 Database: Nucleotide collection (nt)
            48,014,062 sequences; 198,041,598,103 total letters
-Query= 
+Query=Msmest_n
 Length=304
 
 

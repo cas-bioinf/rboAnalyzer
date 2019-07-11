@@ -168,38 +168,47 @@ Analyzing subset of NCBI blast HITs for [6S RNA](https://doi.org/10.1038%2F22914
  Here we describe the variant with downloading only the necessary sequences.
  This is done by using the `genomes_from_blast` by calling:
     ```shell
-    genomes_from_blast -e YOUR_EMAIL -in 6S_short.xml -o genomes.fasta
+    genomes_from_blast -e YOUR_EMAIL -in 6S_super_short.xml -o genomes.bdb
     ```
     The `YOUR_EMAIL` should be valid email on which NCBI staff could contact you
     if they need to. It is not saved nor logged by the tool.
-    The 6S.fasta file is not needed if the BLAST database was created
-    successfully and you can delete it.
 
-    The BLAST database with name genomes.fasta.bdb was created for you if everything was successful.
+    The BLAST database with name `genomes.bdb` was created for you if everything was successful.
     You will need it in the next step.
+
+    The intermediate file `genomes.bdb.fasta` was also created and contains all sequences added to the BLAST database.
+    When another BLAST output is analyzed (and sequences are needed) then only those sequences not present in the intermediate FASTA file are downloaded (assuming same BLAST db name is used).
 
 2) Now you can run the pipeline itself:
     ```shell
-    rboAnalyzer -in 6S_short.xml -q 6S_query.fasta -db genomes.fasta.bdb --html 6S_out.html
+    rboAnalyzer -in 6S_super_short.xml -q 6S_query.fasta -db genomes.bdb --html 6S_out.html
     ```
 3) The output is single html file. You can scroll through analyzed HSPs, show the genomic loci of the HSP and select data to export.
 
 #### Example 2:
 Analyzing possible remote homologs for [MS1 RNA](https://doi.org/10.1093%2Fnar%2Fgku793).
 
+```shell
+# update genome database with new sequences
+genomes_from_blast -e YOUR_EMAIL -in MS1_BLAST_output.txt -o genomes.bdb
+
+# run the rboAnalyzer
+rboAnalyzer -in MS1_BLAST_output.txt -q MS1_query.fasta -db genomes.bdb --html MS1_out.html --prediction_method rnafold rfam-Rc Turbo-fast --turbo_fast_preset
+```
+
 The BLAST was run with database where Streptomycetaceae and Mycobacteriaceae families where excluded.
 As the MS1 RNA is primarily known from Mycobacteriaceae family we can expect
-incomplete HITs and many false positives.
+  incomplete HITs and many false positives.
 
 Also you can notice, that the BLAST output is now in text format, the rboAnalyzer accepts BLAST output in plain text and xml.
 
-We get the BLAST database as in previous example. (If the `genomes_from_blast`
-  script was used, you can now run the same command with `MS1_BLAST_output.txt`
-  as input and only the sequences not in the database will be downloaded).
+The BLAST database is obtained with similar command as in previous example.
+Since the output BLAST database file is the same as before the `genomes_from_blast`
+ will check the intermediate fasta file (`genomes.bdb.fasta`) and will
+ download only sequences which are not present.
 
-With the database (assume `genomes.fasta.bdb`) we can run the rboAnalyzer.
 We can expect that the BLAST output contain many false positive HSPs,
-so we choose prediction methods which do not rely on information in the BLAST output itself.
+so we selected some of prediction methods which do not rely on information in the BLAST output itself.
 These are:
 - rnafold
 - rfam-Rc
@@ -208,10 +217,6 @@ These are:
 - centroid-fast with "max_seqs_in_prediction" parameter set to 1 (`--centroid_fast_preset` flag)
 - rfam-sub (If `UnaFold` is installed.)
 
-In this case we will use the rnafold, rfam_rnafoldc and Turbofold_fast with preset.
-```shell
-rboAnalyzer -in MS1_BLAST_output -q MS1_query.fasta -db genomes.fasta.bdb --html MS1_out.html --prediction_method rnafold rfam-Rc Turbo-fast --turbo_fast_preset
-```
 
 ### Solving issues:
 - __One or more records not found__

@@ -108,9 +108,7 @@ Fasta header format:
             <div class="row">
                 {% for pic in data.pictures %}
                     <figure class="column" data-brna_secondary_structure="{{pic.secondary_structure}}" id="{{data.intid}}{{pic.picname}}">
-                        <a href onclick="mypicload(this)">
-                            <img class="rnapic" src="{{pic.pic}}" />
-                        </a>
+                        <img class="rnapic" src="{{pic.pic}}" />
                         <figcaption>
                             <label class="repheader">{{pic.picname}}</label>
                             <input type="checkbox" class="individualStructureCheckbox" id="{{data.intid}}{{data.picname}}StrCheck" data-method="{{pic.picname}}">

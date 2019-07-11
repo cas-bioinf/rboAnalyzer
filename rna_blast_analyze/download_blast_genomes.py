@@ -16,12 +16,13 @@ def parser():
         description=(
             'Download whole sequences whose accessions are present in BLAST output from NCBI.'
             ' The script will download records in BLAST output from NCBI nucleotide database using entrez.'
-            ' The BLAST database needed for running rboAnalyzer will also be created.'
-            ' If the --out FILE exists we assume that it is FASTA file - it will be scanned for fasta header IDs in form of accession.version.'
-            ' Required records present in the file will not be downloaded.'
+            ' And create the BLAST database needed for running rboAnalyzer.'
+            ' The intermediate FASTA file (appending ".fasta" to the BLAST database name) is saved as sequences can be added to it.'
+            ' If the intermediate FASTA file exists, it will be scanned for fasta header IDs in form of accession.version.'
+            ' Required records which present in the intermediate file will not be downloaded.'
             ' New records will be appended to the file. The BLAST db will overwrite old BLAST db of same name.'
         ),
-        usage='genomes_from_blast -email YOUR@EMAIL --blast_in BLAST_FILE'
+        usage='genomes_from_blast -e YOUR@EMAIL -in BLAST_FILE'
     )
     p.add_argument(
         '-e',
@@ -45,7 +46,8 @@ def parser():
         type=str,
         default=None,
         help=(
-            'Output fasta file. Default "[BLAST IN]+.fasta". The BLAST db name is then --out FILE + ".bdb".'
+            'Output BLAST database file. Default "[BLAST IN]+.bdb".'
+            ' The intermediate FASTA file name is then --out FILE + ".fasta".'
         )
     )
     p.add_argument(
@@ -103,9 +105,11 @@ def main():
             accessions.add(bdb_accession)
 
     if args.out:
-        of = args.out
+        od = args.out
+        of = args.out + '.fasta'
     else:
-        of = args.blast_in + '.fasta'
+        od = args.blast_in + '.bdb'
+        of = args.blast_in + '.bdb.fasta'
 
     sys.stdout.write('Total of {} sequences are required.\n'.format(len(accessions)))
 
@@ -145,7 +149,7 @@ def main():
         '-in', of,
         '-input_type', 'fasta',
         '-dbtype', 'nucl',
-        '-out', of + '.bdb',
+        '-out', od,
         '-parse_seqids'
     ]
     r = call(cmd)
