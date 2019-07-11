@@ -2,24 +2,25 @@
 A tool for analyzing BLAST search output for RNA sequences.
 
 ## Short description
-rboAnalyzer is a tool for complement BLAST algorithm when searching for query
- sequence that is RNA with secondary structure (which does not have to be known).
+rboAnalyzer is a tool complementing the BLAST algorithm when searching for a query
+ sequence that is RNA with a secondary structure (which does not have to be known).
 
-The HSPs in BLAST output are often incomplete
- (ie. the alignment in HSP does not cover whole query sequence).
-This is major drawback when trying to characterize the potential ncRNA
+The high-scoring pairs (HSPs) in BLAST output are often incomplete
+ (ie. the alignment in HSP does not cover the whole query sequence).
+This is a major drawback when trying to characterize the potential ncRNA
  indicated by the HSP.
 
-Therefor the rboAnalyzer estimates full-length RNA sequences
- from the incomplete HSPs from the BLAST output and predicts secondary structure
+Therefore, rboAnalyzer tries to find full-length RNA sequences
+ from the incomplete HSPs from the BLAST output and predict their secondary structures
  with one or more methods.
 Score for similarity (as proxy to homology) between the estimated full-length sequence
  and query sequence is also computed.
-The BLAST output is combined with computed data and presented in form of interactive HTML page.
+The BLAST output is combined with computed data and presented in form of an interactive HTML page.
 
-For this the rboAnalyzer need the BLAST input and output.
-That is the query sequence, the BLAST database containing sequences within the output
- and the BLAST output itself.
+To achive this, rboAnalyzer takes as input:
+- the query sequence
+- the BLAST output
+- the BLAST database containing sequences within the output
 
 
 ## Installation
