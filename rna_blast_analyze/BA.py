@@ -46,7 +46,7 @@ def f_parser():
     :return: args structure
     """
     parser = argparse.ArgumentParser(
-        description='Blast RNA Refine pipeline',
+        description='rboAnalyzer - tool for analyzing BLAST search output for RNA sequences',
     )
     input_group = parser.add_argument_group(
         'INPUT'

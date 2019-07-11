@@ -21,10 +21,11 @@ def parser():
             ' Required records present in the file will not be downloaded.'
             ' New records will be appended to the file. The BLAST db will overwrite old BLAST db of same name.'
         ),
-        usage='genomes_from_blast -email YOUR@EMAIL -blast_in BLAST_FILE'
+        usage='genomes_from_blast -email YOUR@EMAIL --blast_in BLAST_FILE'
     )
     p.add_argument(
-        '-email',
+        '-e',
+        '--email',
         type=str,
         required=True,
         help='Enter valid email so NCBI staff could contact you if needed.'
@@ -34,11 +35,12 @@ def parser():
         '--blast_in',
         type=str,
         required=True,
-        help='BLAST output file (txt or xml) created with NCBI BLAST agains one of their databases.'
+        help='BLAST output file (txt or xml) created with NCBI BLAST against one of their databases.'
              ' Accession numbers in BLAST output must correspond to records in NCBI nucl database'
              ' for this script to work.'
     )
     p.add_argument(
+        '-o',
         '--out',
         type=str,
         default=None,

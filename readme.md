@@ -114,58 +114,26 @@ This will download Rfam covariance models to default directory
 unpack it and add the path to directory containing `Rfam.cm` file to your `config.txt` file.
 Note that running rboAnalyzer with `--download_rfam` will overwrite this manually installed file.
 
-### BLAST database
-The rboAnalyzer needs to get relevant 5' and 3' regions of subject sequence of HSPs, for this we use the BLAST database used in the BLAST search.
-For each analysis you need to provide the nucleotide BLAST database containing whole sequences (complete genomes, etc.) for the sequence ids present in the BLAST output.
-
-#### BLAST on NCBI web
-
-If you used the BLAST using the NCBI web service against one of preformatted databased, you can download the whole database or use a `genomes_from_blast` script for download.
-
-1. downloading whole database
-The latest databases are provided here [NCBI LATEST](ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST).
-Note that databases included in the BLAST database releases are not the latest ones.
-This code snippet can be used to obtain and update the database:
-    ```shell
-    # cd to directory to which you want to download the database
-
-    # for the "nt" database
-    wget -N ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST/nt*
-
-    # for other databases provided by NCBI (insert database name without square brackets)
-    wget -N ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST/[database name]*
-    ```
-
-2. downloading only relevant sequences
-  If you do not wish to download whole blastdb you may use prepared script
- `genomes_from_blast`, which downloads only the needed sequences
-  (those in the BLAST output) and build the blastdb from them.
-  This command will download all needed genomes and create blast database for you (if `makeblastdb` command is available).
-    ```shell
-    # The `YOUR_EMAIL` is needed so the NCBI would contact you in case of missuse of their resources.
-
-    genomes_from_blast -email YOUR_EMAIL -blast_in BLAST_OUT_FILE -out FASTA_FILE_OUT
-    ```
-
-#### Custom BLAST database
-If custom database was used for the BLAST search you need to ensure multiple things for the rboAnalyzer to find the sequences correctly.
-1. custom database is nucleotide and it was created with `-parse_seqids` (this makes sequences retrievable by their ids).
-2. provide regular expression capturing the sequence ids. By default the rboAnalyzer captures the Accession.Version as documented [here](https://www.ncbi.nlm.nih.gov/Sequin/acc.html).
-
-### Installing UNAFold
+### Installing UNAFold (optional)
 Prediction methods using suboptimal structures need UNAFold software to work.
  It is available here <http://unafold.rna.albany.edu/>.
  Follow installation instructions. The pipeline uses the `hybrid-ss-min` program.
  Either add it to PATH or add path to directory containing the executable to `config.txt` file.
 
 ### Shell autocomplete (optional)
-The pipeline is equipped with argument completion for bash shell.
+The rboAnalyzer is equipped with argument completion for bash shell.
 To enable this feature you need to register the script (more info [here](https://pypi.org/project/argcomplete/)).
 
 To get the autocomplete working run:
 ```shell
 register-python-argcomplete rboAnalyzer >> ~/.bashrc
 ```
+
+### BLAST database
+The rboAnalyzer needs to get relevant 5' and 3' regions of subject sequence of HSPs, for this we use the BLAST database used in the BLAST search.
+For each analysis you need to provide the nucleotide BLAST database containing whole sequences (complete genomes, etc.) for the sequence ids present in the BLAST output.
+
+The procedure on how to get the BLAST databases for the examples is described in the Example section. For the general case, please see the BLAST databases section
 
 ## Basic Usage
 ### Help
@@ -200,7 +168,7 @@ Analyzing subset of NCBI blast HITs for [6S RNA](https://doi.org/10.1038%2F22914
  Here we describe the variant with downloading only the necessary sequences.
  This is done by using the `genomes_from_blast` by calling:
     ```shell
-    genomes_from_blast -email YOUR_EMAIL -in 6S_short.xml -out genomes.fasta
+    genomes_from_blast -e YOUR_EMAIL -in 6S_short.xml -o genomes.fasta
     ```
     The `YOUR_EMAIL` should be valid email on which NCBI staff could contact you
     if they need to. It is not saved nor logged by the tool.
@@ -212,7 +180,7 @@ Analyzing subset of NCBI blast HITs for [6S RNA](https://doi.org/10.1038%2F22914
 
 2) Now you can run the pipeline itself:
     ```shell
-    rboAnalyzer -in 6S_short.xml -q 6S_query.fasta -db genomes.fasta.bdb -html 6S_out.html
+    rboAnalyzer -in 6S_short.xml -q 6S_query.fasta -db genomes.fasta.bdb --html 6S_out.html
     ```
 3) The output is single html file. You can scroll through analyzed HSPs, show the genomic loci of the HSP and select data to export.
 
@@ -242,10 +210,10 @@ These are:
 
 In this case we will use the rnafold, rfam_rnafoldc and Turbofold_fast with preset.
 ```shell
-rboAnalyzer -in MS1_BLAST_output -q MS1_query.fasta -db genomes.fasta.bdb -html MS1_out.html --prediction_method rnafold rfam-Rc Turbo-fast --turbo_fast_preset
+rboAnalyzer -in MS1_BLAST_output -q MS1_query.fasta -db genomes.fasta.bdb --html MS1_out.html --prediction_method rnafold rfam-Rc Turbo-fast --turbo_fast_preset
 ```
 
-## Solving issues:
+### Solving issues:
 - __One or more records not found__
   Reason: the blastdbcmd was not able to find sequence(s) with respective id(s) in provided database.
   This is due to inconsistency between the sequence accessions and the BLAST database.
@@ -280,6 +248,42 @@ rboAnalyzer -in MS1_BLAST_output -q MS1_query.fasta -db genomes.fasta.bdb -html 
   If everything was installed with conda to same environment, this will be resolved automatically.
   If not, you must add path to `RNAstructure/data_tables` to config.txt (see docs/config_how_to.md).
 -->
+
+### BLAST databases
+
+#### BLAST on NCBI web
+
+If you used the BLAST using the NCBI web service against one of preformatted databased, you can download the whole database or use a `genomes_from_blast` script for download.
+
+1. downloading whole database (~50GB)
+The latest databases are provided here [NCBI LATEST](ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST).
+Note that databases included in the BLAST database releases are not the latest ones.
+This code snippet can be used to obtain and update the database:
+    ```shell
+    # cd to directory to which you want to download the database
+
+    # for the "nt" database
+    wget -N ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST/nt*
+
+    # for other databases provided by NCBI (insert database name without square brackets)
+    wget -N ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST/[database name]*
+    ```
+
+2. downloading only relevant sequences
+  If you do not wish to download whole blastdb you may use prepared script
+ `genomes_from_blast`, which downloads only the needed sequences
+  (those in the BLAST output) and build the blastdb from them.
+  This command will download all needed genomes and create blast database for you.
+    ```shell
+    # The `YOUR_EMAIL` is needed so the NCBI would contact you in case of missuse of their resources.
+
+    genomes_from_blast -e YOUR_EMAIL -in BLAST_OUT_FILE -o FASTA_FILE_OUT
+    ```
+
+#### Custom BLAST database
+If custom database was used for the BLAST search you need to ensure multiple things for the rboAnalyzer to find the sequences correctly.
+1. custom database is nucleotide and it was created with `-parse_seqids` (this makes sequences retrievable by their ids).
+2. provide regular expression capturing the sequence ids. By default the rboAnalyzer captures the Accession.Version as documented [here](https://www.ncbi.nlm.nih.gov/Sequin/acc.html).
 
 ## Notes
 This is Beta version. Especially the default parameters for prediction can change.
