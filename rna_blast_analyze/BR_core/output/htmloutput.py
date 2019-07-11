@@ -1,13 +1,16 @@
 import os
 import json
+import logging
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2.exceptions import TemplateError
 from time import strftime
 
 from rna_blast_analyze.BR_core.BA_support import blasthsp2pre, run_rnaplot
 from rna_blast_analyze.BR_core.config import CONFIG
 
-import matplotlib
 from matplotlib import colors, cm
+
+ml = logging.getLogger(__name__)
 
 
 def rog_cmap():
@@ -16,23 +19,22 @@ def rog_cmap():
         '#FFB916',
         '#7AD84B'
     ]
-    # hex2rgb = lambda x: tuple(int(x[i:i+2], 16)/255 for i in (0, 2, 4))
     cmap_rog = colors.LinearSegmentedColormap.from_list(
         name='rog',
         colors=[colors.hex2color(c) for c in my_colors],
         N=1024
     )
-    # cm.register_cmap('rog', cmap_rog)
     return cmap_rog
 
 
 def write_html_output(datain, template_path=''):
+    ml.info("Writing HTML output.")
     # prepare data
     toprint = _prepare_body(datain)
     myfooter = _prepare_footer(datain)
     my_header = _prepare_header(datain)
 
-    # init jinja2 rendering enviroment
+    # init jinja2 rendering environment
     env = Environment(
         loader=FileSystemLoader(template_path),
         autoescape=select_autoescape(['html', 'xml'])
@@ -41,24 +43,48 @@ def write_html_output(datain, template_path=''):
     try:
         os.chdir(CONFIG.html_template_dir)
         template = env.get_template('onehit.html')
-        html_str = template.render(input_list=toprint, foo=myfooter, strftime=strftime, hea=my_header, len=len)
+        html_str = template.render(
+            input_list=toprint,
+            foo=myfooter,
+            strftime=strftime,
+            hea=my_header,
+            show_gene_browser=datain.args.show_gene_browser,
+            len=len,
+        )
+        return html_str
+    except TemplateError:
+        ml.error("Jinja rendering error. Please check if the template is available and correct.")
+        raise
+    except Exception:
+        ml.error("Failed to render html.")
+        raise
     finally:
         os.chdir(cwd)
-    return html_str
 
 
 def _prepare_header(data):
-    return {'input': data.args.blast_in}
+    return {
+        'input': data.args.blast_in,
+        'query': data.args.blast_query,
+        'best_matching_model': data.best_matching_model,
+    }
+
+
+def _prep_hit_name(id, desc):
+    if desc.startswith(id):
+        return desc
+    else:
+        return id + " " + desc
 
 
 def _prepare_body(data):
     rog = rog_cmap()
-    norm = matplotlib.colors.Normalize(vmin=0, vmax=data.query.annotations['cmstat']['bit_sc']/2, clip=True)
+    norm = colors.Normalize(vmin=0, vmax=data.query.annotations['cmstat']['bit_sc']/2, clip=True)
     mm = cm.ScalarMappable(norm=norm, cmap=rog)
 
     jj = []
     for i, onehit in enumerate(data.hits):
-        ext = onehit.subs[onehit.ret_keys[0]]
+        ext = onehit.extension
         h_bit_sc = ext.annotations['cmstat']['bit_sc']
         rr = dict()
         rr['source_seq_name'] = onehit.source.annotations['blast'][0]
@@ -66,7 +92,7 @@ def _prepare_body(data):
         rr['sequence'] = str(ext.seq)
         rr['formated_seq'] = ext.format('fasta')
         rr['rsearchbitscore'] = h_bit_sc
-        rr['blast_hit_name'] = onehit.source.annotations['blast'][0] + ' ' + ' '.join(onehit.source.description.split()[1:])
+        rr['blast_hit_name'] = _prep_hit_name(onehit.source.annotations['blast'][0], onehit.source.description)
         rr['ext_start'] = onehit.best_start
         rr['ext_end'] = onehit.best_end
         rr['blast_text'] = blasthsp2pre(onehit.source.annotations['blast'][1])
@@ -100,19 +126,20 @@ def _prepare_body(data):
         if es < 0:
             es = 1
 
-        if getattr(data.args, 'show_gene_browser', False):
-            rr['draw_seqview'] = True
-        else:
-            rr['draw_seqview'] = False
+        # if getattr(data.args, 'show_gene_browser', False):
+        #     rr['draw_seqview'] = True
+        # else:
+        #     rr['draw_seqview'] = False
 
         rr['seqviewurl'] = ''.join([
-            '?embeded=true&',
-            'noviewheader=true&',
-            'id={}&'.format(onehit.source.annotations['blast'][0]),
-            'v={}:{}&'.format(es, ee),
-            'appname=rna_blast_analyze_beta&',
-            'mk={}:{}|BestMatch!&'.format(onehit.best_start, onehit.best_end),
-            'multipanel=false',
+            '?embeded=true',
+            '&noviewheader=true',
+            '&id={}'.format(onehit.source.annotations['blast'][0]),
+            '&v={}:{}'.format(es, ee),
+            '&appname=rboAnalyzer',
+            '&mk={}:{}|BestMatch!'.format(onehit.best_start, onehit.best_end),
+            '&multipanel=false',
+            '&slim=true'
         ])
         rr['seqvid'] = 'seqv_{}'.format(i)
 

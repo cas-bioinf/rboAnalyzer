@@ -211,8 +211,7 @@ class TestSubsequences(unittest.TestCase):
                 id='qq'
             )
         )
-        s.subs = {'asd': SeqRecord(Seq('ACGUR'), id='asd')}
-        s.ret_keys = ['1', 'asd', '4t']
+        s.extension = SeqRecord(Seq('ACGUR'), id='asd')
         s.query_name = 'myquery'
         s.best_start = 12
         s.best_end = 324

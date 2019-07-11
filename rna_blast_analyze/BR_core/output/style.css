@@ -10,14 +10,6 @@
     .reports {
         justify-content: flex-start;
     }
-    /* Create four equal columns that sits next to each other */
-    /*
-    .column {
-        flex: 25%;
-        max-width: 25%;
-        padding: 0 4px;
-    }
-    */
     .column img {
         margin-top: 8px;
         vertical-align: middle;
@@ -50,6 +42,7 @@
         position: -webkit-sticky;
         position: sticky;
         top: 0px;
+        z-index: 30;
     }
     .onehit_body {
         margin-left: 10px;
@@ -67,6 +60,15 @@
     }
     .repitem table {
         border: none;
+    }
+    .blast_text {
+        width: 600px;
+    }
+    .blasttext {
+        position: relative;
+    }
+    .header-bhname {
+        font-weight: bold;
     }
     col.c1 {
         background-color: red;
@@ -106,6 +108,24 @@
         background-color: #555;
     }
 
+    .individualSequenceCheckbox {
+        margin-top: 0px;
+    }
+
+    .individualStructureCheckbox {
+        margin-top: 0px;
+    }
+
+    .repheader {
+        vertical-align: top;
+    }
+
+    .blasttooltip {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
     div.controls {
         position: fixed;
         bottom: 0px;
@@ -130,15 +150,15 @@
         margin-left: -10px;
     }
     #waitoverlay {
-        position: fixed; /* Sit on top of the page content */
-        display: none; /* Hidden by default */
-        width: 100%; /* Full width (cover the whole page) */
-        height: 100%; /* Full height (cover the whole page) */
+        position: fixed;                    /* Sit on top of the page content */
+        display: none;                      /* Hidden by default */
+        width: 100%;                        /* Full width (cover the whole page) */
+        height: 100%;                       /* Full height (cover the whole page) */
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: rgba(0,0,0,0.6); /* Black background with opacity */
+        background-color: rgba(0,0,0,0.6);  /* Black background with opacity */
         z-index: 100;
     }
     #progressbar_wrap {
@@ -157,5 +177,33 @@
     }
     p.warn {
         color: red;
+    }
+    #headergrad {
+        height: 50px;
+        background-image: linear-gradient(to right, #7AD84B, #FFB916, #E24B2D);
+    }
+    /* Tooltip container */
+    .tooltip {
+        /*position: relative;*/
+        display: inline-block;
+        width: 1em;
+    }
+
+    /* Tooltip text */
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        background-color: black;
+        color: #fff;
+        padding: 5px;
+        border-radius: 6px;
+        position: absolute;
+        z-index: 1;
+    }
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+    }
+    .rnapic {
+        height: 300px;
     }
 </style>

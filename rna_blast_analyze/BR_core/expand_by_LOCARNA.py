@@ -1,28 +1,5 @@
-# try different approach
-# use structure of template as guide and blast alignment as seed
-# then gradually add nucleotides and reward addition which is in possible structure
-# rather then structure, use probability dot plot for that
-# ? how to allow insertions and deletions?
-# is it just structure rna alignment ?
-# maybe do it over all extended sequences at once?
-
-# its like locarna's anchored mode - try that
-# just take blast, mark matched parts and run locarna for each of them
-# locarna in anchored mode with exp window 10 provided best results
-
-# todo structure prediction
-#  - repredict structures for aligned sequences
-#    - alifold + refold of aligned sequences - or other consensus prediction algorithms
-#    - custom alignment ad identification of conserved unaligned regions?
-#    - predict by shapes cast () - unable to handle large records
-#
-#  - how to infer homology of record from alignment?
-#  - repredict after homology inference
-#  - run cmalign after homology inference
-#  - rscape analysis
-# prediction programs: MCFold, ProbKnot?, RSpredict, RNAwolf, TurboFold
-
 import os
+import sys
 import pickle
 import re
 from copy import deepcopy
@@ -32,6 +9,7 @@ from subprocess import call
 from tempfile import mkstemp
 import itertools
 import logging
+import shlex
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
@@ -41,7 +19,7 @@ import rna_blast_analyze.BR_core.extend_hits
 from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
 from rna_blast_analyze.BR_core.alifold4all import compute_refold
 from rna_blast_analyze.BR_core.config import CONFIG, tools_paths
-from rna_blast_analyze.BR_core.infer_homology import infer_homology
+from rna_blast_analyze.BR_core.infer_homology import infer_homology, find_and_extract_cm_model
 from rna_blast_analyze.BR_core.locarna_clustal_like_2stockholm import parse_locarna_alignment
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
 from rna_blast_analyze.BR_core.stockholm_parser import StockholmFeatureStock, trim_alignment_by_sequence
@@ -49,6 +27,7 @@ from rna_blast_analyze.BR_core import BA_verify
 from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.cmalign import get_cm_model, run_cmfetch, RfamInfo
+from rna_blast_analyze.BR_core.validate_args import validate_args
 
 ml = logging.getLogger(__name__)
 
@@ -78,7 +57,7 @@ def locarna_worker(pack):
 
     # access the locarna aligner directly
     # CARNA for some reason wount accept its own designed format, but, it will eat a pseudo-clustal
-    fd1, locarna_file1 = mkstemp(prefix='rba_', suffix='_20')
+    fd1, locarna_file1 = mkstemp(prefix='rba_', suffix='_20', dir=CONFIG.tmpdir)
     with os.fdopen(fd1, 'w') as fp_locarna_file_1:
         ql1, ql2 = anchors.anchor_whole_seq(str(query_seq), 'query')
         write_clustal_like_file_with_anchors(fp_locarna_file_1,
@@ -89,7 +68,7 @@ def locarna_worker(pack):
                                                  ('#A2', ql2.split()[0])
                                              ))
 
-    fd2, locarna_file2 = mkstemp(prefix='rba_', suffix='_21')
+    fd2, locarna_file2 = mkstemp(prefix='rba_', suffix='_21', dir=CONFIG.tmpdir)
     with os.fdopen(fd2, 'w') as fp_locarna_file_2:
         sl1, sl2 = anchors.anchor_whole_seq(str(one_expanded_hit.seq), 'subject')
         write_clustal_like_file_with_anchors(fp_locarna_file_2,
@@ -138,18 +117,31 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
     # update params if different config is requested
     CONFIG.override(tools_paths(args_inner.config_file))
 
+    if not validate_args(args_inner):
+        print("There was an error with provided arguments. Please see the error message.")
+        sys.exit(1)
+
     stockholm_features = StockholmFeatureStock()
     stockholm_features.add_custom_parser_tags('GC', {'cA1': 'anchor letter tag',
                                                      'cA2': 'anchor number tag'})
 
     p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
-    # this is done for each query
+    query_seqs = [i for i in SeqIO.parse(args_inner.blast_query, 'fasta')]
 
+    if len(p_blast) != len(query_seqs):
+        ml.error('Number of query sequences in provided BLAST output file ({}) does not match number of query sequences'
+                 ' in query FASTA file ({})'.format(len(p_blast), len(query_seqs)))
+        sys.exit(0)
+
+    if len(p_blast) > 1:
+        multi_query = True
+    else:
+        multi_query = False
+
+    # this is done for each query
     ml_out_line = []
     all_analyzed = []
-    for iteration, (bhp, query) in enumerate(
-            itertools.zip_longest(p_blast, SeqIO.parse(args_inner.blast_query, 'fasta'))
-    ):
+    for iteration, (bhp, query) in enumerate(itertools.zip_longest(p_blast, query_seqs)):
         print('processing query: {}'.format(query.id))
         # check query and blast
         if bhp is None:
@@ -159,33 +151,60 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
 
         BA_verify.verify_query_blast(blast=bhp, query=query)
 
+        analyzed_hits = BlastSearchRecompute()
+        analyzed_hits.args = args_inner
+        analyzed_hits.query = query
+        all_analyzed.append(analyzed_hits)
+
+        # run cm model build
+        # allows to fail fast if rfam was selected and we dont find the model
+        ih_model, analyzed_hits = find_and_extract_cm_model(args_inner, analyzed_hits)
+
         # select all
         all_blast_hits = BA_support.blast_hsps2list(bhp)
 
+        if len(all_blast_hits) == 0:
+            ml.error('No hits found in {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
+            continue
+
         # filter if needed
         if args_inner.filter_by_eval is not None:
-            all_short = filter_by_eval(all_blast_hits, *args_inner.filter_by_eval)
+            tmp = filter_by_eval(all_blast_hits, BA_support.blast_hit_getter_from_hits, *args_inner.filter_by_eval)
+            if len(tmp) == 0 and len(all_blast_hits) != 0:
+                ml.error('The requested filter removed all BLAST hits {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
+                continue
         elif args_inner.filter_by_bitscore is not None:
-            all_short = filter_by_bits(all_blast_hits, *args_inner.filter_by_bitscore)
-        else:
-            all_short = all_blast_hits
+            tmp = filter_by_bits(all_blast_hits, BA_support.blast_hit_getter_from_hits, *args_inner.filter_by_bitscore)
+            if len(tmp) == 0 and len(all_blast_hits) != 0:
+                ml.error('The requested filter removed all BLAST hits {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
+                continue
 
-        if len(all_short) == 0 and len(all_blast_hits) != 0:
-            print('The requested filter removed all BLAST hits. Nothing to do.')
-            exit(0)
-        elif len(all_short) == 0:
-            raise ValueError('No BLAST hits after filtering.')
+        all_short = all_blast_hits
 
         # expand hits according to query + 10 nucleotides +-
-        shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits(
-            all_short,
-            args_inner.blast_db,
-            bhp.query_length,
-            extra=args_inner.subseq_window_locarna,
-            blast_regexp=args_inner.blast_regexp,
-            skip_missing=args_inner.skip_missing,
-            msgs=args_inner.logmsgs,
-        )
+        if args_inner.db_type == "blastdb":
+            shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits(
+                all_short,
+                args_inner.blast_db,
+                bhp.query_length,
+                extra=args_inner.subseq_window_locarna,
+                blast_regexp=args_inner.blast_regexp,
+                skip_missing=args_inner.skip_missing,
+                msgs=args_inner.logmsgs,
+            )
+        elif args_inner.db_type in ["fasta", "gb", "server"]:
+            shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits_from_fasta(
+                all_short,
+                args_inner.blast_db,
+                bhp.query_length,
+                extra=args_inner.subseq_window_locarna,
+                blast_regexp=args_inner.blast_regexp,
+                skip_missing=args_inner.skip_missing,
+                msgs=args_inner.logmsgs,
+                format=args_inner.db_type,
+            )
+        else:
+            raise ValueError
 
         # check, if blast hits are non - overlapping, if so, add the overlapping hit info to the longer hit
         # reflect this in user output
@@ -193,14 +212,9 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
 
         shorts_expanded = BA_support.rc_hits_2_rna(shorts_expanded)
 
-        analyzed_hits = BlastSearchRecompute()
-        analyzed_hits.args = args_inner
-        all_analyzed.append(analyzed_hits)
-
         query_seq = query.seq.transcribe()
 
         # compute alignment here
-        analyzed_hits.query = query
 
         if args_inner.threads == 1:
             result = []
@@ -238,12 +252,14 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
         # infer homology
         # consider adding query sequence to alignment and scoring it as a proof against squed alignments and datasets
         # write all hits to fasta
-        fda, all_hits_fasta = mkstemp(prefix='rba_', suffix='_22')
+        fda, all_hits_fasta = mkstemp(prefix='rba_', suffix='_22', dir=CONFIG.tmpdir)
         os.close(fda)
         analyzed_hits.write_results_fasta(all_hits_fasta)
 
         # this part predicts homology - it is not truly part of repredict
-        homology_prediction, homol_seqs, cm_file = infer_homology(analyzed_hits=analyzed_hits, args=args_inner)
+        homology_prediction, homol_seqs, cm_file_rfam_user = infer_homology(
+            analyzed_hits=analyzed_hits, args=args_inner, cm_model_file=ih_model, multi_query=multi_query, iteration=iteration
+        )
 
         # add homology prediction to the data
         for hit, pred in zip(analyzed_hits.hits, homology_prediction):
@@ -263,10 +279,10 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
                 dpfile = args_inner.json.strip('json')
 
             # optimization so the rfam cm file is used only once
-            if cm_file is None and 'rfam' in ''.join(args_inner.prediction_method):
+            if cm_file_rfam_user is None and 'rfam' in ''.join(args_inner.prediction_method):
                 best_model = get_cm_model(args_inner.blast_query, threads=args_inner.threads)
                 rfam = RfamInfo()
-                cm_file = run_cmfetch(rfam.file_path, best_model)
+                cm_file_rfam_user = run_cmfetch(rfam.file_path, best_model)
 
             for method in args_inner.prediction_method:
                 # cycle the prediction method settings
@@ -293,9 +309,6 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
                     if getattr(args_inner, 'pandas_dump', False):
                         spa = args_inner.pandas_dump.split('.')
                         ah.args.pandas_dump = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                    if getattr(args_inner, 'o_tbl', False):
-                        spa = args_inner.o_tbl.split('.')
-                        ah.args.o_tbl = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
                     if getattr(args_inner, 'dill', False):
                         spa = args_inner.dill.split('.')
                         ah.args.dill = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
@@ -309,11 +322,11 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
                     wrapped_ending_with_prediction(
                         args_inner=ah.args,
                         analyzed_hits=ah,
-                        all_hits_fasta=all_hits_fasta,
-                        query=query,
                         pred_method=method,
                         method_params=method_params,
-                        used_cm_file=cm_file,
+                        used_cm_file=cm_file_rfam_user,
+                        multi_query=multi_query,
+                        iteration=iteration,
                     )
                     success = True
                     out_line.append(to_tab_delim_line_simple(ah.args))
@@ -327,16 +340,16 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None):
             wrapped_ending_with_prediction(
                 args_inner=args_inner,
                 analyzed_hits=analyzed_hits,
-                all_hits_fasta=all_hits_fasta,
-                query=query,
-                used_cm_file=cm_file,
+                used_cm_file=cm_file_rfam_user,
+                multi_query=multi_query,
+                iteration=iteration,
             )
             out_line.append(to_tab_delim_line_simple(args_inner))
 
         ml_out_line.append('\n'.join(out_line))
 
-        if cm_file is not None and os.path.exists(cm_file):
-            os.remove(cm_file)
+        if cm_file_rfam_user is not None and os.path.exists(cm_file_rfam_user):
+            os.remove(cm_file_rfam_user)
 
         os.remove(all_hits_fasta)
 
@@ -391,18 +404,13 @@ def create_report_object_from_locarna(exp_hit, locarna_alig):
     # prepare seq_record for subsequences
     aligned_subsequence.description = ''
     hit = BA_support.Subsequences(exp_hit)
-    sub_id = aligned_subsequence.id[:-2].split(':')[-1]
 
-    hit.subs[sub_id] = aligned_subsequence
+    hit.extension = aligned_subsequence
 
     # find the matching sequence
     pos_match = re.search(str(aligned_subsequence.seq), str(exp_hit.seq), flags=re.IGNORECASE)
     if not pos_match:
         raise Exception('Subsequnce not found in supersequence. Terminating.')
-
-    hit.ret_keys = [sub_id,
-                    'ss0',
-                    None]
 
     hit.best_start, hit.best_end = compute_true_location_locarna(hit, pos_match)
 
@@ -454,12 +462,12 @@ def run_locarna(query_file, subject_file, locarna_params):
     if not os.path.isfile(subject_file):
         raise FileNotFoundError('Provided file {} was not found'.format(subject_file))
 
-    cmd = '{}locarna {} {} {} > {}'.format(
-        CONFIG.locarna_path,
-        locarna_params,
-        query_file,
-        subject_file,
-        subject_file + '.loc_out',
+    cmd = '{} {} {} {} > {}'.format(
+        shlex.quote('{}locarna'.format(CONFIG.locarna_path)),
+        ' '.join([shlex.quote(i) for i in shlex.split(locarna_params)]),
+        shlex.quote(query_file),
+        shlex.quote(subject_file),
+        shlex.quote(subject_file + '.loc_out'),
     )
     ml.debug(cmd)
     r = call(cmd, shell=True)
@@ -615,12 +623,12 @@ def refold_stockholm(stockholm_alig, consensus_structure):
     """
     ml.debug(fname())
     # convert to clustal alignment
-    fd, clust_tempfile = mkstemp(prefix='rba_', suffix='_23')
+    fd, clust_tempfile = mkstemp(prefix='rba_', suffix='_23', dir=CONFIG.tmpdir)
     with os.fdopen(fd, 'w') as f:
         stockholm_alig.write_clustal(f)
 
     # write fake alifold output with given consensus structure
-    fd, alif_fake_file = mkstemp(prefix='rba_', suffix='_24')
+    fd, alif_fake_file = mkstemp(prefix='rba_', suffix='_24', dir=CONFIG.tmpdir)
     with os.fdopen(fd, 'w') as f:
         # the consensus sequence in alifold file is really not used for anything
         f.write('A'*len(consensus_structure) + '\n')

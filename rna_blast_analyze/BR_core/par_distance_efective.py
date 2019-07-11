@@ -34,11 +34,6 @@ def vypocet(oi):
     return dist
 
 
-def vypocet_memory_debug(oi):
-    a = oi[1]
-    return 1
-
-
 def the_main(fp):
     """input is list of dictionaries with fields
     name, seq, structure, consensus
@@ -57,20 +52,15 @@ def the_main(fp):
     return distances
 
 
-def external_pool(fp, open_pool):
-    if round(len(fp)/open_pool._processes) == 0:
-        distances = open_pool.map(vypocet, fp)
+def compute_distances(fp, threads=1):
+    if threads == 1:
+        dist = []
+        for pair in fp:
+            dist.append(vypocet(pair))
+        return dist
     else:
-        distances = open_pool.map(vypocet, fp, round(len(fp)/open_pool._processes))
-    # distances = open_pool.map(vypocet_memory_debug, fp, round(len(fp)/open_pool._processes))
-    return distances
-
-
-def distances_one_thread(fp):
-    dist = []
-    for pair in fp:
-        dist.append(vypocet(pair))
-    return dist
+        with Pool(processes=threads) as pool:
+            return pool.map(vypocet, fp)
 
 
 def two_files_input(fasta_structures, fasta_reference):

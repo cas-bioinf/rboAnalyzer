@@ -1,6 +1,5 @@
 import configparser
 import os
-from distutils.util import strtobool
 import logging
 ml = logging.getLogger(__name__)
 # Beware of lazy or conditional import with config!!!! It would overwrite custom config file.
@@ -18,11 +17,8 @@ class tools_paths(object):
             'mfold': '',
             'blast': '',
             'mafft': '',
-            't-coffee': '',
             'centroid': '',
             'turbofold': '',
-            'rnashapes': '',
-            'rapidshapes': '',
         }
 
         try:
@@ -41,13 +37,8 @@ class tools_paths(object):
             'html_template_dir': os.path.abspath(
                 os.path.dirname(__file__) + '/output'
             ),
-            'rnastructure_datapath': dp
-        }
-
-        self.ssh = {
-            'ssh_user': '',
-            'ssh_pass': '',
-            'use_virtual': False,
+            'rnastructure_datapath': dp,
+            'tmpdir': None,
         }
 
         if config_file:
@@ -66,13 +57,6 @@ class tools_paths(object):
                 else:
                     self.tool_paths[key] = config['TOOL_PATHS'][key] + os.sep
 
-        if 'SSH' in config:
-            for key in config['SSH'].keys():
-                if key == 'use_virtual':
-                    self.ssh[key] = strtobool(config['SSH'][key])
-                else:
-                    self.ssh[key] = config['SSH'][key]
-
         if 'DATA' in config:
             for key in config['DATA'].keys():
                 self.data_paths[key] = config['DATA'][key]
@@ -84,7 +68,6 @@ class tools_paths(object):
     def override(self, other):
         ml.info('Overriding previous configuration.')
         self.differ(self.tool_paths, other.tool_paths)
-        self.differ(self.ssh, other.ssh)
         self.differ(self.data_paths, other.data_paths)
         ml.debug('New configuration: {}'.format(self))
 
@@ -135,36 +118,12 @@ class tools_paths(object):
         return self.tool_paths['mafft']
 
     @property
-    def tcoffee_path(self):
-        return self.tool_paths['t-coffee']
-
-    @property
     def centriod_path(self):
         return self.tool_paths['centroid']
 
     @property
     def turbofold_path(self):
         return self.tool_paths['turbofold']
-
-    @property
-    def rnashapes_path(self):
-        return self.tool_paths['rnashapes']
-
-    @property
-    def rapidshapes_path(self):
-        return self.tool_paths['rapidshapes']
-
-    @property
-    def SSH_USER(self):
-        return self.ssh['ssh_user']
-
-    @property
-    def SSH_PASS(self):
-        return self.ssh['ssh_pass']
-
-    @property
-    def USE_VIRTUAL(self):
-        return self.ssh['use_virtual']
 
     @property
     def rfam_dir(self):
@@ -182,6 +141,10 @@ class tools_paths(object):
     def html_template_dir(self):
         return self.data_paths['html_template_dir']
 
+    @property
+    def tmpdir(self):
+        return self.data_paths['tmpdir']
+
     def __repr__(self):
         return repr(vars(self))
 
@@ -191,6 +154,4 @@ CONFIG = tools_paths(config_file=None)
 if __name__ == '__main__':
     CC = tools_paths(config_file=None)
     for s in CC.tool_paths.values():
-        print(s)
-    for s in CC.ssh.values():
         print(s)

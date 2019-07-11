@@ -1,76 +1,75 @@
-# RNA BLAST ANALYZE pipeline
+# rboAnalyzer
 ## Introduction
-This pipeline is meant as a complementary step when using BLAST algorithm
- to search non-coding RNA (ncRNA) with secondary structure.
+rboAnalyzer is pipeline meant as a complementary step when BLAST algorithm
+ was used to search for query that is non-coding RNA (ncRNA) with secondary structure (does not have to be known).
 As the BLAST is general sequence alignment algorithm, it's results (output)
  is missing some very useful features in context of ncRNAs.
 
 Also the output apart from well scoring hits, usually contains sequence
  fragments (subject sequence only partially aligned to query).
 Such hit may bring valuable information by capturing distant homology or
-it could be just ...
+it may be nothing.
 
-With our pipeline we add information to such BLAST search to help researcher
+With our rboAnalyzer we add information to such BLAST search to help researcher
  decide which hits are real ncRNAs and what their secondary structure might be.
 
 ## Functionality overview
 <img src="RBA_pipeline_overview.svg" width="700px" />
 
-The pipeline has 3 stages:
-1) Hit extension.
-2) Inference of homology of extended hit to query sequence.
-3) Secondary structure prediction.
+The rboAnalyzer has 3 stages:
+1) Estimation of full-length RNA sequence from HSP (extension).
+2) Estimation of homology of estimated full-length sequences to query sequence.
+3) Prediction of secondary structures.
 
 Each of these stages has dedicated section.
 
-### Hit extension
-The pipeline has 3 modes for extending BLAST hits.
+### Methods for estimation of full-length sequences from HSPs
+The pipeline has 3 methods for estimating the full-length sequences from BLAST HSPs.
 
 1) __simple__
 
-    This means that location of extended sequence is computed from
-     unaligned parts of query sequence.
+    This means that location of estimated full-length sequence is computed from
+     unaligned parts of query sequence on 5' and 3' ends of the HSP.
 
 2) __locarna__
 
-    In this mode, the hit loci at the subject sequence is realigned to
-     the query sequence with Locarna algorithm. The subject sequence
-     aligned to the query is considered as extended sequence.
+    In this method, the loci containing hit with flanking regions at the subject sequence is realigned to
+     the query sequence with Locarna algorithm. The sequence
+     aligned to the query is considered to be the estimated full-length sequence.
 
 3) __joined__
 
-    Here the two aforementioned mode are combined and extended sequences
-     are scored with RSEARCH covariance model. The better scoring sequence
-     is chosen.
+    Here the two aforementioned methods are combined and estimated full-length sequences
+     are scored with covariance model. The better scoring sequence is chosen.
 
-#### Extension - simple
+#### ad simple)
 <img src="figure_blast_simple.svg" width="700px" />
 
-
-In this mode we compute the extended hit location by taking length of
- unaligned query sequence (can be at start, end or both) and add or
+In this mode we compute the location of estimated full-length sequence by taking length of
+ unaligned parts of query sequence in HSP (can be at start, end or both) and add or
  subtract it respectively from hit start/end index.
-In the toy example we have the Plus/Plus BLAST hit with query sequence
+In the toy example we have the Plus/Plus BLAST HSP with query sequence
  aligned from 10 to 21 to subject sequence 1000 to 1009.
 If query is 50 bases long, then length of unaligned query at start is 9
  and length of unaligned query at end is 29.
-Then start of the extended sequence in subject is 1000 - 9 = 991 and end is
+Then start of the estimated full-length sequence in subject is 1000 - 9 = 991 and end is
  1009 + 29 = 1038.
 
 
-#### Extension - locarna
+#### ad locarna)
 <img src="figure_blast_locarna.svg" width="700px" />
 
-With __locarna__ mode we first extract so called _supersequence_. Which is
- region on subject sequence extended by unaligned query region with
- additional regions. This _supersequence_ is then realigned with Locarna
- algorithm to obtain extended sequence.
-The Locarna algorithm utilises secondary structure in it's computations,
- thus it is more suited to align ncRNAs.
-The Locarna algorithm is by default called with `struct-local=0`,
+With __locarna__ mode we first extract so called _supersequence_, which is
+ region on subject sequence as with __simple__,
+ additionally padded on 5' and 3' ends by extra sequnece from the subject sequence.
+This _supersequence_ is then realigned with Locarna algorithm to obtain the estimated full-length sequence.
+
+The Locarna algorithm utilises possible pairings in it's computations,
+ thus it is better suited to align RNAs then BLAST algorithm.
+The Locarna is by default called with `struct-local=0`,
  `sequ-local=0` and `free-endgaps=++++` parameters.
-In addition the information from BLAST hits is utilized in form of
- providing so called anchor to the Locarna algorithm.
+Additionaly the information about matching nucleotides from BLAST HSPs 
+is used to construct so called anchor for the Locarna algorithm.
 The anchor defines columns of alignment which are considered aligned.
 As the anchor we consider consecutive series of matches of length at
  least `L` in BLAST alignment.
@@ -78,100 +77,108 @@ The default value of `L` is 7.
 This way the alignment is anchored and the Locarna algorithm can align
  query to the _supersequence_. With the `free-endgaps=++++` option,
  the algorithm does not put penalty to unaligned ends of _supersequence_.
+The estimated full-length sequence is the continuous part of _supersequence_ aligned to the query sequence
+ (i.e. the subject sequence between the bases, inclusive, on subject sequence matching to the 5' terminal and 3' terminal bases).
 
-#### Extension - joined
-This approach combines the __simple__ and __locarna__.
+#### add joined)
+This approach combines the __simple__ and __locarna__. It computes both and 
+ for each HSPs it chooses the estimated full-length sequence with higher score to covariance model.
 
-### Homology inference
-Here we compute score for relation between extended sequence and query sequence.
-The computation is based on aligning covariance model (CM) to each extended
+### Estimation of homology
+Here we compute score for relation between the estimated full-lenght sequence and query sequence.
+The computation is based on aligning covariance model (CM) to each estimated full-length
  sequence with `cmalign` program from the Infernal package.
 
-We implement 3 options on how to get covariance model:
+We've implemented 3 options on how to provide covariance model:
 
 1) build with RSEARCH (default)
 
-    By default we build the covariance model from the query sequence and RIBOSUM65 matrix.
-    The RIBOSUM file used can be changed by [alternative](config_how_to.md) `config.txt` file.
+    By default we build the covariance model from the query sequence (secondary structure predicted by RNAfold) and RIBOSUM matrix.
+    The RIBOSUM is RIBOSUM65 by default and it can be changed in [alternative](config_how_to.md) `config.txt` file.
 
 2) supply your own model (the `--cm_file` option)
 
-    If the covariance model is known it can be provided with `--cm_file` option.
-    Only one model per file is allowed (this is not checked by the pipeline).
+    If the covariance model is known, it can be provided with `--cm_file` option.
+    Only one model per file is allowed.
+    
+    Note that if you provide the covariance model, it will also be used in all methods for prediction of secondary structures using covariance models (those starting with `rfam`).
 
 3) infer from Rfam (the `--use_rfam` option)
 
     The Rfam database is searched with query sequence for the best matching
     model (`cmscan`).
 
-### Secondary structure prediction
-In the secondary structure prediction the pipeline can use multiple approaches (prediction methods).
+### Prediction of secondary structures
+The rboAnalyzer can use multiple approaches (prediction methods) to predict secondary structures.
 The prediction methods can be (roughly) divided to following groups:
 
-- Predict structure independently on other extended sequences
-
-    The main advantage here is that these methods can be used even if
-     only fragments and low scoring hits are in the output.
+- Predict structure independently of other estimated full-length sequences
+    The advantage for these methods is robustness to possible improper parameter choice.
     - [rnafold](prediction_methods.md#rnafold)
-    - [subopt_fold_query](prediction_methods.md#subopt_fold_query)
-    - [rfam_rnafoldc](prediction_methods.md#rfam_rnafoldc)
-    - [rfam_subopt](prediction_methods.md#rfam_subopt)
-    - [TurboFold_fast](prediction_methods.md#TurboFold_fast) (with max_seqs_in_prediction = 2)
+    - [fq-sub](prediction_methods.md#fq-sub)
+    - [rfam-Rc](prediction_methods.md#rfam-Rc)
+    - [rfam-centroid](prediction_methods.md#rfam-centroid)
+    - [rfam-sub](prediction_methods.md#rfam-sub)
 
-- Use _trusted_ extended sequences as reference
-    - [centroid_homfold](prediction_methods.md#centroid_homfold)
+- Use of selected estimated full-length sequences as reference
+    - [centroid](prediction_methods.md#centroid)
     - [TurboFold](prediction_methods.md#TurboFold)
-    - [TurboFold_fast](prediction_methods.md#TurboFold_fast)
+    - [Turbo-fast](prediction_methods.md#Turbo-fast)
 
-- Use _trusted_ extended sequences to build consensus secondary structure
-    - [alifold_refold_rnafold_c](prediction_methods.md#alifold_refold_rnafold_c)
-    - [muscle_alifold_refold_rnafold_c](prediction_methods.md#muscle_alifold_refold_rnafold_c)
-    - [tcoffee_rcoffee_alifold_refold_rnafoldc](prediction_methods.md#tcoffe_rcoffee_alifold_refold_rnafoldc)
-    - [alifold_unpaired_conserved_refold](prediction_methods.md#alifold_unpaired_conserved_refold)
-    - [muscle_alifold_unpaired_conserved_refold](prediction_methods.md#muscle_alifold_unpaired_conserved_refold)
-    - [tcoffee_rcoffee_alifold_conserved_ss_rnafoldc](prediction_methods.md#tcoffee_rcoffee_alifold_conserved_ss_rnafoldc)
-    - [subopt_fold_clustal_alifold](prediction_methods.md#subopt_fold_clustal_alifold)
-    - [subopt_fold_muscle_alifold](prediction_methods.md#subopt_fold_muscle_alifold)
+- Use of selected estimated full-length sequences to build consensus secondary structure
+    - [C-A-r-Rc](prediction_methods.md#C-A-r-Rc)
+    - [M-A-r-Rc](prediction_methods.md#M-A-r-Rc)
+    - [C-A-U-r-Rc](prediction_methods.md#C-A-U-r-Rc)
+    - [M-A-U-r-Rc](prediction_methods.md#M-A-U-r-Rc)
+    - [C-A-sub](prediction_methods.md#C-A-sub)
+    - [M-A-sub](prediction_methods.md#M-A-sub)
 
 ## Output
 
 ### Output formats
-The pipeline is able to produce several output formats, most handy being
+The rboAnalyzer is able to produce several output formats, most handy being
   being the `.html`.
 - html
-    Stand-alone web page containing sequences and predicted secondary structures.
+    Stand-alone web page containing estimated full-length sequences and predicted secondary structures.
     If internet connection is avalible, it can be used to view respective
-    genome loci for each blast hit using NCBI SeqViewer.
+    genome loci for each BLAST HSP using NCBI SeqViewer.
 - json
-    Complete json-readable pipeline output (all other output can be produced from this one.).
+    Json-readable rboAnalyzer output (contains all data).
 - csv
     Output table in comma separated values. Contains all important information
-    including original hit specification, extended sequence location,
-    sequence and secondary structure itself.
+    including original HSP data, estimated full-length sequence location,
+    sequence and predicted secondary structure(s).
 
 ## HTML output
-The html output is organized around BLAST output. Each blast hit gets
-it's separate section with five parts:
+In the head section there is report on basic input data and name of Rfam
+ covariance model with best score to the provided query sequence.
 
-  1) the text representation of BLAST hit
+The html output is organized around BLAST output.
+Each BLAST HSP gets it's separate section with five parts:
 
-  2) pipeline report with extended sequence indices and RSEARCH bit score
+  1) the text representation of BLAST HSP
 
-  3) the extended sequence itself (checkbox or avalible for direct copy)
+  2) rboAnalyzer report with estimated full-length sequence indices and RSEARCH bit score
 
-  4) one or multiple predicted secondary structures, each with its own checkbox for export
+  3) the estimated full-length sequence itself
+
+  4) one or multiple predicted secondary structures
 
   5) NCBI Sequence viewer (optional - by default only load button is shown)
 
 The `html` otuput offers sorting, selecting sequences and structures and
-  their export to fasta format or fasta-like format with dot-bracket secondary structures.
-  Also if internet connection is avalible NCBI genome browser is avalible
+  their export to fasta format or fasta-like format with predicted secondary structures in dot-bracket notation.
+If internet connection is avalible, the NCBI genome browser can be used
   to explore synteny and known features of current genome.
+
+The header for each BLAST HSP contains Accession.Version number (based on provided regular expression).
+The header is also color-coded on color scale from green to red based on RSEARCH score.
+This allows rapid identification of interesting or suspicious HSPs differing from others.
 
 ### Example output ideal case
 <img src="html_ba_1.png" width="695px" />
 
-The black arrows points to the hit header (color indicating homology) and control buttons respectively.
+The black arrows points to the HSP header (color indicating homology) and control buttons respectively.
 
 ### Example output with  loaded NCBI sequence viewer
 <img src="html_ba_2.png" width="824px" />
@@ -180,43 +187,39 @@ The black arrows points to the hit header (color indicating homology) and contro
 #### Control buttons
 At the bottom of the view there are general control buttons which allow
   selecting and deselecting of sequences and structures, sorting by E-value
-  and bulk NCBI Sequence Viewer loader.
-- Select/Unselect all Seqs. (will select/unselect (check checkbox) all extended sequences)
+  and bulk initialization of NCBI Sequence Viewer.
+- Select/Unselect all Seqs. (will select/unselect (check checkbox) all estimated full-length sequences)
 - Select/Unselect all Structs (will select/unselect (check checkbox) all predicted structures)
-- Export sel. Structs (will trigger download of selected structures in fasta-like format)
-- Export sel. Seqs (will trigger donwload of selected sequences in fasta-like format)
-- Sort Eval desc/asc (will sort BLAST hits according to E-value Ascending or Descending)
-- View all Regions (will trigger loading of NCBI viewer for all (not yet loaded) hits)
+- Export sel. Structs (will trigger download of selected predicted secondary structures in fasta-like format)
+- Export sel. Seqs (will trigger download of selected estimated full-length sequences in fasta-like format)
+- Sort Eval desc/asc (will sort BLAST HSPs according to E-value Ascending or Descending)
+- View all Regions (will trigger loading of NCBI viewer for all (not yet loaded) HSPs)
 
-#### Hit Header
-The header for each blast hit contains Accession.Version number (based on provided regexp). The header is also color-coded on color scale from green to red based on
-  RSEARCH score. This allows rapid identification of interesting or
-  suspicious hits differing from others.
+#### Report structure
 
-#### Report structures
+1) Inputs: query input file and BLAST input file
+  Best matching mode from Rfam
 
-1) Pipeline name and BLAST input file
-
-2) Extended sequences report
+2) Estimated full-length sequences, predicted secondary structures and other data
 
 3) Command and parameters
   - executed commandline string
   - date and time of run
-  - paramaters
+  - parameters
 
 #### The fasta-like format containing secondary structures
 ```
->uid:N|accessionDIRECTION-METHOD_NAME genome location START-END
+>uid:N|ACCESSION.VERSIONdirection-method_name START-END (genome location)
 SEQUENCE
 SECONDARY_STRUCTURE
 
-# where the N is serial number of BLAST hit
-#  and DIRECTION can be "fw" for plus strand and "rc" for minus strand
-#  genome-location is then location of found sequence on original genome
-#  in START-END format where START is always less then END (direction is defined by DIRECTION)
+# - where the N is serial number of BLAST HSP
+# - direcion can be "fw" for plus strand and "rc" for minus strand
+# - genome-location is then location of found sequence on original genome
+#   in START-END format where START is always lower index then END (direction is defined by "direction")
 # the sequence is always 5' to 3' direction
 
->uid:104|CP006976.1fw-rfam_rnafoldc 2175683-2175865
+>uid:104|CP006976.1fw-rfam-Rc 2175683-2175865
 GAUUACCUGAGGUGUUUGCCAGUGGGUUAUGUCCCUGAGCCGAUACUUUUAUUUUAUGAAUCGGUUUCUAAUUGUUGGUGUGCAUGCUUAGCUUGACUAAGAAGCCUAAAAAUAGUUAUAACUGAUUCCCUUGAACCGUUGGGUUCAAGGACUGAGACUUGCAGCAGCAUCUCGGGUUCUUCC
 ....(((((((((((.(((..(((((((..((((.((((((.(....((((......(((((((((..((((((((..((.((.(.(((((.....)))))).)).))..)))))))).)))))))))...))))....).)))))).))))...))))))).))))))))))))))......
 >uid:104|CP006976.1fw-rnafold 2175683-2175865
@@ -224,7 +227,17 @@ GAUUACCUGAGGUGUUUGCCAGUGGGUUAUGUCCCUGAGCCGAUACUUUUAUUUUAUGAAUCGGUUUCUAAUUGUUGGUG
 ....(((((((((((((((.((((((......)))......................(((((((((..((((((((..((.((.(.(((((.....)))))).)).))..)))))))).)))))))))(((((((((....)))))))))......))).)))..))))))))))))......
 ```
 #### The NCBI sequence Viewer
-The NCBI sequence viewer works only if Internet connection is available.
+The NCBI sequence viewer works only if internet connection is available.
 It may take some time to load (especially with large genomes) and when the report
  contains many BLAST hits it may required more substantial amount of RAM.
- The data for the sequence viewer are not saved across sessions (after you close the web page), and must be reloaded re-lunch.
+The data for the sequence viewer are not saved across browser sessions.
+
+## Funding
+
+This work was supported by ELIXIR CZ research infrastructure project (MEYS Grant No: LM2015047) including access to computing and storage facilities.
+
+![elixir logo](ELIXIR_CZECHREPUBLIC_white_background_small.png)
+
+This work was supported from European Regional Development Fund - Project "ELIXIR-CZ: Budování kapacit" (No. CZ.02.1.01/0.0/0.0/16_013/0001777).
+
+![msmt logo](logolink_OP_VVV_hor_barva_eng.jpg)

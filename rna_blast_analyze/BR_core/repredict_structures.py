@@ -1,42 +1,47 @@
 import logging
 import os
 import pickle
-import re
-from tempfile import mkstemp
-
+import gzip
 import dill
 import numpy as np
 import pandas
+import json
+from tempfile import mkstemp
 from Bio import AlignIO, SeqIO
 from Bio.Phylo.TreeConstruction import DistanceCalculator
 from Bio.SeqRecord import SeqRecord
 
-import rna_blast_analyze.BR_core.BA_methods
 import rna_blast_analyze.BR_core.BA_support as BA_support
-from rna_blast_analyze.BR_core.BA_support import NoHomologousSequenceException, filter_ambiguous_seqs_from_list, AmbiguousQuerySequenceException
-from rna_blast_analyze.BR_core.centroid_homfold import me_centroid_homfold
-from rna_blast_analyze.BR_core.cmalign import RfamInfo, run_cmfetch, get_cm_model, extract_ref_from_cm
+from rna_blast_analyze.BR_core.BA_methods import add_loc_to_description
+from rna_blast_analyze.BR_core.BA_support import iter2file_name
+from rna_blast_analyze.BR_core.centroid_homfold import me_centroid_homfold, centroid_homfold_fast
+from rna_blast_analyze.BR_core.cmalign import RfamInfo, run_cmfetch, get_cm_model, extract_ref_from_cm, run_cmemit
 from rna_blast_analyze.BR_core.fname import fname
-from rna_blast_analyze.BR_core.infer_homology import _infer_hits_cm
-from rna_blast_analyze.BR_core.predict_structures import alifold_refold_prediction, tcoffee_rcoffee_refold_prediction, \
-    decouple_homologs_alifold_refold_prediction, rnafold_prediction, subopt_fold_query,\
-    subopt_fold_alifold, msa_alifold_rapidshapes, cmscan_rapidshapes, cmmodel_rnafold_c,\
-    rfam_subopt_pred, turbofold_conservative_prediction
-from rna_blast_analyze.BR_core.predict_structures import find_nc_and_remove, check_lonely_bp, IUPACmapping
+from rna_blast_analyze.BR_core.infer_homology import infer_hits_cm
+from rna_blast_analyze.BR_core.predict_structures import alifold_refold_prediction, \
+    rnafold_wrap_for_predict, subopt_fold_query,\
+    subopt_fold_alifold, cmmodel_rnafold_c, rfam_subopt_pred
+from rna_blast_analyze.BR_core.predict_structures import find_nc_and_remove, check_lonely_bp
 from rna_blast_analyze.BR_core.turbofold import turbofold_fast, turbofold_with_homologous
+from rna_blast_analyze.BR_core.output.htmloutput import write_html_output
+from rna_blast_analyze.BR_core.convert_classes import blastsearchrecompute2dict
+from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
+from rna_blast_analyze.BR_core.config import CONFIG
+from rna_blast_analyze.BR_core import exceptions
 
 ml = logging.getLogger(__name__)
 
 safe_prediction_method = [
     'rnafold',
-    'pairwise_centroid_homfold',
-    'TurboFold_fast',
-    'rfam_rnafoldc',
+    'centroid',
+    'Turbo-fast',
+    'rfam-Rc',
 ]
 
 
-def wrapped_ending_with_prediction(args_inner, analyzed_hits, all_hits_fasta, query,
-                                   pred_method=None, method_params=None, used_cm_file=None):
+def wrapped_ending_with_prediction(
+        args_inner, analyzed_hits, pred_method=None, method_params=None, used_cm_file=None, multi_query=False, iteration=0
+):
     """
     wrapper for prediction of secondary structures
     :param args_inner: Namespace of input arguments
@@ -45,39 +50,73 @@ def wrapped_ending_with_prediction(args_inner, analyzed_hits, all_hits_fasta, qu
     :param query: query sequence
     :param pred_method:
     :param method_params:
+    :param used_cm_file: cmfile if cmfile is known (user given or computed)
     :return:
     """
     ml.debug(fname())
     if pred_method is None:
         pred_method = args_inner.prediction_method
 
-    # todo: remove later - quick fix because some test code assigns prediction parameter for one method as str
     if isinstance(pred_method, str):
         pred_method = (pred_method,)
 
     if method_params is None:
         method_params = args_inner.pred_params
 
+    # ======= filter if needed =======
+    # do the filtering based on e-val or bitscore
+    # homologous hits still gets used for prediction
+
+    all_hits = analyzed_hits.hits.copy()
+
+    if args_inner.filter_by_eval is not None:
+        hits2predict = filter_by_eval(
+            analyzed_hits.hits, BA_support.blast_hit_getter_from_subseq, *args_inner.filter_by_eval
+        )
+        analyzed_hits.hits = hits2predict
+    elif args_inner.filter_by_bitscore is not None:
+        hits2predict = filter_by_bits(
+            analyzed_hits.hits, BA_support.blast_hit_getter_from_subseq, *args_inner.filter_by_bitscore
+        )
+        analyzed_hits.hits = hits2predict
+
+    # if used_cm_file is provided do not override it with CM from RFAM
+    # if use_rfam flag was given, then used_cm_file is already the best_matching model
+    # if analyzed_hits.best_matching_model is None - then we could not find the best matching model in RFAM
+    #  and the rfam based methods should fail (i.e. not predict anything)
+    # todo: change handling of obtained models (ie delete)
+    delete_cm = False
+    if used_cm_file is None and analyzed_hits.best_matching_model is not None:
+        rfam = RfamInfo()
+        used_cm_file = run_cmfetch(rfam.file_path, analyzed_hits.best_matching_model['target_name'])
+        delete_cm = True
+
     new_structures, exe_time = repredict_structures_for_homol_seqs(
         analyzed_hits.query,
-        all_hits_fasta,
+        analyzed_hits.hits,
         args_inner.threads,
         prediction_method=pred_method,
         pred_method_params=method_params,
-        all_hits=analyzed_hits.hits,
+        all_hits=all_hits,
         use_cm_file=used_cm_file,
         )
+
+    if delete_cm:
+        try:
+            os.remove(used_cm_file)
+        except OSError:
+            pass
 
     if 'default' not in pred_method:
         for i, hit in enumerate(analyzed_hits.hits):
             for key in new_structures.keys():
-                assert str(hit.subs[hit.ret_keys[0]].seq) == str(new_structures[key][i].seq)
-                hit.subs[hit.ret_keys[0]].annotations['sss'] += [key]
+                assert str(hit.extension.seq) == str(new_structures[key][i].seq)
+                hit.extension.annotations['sss'] += [key]
 
                 # expects "predicted" in annotations - for now, if not given, default is True, as not all prediction
                 #  methods implement "predicted" in their output
                 if new_structures[key][i].annotations.get('predicted', True):
-                    hit.subs[hit.ret_keys[0]].letter_annotations[key] = new_structures[key][i].letter_annotations['ss0']
+                    hit.extension.letter_annotations[key] = new_structures[key][i].letter_annotations['ss0']
 
     else:
         # default in pred method
@@ -85,55 +124,62 @@ def wrapped_ending_with_prediction(args_inner, analyzed_hits, all_hits_fasta, qu
 
     if 'default' not in pred_method:
         for hit in analyzed_hits.hits:
-            del hit.subs[hit.ret_keys[0]].letter_annotations['ss0']
-            hit.subs[hit.ret_keys[0]].annotations['sss'].remove('ss0')
+            del hit.extension.letter_annotations['ss0']
+            hit.extension.annotations['sss'].remove('ss0')
     else:
         for i, hit in enumerate(analyzed_hits.hits):
-            # assert str(hit.subs[hit.ret_keys[0]].seq) == str(new_structures[key][i].seq)
-            hit.subs[hit.ret_keys[0]].annotations['sss'].remove('ss0')
-            hit.subs[hit.ret_keys[0]].annotations['sss'] += ['default']
-            hit.subs[hit.ret_keys[0]].letter_annotations['default'] = hit.subs[hit.ret_keys[0]].letter_annotations.pop('ss0')
-
-    # do not need this, for the sake of compatibility with evaluation scripts
-    template_structure = BA_support.RNAfold(str(query.seq))[1]
-
-    templates = {'t0': {'str': template_structure,
-                        'seq': str(query.seq)}}
-
-    for hit in analyzed_hits.hits:
-        hit.templates = templates
+            # assert str(hit.extension.seq) == str(new_structures[key][i].seq)
+            hit.extension.annotations['sss'].remove('ss0')
+            hit.extension.annotations['sss'] += ['default']
+            hit.extension.letter_annotations['default'] = hit.extension.letter_annotations.pop(
+                'ss0'
+            )
 
     # remove uid from file descriptor
-    rna_blast_analyze.BR_core.BA_methods.add_loc_to_description(analyzed_hits)
+    add_loc_to_description(analyzed_hits)
 
     # write html if requested
     if args_inner.html:
-        ml.info('Writing html to {}.'.format(args_inner.html))
-        analyzed_hits.to_html(args_inner.html)
+        html_file = iter2file_name(args_inner.html, multi_query, iteration)
+        ml.info('Writing html to {}.'.format(html_file))
+        with open(html_file, 'w') as h:
+            h.write(write_html_output(analyzed_hits))
 
     # write csv file if requested
     if args_inner.csv:
-        ml.info('Writing csv to {}.'.format(args_inner.csv))
-        analyzed_hits.to_csv(args_inner.csv)
+        csv_file = iter2file_name(args_inner.csv, multi_query, iteration)
+        ml.info('Writing csv to {}.'.format(csv_file))
+        analyzed_hits.to_csv(csv_file)
 
     # replace with json
     if args_inner.json:
-        ml.info('Writing json to {}.'.format(args_inner.json))
-        analyzed_hits.to_json(args_inner.json, getattr(args_inner, 'zip_json', False))
+        json_file = iter2file_name(args_inner.json, multi_query, iteration)
+        ml.info('Writing json to {}.'.format(json_file))
+        j_obj = json.dumps(blastsearchrecompute2dict(analyzed_hits), indent=2)
+        if getattr(args_inner, 'zip_json', False):
+            with open(json_file + '.gz', 'wb') as ff:
+                ff.write(
+                    gzip.compress(j_obj.encode())
+                )
+        else:
+            with open(json_file, 'w') as ff:
+                ff.write(j_obj)
 
     if args_inner.pandas_dump:
-        ml.info('Writing pandas pickle to {}.'.format(args_inner.pandas_dump))
-        pandas.to_pickle(analyzed_hits.pandas, args_inner.pandas_dump)
+        pickle_file = iter2file_name(args_inner.pandas_dump, multi_query, iteration)
+        ml.info('Writing pandas pickle to {}.'.format(pickle_file))
+        pandas.to_pickle(analyzed_hits.pandas, pickle_file)
 
     if args_inner.dump:
-        ml.info('Writing dump files base: {}.'.format(args_inner.dump))
-        with open(args_inner.dump, 'wb') as pp:
+        dump_file = iter2file_name(args_inner.dump, multi_query, iteration)
+        ml.info('Writing dump files base: {}.'.format(dump_file))
+        with open(dump_file, 'wb') as pp:
             pickle.dump(analyzed_hits, pp, pickle.HIGHEST_PROTOCOL)
 
-        with open(args_inner.dump[:-4] + 'time_dump', 'wb') as pp:
+        with open(dump_file + '.time_dump', 'wb') as pp:
             pickle.dump(exe_time, pp, pickle.HIGHEST_PROTOCOL)
 
-        with open(args_inner.dump[:-4] + 'dill', 'wb') as pp:
+        with open(dump_file + '.dill', 'wb') as pp:
             dill.dump(analyzed_hits, pp, pickle.HIGHEST_PROTOCOL)
 
 
@@ -166,7 +212,7 @@ def create_nr_trusted_hits_file_MSA_safe(
     # because it is used as an reference during distance computation and subsequence selection,
     # however i dont need to have all homologous seqs there
     if check_unambiguous:
-        all_hits = filter_ambiguous_seqs_from_list(all_hits)
+        all_hits = BA_support.filter_ambiguous_seqs_from_list(all_hits)
 
     dist_table, homologous_seqs = _trusted_hits_selection_wrapper(
         all_hits,
@@ -177,7 +223,7 @@ def create_nr_trusted_hits_file_MSA_safe(
     )
 
     if dist_table.size == 0:
-        raise NoHomologousSequenceException
+        raise exceptions.NoHomologousSequenceException
 
     to_include = BA_support.select_sequences_from_similarity_rec(
         dist_table,
@@ -203,9 +249,9 @@ def create_nr_trusted_hits_file_MSA_safe(
         del dis_hom_index
 
     elif len(nr_homolog_hits) < 2 and check_unambiguous:
-        if len(filter_ambiguous_seqs_from_list(nr_homolog_hits)) == 0:
+        if len(BA_support.filter_ambiguous_seqs_from_list(nr_homolog_hits)) == 0:
             # this mean query contain ambiguos bases
-            raise NoHomologousSequenceException
+            raise exceptions.NoHomologousSequenceException
         else:
             ml.warning(
                 'Only one sequence is unique under defined sim_threshold_percent (including query)\n'
@@ -215,25 +261,25 @@ def create_nr_trusted_hits_file_MSA_safe(
             dis_hom_index = dist_table[:, 0].argmin()
             nr_homolog_hits.append(SeqRecord(homologous_seqs[dis_hom_index].seq, id='dummy_seq_01'))
             del dis_hom_index
-        homologous_seqs = filter_ambiguous_seqs_from_list(homologous_seqs)
+        homologous_seqs = BA_support.filter_ambiguous_seqs_from_list(homologous_seqs)
 
     elif len(nr_homolog_hits) >= 2 and not check_unambiguous:
         pass
 
     elif len(nr_homolog_hits) > 2 and check_unambiguous:
-        nr_homolog_hits = filter_ambiguous_seqs_from_list(nr_homolog_hits)
-        homologous_seqs = filter_ambiguous_seqs_from_list(homologous_seqs)
+        nr_homolog_hits = BA_support.filter_ambiguous_seqs_from_list(nr_homolog_hits)
+        homologous_seqs = BA_support.filter_ambiguous_seqs_from_list(homologous_seqs)
 
     elif len(nr_homolog_hits) == 2 and check_unambiguous:
-        homologous_seqs = filter_ambiguous_seqs_from_list(homologous_seqs)
-        if len(filter_ambiguous_seqs_from_list(nr_homolog_hits)) == 1:
+        homologous_seqs = BA_support.filter_ambiguous_seqs_from_list(homologous_seqs)
+        if len(BA_support.filter_ambiguous_seqs_from_list(nr_homolog_hits)) == 1:
             # this mean that query contains ambiguous base
-            raise NoHomologousSequenceException
+            raise exceptions.NoHomologousSequenceException
 
     else:
         raise Exception()
 
-    fd_h, nr_homo_hits_file = mkstemp(prefix='rba_', suffix='_58')
+    fd_h, nr_homo_hits_file = mkstemp(prefix='rba_', suffix='_58', dir=CONFIG.tmpdir)
     with os.fdopen(fd_h, 'w') as f:
         BA_support.write_fasta_from_list_of_seqrecords(f, nr_homolog_hits)
 
@@ -263,7 +309,7 @@ def create_nr_homolog_hits_file_MSA_unsafe(sim_threshold_percent=None, all_hits=
         )
         nr_homolog_hits = [homologous_seqs[i] for i in to_include]
 
-    fd_h, nr_homo_hits_file = mkstemp(prefix='rba_', suffix='_59')
+    fd_h, nr_homo_hits_file = mkstemp(prefix='rba_', suffix='_59', dir=CONFIG.tmpdir)
     with os.fdopen(fd_h, 'w') as f:
         BA_support.write_fasta_from_list_of_seqrecords(f, nr_homolog_hits)
 
@@ -305,7 +351,7 @@ def _trusted_hits_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold
     else:
         selection_threshold = cmscore_tr_
 
-    pred = _infer_hits_cm(score, tr=selection_threshold)
+    pred = infer_hits_cm(score, tr=selection_threshold)
     trusted_seqs_ = [i for i, j in zip(all_hits_, pred) if j]
 
     if len(trusted_seqs_) == 0:
@@ -347,7 +393,7 @@ def _trusted_hits_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold
     # sanitize seq names (muscle has issues with too long names)
     san_hom_seqs, san_dict = BA_support.sanitize_fasta_names_in_seqrec_list(nr_len_selected_trusted)
 
-    c_fd, trusted_sequence_file_ = mkstemp(prefix='rba_', suffix='_60')
+    c_fd, trusted_sequence_file_ = mkstemp(prefix='rba_', suffix='_60', dir=CONFIG.tmpdir)
     with os.fdopen(c_fd, 'w') as f:
         BA_support.write_fasta_from_list_of_seqrecords(f, san_hom_seqs)
 
@@ -374,40 +420,15 @@ def nonhomseqwarn(method_name):
     ml.warning(msg)
 
 
-def annotate_ambiguos_bases(seqlist):
-    iupac = IUPACmapping()
-    reg = re.compile("[^" + "^".join(iupac.unambiguous) + "]+", re.IGNORECASE)
-    for seq in seqlist:
-        m = re.search(reg, str(seq.seq))
-        if m:
-            msg = "Ambiguous base dected in {}, violating base {}, pos {}".format(
-                seq.id,
-                m.group(),
-                m.start()
-            )
-            ml.warning(msg)
-            seq.annotations['ambiguous'] = True
-            if not 'msgs' in seq.annotations:
-                seq.annotations['msgs'] = []
-            seq.annotations['msgs'].append(msg)
-        else:
-            seq.annotations['ambiguous'] = False
-
-    return seqlist
-
-
 def repredict_structures_for_homol_seqs(
-        query, all_hits_fasta,
+        query, seqs2predict,
         threads=None,
         prediction_method=tuple('alifold_refold',),
         pred_method_params=None,
         all_hits=None,
         use_cm_file=None,
 ):
-    """
-    use some approach to predict as best structures as possible
-    some fast alignment and consensus prediction with refold like proces is also possible
-    :return:
+    """Run RNA structure prediction based on chosen method and parameters.
     """
     msg = 'Entering structure prediction..'
     ml.info(msg)
@@ -416,23 +437,25 @@ def repredict_structures_for_homol_seqs(
     default_sim_tr_perc = 90
     default_score_tr = 0.0
     query_max_len_diff = 0.1
+
+    fd, seqs2predict_fasta = mkstemp(prefix='rba_', suffix='_83', dir=CONFIG.tmpdir)
+    with os.fdopen(fd, 'w') as fah:
+        for hit in seqs2predict:
+            if len(hit.extension.seq) == 0:
+                continue
+            fah.write('>{}\n{}\n'.format(
+                hit.extension.id,
+                str(hit.extension.seq))
+            )
+
     # output are structures for all_hits
-    all_hits_list = [i.subs[i.ret_keys[0]] for i in all_hits]
-
-    all_hits_list = annotate_ambiguos_bases(all_hits_list)
-    query = annotate_ambiguos_bases([query])[0]
-
-    # The FIRST sequence in the list is QUERY!!!!
-    # query = homologous_seqs[0]
-    # the clustering etc is part of consensus style prediction
-    # alifold is susceptible if sequences are not very different
-    # select most different sequences - cluster sequences, go for x identity
-    # combine eval with locarna score
+    all_hits_list = BA_support.annotate_ambiguos_bases([i.extension for i in all_hits])
+    query = BA_support.annotate_ambiguos_bases([query])[0]
+    seqs2predict_list = BA_support.annotate_ambiguos_bases([i.extension for i in seqs2predict])
 
     if not isinstance(pred_method_params, dict):
         raise Exception('prediction method parameters must be python dict')
 
-    # prediction_method = 'alifold_refold'
     structures = dict()
     exec_time = dict()
 
@@ -440,939 +463,320 @@ def repredict_structures_for_homol_seqs(
         # do nothing
         pass
 
-    if 'rfam_rnafoldc' in prediction_method:
-        pkey = 'rfam_rnafoldc'
+    if 'rfam-Rc' in prediction_method:
+        pkey = 'rfam-Rc'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
-        # select cm_model ()
 
         if use_cm_file is None:
-            fd, temp_query_file = mkstemp(prefix='rba_', suffix='_61')
-            with os.fdopen(fd, 'w') as f:
-                f.write('>{}\n{}\n'.format(query.id, str(query.seq)))
-
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                best_model = get_cm_model(temp_query_file, params=pred_method_params[pkey], threads=threads)
-            else:
-                best_model = get_cm_model(temp_query_file, threads=threads)
-
-            rfam = RfamInfo()
-            single_cm_file = run_cmfetch(rfam.file_path, best_model)
-            os.remove(temp_query_file)
+            ml.warning("No CM model. Can't use {}.".format(pkey))
         else:
-            single_cm_file = use_cm_file
-
-        if pkey in pred_method_params and pred_method_params[pkey]:
             structures[pkey], exec_time[pkey] = cmmodel_rnafold_c(
-                all_hits_fasta,
-                single_cm_file,
+                seqs2predict_fasta,
+                use_cm_file,
                 threads=threads,
-                params=pred_method_params[pkey]
-            )
-        else:
-            structures[pkey], exec_time[pkey] = cmmodel_rnafold_c(
-                all_hits_fasta,
-                single_cm_file,
-                threads=threads
+                params=pred_method_params.get(pkey, {})
             )
 
-        if use_cm_file is None:
-            os.remove(single_cm_file)
         del pkey
 
-    if 'rfam_subopt' in prediction_method:
-        pkey = 'rfam_subopt'
+    if 'rfam-centroid' in prediction_method:
+        pkey = 'rfam-centroid'
+        print('Running: {}...'.format(pkey))
+        ml.info(pkey)
+        # run cmscan if needed
+        # run cmfetch
+        # run cmemit -> homologous seqs
+        # run centroid_homfold
+
+        method_parameters = pred_method_params.get(pkey, {})
+
+        if use_cm_file is None:
+            ml.warning("No CM model. Can't use {}.".format(pkey))
+        else:
+            cep = method_parameters.get('cmemit', '')
+            if '-u' not in cep:
+                cep += ' -u'
+            if '-N' not in cep:
+                cep += ' -N {}'.format(method_parameters.get('n_seqs', 10))
+
+            hf_file = run_cmemit(use_cm_file, params=cep)
+
+            structures[pkey], exec_time[pkey] = me_centroid_homfold(seqs2predict_fasta, hf_file, params=method_parameters)
+
+            os.remove(hf_file)
+        del pkey
+
+    if 'rfam-sub' in prediction_method:
+        pkey = 'rfam-sub'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         if use_cm_file is None:
-            fd, temp_query_file = mkstemp(prefix='rba_', suffix='_62')
-            with os.fdopen(fd, 'w') as f:
-                f.write('>{}\n{}\n'.format(query.id, str(query.seq)))
-
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                best_model = get_cm_model(temp_query_file, params=pred_method_params[pkey], threads=threads)
-            else:
-                best_model = get_cm_model(temp_query_file, threads=threads)
-
-            rfam = RfamInfo()
-            single_cm_file = run_cmfetch(rfam.file_path, best_model)
-            os.remove(temp_query_file)
+            ml.warning("No CM model. Can't use {}.".format(pkey))
         else:
-            single_cm_file = use_cm_file
+            ref_structure = extract_ref_from_cm(use_cm_file)
 
-        ref_structure = extract_ref_from_cm(single_cm_file)
-
-        if pkey in pred_method_params and pred_method_params[pkey]:
             structures[pkey], exec_time[pkey] = rfam_subopt_pred(
-                all_hits_fasta,
+                seqs2predict_fasta,
                 ref_structure,
-                params=pred_method_params[pkey]
+                params=pred_method_params.get(pkey, None),
+                threads=threads,
             )
-        else:
-            structures[pkey], exec_time[pkey] = rfam_subopt_pred(
-                all_hits_fasta,
-                ref_structure,
-            )
-
-        if use_cm_file is None:
-            os.remove(single_cm_file)
 
         del pkey
-
-    if 'rfam_rapidshapes' in prediction_method:
-        pkey = 'rfam_rapidshapes'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-
-        fd, temp_query_file = mkstemp(prefix='rba_', suffix='_63')
-        with os.fdopen(fd, 'w') as f:
-            f.write('>{}\n{}\n'.format(query.id, str(query.seq)))
-
-        if pkey in pred_method_params and pred_method_params[pkey]:
-            structures[pkey], exec_time[pkey] = cmscan_rapidshapes(
-                all_hits_fasta,
-                temp_query_file,
-                params=pred_method_params[pkey],
-                threads=threads
-            )
-        else:
-            structures[pkey], exec_time[pkey] = cmscan_rapidshapes(
-                all_hits_fasta,
-                temp_query_file,
-                threads=threads
-            )
-
-        os.remove(temp_query_file)
-        del pkey
-        del fd
-        del temp_query_file
-
-    if 'clustalo_alifold_rapidshapes' in prediction_method:
-        pkey = 'clustalo_alifold_rapidshapes'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = msa_alifold_rapidshapes(
-                    all_hits_fasta,
-                    nr_homo_hits_file,
-                    pred_method_params[pkey],
-                    threads=threads,
-                    msa_alg='clustalo'
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = msa_alifold_rapidshapes(
-                    all_hits_fasta,
-                    nr_homo_hits_file,
-                    threads=threads,
-                    msa_alg='clustalo'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'muscle_alifold_rapidshapes' in prediction_method:
-        pkey = 'muscle_alifold_rapidshapes'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = msa_alifold_rapidshapes(
-                    all_hits_fasta,
-                    nr_homo_hits_file,
-                    pred_method_params[pkey],
-                    threads=threads,
-                    msa_alg='muscle'
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = msa_alifold_rapidshapes(
-                    all_hits_fasta,
-                    nr_homo_hits_file,
-                    threads=threads,
-                    msa_alg='muscle'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'rcoffee_alifold_rapidshapes' in prediction_method:
-        pkey = 'rcoffee_alifold_rapidshapes'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = msa_alifold_rapidshapes(
-                    all_hits_fasta,
-                    nr_homo_hits_file,
-                    pred_method_params[pkey],
-                    threads=threads,
-                    msa_alg='rcoffee'
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = msa_alifold_rapidshapes(
-                    all_hits_fasta,
-                    nr_homo_hits_file,
-                    threads=threads,
-                    msa_alg='rcoffee'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'alifold_refold' in prediction_method:
-        pkey = 'alifold_refold'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='refold',
-                    threads=threads,
-                    params=pred_method_params[pkey],
-                    msa_alg='clustalo'
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='refold',
-                    threads=threads,
-                    msa_alg='clustalo'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'muscle_alifold_refold' in prediction_method:
-        pkey = 'muscle_alifold_refold'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file, all_hits_fasta, refold='refold', threads=threads,
-                    params=pred_method_params[pkey],
-                    msa_alg='muscle'
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file, all_hits_fasta, refold='refold', threads=threads,
-                    msa_alg='muscle'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
 
     if 'rnafold' in prediction_method:
         pkey = 'rnafold'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
-        if pkey in pred_method_params and pred_method_params[pkey]:
-            structures[pkey], exec_time[pkey] = rnafold_prediction(
-                all_hits_fasta,
-                params=pred_method_params[pkey].get('RNAfold', '')
-            )
-        else:
-            structures[pkey], exec_time[pkey] = rnafold_prediction(
-                all_hits_fasta
-            )
+        structures[pkey], exec_time[pkey] = rnafold_wrap_for_predict(
+            seqs2predict_fasta,
+            params=pred_method_params.get(pkey, {}).get('RNAfold', '')
+        )
         del pkey
 
-    if 'subopt_fold_query' in prediction_method:
-        pkey = 'subopt_fold_query'
+    if 'fq-sub' in prediction_method:
+        pkey = 'fq-sub'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
-        if pkey in pred_method_params and pred_method_params[pkey]:
-            structures[pkey], exec_time[pkey] = subopt_fold_query(
-                all_hits_fasta,
-                query,
-                params=pred_method_params[pkey]
-            )
-        else:
-            structures[pkey], exec_time[pkey] = subopt_fold_query(
-                all_hits_fasta,
-                query
-            )
+
+        a, qf = mkstemp(prefix='rba_', suffix='_55', dir=CONFIG.tmpdir)
+        with os.fdopen(a, 'w') as fd:
+            fd.write('>query\n{}\n'.format(str(query.seq)))
+
+        structures[pkey], exec_time[pkey] = subopt_fold_query(
+            seqs2predict_fasta,
+            qf,
+            params=pred_method_params.get(pkey, None),
+            threads=threads
+        )
+
+        os.remove(qf)
 
         del pkey
 
-    if 'subopt_fold_clustal_alifold' in prediction_method:
-        pkey = 'subopt_fold_clustal_alifold'
+    if 'C-A-sub' in prediction_method:
+        pkey = 'C-A-sub'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-            else:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
+            method_parameters = pred_method_params.get(pkey, {})
+
+            nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
+                all_hits=all_hits_list,
+                query=query,
+                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
+                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
+                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
+                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
+            )
 
             os.remove(nr_homo_hits_file)
             del nr_homo_hits_file
 
-            f, homologous_sequence_file = mkstemp(prefix='rba_', suffix='_64')
+            f, homologous_sequence_file = mkstemp(prefix='rba_', suffix='_64', dir=CONFIG.tmpdir)
             with os.fdopen(f, 'w') as fh:
                 BA_support.write_fasta_from_list_of_seqrecords(fh, homologous_seqs)
 
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                structures[pkey], exec_time[pkey] = subopt_fold_alifold(
-                    all_hits_fasta,
-                    homologous_sequence_file,
-                    aligner='clustalo',
-                    params=pred_method_params[pkey],
-                    threads=threads
-                )
-            else:
-                structures[pkey], exec_time[pkey] = subopt_fold_alifold(
-                    all_hits_fasta,
-                    homologous_sequence_file,
-                    aligner='clustalo',
-                    threads=threads
-                )
+            structures[pkey], exec_time[pkey] = subopt_fold_alifold(
+                seqs2predict_fasta,
+                homologous_sequence_file,
+                aligner='clustalo',
+                params=method_parameters,
+                threads=threads
+            )
 
             os.remove(homologous_sequence_file)
             del homologous_sequence_file
             del homologous_seqs
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
         finally:
             del pkey
 
-    if 'subopt_fold_muscle_alifold' in prediction_method:
-        pkey = 'subopt_fold_muscle_alifold'
+    if 'M-A-sub' in prediction_method:
+        pkey = 'M-A-sub'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-            else:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
+            method_parameters = pred_method_params.get(pkey, {})
+
+            nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
+                all_hits=all_hits_list,
+                query=query,
+                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
+                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
+                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
+                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
+            )
 
             os.remove(nr_homo_hits_file)
             del nr_homo_hits_file
 
-            f, homologous_sequence_file = mkstemp(prefix='rba_', suffix='_65')
+            f, homologous_sequence_file = mkstemp(prefix='rba_', suffix='_65', dir=CONFIG.tmpdir)
             with os.fdopen(f, 'w') as fh:
                 BA_support.write_fasta_from_list_of_seqrecords(fh, homologous_seqs)
 
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                structures[pkey], exec_time[pkey] = subopt_fold_alifold(
-                    all_hits_fasta,
-                    homologous_sequence_file,
-                    aligner='muscle',
-                    params=pred_method_params[pkey],
-                    threads=threads,
-                )
-            else:
-                structures[pkey], exec_time[pkey] = subopt_fold_alifold(
-                    all_hits_fasta,
-                    homologous_sequence_file,
-                    aligner='muscle',
-                    threads=threads,
-                )
+            structures[pkey], exec_time[pkey] = subopt_fold_alifold(
+                seqs2predict_fasta,
+                homologous_sequence_file,
+                aligner='muscle',
+                params=method_parameters,
+                threads=threads,
+            )
 
             os.remove(homologous_sequence_file)
             del homologous_sequence_file
             del homologous_seqs
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
         finally:
             del pkey
 
-    if 'alifold_refold_rnafold_c' in prediction_method:
-        pkey = 'alifold_refold_rnafold_c'
+    if 'C-A-r-Rc' in prediction_method:
+        pkey = 'C-A-r-Rc'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='refold_rnafoldc',
-                    threads=threads,
-                    params=pred_method_params[pkey],
-                    msa_alg='clustalo'
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='refold_rnafoldc',
-                    threads=threads,
-                    msa_alg='clustalo'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
+            method_parameters = pred_method_params.get(pkey, {})
 
-    if 'muscle_alifold_refold_rnafold_c' in prediction_method:
-        pkey = 'muscle_alifold_refold_rnafold_c'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='refold_rnafoldc',
-                    threads=threads,
-                    params=pred_method_params[pkey],
-                    msa_alg='muscle'
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='refold_rnafoldc',
-                    threads=threads,
-                    msa_alg='muscle'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'alifold_unpaired_conserved_refold' in prediction_method:
-        pkey = 'alifold_unpaired_conserved_refold'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='conserved_ss_rnafoldc',
-                    threads=threads,
-                    params=pred_method_params[pkey],
-                    msa_alg='clustalo'
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='conserved_ss_rnafoldc',
-                    threads=threads,
-                    msa_alg='clustalo'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'muscle_alifold_unpaired_conserved_refold' in prediction_method:
-        pkey = 'muscle_alifold_unpaired_conserved_refold'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='conserved_ss_rnafoldc',
-                    threads=threads,
-                    params=pred_method_params[pkey],
-                    msa_alg='muscle'
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='conserved_ss_rnafoldc',
-                    threads=threads,
-                    msa_alg='muscle'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'dh_tcoffee_alifold_refold' in prediction_method:
-        pkey = 'dh_tcoffee_alifold_refold'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='refold',
-                    threads=threads,
-                    params=pred_method_params[pkey]
-                )
-            else:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='refold',
-                    threads=threads
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-            del homologous_seqs
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'dh_tcoffee_alifold_refold_rnafoldc' in prediction_method:
-        pkey = 'dh_tcoffee_alifold_refold_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='refold_rnafoldc',
-                    threads=threads,
-                    params=pred_method_params[pkey]
-                )
-            else:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='refold_rnafoldc',
-                    threads=threads
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-            del homologous_seqs
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'dh_tcoffee_alifold_conserved_ss_rnafoldc' in prediction_method:
-        pkey = 'dh_tcoffee_alifold_conserved_ss_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='conserved_ss_rnafoldc',
-                    threads=threads,
-                    params=pred_method_params[pkey]
-                )
-            else:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='conserved_ss_rnafoldc',
-                    threads=threads
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-            del homologous_seqs
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'dh_clustal_alifold_refold' in prediction_method:
-        pkey = 'dh_clustal_alifold_refold'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='refold',
-                    threads=threads,
-                    params=pred_method_params[pkey],
-                    align='clustalo'
-                )
-            else:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='refold',
-                    threads=threads,
-                    align='clustalo'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-            del homologous_seqs
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'dh_clustal_alifold_refold_rnafoldc' in prediction_method:
-        pkey = 'dh_clustal_alifold_refold_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='refold_rnafoldc',
-                    threads=threads,
-                    params=pred_method_params[pkey],
-                    align='clustalo'
-                )
-            else:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='refold_rnafoldc',
-                    threads=threads,
-                    align='clustalo'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-            del homologous_seqs
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'dh_clustal_alifold_conserved_ss_rnafoldc' in prediction_method:
-        pkey = 'dh_clustal_alifold_conserved_ss_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='conserved_ss_rnafoldc',
-                    threads=threads,
-                    params=pred_method_params[pkey],
-                    align='clustalo'
-                )
-            else:
-                nr_homo_hits_file, homologous_seqs = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = decouple_homologs_alifold_refold_prediction(
-                    nr_homo_hits_file,
-                    homologous_seqs,
-                    all_hits_fasta,
-                    refold='conserved_ss_rnafoldc',
-                    threads=threads,
-                    align='clustalo'
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-            del homologous_seqs
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'pairwise_centroid_homfold' in prediction_method:
-        pkey = 'pairwise_centroid_homfold'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        if pkey in pred_method_params and pred_method_params[pkey]:
-            nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_unsafe(
+            nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
                 all_hits=all_hits_list,
                 query=query,
-                sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
+                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
+                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
+                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
+                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
             )
-        else:
-            nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_unsafe(
+
+            structures[pkey], exec_time[pkey] = alifold_refold_prediction(
+                nr_homo_hits_file,
+                seqs2predict_fasta,
+                refold='refold_rnafoldc',
+                threads=threads,
+                params=method_parameters,
+                msa_alg='clustalo'
+            )
+
+            os.remove(nr_homo_hits_file)
+            del nr_homo_hits_file
+        except exceptions.NoHomologousSequenceException:
+            nonhomseqwarn(pkey)
+        finally:
+            del pkey
+
+    if 'M-A-r-Rc' in prediction_method:
+        pkey = 'M-A-r-Rc'
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
+        try:
+            method_parameters = pred_method_params.get(pkey, {})
+
+            nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
                 all_hits=all_hits_list,
                 query=query,
-                sim_threshold_percent=default_sim_tr_perc,
-                cmscore_tr=default_score_tr,
-                len_diff=query_max_len_diff,
+                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
+                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
+                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
+                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
             )
+            structures[pkey], exec_time[pkey] = alifold_refold_prediction(
+                nr_homo_hits_file,
+                seqs2predict_fasta,
+                refold='refold_rnafoldc',
+                threads=threads,
+                params=method_parameters,
+                msa_alg='muscle'
+            )
+
+            os.remove(nr_homo_hits_file)
+            del nr_homo_hits_file
+        except exceptions.NoHomologousSequenceException:
+            nonhomseqwarn(pkey)
+        finally:
+            del pkey
+
+    if 'C-A-U-r-Rc' in prediction_method:
+        pkey = 'C-A-U-r-Rc'
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
+        try:
+            method_parameters = pred_method_params.get(pkey, {})
+
+            nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
+                all_hits=all_hits_list,
+                query=query,
+                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
+                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
+                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
+                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
+            )
+            structures[pkey], exec_time[pkey] = alifold_refold_prediction(
+                nr_homo_hits_file,
+                seqs2predict_fasta,
+                refold='conserved_ss_rnafoldc',
+                threads=threads,
+                params=method_parameters,
+                msa_alg='clustalo'
+            )
+
+            os.remove(nr_homo_hits_file)
+            del nr_homo_hits_file
+        except exceptions.NoHomologousSequenceException:
+            nonhomseqwarn(pkey)
+        finally:
+            del pkey
+
+    if 'M-A-U-r-Rc' in prediction_method:
+        pkey = 'M-A-U-r-Rc'
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
+        try:
+            method_parameters = pred_method_params.get(pkey, {})
+
+            nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
+                all_hits=all_hits_list,
+                query=query,
+                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
+                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
+                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
+                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
+            )
+            structures[pkey], exec_time[pkey] = alifold_refold_prediction(
+                nr_homo_hits_file,
+                seqs2predict_fasta,
+                refold='conserved_ss_rnafoldc',
+                threads=threads,
+                params=method_parameters,
+                msa_alg='muscle'
+            )
+
+            os.remove(nr_homo_hits_file)
+            del nr_homo_hits_file
+        except exceptions.NoHomologousSequenceException:
+            nonhomseqwarn(pkey)
+        finally:
+            del pkey
+
+    if 'centroid' in prediction_method:
+        pkey = 'centroid'
+        print('Runing: {}...'.format(pkey))
+        ml.info(pkey)
+
+        method_parameters = pred_method_params.get(pkey, {})
+
+        nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_unsafe(
+            all_hits=all_hits_list,
+            query=query,
+            sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
+            cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
+            cm_threshold_percent=method_parameters.get('cmscore_percent', None),
+            len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
+        )
 
         raw_structures, exec_time[pkey] = me_centroid_homfold(
-            all_hits_fasta, nr_homo_hits_file,
-            params=pred_method_params.get(pkey, None)
+            seqs2predict_fasta, nr_homo_hits_file,
+            params=method_parameters
         )
 
         # check noncanonical
@@ -1398,45 +802,47 @@ def repredict_structures_for_homol_seqs(
         del nr_homo_hits_file
         del pkey
 
-    if 'TurboFold_conservative' in prediction_method:
-        pkey = 'TurboFold_conservative'
+    if 'centroid-fast' in prediction_method:
+        pkey = 'centroid-fast'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
-        if pkey in pred_method_params and pred_method_params[pkey]:
-            nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_unsafe(
-                all_hits=all_hits_list,
+
+        method_parameters = pred_method_params.get(pkey, {})
+        try:
+            if query.annotations['ambiguous']:
+                raise exceptions.AmbiguousQuerySequenceException
+
+            raw_structures, exec_time[pkey] = centroid_homfold_fast(
+                all_seqs=all_hits_list,
                 query=query,
-                sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-            )
-        else:
-            nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_unsafe(
-                all_hits=all_hits_list,
-                query=query,
-                sim_threshold_percent=default_sim_tr_perc,
-                cmscore_tr=default_score_tr,
-                len_diff=query_max_len_diff,
+                all_seqs_fasta=seqs2predict_fasta,
+                n=method_parameters.get('max_seqs_in_prediction', 10),
+                centroid_homfold_params=method_parameters,
+                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff)
             )
 
-        checked_hits = filter_ambiguous_seqs_from_list(all_hits_list)
-        ch_fd, all_checked_hits_file = mkstemp(prefix='rba_', suffix='_66')
-        with os.fdopen(ch_fd, 'w') as ch:
-            SeqIO.write(checked_hits, ch, format='fasta')
+            # check noncanonical
+            if pkey in pred_method_params and pred_method_params[pkey]:
+                allow_nc = pred_method_params[pkey].get('allow_noncanonical', False)
+                allow_lp = pred_method_params[pkey].get('allow_lonely_pairs', False)
+            else:
+                allow_nc = False
+                allow_lp = False
+            if not allow_nc:
+                for seq in raw_structures:
+                    repstr = find_nc_and_remove(str(seq.seq), structure=seq.letter_annotations['ss0'])
+                    seq.letter_annotations['ss0'] = repstr
 
-        structures_t, exec_time[pkey] = turbofold_conservative_prediction(all_checked_hits_file, nr_homo_hits_file)
+            # check lonely basepairs
+            if not allow_lp:
+                for seq in raw_structures:
+                    repstr = check_lonely_bp(seq.letter_annotations['ss0'])
+                    seq.letter_annotations['ss0'] = repstr
 
-        structures[pkey] = BA_support.rebuild_structures_output_from_pred(
-            all_hits_list,
-            structures_t
-        )
-
-        os.remove(all_checked_hits_file)
-        os.remove(nr_homo_hits_file)
-        del structures_t
-        del ch_fd
-        del nr_homo_hits_file
+            structures[pkey] = raw_structures
+        except exceptions.AmbiguousQuerySequenceException:
+            msgfail = "Query sequence contains ambiguous characters. Can't use centroid-fast."
+            ml.error(msgfail)
         del pkey
 
     if 'TurboFold' in prediction_method:
@@ -1447,45 +853,38 @@ def repredict_structures_for_homol_seqs(
         #  with Trurbofold. The structure of redundant sequences will be set according to the one in prediction
 
         try:
-            all_hits_filtered = filter_ambiguous_seqs_from_list(all_hits_list)
+            all_hits_filtered = BA_support.filter_ambiguous_seqs_from_list(all_hits_list)
+            seqs2predict_filtered = BA_support.filter_ambiguous_seqs_from_list(seqs2predict_list)
 
             if query.annotations['ambiguous']:
                 msgfail = "Query sequence contains ambiguous characters. Can't use Turbofold."
                 ml.error(msgfail)
-                raise AmbiguousQuerySequenceException(msgfail)
+                raise exceptions.AmbiguousQuerySequenceException(msgfail)
 
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_unsafe(
-                    all_hits=all_hits_filtered,
-                    query=query,
-                    sim_threshold_percent=100,
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
+            method_parameters = pred_method_params.get(pkey, {})
 
-            else:
-                nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_unsafe(
-                    all_hits=all_hits_filtered,
-                    query=query,
-                    sim_threshold_percent=100,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
+            nr_homo_hits_file, _ = create_nr_homolog_hits_file_MSA_unsafe(
+                all_hits=all_hits_filtered,
+                query=query,
+                sim_threshold_percent=100,
+                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
+                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
+                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
                 )
 
             with open(nr_homo_hits_file, 'r') as nrf:
                 nr_homo_hits = [seq for seq in SeqIO.parse(nrf, format='fasta')]
 
             structures_t, exec_time[pkey] = turbofold_with_homologous(
-                all_sequences=all_hits_filtered,
+                all_sequences=seqs2predict_filtered,
                 nr_homologous=nr_homo_hits,
-                params=pred_method_params.get(pkey, {}).get('TurboFold', {}),
-                n=pred_method_params[pkey].get('max_seqs_in_prediction', 3),
+                params=method_parameters.get('TurboFold', {}),
+                n=method_parameters.get('max_seqs_in_prediction', 3),
                 cpu=threads
             )
 
             structures[pkey] = BA_support.rebuild_structures_output_from_pred(
-                all_hits_list,
+                seqs2predict_list,
                 structures_t
             )
 
@@ -1493,17 +892,17 @@ def repredict_structures_for_homol_seqs(
             del structures_t
             del nr_homo_hits
             del nr_homo_hits_file
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
 
-        except AmbiguousQuerySequenceException:
+        except exceptions.AmbiguousQuerySequenceException:
             pass
 
         finally:
             del pkey
 
-    if 'TurboFold_fast' in prediction_method:
-        pkey = 'TurboFold_fast'
+    if 'Turbo-fast' in prediction_method:
+        pkey = 'Turbo-fast'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
 
@@ -1511,10 +910,11 @@ def repredict_structures_for_homol_seqs(
             if query.annotations['ambiguous']:
                 msgfail = "Query sequence contains ambiguous characters. Can't use Turbofold."
                 ml.error(msgfail)
-                raise AmbiguousQuerySequenceException(msgfail)
+                raise exceptions.AmbiguousQuerySequenceException(msgfail)
 
             structures_t, exec_time[pkey] = turbofold_fast(
                 all_seqs=all_hits_list,
+                seqs2predict=seqs2predict_list,
                 query=query,
                 cpu=threads,
                 n=pred_method_params[pkey].get('max_seqs_in_prediction', 3),
@@ -1523,144 +923,20 @@ def repredict_structures_for_homol_seqs(
             )
 
             structures[pkey] = BA_support.rebuild_structures_output_from_pred(
-                all_hits_list,
+                seqs2predict_list,
                 structures_t
             )
 
             del structures_t
-        except NoHomologousSequenceException:
+        except exceptions.NoHomologousSequenceException:
             nonhomseqwarn(pkey)
 
-        except AmbiguousQuerySequenceException:
+        except exceptions.AmbiguousQuerySequenceException:
             pass
 
         finally:
             del pkey
 
-    if 'tcoffee_rcoffee_alifold_refold' in prediction_method:
-        pkey = 'tcoffee_rcoffee_alifold_refold'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = tcoffee_rcoffee_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='refold',
-                    threads=threads,
-                    params=pred_method_params[pkey]
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = tcoffee_rcoffee_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='refold',
-                    threads=threads,
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'tcoffee_rcoffee_alifold_refold_rnafoldc' in prediction_method:
-        pkey = 'tcoffee_rcoffee_alifold_refold_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = tcoffee_rcoffee_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='refold_rnafoldc',
-                    threads=threads,
-                    params=pred_method_params[pkey]
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = tcoffee_rcoffee_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='refold_rnafoldc',
-                    threads=threads,
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
-
-    if 'tcoffee_rcoffee_alifold_conserved_ss_rnafoldc' in prediction_method:
-        pkey = 'tcoffee_rcoffee_alifold_conserved_ss_rnafoldc'
-        print('Runing: {}...'.format(pkey))
-        ml.info(pkey)
-        try:
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=pred_method_params[pkey].get('pred_sim_threshold', default_sim_tr_perc),
-                    cmscore_tr=pred_method_params[pkey].get('cmscore_tr', default_score_tr),
-                    cm_threshold_percent=pred_method_params[pkey].get('cmscore_percent', None),
-                    len_diff=pred_method_params[pkey].get('query_max_len_diff', query_max_len_diff),
-                )
-                structures[pkey], exec_time[pkey] = tcoffee_rcoffee_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='conserved_ss_rnafoldc',
-                    threads=threads,
-                    params=pred_method_params[pkey]
-                )
-            else:
-                nr_homo_hits_file, _ = create_nr_trusted_hits_file_MSA_safe(
-                    all_hits=all_hits_list,
-                    query=query,
-                    sim_threshold_percent=default_sim_tr_perc,
-                    cmscore_tr=default_score_tr,
-                    len_diff=query_max_len_diff,
-                )
-                structures[pkey], exec_time[pkey] = tcoffee_rcoffee_refold_prediction(
-                    nr_homo_hits_file,
-                    all_hits_fasta,
-                    refold='conserved_ss_rnafoldc',
-                    threads=threads,
-                )
-            os.remove(nr_homo_hits_file)
-            del nr_homo_hits_file
-        except NoHomologousSequenceException:
-            nonhomseqwarn(pkey)
-        finally:
-            del pkey
+    os.remove(seqs2predict_fasta)
 
     return structures, exec_time

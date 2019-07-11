@@ -1,20 +1,16 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
-# package_data
-# - directly related to code
-# - 3rd_party_data as data_files not working to expectations
-
-with open('VERSION', 'r') as o:
+with open('rna_blast_analyze/VERSION', 'r') as o:
     version = o.read().strip()
 
 package_data = {
     'rna_blast_analyze': [
         'BR_core/config.txt',
         'BR_core/prediction_parameters.json',
-        'BR_core/output/*.html',
-        'BR_core/output/style.css',
+        'BR_core/output/*',
         '3rd_party_source/RSEARCH_matrices/*',
-        'docs/*'
+        'docs/*',
+        'VERSION'
     ]
 }
 
@@ -26,7 +22,7 @@ setup(
     author_email='marek.schwarz@biomed.cas.cz',
     entry_points={
         'console_scripts': [
-            'rna_blast_analyze = rna_blast_analyze.BA:main',
+            'rboAnalyzer = rna_blast_analyze.BA:main',
             'genomes_from_blast = rna_blast_analyze.download_blast_genomes:main'
         ],
     },
@@ -36,11 +32,10 @@ setup(
         'numpy',
         'Jinja2>=2, <3',
         'pandas>=0.22',
-        'PyPDF2',
         'biopython',
         'argcomplete',
     ],
-    packages=find_packages(),
+    packages=['rna_blast_analyze', 'rna_blast_analyze.BR_core', 'rna_blast_analyze.BR_core.output'],
     package_data=package_data,
     include_package_data=True,
 )

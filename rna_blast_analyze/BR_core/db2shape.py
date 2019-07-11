@@ -4,7 +4,6 @@ import argparse
 def db2shape(seq):
     """converts Vienna dot bracket representation of rna structure to a shape level 5"""
     [c, nest] = nesting(seq, ('(', ')'))
-    # qq = np.array(nest, dtype=int)
     [b, s, rec_level] = analyze(nest, 0)
     if b == rec_level:
         # means that no basepairs where found and b, rec_level are empty lists
@@ -107,9 +106,7 @@ def _split_stems(nest):
     st.append(len(nest))
     qq = []
     for i in range(0,len(st)-1,2):
-        #r = nest[st[i]:st[i+1]+1]
         r = nest[st[i]:st[i+2]]
-        # r = [j-1 for j in r]
         qq.append(r)
     return qq
 
@@ -191,7 +188,7 @@ if __name__ == '__main__':
     if args.bench:
         # compute db2shape
         # read the file first is header, second is structure sequence in Vienna dot bracket format
-        fp, filename = mkstemp(prefix='rba_', suffix='_16')
+        fp, filename = mkstemp(prefix='rba_', suffix='_16', dir=CONFIG.tmpdir)
         ss = []
         with open(args.bench, 'r') as f, os.fdopen(fp, 'w') as fw:
             txt = f.readline()

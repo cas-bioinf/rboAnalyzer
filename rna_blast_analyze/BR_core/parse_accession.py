@@ -1,25 +1,36 @@
 # list of prefixes and rules for parsing accession numbers
 
-import re
-
 # ===== UniProt accession =====
 # uniprot from: https://www.uniprot.org/help/accession_numbers
-uniprot = '[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
+# uniprot = ['[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}']
+
+# uniprot regular expression may overlap genebank accession
 
 # ===== GenBank classic accession =====
 # from: https://www.ncbi.nlm.nih.gov/Sequin/acc.html
-#
-# -- Basic rules --
-# Nucleotide:	1 letter + 5 numerals OR 2 letters + 6 numerals
-# Protein:	3 letters + 5 numerals
-# WGS:	4 letters + 2 numerals for WGS assembly version + 6-8 numerals
-# MGA:	5 letters + 7 numerals
-#
+# update: Feb 2019
 # we need Nucleotide and WGS
-genbank_nucl = '[A-Z][0-9]{5}\.[0-9]+|[A-Z]{2}[0-9]{6}\.[0-9]+'
-genbank_prot = '[A-Z]{3}[0-9]{5}\.[0-9]+'
-genbank_mga = '[A-Z]{5}[0-9]{7}\.[0-9]+'
-genbank_wgs = '[A-Z]{4}[0-9]{2,9}\.[0-9]+'
+genbank_nucl = [
+    '[A-Z][0-9]{5}\.[0-9]+',
+    '[A-Z]{2}[0-9]{6}\.[0-9]+',
+    '[A-Z]{2}[0-9]{8}\.[0-9]+',
+    ]
+genbank_prot = [
+    '[A-Z]{3}[0-9]{5}\.[0-9]+',
+    '[A-Z]{3}[0-9]{7}\.[0-9]+',
+    ]
+genbank_mga = [
+    '[A-Z]{5}[0-9]{7}\.[0-9]+'
+]
+genbank_wgs = [
+    '[A-Z]{4}[0-9]{8,}\.[0-9]+',
+    '[A-Z]{6}[0-9]{9,}\.[0-9]+',
+]
+
+genbank_wgs_scafolds = [
+    '[A-Z]{4}[0-9]{2}S?[0-9]{6,}\.[0-9]+',
+    '[A-Z]{6}[0-9]{2}S?[0-9]{7,}\.[0-9]+',
+]
 
 # ===== RefSeq format =====
 # refseq from: https://www.ncbi.nlm.nih.gov/books/NBK21091/table/ch18.T.refseq_accession_numbers_and_mole/?report=objectonly
@@ -57,7 +68,32 @@ refseq = [
     'XP_',
     'WP_',
 ]
-refseq_re = '|'.join([i + '[0-9]+\.[0-9]+|' + genbank_nucl + '|' + genbank_wgs for i in refseq])
+refseq_re = [prefix + "[0-9A-Z]+\.[0-9]+" for prefix in refseq]
 
-known_acc_formats = [genbank_nucl, genbank_wgs, refseq_re, genbank_mga, uniprot, genbank_prot]
-accession_regex = re.compile('|'.join(known_acc_formats))
+pdb = ["[0-9A-Z]{4}_[0-9A-Z]{1,2}",]
+
+exceptions = [
+    '1KPD',  # although it has chain, in the NCBI nt database it is listed without chain
+]
+
+known_acc_formats = genbank_nucl + genbank_wgs + refseq_re + genbank_mga + genbank_prot + pdb + genbank_wgs_scafolds + exceptions
+accession_regex = '|'.join(known_acc_formats)
+
+
+if __name__ == '__main__':
+    import sys
+    import gzip
+    import re
+    import io
+
+    if len(sys.argv) == 1:
+        print('Test for known accession with ncbi accession2taxid gzipped files. Missed accession added to parsing_errors file.')
+
+    regex = re.compile(accession_regex)
+
+    for file in sys.argv[1:]:
+        with gzip.open(file, 'rb') as f, open('parsing_errors', 'a+') as e:
+            for line in io.BufferedReader(f):
+                acc_v = line.decode().split('\t')[1]
+                if not re.search(regex, acc_v):
+                    e.write(acc_v + ' {}\n'.format(file))

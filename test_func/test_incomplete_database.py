@@ -10,12 +10,13 @@ test_dir = 'test_data'
 class TestIncompleteDatabase(unittest.TestCase):
     def test_if_missing_db_entry_is_reported(self):
         aa = Pseudoargs(
-            query_in=os.path.join(fwd, test_dir, 'RF00001.fasta'),
+            blast_query=os.path.join(fwd, test_dir, 'RF00001.fasta'),
             blast_in=os.path.join(fwd, test_dir, 'RF00005.blastout'),
             blast_db=os.path.join(fwd, test_dir, 'blastdb', 'RF00001-art.blastdb'),
             b_type='plain',
             prediction_method=['rnafold'],
-            blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$'
+            blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
+            enable_overwrite=True
         )
 
         with self.assertRaises(LookupError):

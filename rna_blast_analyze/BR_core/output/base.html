@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Blast RNA extension</title>
+    <title>RNA BLAST Analyze</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% include 'style.css' %}
 {% include 'script.js' %}
+{% block script %}{% endblock %}
     </head>
 <body>
     <div id="waitoverlay">
@@ -16,7 +17,8 @@
     </div>
     <div class="page-wrap">
         <div class="header">
-            <h2>RNA BLAST Analyze</h2>
+            <!--<div id="headergrad"></div>-->
+            <h1>rboAnalyzer report</h1>
             {% block header %}{% endblock %}
         </div>
         <div class="hits">
@@ -28,8 +30,8 @@
         <div class="controls">
             <button onclick="selectAllseqs(this)" id="selectSeqsBtn" title="Select All Sequences">Select all Seqs.</button>
             <button onclick="selectAllstrs(this)" id="selectStrsBtn" title="Select All Structures">Select all Structs.</button>
-            <button onclick="writeSelectionStructures()" id="exportStrBtn" title="Export Selected Structures">Export sel. Structs.</button>
-            <button onclick="writeSelectionFasta()" id="exportSeqsBtn" title="Export Selected Sequences">Export sel. Seqs.</button>
+            <button onclick="writeSelectionFasta()" id="exportSeqsBtn" title="Export Selected Sequences">Export Sequences</button>
+            <button onclick="writeSelectionStructures()" id="exportStrBtn" title="Export Selected Structures">Export Structures</button>
             <button onclick="sortByEval(this)" id="sortEvalBtn" title="Sort by e-value">Sort Eval desc.</button>
             <button onclick="viewAllRegions()" id="viewAllRegionsBtn" title="View all Regions">View all Regions</button>
         </div>

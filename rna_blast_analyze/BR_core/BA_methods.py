@@ -1,13 +1,9 @@
 import copy
 import re
 import time
-import json
 import pandas as pd
-import gzip
 
 from rna_blast_analyze.BR_core.BA_support import Subsequences
-import rna_blast_analyze.BR_core.convert_classes
-import rna_blast_analyze.BR_core.output.htmloutput
 
 
 class BlastSearchRecompute(object):
@@ -15,8 +11,6 @@ class BlastSearchRecompute(object):
     wrapper class for whole blast search
     """
     def __init__(self):
-        # self.dpool_global = None
-        # self.dpool_raw = None
         self.hits = HitList()
         self.pandas = None
         self.query = None
@@ -24,6 +18,7 @@ class BlastSearchRecompute(object):
         self._runstat = 1
         self.args = None
         self.date_of_run = time.localtime()
+        self.best_matching_model = None
 
     def stop_timer(self):
         if self._runstat:
@@ -40,26 +35,6 @@ class BlastSearchRecompute(object):
             pass
         print('not implemented yet')
 
-    def to_json(self, output_file, gzip_json=False):
-        """
-        write jsonnized object
-        fully fledged reverse function is provided in
-          rna_blast_analyze.BR_core.convert_classes.blastsearchrecomputefromdict
-        :param output_file:
-        :return:
-        """
-
-        j_obj = json.dumps(rna_blast_analyze.BR_core.convert_classes.blastsearchrecompute2dict(self))
-        if gzip_json:
-            with open(output_file + '.gz', 'wb') as ff:
-                ff.write(
-                    gzip.compress(j_obj.encode())
-                )
-        else:
-            with open(output_file, 'w') as ff:
-                ff.write(j_obj)
-
-
     def to_pandas_dump(self, output_file):
         if self.pandas is None:
             self.export_pandas_results()
@@ -71,12 +46,7 @@ class BlastSearchRecompute(object):
         self.pandas.to_csv(output_file)
 
     def export_pandas_results(self):
-        # todo: add rsearch bits if computed
-        #  add query name
-        #  remove b_e_start b_e_end -> address this where neccessary
-        #    if b_e_stat and b_e_end should be removed i need to compute the blast ext diff in eval_blast differently
-        #    ex the values are used there and are not easily replaceable
-        # todo revrite export so it exports data from one run to one file (ie multiple queries support)
+        # todo rewrite export so it exports data from one run to one file (ie multiple queries support)
         self.stop_timer()
 
         export_columns = [
@@ -102,7 +72,6 @@ class BlastSearchRecompute(object):
         #  each prediction method has its own columns
         #  unused columns are not listed
         data = dict()
-        # todo: remove later - quick fix because some test code assigns prediction parameter for one method as str
         if isinstance(self.args.prediction_method, str):
             self.args.prediction_method = [self.args.prediction_method,]
 
@@ -116,7 +85,7 @@ class BlastSearchRecompute(object):
                     data['blast_query'].append(self.query.id)
                     continue
                 elif k == 'locarna_score':
-                    data['locarna_score'].append(hit.subs[hit.ret_keys[0]].annotations['score'])
+                    data['locarna_score'].append(hit.extension.annotations['score'])
                     continue
                 elif k == 'b_e_start':
                     data['b_e_start'].append(hit.source.annotations['extended_start'])
@@ -162,19 +131,19 @@ class BlastSearchRecompute(object):
                     continue
                 elif k == 'best_sequence':
                     # selected sequence
-                    data['best_sequence'].append(str(hit.subs[hit.ret_keys[0]].seq))
+                    data['best_sequence'].append(str(hit.extension.seq))
                     continue
                 elif hasattr(hit, k):
                     data[k].append(getattr(hit, k))
                     continue
-                elif k in hit.subs[hit.ret_keys[0]].letter_annotations:
+                elif k in hit.extension.letter_annotations:
                     # add secondary structure
-                    data[k].append(hit.subs[hit.ret_keys[0]].letter_annotations[k])
+                    data[k].append(hit.extension.letter_annotations[k])
                 else:
                     if k in self.args.prediction_method:
                         # key (prediction method name) is missing from letter annotations, but it was requested and
                         #  should be predicted. This means that something went wrong with the prediction and it was
-                        #  logged with stdout. However, we need to include something to tha table out
+                        #  logged with stdout. However, we need to include something to the table output
                         data[k].append('PREDICTION FAILED')
                     else:
                         raise Exception('key not found')
@@ -186,19 +155,19 @@ class BlastSearchRecompute(object):
         self.stop_timer()
         with open(out_file, 'w') as f:
             for hit in self.hits:
-                f.write('>{}\n{}\n'.format(hit.subs[hit.ret_keys[0]].id,
-                                           str(hit.subs[hit.ret_keys[0]].seq)))
+                f.write('>{}\n{}\n'.format(hit.extension.id,
+                                           str(hit.extension.seq)))
 
     def write_results_structures(self, out_file):
         with open(out_file, 'w') as f:
             for hit in self.hits:
-                f.write('>{}\n{}\n'.format(hit.subs[hit.ret_keys[0]].id,
-                                           str(hit.subs[hit.ret_keys[0]].seq)))
-                for st_key in hit.subs[hit.ret_keys[0]].letter_annotations.keys():
-                    f.write('{} {}\n'.format(hit.subs[hit.ret_keys[0]].letter_annotations[st_key], st_key))
+                f.write('>{}\n{}\n'.format(hit.extension.id,
+                                           str(hit.extension.seq)))
+                for st_key in hit.extension.letter_annotations.keys():
+                    f.write('{} {}\n'.format(hit.extension.letter_annotations[st_key], st_key))
 
     def res_2_record_list(self):
-        return [hit.subs[hit.ret_keys[0]] for hit in self.hits]
+        return [hit.extension for hit in self.hits]
 
     def copy(self):
         new = BlastSearchRecompute()
@@ -211,13 +180,20 @@ class BlastSearchRecompute(object):
     def extract_all_structures(self):
         all_structures = dict()
         for key in self.hits[0].annotaions['sss']:
-            all_structures[key] = self.hits.extract_structures(key)
+            all_structures[key] = extract_structures(self.hits, key)
         return all_structures
 
-    def to_html(self, outputfile):
-        htmlstr = rna_blast_analyze.BR_core.output.htmloutput.write_html_output(self)
-        with open(outputfile, 'w') as f:
-            f.write(htmlstr)
+
+def extract_structures(hit_list, str_key):
+    """
+    returns list of all structures from hits defined byt str_key
+    :param str_key: key to structure for retrieving
+    :return: list
+    """
+    outstr = []
+    for seqr in hit_list:
+        outstr.append(seqr.letter_annotations[str_key])
+    return outstr
 
 
 class HitList(list):
@@ -232,27 +208,6 @@ class HitList(list):
         if not isinstance(p_object, Subsequences):
             raise Exception('passed object is not of expected class (Subsequences)')
         super(HitList, self).append(p_object)
-
-    def extract_structures(self, str_key):
-        """
-        returns list of all structures from hits defined byt str_key
-        :param str_key: key to structure for retrieving
-        :return: list
-        """
-        outstr = []
-        for seqr in self:
-            outstr.append(seqr.letter_annotations[str_key])
-        return outstr
-
-    def iter_all_structures(self):
-        """
-        iterator for all structures defined in annotations['sss']
-        structures will be returned as dict
-        :return: dict
-        """
-        for seqr in self:
-            yield {k: seqr.subs[seqr.ret_keys[0]].letter_annotations[k]
-                   for k in seqr.subs[seqr.ret_keys[0]].annotations['sss']}
 
 
 def to_tab_delim_line(input_args):
@@ -308,4 +263,4 @@ def add_loc_to_description(analyzed_hits):
     for hit in analyzed_hits.hits:
         d2a = '{}-{}'.format(hit.best_start, hit.best_end)
         # hit.source.description += d2a
-        hit.subs[hit.ret_keys[0]].description += d2a
+        hit.extension.description += d2a

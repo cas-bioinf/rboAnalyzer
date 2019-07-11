@@ -1,1 +1,2220 @@
-{"query": {"description": "X15126.1_3-120 X15126.1/3-120", "features": [], "Bio.Seq": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "alphabet": "80036342696f2e416c7068616265740a53696e676c654c6574746572416c7068616265740a7100298171012e"}, "annotations": {"cmstat": "{\"seq_name\":\"X15126.1_3-120\",\"length\":118,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":153.97,\"avg_pp\":1.0,\"band_calc\":0.01,\"alignment\":0.01,\"total\":0.02,\"mem\":0.39}", "ambiguous": false}, "letter_annotations": {}, "dbxrefs": [], "name": "X15126.1_3-120", "id": "X15126.1_3-120"}, "creation": 1542882320.2088256, "date_of_run": [2018, 11, 22, 11, 25, 20, 3, 326, 0], "_runstat": 1, "args": {"show_gene_browser": true, "pred_params": {"subopt_fold_muscle_alifold": {"query_max_len_diff": 0.1, "cmscore_percent": 90}, "tcoffee_rcoffee_alifold_refold": {"query_max_len_diff": 0.05, "pred_sim_threshold": 80, "cmscore_percent": 50}, "TurboFold_fast": {"query_max_len_diff": 0.05, "max_seqs_in_prediction": 2}, "rnafold": {}, "TurboFold": {"query_max_len_diff": 0.1, "cmscore_percent": 30}, "rfam_rapidshapes": {}, "tcoffee_rcoffee_alifold_conserved_ss_rnafoldc": {"query_max_len_diff": 0.1, "pred_sim_threshold": 80, "cmscore_percent": 90}, "rfam_rnafoldc": {}, "alifold_refold_rnafold_c": {"query_max_len_diff": 0.1, "pred_sim_threshold": 100, "cmscore_percent": 10}, "clustalo_alifold_rapidshapes": {}, "dh_tcoffee_alifold_refold_rnafoldc": {"query_max_len_diff": 0.1, "pred_sim_threshold": 80, "cmscore_percent": 10}, "dh_clustal_alifold_conserved_ss_rnafoldc": {"query_max_len_diff": 0.05, "pred_sim_threshold": 60, "cmscore_percent": 40}, "rfam_subopt": {}, "dh_tcoffee_alifold_conserved_ss_rnafoldc": {"query_max_len_diff": 0.15, "pred_sim_threshold": 70, "cmscore_percent": 50}, "rcoffee_alifold_rapidshapes": {}, "dh_tcoffee_alifold_refold": {"query_max_len_diff": 0.05, "pred_sim_threshold": 70, "cmscore_percent": 50}, "muscle_alifold_rapidshapes": {}, "dh_clustal_alifold_refold": {"query_max_len_diff": 0.1, "pred_sim_threshold": 90, "cmscore_percent": 90}, "subopt_fold_clustal_alifold": {"query_max_len_diff": 0.1, "cmscore_percent": 80}, "pairwise_centroid_homfold": {"query_max_len_diff": 0.1, "centroid_homfold": "--engine_s CONTRAfold", "pred_sim_threshold": 80, "cmscore_percent": 20}, "alifold_refold": {"query_max_len_diff": 0.05, "pred_sim_threshold": 70, "cmscore_percent": 50}, "dh_clustal_alifold_refold_rnafoldc": {"query_max_len_diff": 0.15, "pred_sim_threshold": 100, "cmscore_percent": 0}, "muscle_alifold_unpaired_conserved_refold": {"query_max_len_diff": 0.15, "pred_sim_threshold": 90, "cmscore_percent": 70}, "subopt_fold_query": {"mfold": [10, 2, 60]}, "muscle_alifold_refold_rnafold_c": {"query_max_len_diff": 0.15, "pred_sim_threshold": 90, "cmscore_percent": 0}, "alifold_unpaired_conserved_refold": {"query_max_len_diff": 0.15, "pred_sim_threshold": 80, "cmscore_percent": 60}, "tcoffee_rcoffee_alifold_refold_rnafoldc": {"query_max_len_diff": 0.1, "pred_sim_threshold": 80, "cmscore_percent": 10}, "muscle_alifold_refold": {"query_max_len_diff": 0.15, "pred_sim_threshold": 90, "cmscore_percent": 70}}, "verbose": 0, "threads": null, "json": "/home/marek/PycharmProjects/foldx/test_func/test_data/RF00001_output.json", "blast_in": "/home/marek/PycharmProjects/foldx/test_func/test_data/RF00001_short.blastout", "dump": null, "download_rfam": false, "cm_file": null, "pandas_dump": null, "dev_pred": false, "blast_regexp": "(?<=\\|)[A-Z0-9]*\\.?\\d*$", "filter_by_bitscore": null, "subseq_window_locarna": 30, "logfile": null, "logmsgs": [], "blast_db": "/home/marek/PycharmProjects/foldx/test_func/test_data/blastdb/RF00001-art.blastdb", "locarna_anchor_length": 7, "skip_missing": false, "command": ["../../../rna_blast_analyze/BA.py", "-blast_in", "/home/marek/PycharmProjects/foldx/test_func/test_data/RF00001_short.blastout", "-blast_query", "/home/marek/PycharmProjects/foldx/test_func/test_data/RF00001.fasta", "-blast_db", "/home/marek/PycharmProjects/foldx/test_func/test_data/blastdb/RF00001-art.blastdb", "--mode", "simple", "--blast_regexp", "(?<=\\|)[A-Z0-9]*\\.?\\d*$", "--b_type", "plain", "--json", "/home/marek/PycharmProjects/foldx/test_func/test_data/RF00001_output.json", "--prediction_method", "rnafold"], "subseq_window": 10, "csv": null, "pm_param_file": null, "locarna_params": "--struct-local=0 --sequ-local=0 --free-endgaps=++++", "keep_all": false, "html": null, "blast_query": "/home/marek/PycharmProjects/foldx/test_func/test_data/RF00001.fasta", "subseq_window_simple_ext": 10, "config_file": null, "mode": "simple", "repredict_file": null, "use_rfam": false, "prediction_method": ["rnafold"], "b_type": "plain", "filter_by_eval": null}, "hits": {"1": {"best_end": 1158644, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "UACGGCGGUUAUAGCGGAGGGGAAACACCCGGUUACAUUCCGAACCCGGAAGUUAAGCUCUUCAGCGCCGAUGGUACUGCACUCGGGAGGGUGUGGGAGAGUAGGUCGCCGCCGGAC", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 1158528, "query_end": 1158644, "extended_start": 1158528, "trimmed_ss": false, "trimmed_es": false, "super_start": 1158518, "trimmed_se": false, "super_end": 1158654, "extended_end": 1158644, "trimmed_ee": false, "blast": ["RF00001", {"bits": 128.0, "num_alignments": null, "frame": [], "query": "TACGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC", "query_start": 1, "align_length": 118, "strand": ["Plus", "Plus"], "identities": [104, 118], "expect": 7e-31, "gaps": [1, 118], "sbjct_end": 1158644, "query_end": 118, "positives": [null, null], "match": "||||||||  ||||||||||||||||  ||||||  ||||||||||||||||| ||||| || |||||||||||||||||||||||  |||||||||||||||||| | |||||| ||", "score": 88, "sbjct_start": 1158528, "sbjct": "TACGGCGGTTATAGCGGAGGGGAAACA-CCCGGTTACATTCCGAACCCGGAAGTTAAGCTCTTCAGCGCCGATGGTACTGCACTCGGGAGGGTGTGGGAGAGTAGGTCGCCGCCGGAC"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:1|RF00001fw"}, "ret_keys": ["1|RF00001", "ss0", null], "subs": {"1|RF00001": {"description": "1158528-1158644", "features": [], "Bio.Seq": {"seq": "UACGGCGGUUAUAGCGGAGGGGAAACACCCGGUUACAUUCCGAACCCGGAAGUUAAGCUCUUCAGCGCCGAUGGUACUGCACUCGGGAGGGUGUGGGAGAGUAGGUCGCCGCCGGAC", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 1158528, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:1|RF00001fw\",\"length\":117,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":112.27,\"avg_pp\":0.984,\"band_calc\":0.01,\"alignment\":0.02,\"total\":0.03,\"mem\":0.46}", "ambiguous": false, "super_start": 1158518, "trimmed_se": false, "extended_end": 1158644, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 128.0, "query_start": 1, "identities": [104, 118], "expect": 7e-31, "match": "||||||||  ||||||||||||||||  ||||||  ||||||||||||||||| ||||| || |||||||||||||||||||||||  |||||||||||||||||| | |||||| ||", "score": 88, "num_alignments": null, "frame": [], "query": "TACGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC", "align_length": 118, "strand": ["Plus", "Plus"], "gaps": [1, 118], "sbjct_end": 1158644, "query_end": 118, "positives": [null, null], "sbjct_start": 1158528, "sbjct": "TACGGCGGTTATAGCGGAGGGGAAACA-CCCGGTTACATTCCGAACCCGGAAGTTAAGCTCTTCAGCGCCGATGGTACTGCACTCGGGAGGGTGTGGGAGAGTAGGTCGCCGCCGGAC"}], "msgs": [], "query_end": 1158644, "extended_start": 1158528, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 1158654}, "letter_annotations": {"rnafold": "..(((((((....((.((((((.(((..((((((........)).))))..)))...)))))).))(((.((....((((((((....))))))))....)).))).)))))))..."}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:1|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 1158528}, "14": {"best_end": 2424707, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "UCGCGUUCACUCAUUAGCAACAUAUAUUAGGGGUCCCUUUCCAGCCCCGUAAGCGUUGCCCUCCGCGAGAUCGGUCGCCAGGUAGUGAAGGUUAGAACCAAUAUUUCCCGCCCAUUGG", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 2424621, "query_end": 2424653, "extended_start": 2424590, "trimmed_ss": false, "trimmed_es": false, "super_start": 2424580, "trimmed_se": false, "super_end": 2424717, "extended_end": 2424707, "trimmed_ee": false, "blast": ["RF00001", {"bits": 26.8, "num_alignments": null, "frame": [], "query": "GGTCCCATTCCGAACCCGGAAGCTAAGCCCTCC", "query_start": 32, "align_length": 33, "strand": ["Plus", "Plus"], "identities": [25, 33], "expect": 2.2, "gaps": [0, 33], "sbjct_end": 2424653, "query_end": 64, "positives": [null, null], "match": "|||||| ||||   |||| ||||   |||||||", "score": 17, "sbjct_start": 2424621, "sbjct": "GGTCCCTTTCCAGCCCCGTAAGCGTTGCCCTCC"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:14|RF00001fw"}, "ret_keys": ["14|RF00001", "ss0", null], "subs": {"14|RF00001": {"description": "2424590-2424707", "features": [], "Bio.Seq": {"seq": "UCGCGUUCACUCAUUAGCAACAUAUAUUAGGGGUCCCUUUCCAGCCCCGUAAGCGUUGCCCUCCGCGAGAUCGGUCGCCAGGUAGUGAAGGUUAGAACCAAUAUUUCCCGCCCAUUGG", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 2424621, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:14|RF00001fw\",\"length\":118,\"cm_from\":1,\"cm_to\":2,\"trunc\":\"no\",\"bit_sc\":-19.06,\"avg_pp\":0.979,\"band_calc\":0.01,\"alignment\":0.5,\"total\":0.5,\"mem\":9.81}", "ambiguous": false, "super_start": 2424580, "trimmed_se": false, "extended_end": 2424707, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 26.8, "query_start": 32, "identities": [25, 33], "expect": 2.2, "match": "|||||| ||||   |||| ||||   |||||||", "score": 17, "num_alignments": null, "frame": [], "query": "GGTCCCATTCCGAACCCGGAAGCTAAGCCCTCC", "align_length": 33, "strand": ["Plus", "Plus"], "gaps": [0, 33], "sbjct_end": 2424653, "query_end": 64, "positives": [null, null], "sbjct_start": 2424621, "sbjct": "GGTCCCTTTCCAGCCCCGTAAGCGTTGCCCTCC"}], "msgs": [], "query_end": 2424653, "extended_start": 2424590, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 2424717}, "letter_annotations": {"rnafold": "..((.((((((.....(((((.(.(((..(((((.........)))))))).).)))))(((..((((......)))).))).)))))).)).....(((((...........)))))"}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:14|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 2424590}, "11": {"best_end": 3334229, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "UCCCCGUGCCUUUAGCGCCUCGGAACCACCCCACUCCAUGCCGAACUGGGUCGUGAAACGUGGCAGCGCCUAUGAUACUUGGACCGCAGGGUCCUGGAAAAGUCGGUGCAGUGCGGGG", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 3334135, "query_end": 3334217, "extended_start": 3334112, "trimmed_ss": false, "trimmed_es": false, "super_start": 3334102, "trimmed_se": false, "super_end": 3334239, "extended_end": 3334229, "trimmed_ee": false, "blast": ["RF00001", {"bits": 32.6, "num_alignments": null, "frame": [], "query": "AACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTAC-TGCACTCGACAGGGT-GTGGGAGAGTAGG", "query_start": 24, "align_length": 85, "strand": ["Plus", "Plus"], "identities": [57, 85], "expect": 0.043, "gaps": [4, 85], "sbjct_end": 3334217, "query_end": 106, "positives": [null, null], "match": "|||| |||    |||| ||||||  ||  |  || |    ||||||| ||| ||| || || || ||||||  ||| | ||| ||", "score": 21, "sbjct_start": 3334135, "sbjct": "AACCACCCCACTCCATGCCGAACTGGGTCGTGAAACGTGGCAGCGCCTATGATACTTGGAC-CG-CAGGGTCCTGGAAAAGTCGG"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:11|RF00001fw"}, "ret_keys": ["11|RF00001", "ss0", null], "subs": {"11|RF00001": {"description": "3334112-3334229", "features": [], "Bio.Seq": {"seq": "UCCCCGUGCCUUUAGCGCCUCGGAACCACCCCACUCCAUGCCGAACUGGGUCGUGAAACGUGGCAGCGCCUAUGAUACUUGGACCGCAGGGUCCUGGAAAAGUCGGUGCAGUGCGGGG", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 3334135, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:11|RF00001fw\",\"length\":118,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":7.62,\"avg_pp\":0.846,\"band_calc\":0.01,\"alignment\":0.06,\"total\":0.07,\"mem\":1.16}", "ambiguous": false, "super_start": 3334102, "trimmed_se": false, "extended_end": 3334229, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 32.6, "query_start": 24, "identities": [57, 85], "expect": 0.043, "match": "|||| |||    |||| ||||||  ||  |  || |    ||||||| ||| ||| || || || ||||||  ||| | ||| ||", "score": 21, "num_alignments": null, "frame": [], "query": "AACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTAC-TGCACTCGACAGGGT-GTGGGAGAGTAGG", "align_length": 85, "strand": ["Plus", "Plus"], "gaps": [4, 85], "sbjct_end": 3334217, "query_end": 106, "positives": [null, null], "sbjct_start": 3334135, "sbjct": "AACCACCCCACTCCATGCCGAACTGGGTCGTGAAACGTGGCAGCGCCTATGATACTTGGAC-CG-CAGGGTCCTGGAAAAGTCGG"}], "msgs": [], "query_end": 3334217, "extended_start": 3334112, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 3334239}, "letter_annotations": {"rnafold": ".((((((((.......(((.((..((.((((...((......))...)))).))....)).))).(((((.((....((.(((((....))))).))....)).))))).))))))))"}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:11|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 3334112}, "13": {"best_end": 1345649, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "GCGAGACUUGUGGCCGGAUGGGUAACCGCCCGGCUCCAUGACAGCAUUCCCGGUGUAGUAGGAAGCUAAGUGCGACCGAGCACCGUCCUACGCGUCAGCCGAGAGAGGUCCCAUGUUU", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 1345546, "query_end": 1345570, "extended_start": 1345532, "trimmed_ss": false, "trimmed_es": false, "super_start": 1345522, "trimmed_se": false, "super_end": 1345659, "extended_end": 1345649, "trimmed_ee": false, "blast": ["RF00001", {"bits": 26.8, "num_alignments": null, "frame": [], "query": "CGGAGGGGAAACCGCCCGGTCCCAT", "query_start": 15, "align_length": 25, "strand": ["Plus", "Plus"], "identities": [21, 25], "expect": 2.2, "gaps": [0, 25], "sbjct_end": 1345570, "query_end": 39, "positives": [null, null], "match": "|||| ||| ||||||||||  ||||", "score": 17, "sbjct_start": 1345546, "sbjct": "CGGATGGGTAACCGCCCGGCTCCAT"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:13|RF00001fw"}, "ret_keys": ["13|RF00001", "ss0", null], "subs": {"13|RF00001": {"description": "1345532-1345649", "features": [], "Bio.Seq": {"seq": "GCGAGACUUGUGGCCGGAUGGGUAACCGCCCGGCUCCAUGACAGCAUUCCCGGUGUAGUAGGAAGCUAAGUGCGACCGAGCACCGUCCUACGCGUCAGCCGAGAGAGGUCCCAUGUUU", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 1345546, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:13|RF00001fw\",\"length\":118,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":-17.72,\"avg_pp\":0.674,\"band_calc\":0.01,\"alignment\":0.37,\"total\":0.38,\"mem\":7.79}", "ambiguous": false, "super_start": 1345522, "trimmed_se": false, "extended_end": 1345649, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 26.8, "query_start": 15, "identities": [21, 25], "expect": 2.2, "match": "|||| ||| ||||||||||  ||||", "score": 17, "num_alignments": null, "frame": [], "query": "CGGAGGGGAAACCGCCCGGTCCCAT", "align_length": 25, "strand": ["Plus", "Plus"], "gaps": [0, 25], "sbjct_end": 1345570, "query_end": 39, "positives": [null, null], "sbjct_start": 1345546, "sbjct": "CGGATGGGTAACCGCCCGGCTCCAT"}], "msgs": [], "query_end": 1345570, "extended_start": 1345532, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 1345659}, "letter_annotations": {"rnafold": "...........((((((.(((....))).)))))).((((..(.(.(((.((((...((((((......((((......))))..))))))......)))).))).).)..))))..."}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:13|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 1345532}, "0": {"best_end": 1432129, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "UACGGCGGCCAUAGCGGCAGGGAAACGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCUGCCAGCGCCGAUGGUACUGCACUCGUGAGGGUGUGGGAGAGUAGGUCACCGCCGAAC", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 1432013, "query_end": 1432129, "extended_start": 1432013, "trimmed_ss": false, "trimmed_es": false, "super_start": 1432003, "trimmed_se": false, "super_end": 1432139, "extended_end": 1432129, "trimmed_ee": false, "blast": ["RF00001", {"bits": 145.0, "num_alignments": null, "frame": [], "query": "TACGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC", "query_start": 1, "align_length": 118, "strand": ["Plus", "Plus"], "identities": [110, 118], "expect": 5e-36, "gaps": [1, 118], "sbjct_end": 1432129, "query_end": 118, "positives": [null, null], "match": "|||||||||||||||||  ||||||| |||||||||||||||||||||||||||||||||  ||||||||||||||||||||||||  |||||||||||||||||| |||||||||||", "score": 100, "sbjct_start": 1432013, "sbjct": "TACGGCGGCCATAGCGGCAGGGAAAC-GCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCTGCCAGCGCCGATGGTACTGCACTCGTGAGGGTGTGGGAGAGTAGGTCACCGCCGAAC"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:0|RF00001fw"}, "ret_keys": ["0|RF00001", "ss0", null], "subs": {"0|RF00001": {"description": "1432013-1432129", "features": [], "Bio.Seq": {"seq": "UACGGCGGCCAUAGCGGCAGGGAAACGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCUGCCAGCGCCGAUGGUACUGCACUCGUGAGGGUGUGGGAGAGUAGGUCACCGCCGAAC", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 1432013, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:0|RF00001fw\",\"length\":117,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":132.78,\"avg_pp\":0.988,\"band_calc\":0.01,\"alignment\":0.02,\"total\":0.03,\"mem\":0.45}", "ambiguous": false, "super_start": 1432003, "trimmed_se": false, "extended_end": 1432129, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 145.0, "query_start": 1, "identities": [110, 118], "expect": 5e-36, "match": "|||||||||||||||||  ||||||| |||||||||||||||||||||||||||||||||  ||||||||||||||||||||||||  |||||||||||||||||| |||||||||||", "score": 100, "num_alignments": null, "frame": [], "query": "TACGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC", "align_length": 118, "strand": ["Plus", "Plus"], "gaps": [1, 118], "sbjct_end": 1432129, "query_end": 118, "positives": [null, null], "sbjct_start": 1432013, "sbjct": "TACGGCGGCCATAGCGGCAGGGAAAC-GCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCTGCCAGCGCCGATGGTACTGCACTCGTGAGGGTGTGGGAGAGTAGGTCACCGCCGAAC"}], "msgs": [], "query_end": 1432129, "extended_start": 1432013, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 1432139}, "letter_annotations": {"rnafold": "..((((((.....((((((((.....((((((.............))))..))....)))))).))(((.((....((((((((....))))))))....)).)))..))))))..."}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:0|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 1432013}, "9": {"best_end": 1905771, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "ACGUUCGGUCAUACUAGUGACACAUGCGCCUGAACCCAUUUCGAAUUCAGAAGCUAAGCGCCCUCAGGCUUGGUUAGUACUGAGGUGAGGGAUCCACUCGGGAACCCCAAGUGCCGUACG", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 1905678, "query_end": 1905733, "extended_start": 1905652, "trimmed_ss": false, "trimmed_es": false, "super_start": 1905642, "trimmed_se": false, "super_end": 1905781, "extended_end": 1905771, "trimmed_ee": false, "blast": ["RF00001", {"bits": 34.0, "num_alignments": null, "frame": [], "query": "CGCCCGGTCCCATTCCGAACCCGGAAGCTAA--GCCCTCCAGCGCCGATGGTACTG", "query_start": 27, "align_length": 56, "strand": ["Plus", "Plus"], "identities": [40, 56], "expect": 0.016, "gaps": [2, 56], "sbjct_end": 1905733, "query_end": 80, "positives": [null, null], "match": "|||| |  |||||| ||||  | ||||||||  ||||||  ||   | | ||||||", "score": 22, "sbjct_start": 1905678, "sbjct": "CGCCTGAACCCATTTCGAATTCAGAAGCTAAGCGCCCTCAGGCTTGGTTAGTACTG"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:9|RF00001fw"}, "ret_keys": ["9|RF00001", "ss0", null], "subs": {"9|RF00001": {"description": "1905652-1905771", "features": [], "Bio.Seq": {"seq": "ACGUUCGGUCAUACUAGUGACACAUGCGCCUGAACCCAUUUCGAAUUCAGAAGCUAAGCGCCCUCAGGCUUGGUUAGUACUGAGGUGAGGGAUCCACUCGGGAACCCCAAGUGCCGUACG", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 1905678, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:9|RF00001fw\",\"length\":120,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":-8.37,\"avg_pp\":0.877,\"band_calc\":0.01,\"alignment\":0.18,\"total\":0.19,\"mem\":2.82}", "ambiguous": false, "super_start": 1905642, "trimmed_se": false, "extended_end": 1905771, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 34.0, "query_start": 27, "identities": [40, 56], "expect": 0.016, "match": "|||| |  |||||| ||||  | ||||||||  ||||||  ||   | | ||||||", "score": 22, "num_alignments": null, "frame": [], "query": "CGCCCGGTCCCATTCCGAACCCGGAAGCTAA--GCCCTCCAGCGCCGATGGTACTG", "align_length": 56, "strand": ["Plus", "Plus"], "gaps": [2, 56], "sbjct_end": 1905733, "query_end": 80, "positives": [null, null], "sbjct_start": 1905678, "sbjct": "CGCCTGAACCCATTTCGAATTCAGAAGCTAAGCGCCCTCAGGCTTGGTTAGTACTG"}], "msgs": [], "query_end": 1905733, "extended_start": 1905652, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 1905781}, "letter_annotations": {"rnafold": ".(((.(((((((....)))))....((..(((((..(.....)..)))))..))......((((((..((((((....)))))).))))))...((((.(((...))).)))).)).)))"}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:9|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 1905652}, "10": {"best_end": 3218347, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "CCUGAUGACCAUAGCGACGUGGUACCACUCCUUCCCAUCCCGAACAGGACAGUGAAACGACUUUGCGCCGAUGAUAGUGCGGGUUCCCGUGUGAAAGUAGGUCAUCGUCAGGCAUUA", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 3218239, "query_end": 3218310, "extended_start": 3218231, "trimmed_ss": false, "trimmed_es": false, "super_start": 3218221, "trimmed_se": false, "super_end": 3218357, "extended_end": 3218347, "trimmed_ee": false, "blast": ["RF00001", {"bits": 32.6, "num_alignments": null, "frame": [], "query": "CCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGC", "query_start": 9, "align_length": 73, "strand": ["Plus", "Plus"], "identities": [48, 73], "expect": 0.043, "gaps": [1, 73], "sbjct_end": 3218310, "query_end": 81, "positives": [null, null], "match": "||||||||  | || | || | |  |||||| ||||||  |  ||  || |      ||||||||| || |||", "score": 21, "sbjct_start": 3218239, "sbjct": "CCATAGCGACGTGGTA-CCACTCCTTCCCATCCCGAACAGGACAGTGAAACGACTTTGCGCCGATGATAGTGC"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:10|RF00001fw"}, "ret_keys": ["10|RF00001", "ss0", null], "subs": {"10|RF00001": {"description": "3218231-3218347", "features": [], "Bio.Seq": {"seq": "CCUGAUGACCAUAGCGACGUGGUACCACUCCUUCCCAUCCCGAACAGGACAGUGAAACGACUUUGCGCCGAUGAUAGUGCGGGUUCCCGUGUGAAAGUAGGUCAUCGUCAGGCAUUA", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 3218239, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:10|RF00001fw\",\"length\":117,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":11.37,\"avg_pp\":0.819,\"band_calc\":0.01,\"alignment\":0.07,\"total\":0.08,\"mem\":1.16}", "ambiguous": false, "super_start": 3218221, "trimmed_se": false, "extended_end": 3218347, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 32.6, "query_start": 9, "identities": [48, 73], "expect": 0.043, "match": "||||||||  | || | || | |  |||||| ||||||  |  ||  || |      ||||||||| || |||", "score": 21, "num_alignments": null, "frame": [], "query": "CCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGC", "align_length": 73, "strand": ["Plus", "Plus"], "gaps": [1, 73], "sbjct_end": 3218310, "query_end": 81, "positives": [null, null], "sbjct_start": 3218239, "sbjct": "CCATAGCGACGTGGTA-CCACTCCTTCCCATCCCGAACAGGACAGTGAAACGACTTTGCGCCGATGATAGTGC"}], "msgs": [], "query_end": 3218310, "extended_start": 3218231, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 3218357}, "letter_annotations": {"rnafold": "((((((((.....((((.((.((..((((...(((...........))).))))..)).)).))))(((.........((((....)))).........)))..))))))))....."}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:10|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 3218231}, "2": {"best_end": 2470000, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "UUCGGUGGUUAUGGCGGAGGGGGAACACCCGGUCCCAUUCCGAACCCGGUAGUUAAGCCUUCCAGCGCCGAUGGUACUGCACUCGUGAGGGUGUGGGAGAGUAGGACGCCGCCGAAC", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 2469886, "query_end": 2470000, "extended_start": 2469884, "trimmed_ss": false, "trimmed_es": false, "super_start": 2469874, "trimmed_se": false, "super_end": 2470010, "extended_end": 2470000, "trimmed_ee": false, "blast": ["RF00001", {"bits": 128.0, "num_alignments": null, "frame": [], "query": "CGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC", "query_start": 3, "align_length": 116, "strand": ["Plus", "Plus"], "identities": [103, 116], "expect": 7e-31, "gaps": [1, 116], "sbjct_end": 2470000, "query_end": 118, "positives": [null, null], "match": "||| ||  || ||||||||| |||  |||||||||||||||||||||| || |||||| |||||||||||||||||||||||||  |||||||||||||||||||| |||||||||", "score": 88, "sbjct_start": 2469886, "sbjct": "CGGTGGTTATGGCGGAGGGGGAACA-CCCGGTCCCATTCCGAACCCGGTAGTTAAGCCTTCCAGCGCCGATGGTACTGCACTCGTGAGGGTGTGGGAGAGTAGGACGCCGCCGAAC"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:2|RF00001fw"}, "ret_keys": ["2|RF00001", "ss0", null], "subs": {"2|RF00001": {"description": "2469884-2470000", "features": [], "Bio.Seq": {"seq": "UUCGGUGGUUAUGGCGGAGGGGGAACACCCGGUCCCAUUCCGAACCCGGUAGUUAAGCCUUCCAGCGCCGAUGGUACUGCACUCGUGAGGGUGUGGGAGAGUAGGACGCCGCCGAAC", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 2469886, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:2|RF00001fw\",\"length\":117,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":107.24,\"avg_pp\":0.983,\"band_calc\":0.01,\"alignment\":0.02,\"total\":0.03,\"mem\":0.47}", "ambiguous": false, "super_start": 2469874, "trimmed_se": false, "extended_end": 2470000, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 128.0, "query_start": 3, "identities": [103, 116], "expect": 7e-31, "match": "||| ||  || ||||||||| |||  |||||||||||||||||||||| || |||||| |||||||||||||||||||||||||  |||||||||||||||||||| |||||||||", "score": 88, "num_alignments": null, "frame": [], "query": "CGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC", "align_length": 116, "strand": ["Plus", "Plus"], "gaps": [1, 116], "sbjct_end": 2470000, "query_end": 118, "positives": [null, null], "sbjct_start": 2469886, "sbjct": "CGGTGGTTATGGCGGAGGGGGAACA-CCCGGTCCCATTCCGAACCCGGTAGTTAAGCCTTCCAGCGCCGATGGTACTGCACTCGTGAGGGTGTGGGAGAGTAGGACGCCGCCGAAC"}], "msgs": [], "query_end": 2470000, "extended_start": 2469884, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 2470010}, "letter_annotations": {"rnafold": "(((((((((....((((((((..((((((.(((.(......).))).))).)))...)))))).)).((.((....((((((((....))))))))....)).))..)))))))))."}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:2|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 2469884}, "6": {"best_end": 3540905, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "CUGCUACGUUCAUACCACUCAGAAAACGCCGGGUCCCAUCAGAUCCCCGAAGCUAAGCUGAGUUGGGCUGGAUUAGUACUGGAUUCAGGAAUGAUCUGGGAAUCCCCAGUGACGUAG", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 3540810, "query_end": 3540846, "extended_start": 3540789, "trimmed_ss": false, "trimmed_es": false, "super_start": 3540779, "trimmed_se": false, "super_end": 3540915, "extended_end": 3540905, "trimmed_ee": false, "blast": ["RF00001", {"bits": 36.8, "num_alignments": null, "frame": [], "query": "GAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGC", "query_start": 22, "align_length": 38, "strand": ["Plus", "Plus"], "identities": [32, 38], "expect": 0.002, "gaps": [1, 38], "sbjct_end": 3540846, "query_end": 59, "positives": [null, null], "match": "|||| |||| |||||||| | || ||| ||||||||||", "score": 24, "sbjct_start": 3540810, "sbjct": "GAAAACGCCGGGTCCCAT-CAGATCCCCGAAGCTAAGC"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:6|RF00001fw"}, "ret_keys": ["6|RF00001", "ss0", null], "subs": {"6|RF00001": {"description": "3540789-3540905", "features": [], "Bio.Seq": {"seq": "CUGCUACGUUCAUACCACUCAGAAAACGCCGGGUCCCAUCAGAUCCCCGAAGCUAAGCUGAGUUGGGCUGGAUUAGUACUGGAUUCAGGAAUGAUCUGGGAAUCCCCAGUGACGUAG", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 3540810, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:6|RF00001fw\",\"length\":117,\"cm_from\":1,\"cm_to\":115,\"trunc\":\"no\",\"bit_sc\":5.5,\"avg_pp\":0.883,\"band_calc\":0.01,\"alignment\":0.33,\"total\":0.34,\"mem\":4.94}", "ambiguous": false, "super_start": 3540779, "trimmed_se": false, "extended_end": 3540905, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 36.8, "query_start": 22, "identities": [32, 38], "expect": 0.002, "match": "|||| |||| |||||||| | || ||| ||||||||||", "score": 24, "num_alignments": null, "frame": [], "query": "GAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGC", "align_length": 38, "strand": ["Plus", "Plus"], "gaps": [1, 38], "sbjct_end": 3540846, "query_end": 59, "positives": [null, null], "sbjct_start": 3540810, "sbjct": "GAAAACGCCGGGTCCCAT-CAGATCCCCGAAGCTAAGC"}], "msgs": [], "query_end": 3540846, "extended_start": 3540789, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 3540915}, "letter_annotations": {"rnafold": "...((((((.(((.((((((((.....((((((((......))..))))..))....))))).)))...((((((...(((....)))...))))))(((....))).)))))))))"}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:6|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 3540789}, "7": {"best_end": 1814577, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "UUUGGUGACCAUAGUGUUGUGGUACCACCUGACUCCAUUCCGAACUCAGUAGUGAAACGUAAUAACGCCGAUGGUAGUGUGGGGUUUCCCCAUGUGAGAGUAGGUAUCGCCAGGCCC", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 1814464, "query_end": 1814539, "extended_start": 1814461, "trimmed_ss": false, "trimmed_es": false, "super_start": 1814451, "trimmed_se": false, "super_end": 1814587, "extended_end": 1814577, "trimmed_ee": false, "blast": ["RF00001", {"bits": 35.4, "num_alignments": null, "frame": [], "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTG", "query_start": 4, "align_length": 77, "strand": ["Plus", "Plus"], "identities": [51, 77], "expect": 0.006, "gaps": [1, 77], "sbjct_end": 1814539, "query_end": 80, "positives": [null, null], "match": "|| | |||||| |  | || | || || |   ||||||||||| | | ||  || |     | ||||||||||| ||", "score": 23, "sbjct_start": 1814464, "sbjct": "GGTGACCATAGTGTTGTGGTA-CCACCTGACTCCATTCCGAACTCAGTAGTGAAACGTAATAACGCCGATGGTAGTG"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:7|RF00001fw"}, "ret_keys": ["7|RF00001", "ss0", null], "subs": {"7|RF00001": {"description": "1814461-1814577", "features": [], "Bio.Seq": {"seq": "UUUGGUGACCAUAGUGUUGUGGUACCACCUGACUCCAUUCCGAACUCAGUAGUGAAACGUAAUAACGCCGAUGGUAGUGUGGGGUUUCCCCAUGUGAGAGUAGGUAUCGCCAGGCCC", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 1814464, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:7|RF00001fw\",\"length\":117,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":35.39,\"avg_pp\":0.939,\"band_calc\":0.01,\"alignment\":0.06,\"total\":0.07,\"mem\":1.08}", "ambiguous": false, "super_start": 1814451, "trimmed_se": false, "extended_end": 1814577, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 35.4, "query_start": 4, "identities": [51, 77], "expect": 0.006, "match": "|| | |||||| |  | || | || || |   ||||||||||| | | ||  || |     | ||||||||||| ||", "score": 23, "num_alignments": null, "frame": [], "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTG", "align_length": 77, "strand": ["Plus", "Plus"], "gaps": [1, 77], "sbjct_end": 1814539, "query_end": 80, "positives": [null, null], "sbjct_start": 1814464, "sbjct": "GGTGACCATAGTGTTGTGGTA-CCACCTGACTCCATTCCGAACTCAGTAGTGAAACGTAATAACGCCGATGGTAGTG"}], "msgs": [], "query_end": 1814539, "extended_start": 1814461, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 1814587}, "letter_annotations": {"rnafold": "..(((((.(((((....))))))))))((((((((((((......(((....)))..(((....)))..))))).)))((((((...))))))((((.........))))))))..."}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:7|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 1814461}, "3": {"best_end": 2588893, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "GUCGGUGGUUAUGGCGGAGGGGGAACGCCCGGUCCCAUCCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACCUGUCAGGGUGUGGGAGAGUAGGUCGCCGCCGACA", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 2588779, "query_end": 2588891, "extended_start": 2588777, "trimmed_ss": false, "trimmed_es": false, "super_start": 2588767, "trimmed_se": false, "super_end": 2588903, "extended_end": 2588893, "trimmed_ee": false, "blast": ["RF00001", {"bits": 128.0, "num_alignments": null, "frame": [], "query": "CGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGA", "query_start": 3, "align_length": 114, "strand": ["Plus", "Plus"], "identities": [102, 114], "expect": 7e-31, "gaps": [1, 114], "sbjct_end": 2588891, "query_end": 116, "positives": [null, null], "match": "||| ||  || ||||||||| ||| |||||||||||| |||||||||||||||||||||||||||||||||||||||||||  | ||||||||||||||||||| | |||||||", "score": 88, "sbjct_start": 2588779, "sbjct": "CGGTGGTTATGGCGGAGGGGGAAC-GCCCGGTCCCATCCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACCTGTCAGGGTGTGGGAGAGTAGGTCGCCGCCGA"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:3|RF00001fw"}, "ret_keys": ["3|RF00001", "ss0", null], "subs": {"3|RF00001": {"description": "2588777-2588893", "features": [], "Bio.Seq": {"seq": "GUCGGUGGUUAUGGCGGAGGGGGAACGCCCGGUCCCAUCCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACCUGUCAGGGUGUGGGAGAGUAGGUCGCCGCCGACA", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 2588779, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:3|RF00001fw\",\"length\":117,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":101.94,\"avg_pp\":0.988,\"band_calc\":0.01,\"alignment\":0.02,\"total\":0.03,\"mem\":0.46}", "ambiguous": false, "super_start": 2588767, "trimmed_se": false, "extended_end": 2588893, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 128.0, "query_start": 3, "identities": [102, 114], "expect": 7e-31, "match": "||| ||  || ||||||||| ||| |||||||||||| |||||||||||||||||||||||||||||||||||||||||||  | ||||||||||||||||||| | |||||||", "score": 88, "num_alignments": null, "frame": [], "query": "CGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGA", "align_length": 114, "strand": ["Plus", "Plus"], "gaps": [1, 114], "sbjct_end": 2588891, "query_end": 116, "positives": [null, null], "sbjct_start": 2588779, "sbjct": "CGGTGGTTATGGCGGAGGGGGAAC-GCCCGGTCCCATCCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACCTGTCAGGGTGTGGGAGAGTAGGTCGCCGCCGA"}], "msgs": [], "query_end": 2588891, "extended_start": 2588777, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 2588903}, "letter_annotations": {"rnafold": "(((((((((....((((((((.....((((((.............))))..))....)))))).))(((.((....((((((((....))))))))....)).))).)))))))))."}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:3|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 2588777}, "4": {"best_end": 896226, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "UCUGGUGACUAUAGCAAGGAGGUCACACCUGUUCCCAUGCCGAACACAGAAGUUAAGCUCCUUAGCGUCGAUGGUAGUCGAACUUACGUUCCGCUAGAGUAGAACGUUGCCAGGCUA", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 896113, "query_end": 896185, "extended_start": 896110, "trimmed_ss": false, "trimmed_es": false, "super_start": 896100, "trimmed_se": false, "super_end": 896236, "extended_end": 896226, "trimmed_ee": false, "blast": ["RF00001", {"bits": 42.5, "num_alignments": null, "frame": [], "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTA", "query_start": 4, "align_length": 74, "strand": ["Plus", "Plus"], "identities": [52, 74], "expect": 4e-05, "gaps": [1, 74], "sbjct_end": 896185, "query_end": 77, "positives": [null, null], "match": "|| | | |||||   | ||  ||  || | |||||| |||||| | |||| ||||| |   |||| ||||||||", "score": 28, "sbjct_start": 896113, "sbjct": "GGTGACTATAGCAAGGAGGTCACA-CCTGTTCCCATGCCGAACACAGAAGTTAAGCTCCTTAGCGTCGATGGTA"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:4|RF00001fw"}, "ret_keys": ["4|RF00001", "ss0", null], "subs": {"4|RF00001": {"description": "896110-896226", "features": [], "Bio.Seq": {"seq": "UCUGGUGACUAUAGCAAGGAGGUCACACCUGUUCCCAUGCCGAACACAGAAGUUAAGCUCCUUAGCGUCGAUGGUAGUCGAACUUACGUUCCGCUAGAGUAGAACGUUGCCAGGCUA", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 896113, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:4|RF00001fw\",\"length\":117,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":39.6,\"avg_pp\":0.936,\"band_calc\":0.01,\"alignment\":0.06,\"total\":0.07,\"mem\":1.05}", "ambiguous": false, "super_start": 896100, "trimmed_se": false, "extended_end": 896226, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 42.5, "query_start": 4, "identities": [52, 74], "expect": 4e-05, "match": "|| | | |||||   | ||  ||  || | |||||| |||||| | |||| ||||| |   |||| ||||||||", "score": 28, "num_alignments": null, "frame": [], "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTA", "align_length": 74, "strand": ["Plus", "Plus"], "gaps": [1, 74], "sbjct_end": 896185, "query_end": 77, "positives": [null, null], "sbjct_start": 896113, "sbjct": "GGTGACTATAGCAAGGAGGTCACA-CCTGTTCCCATGCCGAACACAGAAGTTAAGCTCCTTAGCGTCGATGGTA"}], "msgs": [], "query_end": 896185, "extended_start": 896110, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 896236}, "letter_annotations": {"rnafold": ".((((((((....(((.((((((...))))....)).)))...........(((..((((..(((((..((((..(((...)))..)))).)))))))))..)))))))))))...."}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:4|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 896110}, "8": {"best_end": 3560290, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "UUGAGUAACAAUAGCAAAAGGGAUCACCUGAAUCCAUUCCGAACUCAGUAGUUAAGCCUUUUUACGCCGAAGAUACUAGAAAUAGGAAAAUAGGGAGUUACUCAAGAGAUGCCUAG", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 3560185, "query_end": 3560251, "extended_start": 3560175, "trimmed_ss": false, "trimmed_es": false, "super_start": 3560165, "trimmed_se": false, "super_end": 3560300, "extended_end": 3560290, "trimmed_ee": false, "blast": ["RF00001", {"bits": 35.4, "num_alignments": null, "frame": [], "query": "ATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACT", "query_start": 11, "align_length": 69, "strand": ["Plus", "Plus"], "identities": [47, 69], "expect": 0.006, "gaps": [2, 69], "sbjct_end": 3560251, "query_end": 79, "positives": [null, null], "match": "|||||  | ||||   | || |   ||||||||||| | | || |||||| |    |||||| | ||||", "score": 23, "sbjct_start": 3560185, "sbjct": "ATAGCAAAAGGGAT--CACCTGAATCCATTCCGAACTCAGTAGTTAAGCCTTTTTACGCCGAAGATACT"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:8|RF00001fw"}, "ret_keys": ["8|RF00001", "ss0", null], "subs": {"8|RF00001": {"description": "3560175-3560290", "features": [], "Bio.Seq": {"seq": "UUGAGUAACAAUAGCAAAAGGGAUCACCUGAAUCCAUUCCGAACUCAGUAGUUAAGCCUUUUUACGCCGAAGAUACUAGAAAUAGGAAAAUAGGGAGUUACUCAAGAGAUGCCUAG", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 3560185, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:8|RF00001fw\",\"length\":116,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":7.03,\"avg_pp\":0.892,\"band_calc\":0.01,\"alignment\":0.09,\"total\":0.1,\"mem\":1.49}", "ambiguous": false, "super_start": 3560165, "trimmed_se": false, "extended_end": 3560290, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 35.4, "query_start": 11, "identities": [47, 69], "expect": 0.006, "match": "|||||  | ||||   | || |   ||||||||||| | | || |||||| |    |||||| | ||||", "score": 23, "num_alignments": null, "frame": [], "query": "ATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACT", "align_length": 69, "strand": ["Plus", "Plus"], "gaps": [2, 69], "sbjct_end": 3560251, "query_end": 79, "positives": [null, null], "sbjct_start": 3560185, "sbjct": "ATAGCAAAAGGGAT--CACCTGAATCCATTCCGAACTCAGTAGTTAAGCCTTTTTACGCCGAAGATACT"}], "msgs": [], "query_end": 3560251, "extended_start": 3560175, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 3560300}, "letter_annotations": {"rnafold": "(((((((((.........(((.....)))...(((.((((....((((((.((..((........))..))..)))).))....)))).....))))))))))))..........."}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:8|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 3560175}, "5": {"best_end": 92635, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "CCUGGCGACCAUAGCGUUUUGGAUCCACCUGACUCCAUUCCGAACUCAGAAGUGAAACGAAAUAGCGUCGAUGGUAGUGUGGGGUUUCCCCAUGUGAGAGUAGAACAUCGCCAGGCA", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 92522, "query_end": 92597, "extended_start": 92519, "trimmed_ss": false, "trimmed_es": false, "super_start": 92509, "trimmed_se": false, "super_end": 92645, "extended_end": 92635, "trimmed_ee": false, "blast": ["RF00001", {"bits": 41.1, "num_alignments": null, "frame": [], "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTG", "query_start": 4, "align_length": 77, "strand": ["Plus", "Plus"], "identities": [53, 77], "expect": 0.0001, "gaps": [1, 77], "sbjct_end": 92597, "query_end": 80, "positives": [null, null], "match": "|||| ||||||||    |||  || || |   ||||||||||| | ||||  || |     |||| |||||||| ||", "score": 27, "sbjct_start": 92522, "sbjct": "GGCGACCATAGCGTTTTGGAT-CCACCTGACTCCATTCCGAACTCAGAAGTGAAACGAAATAGCGTCGATGGTAGTG"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:5|RF00001fw"}, "ret_keys": ["5|RF00001", "ss0", null], "subs": {"5|RF00001": {"description": "92519-92635", "features": [], "Bio.Seq": {"seq": "CCUGGCGACCAUAGCGUUUUGGAUCCACCUGACUCCAUUCCGAACUCAGAAGUGAAACGAAAUAGCGUCGAUGGUAGUGUGGGGUUUCCCCAUGUGAGAGUAGAACAUCGCCAGGCA", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 92522, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:5|RF00001fw\",\"length\":117,\"cm_from\":1,\"cm_to\":118,\"trunc\":\"no\",\"bit_sc\":53.58,\"avg_pp\":0.956,\"band_calc\":0.01,\"alignment\":0.05,\"total\":0.06,\"mem\":1.01}", "ambiguous": false, "super_start": 92509, "trimmed_se": false, "extended_end": 92635, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 41.1, "query_start": 4, "identities": [53, 77], "expect": 0.0001, "match": "|||| ||||||||    |||  || || |   ||||||||||| | ||||  || |     |||| |||||||| ||", "score": 27, "num_alignments": null, "frame": [], "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTG", "align_length": 77, "strand": ["Plus", "Plus"], "gaps": [1, 77], "sbjct_end": 92597, "query_end": 80, "positives": [null, null], "sbjct_start": 92522, "sbjct": "GGCGACCATAGCGTTTTGGAT-CCACCTGACTCCATTCCGAACTCAGAAGTGAAACGAAATAGCGTCGATGGTAGTG"}], "msgs": [], "query_end": 92597, "extended_start": 92519, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 92645}, "letter_annotations": {"rnafold": "((((((((((((.((((((((..(((..((((.((......))..))))..).))..))))...))))..)))))...((((((...))))))...............))))))).."}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:5|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 92519}, "12": {"best_end": 687711, "source": {"description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]", "features": [], "Bio.Seq": {"seq": "ACGUACGGCCAUAUCCGAGACACGCGUACCGGAACCCAUUCCGAAUUCCGAAGUCAAGCGUCCGCGAGUUGGGUUAGUAAUCUGGUGAAAGAUCACAGGCGAACCCCCAAUGCUGUAC", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 687599, "query_end": 687652, "extended_start": 687594, "trimmed_ss": false, "trimmed_es": false, "super_start": 687584, "trimmed_se": false, "super_end": 687721, "extended_end": 687711, "trimmed_ee": false, "blast": ["RF00001", {"bits": 26.8, "num_alignments": null, "frame": [], "query": "CGGCCATAGCGGAGGGGAAACCGCCCGGT-CCCATTCCGAACCCGGAAGCTAAGC", "query_start": 6, "align_length": 55, "strand": ["Plus", "Plus"], "identities": [38, 55], "expect": 2.2, "gaps": [2, 55], "sbjct_end": 687652, "query_end": 59, "positives": [null, null], "match": "|||||||| | |||   |  |   ||||  |||||||||||  | ||||  ||||", "score": 17, "sbjct_start": 687599, "sbjct": "CGGCCATATCCGAGAC-ACGCGTACCGGAACCCATTCCGAATTCCGAAGTCAAGC"}], "strand": 1, "msgs": []}, "letter_annotations": {}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:12|RF00001fw"}, "ret_keys": ["12|RF00001", "ss0", null], "subs": {"12|RF00001": {"description": "687594-687711", "features": [], "Bio.Seq": {"seq": "ACGUACGGCCAUAUCCGAGACACGCGUACCGGAACCCAUUCCGAAUUCCGAAGUCAAGCGUCCGCGAGUUGGGUUAGUAAUCUGGUGAAAGAUCACAGGCGAACCCCCAAUGCUGUAC", "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"}, "annotations": {"query_start": 687599, "sss": ["rnafold"], "cmstat": "{\"seq_name\":\"uid:12|RF00001fw\",\"length\":118,\"cm_from\":1,\"cm_to\":115,\"trunc\":\"no\",\"bit_sc\":-11.86,\"avg_pp\":0.83,\"band_calc\":0.01,\"alignment\":0.22,\"total\":0.23,\"mem\":3.51}", "ambiguous": false, "super_start": 687584, "trimmed_se": false, "extended_end": 687711, "score": null, "trimmed_ee": false, "blast": ["RF00001", {"bits": 26.8, "query_start": 6, "identities": [38, 55], "expect": 2.2, "match": "|||||||| | |||   |  |   ||||  |||||||||||  | ||||  ||||", "score": 17, "num_alignments": null, "frame": [], "query": "CGGCCATAGCGGAGGGGAAACCGCCCGGT-CCCATTCCGAACCCGGAAGCTAAGC", "align_length": 55, "strand": ["Plus", "Plus"], "gaps": [2, 55], "sbjct_end": 687652, "query_end": 59, "positives": [null, null], "sbjct_start": 687599, "sbjct": "CGGCCATATCCGAGAC-ACGCGTACCGGAACCCATTCCGAATTCCGAAGTCAAGC"}], "msgs": [], "query_end": 687652, "extended_start": 687594, "trimmed_ss": false, "trimmed_es": false, "strand": 1, "super_end": 687721}, "letter_annotations": {"rnafold": "..(((((((....((((.(((.(......(((((..(.....)..))))).......).))))).))((((((...((...((.((((....)))).))...)).)))))))))))))"}, "dbxrefs": [], "name": "RF00001fw", "id": "uid:12|RF00001fw"}}, "query_name": "", "templates": {"t0": {"seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC", "str": "..((((((((((.((((((((...(((....)))....(((((....)))))......))))))...))..))))..((((((((....))))))))............))))))..."}}, "best_start": 687594}}}
+{
+  "date_of_run": [
+    2019,
+    7,
+    8,
+    13,
+    16,
+    35,
+    0,
+    189,
+    1
+  ],
+  "best_matching_model": {
+    "bias": "0.0",
+    "seq_from": "1",
+    "accession_seq": "RF00001",
+    "gc": "0.65",
+    "mld_from": "1",
+    "seq_to": "118",
+    "E-value": 4.9e-14,
+    "trunc": "no",
+    "target_name": "5S_rRNA",
+    "strand": "+",
+    "description_of_target": "-",
+    "inc": "!",
+    "mld_to": "119",
+    "score": 82.4,
+    "query_name": "X15126.1_3-120",
+    "pass": "1",
+    "mdl": "cm",
+    "accession_mdl": "-"
+  },
+  "hits": [
+    {
+      "templates": {},
+      "best_start": 1432013,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 1432013,
+          "extended_end": 1432129,
+          "query_end": 1432129,
+          "super_start": 1432003,
+          "trimmed_ee": false,
+          "extended_start": 1432013,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 1432139,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 1432129,
+              "query_start": 1,
+              "query_end": 118,
+              "identities": 110,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "TACGGCGGCCATAGCGGCAGGGAAAC-GCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCTGCCAGCGCCGATGGTACTGCACTCGTGAGGGTGTGGGAGAGTAGGTCACCGCCGAAC",
+              "bits": 145.0,
+              "sbjct_start": 1432013,
+              "gaps": 1,
+              "score": 100,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 118,
+              "num_alignments": null,
+              "query": "TACGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC",
+              "match": "|||||||||||||||||  ||||||| |||||||||||||||||||||||||||||||||  ||||||||||||||||||||||||  |||||||||||||||||| |||||||||||",
+              "expect": 5e-36
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:0|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UACGGCGGCCAUAGCGGCAGGGAAACGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCUGCCAGCGCCGAUGGUACUGCACUCGUGAGGGUGUGGGAGAGUAGGUCACCGCCGAAC",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 1432129,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 1432129,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 118,
+              "frame": [],
+              "sbjct": "TACGGCGGCCATAGCGGCAGGGAAAC-GCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCTGCCAGCGCCGATGGTACTGCACTCGTGAGGGTGTGGGAGAGTAGGTCACCGCCGAAC",
+              "match": "|||||||||||||||||  ||||||| |||||||||||||||||||||||||||||||||  ||||||||||||||||||||||||  |||||||||||||||||| |||||||||||",
+              "expect": 5e-36,
+              "sbjct_end": 1432129,
+              "query_start": 1,
+              "score": 100,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 145.0,
+              "sbjct_start": 1432013,
+              "gaps": 1,
+              "identities": 110,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 118,
+              "num_alignments": null,
+              "query": "TACGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 1432013,
+          "extended_end": 1432129,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 1432013,
+          "ambiguous": false,
+          "super_end": 1432139,
+          "cmstat": {
+            "avg_pp": 0.988,
+            "seq_name": "uid:0|RF00001fw",
+            "mem": 0.45,
+            "length": 117,
+            "cm_to": 118,
+            "band_calc": 0.0,
+            "alignment": 0.02,
+            "cm_from": 1,
+            "bit_sc": 132.78,
+            "total": 0.03,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 1432003
+        },
+        "letter_annotations": {
+          "rnafold": "..((((((.....((((((((.....((((((.............))))..))....)))))).))(((.((....((((((((....))))))))....)).)))..))))))..."
+        },
+        "description": "1432013-1432129",
+        "id": "uid:0|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UACGGCGGCCAUAGCGGCAGGGAAACGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCUGCCAGCGCCGAUGGUACUGCACUCGUGAGGGUGUGGGAGAGUAGGUCACCGCCGAAC",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 1158528,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 1158528,
+          "extended_end": 1158644,
+          "query_end": 1158644,
+          "super_start": 1158518,
+          "trimmed_ee": false,
+          "extended_start": 1158528,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 1158654,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 1158644,
+              "query_start": 1,
+              "query_end": 118,
+              "identities": 104,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "TACGGCGGTTATAGCGGAGGGGAAACA-CCCGGTTACATTCCGAACCCGGAAGTTAAGCTCTTCAGCGCCGATGGTACTGCACTCGGGAGGGTGTGGGAGAGTAGGTCGCCGCCGGAC",
+              "bits": 128.0,
+              "sbjct_start": 1158528,
+              "gaps": 1,
+              "score": 88,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 118,
+              "num_alignments": null,
+              "query": "TACGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC",
+              "match": "||||||||  ||||||||||||||||  ||||||  ||||||||||||||||| ||||| || |||||||||||||||||||||||  |||||||||||||||||| | |||||| ||",
+              "expect": 7e-31
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:1|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UACGGCGGUUAUAGCGGAGGGGAAACACCCGGUUACAUUCCGAACCCGGAAGUUAAGCUCUUCAGCGCCGAUGGUACUGCACUCGGGAGGGUGUGGGAGAGUAGGUCGCCGCCGGAC",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 1158644,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 1158644,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 118,
+              "frame": [],
+              "sbjct": "TACGGCGGTTATAGCGGAGGGGAAACA-CCCGGTTACATTCCGAACCCGGAAGTTAAGCTCTTCAGCGCCGATGGTACTGCACTCGGGAGGGTGTGGGAGAGTAGGTCGCCGCCGGAC",
+              "match": "||||||||  ||||||||||||||||  ||||||  ||||||||||||||||| ||||| || |||||||||||||||||||||||  |||||||||||||||||| | |||||| ||",
+              "expect": 7e-31,
+              "sbjct_end": 1158644,
+              "query_start": 1,
+              "score": 88,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 128.0,
+              "sbjct_start": 1158528,
+              "gaps": 1,
+              "identities": 104,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 118,
+              "num_alignments": null,
+              "query": "TACGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 1158528,
+          "extended_end": 1158644,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 1158528,
+          "ambiguous": false,
+          "super_end": 1158654,
+          "cmstat": {
+            "avg_pp": 0.9840000000000001,
+            "seq_name": "uid:1|RF00001fw",
+            "mem": 0.46,
+            "length": 117,
+            "cm_to": 118,
+            "band_calc": 0.01,
+            "alignment": 0.02,
+            "cm_from": 1,
+            "bit_sc": 112.27,
+            "total": 0.03,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 1158518
+        },
+        "letter_annotations": {
+          "rnafold": "..(((((((....((.((((((.(((..((((((........)).))))..)))...)))))).))(((.((....((((((((....))))))))....)).))).)))))))..."
+        },
+        "description": "1158528-1158644",
+        "id": "uid:1|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UACGGCGGUUAUAGCGGAGGGGAAACACCCGGUUACAUUCCGAACCCGGAAGUUAAGCUCUUCAGCGCCGAUGGUACUGCACUCGGGAGGGUGUGGGAGAGUAGGUCGCCGCCGGAC",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 2469884,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 2469886,
+          "extended_end": 2470000,
+          "query_end": 2470000,
+          "super_start": 2469874,
+          "trimmed_ee": false,
+          "extended_start": 2469884,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 2470010,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 2470000,
+              "query_start": 3,
+              "query_end": 118,
+              "identities": 103,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "CGGTGGTTATGGCGGAGGGGGAACA-CCCGGTCCCATTCCGAACCCGGTAGTTAAGCCTTCCAGCGCCGATGGTACTGCACTCGTGAGGGTGTGGGAGAGTAGGACGCCGCCGAAC",
+              "bits": 128.0,
+              "sbjct_start": 2469886,
+              "gaps": 1,
+              "score": 88,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 116,
+              "num_alignments": null,
+              "query": "CGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC",
+              "match": "||| ||  || ||||||||| |||  |||||||||||||||||||||| || |||||| |||||||||||||||||||||||||  |||||||||||||||||||| |||||||||",
+              "expect": 7e-31
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:2|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UUCGGUGGUUAUGGCGGAGGGGGAACACCCGGUCCCAUUCCGAACCCGGUAGUUAAGCCUUCCAGCGCCGAUGGUACUGCACUCGUGAGGGUGUGGGAGAGUAGGACGCCGCCGAAC",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 2470000,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 2470000,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 118,
+              "frame": [],
+              "sbjct": "CGGTGGTTATGGCGGAGGGGGAACA-CCCGGTCCCATTCCGAACCCGGTAGTTAAGCCTTCCAGCGCCGATGGTACTGCACTCGTGAGGGTGTGGGAGAGTAGGACGCCGCCGAAC",
+              "match": "||| ||  || ||||||||| |||  |||||||||||||||||||||| || |||||| |||||||||||||||||||||||||  |||||||||||||||||||| |||||||||",
+              "expect": 7e-31,
+              "sbjct_end": 2470000,
+              "query_start": 3,
+              "score": 88,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 128.0,
+              "sbjct_start": 2469886,
+              "gaps": 1,
+              "identities": 103,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 116,
+              "num_alignments": null,
+              "query": "CGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGAAC"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 2469886,
+          "extended_end": 2470000,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 2469884,
+          "ambiguous": false,
+          "super_end": 2470010,
+          "cmstat": {
+            "avg_pp": 0.983,
+            "seq_name": "uid:2|RF00001fw",
+            "mem": 0.47,
+            "length": 117,
+            "cm_to": 118,
+            "band_calc": 0.01,
+            "alignment": 0.01,
+            "cm_from": 1,
+            "bit_sc": 107.24,
+            "total": 0.02,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 2469874
+        },
+        "letter_annotations": {
+          "rnafold": "(((((((((....((((((((..((((((.(((.(......).))).))).)))...)))))).)).((.((....((((((((....))))))))....)).))..)))))))))."
+        },
+        "description": "2469884-2470000",
+        "id": "uid:2|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UUCGGUGGUUAUGGCGGAGGGGGAACACCCGGUCCCAUUCCGAACCCGGUAGUUAAGCCUUCCAGCGCCGAUGGUACUGCACUCGUGAGGGUGUGGGAGAGUAGGACGCCGCCGAAC",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 2588777,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 2588779,
+          "extended_end": 2588893,
+          "query_end": 2588891,
+          "super_start": 2588767,
+          "trimmed_ee": false,
+          "extended_start": 2588777,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 2588903,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 2588891,
+              "query_start": 3,
+              "query_end": 116,
+              "identities": 102,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "CGGTGGTTATGGCGGAGGGGGAAC-GCCCGGTCCCATCCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACCTGTCAGGGTGTGGGAGAGTAGGTCGCCGCCGA",
+              "bits": 128.0,
+              "sbjct_start": 2588779,
+              "gaps": 1,
+              "score": 88,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 114,
+              "num_alignments": null,
+              "query": "CGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGA",
+              "match": "||| ||  || ||||||||| ||| |||||||||||| |||||||||||||||||||||||||||||||||||||||||||  | ||||||||||||||||||| | |||||||",
+              "expect": 7e-31
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:3|RF00001fw",
+        "Bio.Seq": {
+          "seq": "GUCGGUGGUUAUGGCGGAGGGGGAACGCCCGGUCCCAUCCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACCUGUCAGGGUGUGGGAGAGUAGGUCGCCGCCGACA",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 2588893,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 2588891,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 116,
+              "frame": [],
+              "sbjct": "CGGTGGTTATGGCGGAGGGGGAAC-GCCCGGTCCCATCCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACCTGTCAGGGTGTGGGAGAGTAGGTCGCCGCCGA",
+              "match": "||| ||  || ||||||||| ||| |||||||||||| |||||||||||||||||||||||||||||||||||||||||||  | ||||||||||||||||||| | |||||||",
+              "expect": 7e-31,
+              "sbjct_end": 2588891,
+              "query_start": 3,
+              "score": 88,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 128.0,
+              "sbjct_start": 2588779,
+              "gaps": 1,
+              "identities": 102,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 114,
+              "num_alignments": null,
+              "query": "CGGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGCACTCGACAGGGTGTGGGAGAGTAGGACACCGCCGA"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 2588779,
+          "extended_end": 2588893,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 2588777,
+          "ambiguous": false,
+          "super_end": 2588903,
+          "cmstat": {
+            "avg_pp": 0.988,
+            "seq_name": "uid:3|RF00001fw",
+            "mem": 0.46,
+            "length": 117,
+            "cm_to": 118,
+            "band_calc": 0.0,
+            "alignment": 0.02,
+            "cm_from": 1,
+            "bit_sc": 101.94,
+            "total": 0.03,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 2588767
+        },
+        "letter_annotations": {
+          "rnafold": "(((((((((....((((((((.....((((((.............))))..))....)))))).))(((.((....((((((((....))))))))....)).))).)))))))))."
+        },
+        "description": "2588777-2588893",
+        "id": "uid:3|RF00001fw",
+        "Bio.Seq": {
+          "seq": "GUCGGUGGUUAUGGCGGAGGGGGAACGCCCGGUCCCAUCCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACCUGUCAGGGUGUGGGAGAGUAGGUCGCCGCCGACA",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 896110,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 896113,
+          "extended_end": 896226,
+          "query_end": 896185,
+          "super_start": 896100,
+          "trimmed_ee": false,
+          "extended_start": 896110,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 896236,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 896185,
+              "query_start": 4,
+              "query_end": 77,
+              "identities": 52,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "GGTGACTATAGCAAGGAGGTCACA-CCTGTTCCCATGCCGAACACAGAAGTTAAGCTCCTTAGCGTCGATGGTA",
+              "bits": 42.5,
+              "sbjct_start": 896113,
+              "gaps": 1,
+              "score": 28,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 74,
+              "num_alignments": null,
+              "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTA",
+              "match": "|| | | |||||   | ||  ||  || | |||||| |||||| | |||| ||||| |   |||| ||||||||",
+              "expect": 4e-05
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:4|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UCUGGUGACUAUAGCAAGGAGGUCACACCUGUUCCCAUGCCGAACACAGAAGUUAAGCUCCUUAGCGUCGAUGGUAGUCGAACUUACGUUCCGCUAGAGUAGAACGUUGCCAGGCUA",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 896226,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 896185,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 77,
+              "frame": [],
+              "sbjct": "GGTGACTATAGCAAGGAGGTCACA-CCTGTTCCCATGCCGAACACAGAAGTTAAGCTCCTTAGCGTCGATGGTA",
+              "match": "|| | | |||||   | ||  ||  || | |||||| |||||| | |||| ||||| |   |||| ||||||||",
+              "expect": 4e-05,
+              "sbjct_end": 896185,
+              "query_start": 4,
+              "score": 28,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 42.5,
+              "sbjct_start": 896113,
+              "gaps": 1,
+              "identities": 52,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 74,
+              "num_alignments": null,
+              "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTA"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 896113,
+          "extended_end": 896226,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 896110,
+          "ambiguous": false,
+          "super_end": 896236,
+          "cmstat": {
+            "avg_pp": 0.9359999999999999,
+            "seq_name": "uid:4|RF00001fw",
+            "mem": 1.05,
+            "length": 117,
+            "cm_to": 118,
+            "band_calc": 0.01,
+            "alignment": 0.01,
+            "cm_from": 1,
+            "bit_sc": 39.6,
+            "total": 0.02,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 896100
+        },
+        "letter_annotations": {
+          "rnafold": ".((((((((....(((.((((((...))))....)).)))...........(((..((((..(((((..((((..(((...)))..)))).)))))))))..)))))))))))...."
+        },
+        "description": "896110-896226",
+        "id": "uid:4|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UCUGGUGACUAUAGCAAGGAGGUCACACCUGUUCCCAUGCCGAACACAGAAGUUAAGCUCCUUAGCGUCGAUGGUAGUCGAACUUACGUUCCGCUAGAGUAGAACGUUGCCAGGCUA",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 92519,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 92522,
+          "extended_end": 92635,
+          "query_end": 92597,
+          "super_start": 92509,
+          "trimmed_ee": false,
+          "extended_start": 92519,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 92645,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 92597,
+              "query_start": 4,
+              "query_end": 80,
+              "identities": 53,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "GGCGACCATAGCGTTTTGGAT-CCACCTGACTCCATTCCGAACTCAGAAGTGAAACGAAATAGCGTCGATGGTAGTG",
+              "bits": 41.1,
+              "sbjct_start": 92522,
+              "gaps": 1,
+              "score": 27,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 77,
+              "num_alignments": null,
+              "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTG",
+              "match": "|||| ||||||||    |||  || || |   ||||||||||| | ||||  || |     |||| |||||||| ||",
+              "expect": 0.0001
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:5|RF00001fw",
+        "Bio.Seq": {
+          "seq": "CCUGGCGACCAUAGCGUUUUGGAUCCACCUGACUCCAUUCCGAACUCAGAAGUGAAACGAAAUAGCGUCGAUGGUAGUGUGGGGUUUCCCCAUGUGAGAGUAGAACAUCGCCAGGCA",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 92635,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 92597,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 80,
+              "frame": [],
+              "sbjct": "GGCGACCATAGCGTTTTGGAT-CCACCTGACTCCATTCCGAACTCAGAAGTGAAACGAAATAGCGTCGATGGTAGTG",
+              "match": "|||| ||||||||    |||  || || |   ||||||||||| | ||||  || |     |||| |||||||| ||",
+              "expect": 0.0001,
+              "sbjct_end": 92597,
+              "query_start": 4,
+              "score": 27,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 41.1,
+              "sbjct_start": 92522,
+              "gaps": 1,
+              "identities": 53,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 77,
+              "num_alignments": null,
+              "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTG"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 92522,
+          "extended_end": 92635,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 92519,
+          "ambiguous": false,
+          "super_end": 92645,
+          "cmstat": {
+            "avg_pp": 0.956,
+            "seq_name": "uid:5|RF00001fw",
+            "mem": 1.01,
+            "length": 117,
+            "cm_to": 118,
+            "band_calc": 0.0,
+            "alignment": 0.03,
+            "cm_from": 1,
+            "bit_sc": 53.58,
+            "total": 0.03,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 92509
+        },
+        "letter_annotations": {
+          "rnafold": "((((((((((((.((((((((..(((..((((.((......))..))))..).))..))))...))))..)))))...((((((...))))))...............))))))).."
+        },
+        "description": "92519-92635",
+        "id": "uid:5|RF00001fw",
+        "Bio.Seq": {
+          "seq": "CCUGGCGACCAUAGCGUUUUGGAUCCACCUGACUCCAUUCCGAACUCAGAAGUGAAACGAAAUAGCGUCGAUGGUAGUGUGGGGUUUCCCCAUGUGAGAGUAGAACAUCGCCAGGCA",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 3540789,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 3540810,
+          "extended_end": 3540905,
+          "query_end": 3540846,
+          "super_start": 3540779,
+          "trimmed_ee": false,
+          "extended_start": 3540789,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 3540915,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 3540846,
+              "query_start": 22,
+              "query_end": 59,
+              "identities": 32,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "GAAAACGCCGGGTCCCAT-CAGATCCCCGAAGCTAAGC",
+              "bits": 36.8,
+              "sbjct_start": 3540810,
+              "gaps": 1,
+              "score": 24,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 38,
+              "num_alignments": null,
+              "query": "GAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGC",
+              "match": "|||| |||| |||||||| | || ||| ||||||||||",
+              "expect": 0.002
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:6|RF00001fw",
+        "Bio.Seq": {
+          "seq": "CUGCUACGUUCAUACCACUCAGAAAACGCCGGGUCCCAUCAGAUCCCCGAAGCUAAGCUGAGUUGGGCUGGAUUAGUACUGGAUUCAGGAAUGAUCUGGGAAUCCCCAGUGACGUAG",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 3540905,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 3540846,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 59,
+              "frame": [],
+              "sbjct": "GAAAACGCCGGGTCCCAT-CAGATCCCCGAAGCTAAGC",
+              "match": "|||| |||| |||||||| | || ||| ||||||||||",
+              "expect": 0.002,
+              "sbjct_end": 3540846,
+              "query_start": 22,
+              "score": 24,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 36.8,
+              "sbjct_start": 3540810,
+              "gaps": 1,
+              "identities": 32,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 38,
+              "num_alignments": null,
+              "query": "GAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGC"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 3540810,
+          "extended_end": 3540905,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 3540789,
+          "ambiguous": false,
+          "super_end": 3540915,
+          "cmstat": {
+            "avg_pp": 0.883,
+            "seq_name": "uid:6|RF00001fw",
+            "mem": 4.94,
+            "length": 117,
+            "cm_to": 115,
+            "band_calc": 0.01,
+            "alignment": 0.07,
+            "cm_from": 1,
+            "bit_sc": 5.5,
+            "total": 0.07,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 3540779
+        },
+        "letter_annotations": {
+          "rnafold": "...((((((.(((.((((((((.....((((((((......))..))))..))....))))).)))...((((((...(((....)))...))))))(((....))).)))))))))"
+        },
+        "description": "3540789-3540905",
+        "id": "uid:6|RF00001fw",
+        "Bio.Seq": {
+          "seq": "CUGCUACGUUCAUACCACUCAGAAAACGCCGGGUCCCAUCAGAUCCCCGAAGCUAAGCUGAGUUGGGCUGGAUUAGUACUGGAUUCAGGAAUGAUCUGGGAAUCCCCAGUGACGUAG",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 1814461,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 1814464,
+          "extended_end": 1814577,
+          "query_end": 1814539,
+          "super_start": 1814451,
+          "trimmed_ee": false,
+          "extended_start": 1814461,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 1814587,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 1814539,
+              "query_start": 4,
+              "query_end": 80,
+              "identities": 51,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "GGTGACCATAGTGTTGTGGTA-CCACCTGACTCCATTCCGAACTCAGTAGTGAAACGTAATAACGCCGATGGTAGTG",
+              "bits": 35.4,
+              "sbjct_start": 1814464,
+              "gaps": 1,
+              "score": 23,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 77,
+              "num_alignments": null,
+              "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTG",
+              "match": "|| | |||||| |  | || | || || |   ||||||||||| | | ||  || |     | ||||||||||| ||",
+              "expect": 0.006
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:7|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UUUGGUGACCAUAGUGUUGUGGUACCACCUGACUCCAUUCCGAACUCAGUAGUGAAACGUAAUAACGCCGAUGGUAGUGUGGGGUUUCCCCAUGUGAGAGUAGGUAUCGCCAGGCCC",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 1814577,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 1814539,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 80,
+              "frame": [],
+              "sbjct": "GGTGACCATAGTGTTGTGGTA-CCACCTGACTCCATTCCGAACTCAGTAGTGAAACGTAATAACGCCGATGGTAGTG",
+              "match": "|| | |||||| |  | || | || || |   ||||||||||| | | ||  || |     | ||||||||||| ||",
+              "expect": 0.006,
+              "sbjct_end": 1814539,
+              "query_start": 4,
+              "score": 23,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 35.4,
+              "sbjct_start": 1814464,
+              "gaps": 1,
+              "identities": 51,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 77,
+              "num_alignments": null,
+              "query": "GGCGGCCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTG"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 1814464,
+          "extended_end": 1814577,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 1814461,
+          "ambiguous": false,
+          "super_end": 1814587,
+          "cmstat": {
+            "avg_pp": 0.9390000000000001,
+            "seq_name": "uid:7|RF00001fw",
+            "mem": 1.08,
+            "length": 117,
+            "cm_to": 118,
+            "band_calc": 0.01,
+            "alignment": 0.03,
+            "cm_from": 1,
+            "bit_sc": 35.39,
+            "total": 0.04,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 1814451
+        },
+        "letter_annotations": {
+          "rnafold": "..(((((.(((((....))))))))))((((((((((((......(((....)))..(((....)))..))))).)))((((((...))))))((((.........))))))))..."
+        },
+        "description": "1814461-1814577",
+        "id": "uid:7|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UUUGGUGACCAUAGUGUUGUGGUACCACCUGACUCCAUUCCGAACUCAGUAGUGAAACGUAAUAACGCCGAUGGUAGUGUGGGGUUUCCCCAUGUGAGAGUAGGUAUCGCCAGGCCC",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 3560175,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 3560185,
+          "extended_end": 3560290,
+          "query_end": 3560251,
+          "super_start": 3560165,
+          "trimmed_ee": false,
+          "extended_start": 3560175,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 3560300,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 3560251,
+              "query_start": 11,
+              "query_end": 79,
+              "identities": 47,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "ATAGCAAAAGGGAT--CACCTGAATCCATTCCGAACTCAGTAGTTAAGCCTTTTTACGCCGAAGATACT",
+              "bits": 35.4,
+              "sbjct_start": 3560185,
+              "gaps": 2,
+              "score": 23,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 69,
+              "num_alignments": null,
+              "query": "ATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACT",
+              "match": "|||||  | ||||   | || |   ||||||||||| | | || |||||| |    |||||| | ||||",
+              "expect": 0.006
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:8|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UUGAGUAACAAUAGCAAAAGGGAUCACCUGAAUCCAUUCCGAACUCAGUAGUUAAGCCUUUUUACGCCGAAGAUACUAGAAAUAGGAAAAUAGGGAGUUACUCAAGAGAUGCCUAG",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 3560290,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 3560251,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 79,
+              "frame": [],
+              "sbjct": "ATAGCAAAAGGGAT--CACCTGAATCCATTCCGAACTCAGTAGTTAAGCCTTTTTACGCCGAAGATACT",
+              "match": "|||||  | ||||   | || |   ||||||||||| | | || |||||| |    |||||| | ||||",
+              "expect": 0.006,
+              "sbjct_end": 3560251,
+              "query_start": 11,
+              "score": 23,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 35.4,
+              "sbjct_start": 3560185,
+              "gaps": 2,
+              "identities": 47,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 69,
+              "num_alignments": null,
+              "query": "ATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACT"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 3560185,
+          "extended_end": 3560290,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 3560175,
+          "ambiguous": false,
+          "super_end": 3560300,
+          "cmstat": {
+            "avg_pp": 0.892,
+            "seq_name": "uid:8|RF00001fw",
+            "mem": 1.49,
+            "length": 116,
+            "cm_to": 118,
+            "band_calc": 0.01,
+            "alignment": 0.04,
+            "cm_from": 1,
+            "bit_sc": 7.03,
+            "total": 0.05,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 3560165
+        },
+        "letter_annotations": {
+          "rnafold": "(((((((((.........(((.....)))...(((.((((....((((((.((..((........))..))..)))).))....)))).....))))))))))))..........."
+        },
+        "description": "3560175-3560290",
+        "id": "uid:8|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UUGAGUAACAAUAGCAAAAGGGAUCACCUGAAUCCAUUCCGAACUCAGUAGUUAAGCCUUUUUACGCCGAAGAUACUAGAAAUAGGAAAAUAGGGAGUUACUCAAGAGAUGCCUAG",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 1905652,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 1905678,
+          "extended_end": 1905771,
+          "query_end": 1905733,
+          "super_start": 1905642,
+          "trimmed_ee": false,
+          "extended_start": 1905652,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 1905781,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 1905733,
+              "query_start": 27,
+              "query_end": 80,
+              "identities": 40,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "CGCCTGAACCCATTTCGAATTCAGAAGCTAAGCGCCCTCAGGCTTGGTTAGTACTG",
+              "bits": 34.0,
+              "sbjct_start": 1905678,
+              "gaps": 2,
+              "score": 22,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 56,
+              "num_alignments": null,
+              "query": "CGCCCGGTCCCATTCCGAACCCGGAAGCTAA--GCCCTCCAGCGCCGATGGTACTG",
+              "match": "|||| |  |||||| ||||  | ||||||||  ||||||  ||   | | ||||||",
+              "expect": 0.016
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:9|RF00001fw",
+        "Bio.Seq": {
+          "seq": "ACGUUCGGUCAUACUAGUGACACAUGCGCCUGAACCCAUUUCGAAUUCAGAAGCUAAGCGCCCUCAGGCUUGGUUAGUACUGAGGUGAGGGAUCCACUCGGGAACCCCAAGUGCCGUACG",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 1905771,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 1905733,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 80,
+              "frame": [],
+              "sbjct": "CGCCTGAACCCATTTCGAATTCAGAAGCTAAGCGCCCTCAGGCTTGGTTAGTACTG",
+              "match": "|||| |  |||||| ||||  | ||||||||  ||||||  ||   | | ||||||",
+              "expect": 0.016,
+              "sbjct_end": 1905733,
+              "query_start": 27,
+              "score": 22,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 34.0,
+              "sbjct_start": 1905678,
+              "gaps": 2,
+              "identities": 40,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 56,
+              "num_alignments": null,
+              "query": "CGCCCGGTCCCATTCCGAACCCGGAAGCTAA--GCCCTCCAGCGCCGATGGTACTG"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 1905678,
+          "extended_end": 1905771,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 1905652,
+          "ambiguous": false,
+          "super_end": 1905781,
+          "cmstat": {
+            "avg_pp": 0.877,
+            "seq_name": "uid:9|RF00001fw",
+            "mem": 2.82,
+            "length": 120,
+            "cm_to": 118,
+            "band_calc": 0.01,
+            "alignment": 0.04,
+            "cm_from": 1,
+            "bit_sc": -8.37,
+            "total": 0.05,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 1905642
+        },
+        "letter_annotations": {
+          "rnafold": ".(((.(((((((....)))))....((..(((((..(.....)..)))))..))......((((((..((((((....)))))).))))))...((((.(((...))).)))).)).)))"
+        },
+        "description": "1905652-1905771",
+        "id": "uid:9|RF00001fw",
+        "Bio.Seq": {
+          "seq": "ACGUUCGGUCAUACUAGUGACACAUGCGCCUGAACCCAUUUCGAAUUCAGAAGCUAAGCGCCCUCAGGCUUGGUUAGUACUGAGGUGAGGGAUCCACUCGGGAACCCCAAGUGCCGUACG",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 3218231,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 3218239,
+          "extended_end": 3218347,
+          "query_end": 3218310,
+          "super_start": 3218221,
+          "trimmed_ee": false,
+          "extended_start": 3218231,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 3218357,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 3218310,
+              "query_start": 9,
+              "query_end": 81,
+              "identities": 48,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "CCATAGCGACGTGGTA-CCACTCCTTCCCATCCCGAACAGGACAGTGAAACGACTTTGCGCCGATGATAGTGC",
+              "bits": 32.6,
+              "sbjct_start": 3218239,
+              "gaps": 1,
+              "score": 21,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 73,
+              "num_alignments": null,
+              "query": "CCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGC",
+              "match": "||||||||  | || | || | |  |||||| ||||||  |  ||  || |      ||||||||| || |||",
+              "expect": 0.043
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:10|RF00001fw",
+        "Bio.Seq": {
+          "seq": "CCUGAUGACCAUAGCGACGUGGUACCACUCCUUCCCAUCCCGAACAGGACAGUGAAACGACUUUGCGCCGAUGAUAGUGCGGGUUCCCGUGUGAAAGUAGGUCAUCGUCAGGCAUUA",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 3218347,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 3218310,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 81,
+              "frame": [],
+              "sbjct": "CCATAGCGACGTGGTA-CCACTCCTTCCCATCCCGAACAGGACAGTGAAACGACTTTGCGCCGATGATAGTGC",
+              "match": "||||||||  | || | || | |  |||||| ||||||  |  ||  || |      ||||||||| || |||",
+              "expect": 0.043,
+              "sbjct_end": 3218310,
+              "query_start": 9,
+              "score": 21,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 32.6,
+              "sbjct_start": 3218239,
+              "gaps": 1,
+              "identities": 48,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 73,
+              "num_alignments": null,
+              "query": "CCATAGCGGAGGGGAAACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTACTGC"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 3218239,
+          "extended_end": 3218347,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 3218231,
+          "ambiguous": false,
+          "super_end": 3218357,
+          "cmstat": {
+            "avg_pp": 0.8190000000000001,
+            "seq_name": "uid:10|RF00001fw",
+            "mem": 1.16,
+            "length": 117,
+            "cm_to": 118,
+            "band_calc": 0.01,
+            "alignment": 0.03,
+            "cm_from": 1,
+            "bit_sc": 11.37,
+            "total": 0.04,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 3218221
+        },
+        "letter_annotations": {
+          "rnafold": "((((((((.....((((.((.((..((((...(((...........))).))))..)).)).))))(((.........((((....)))).........)))..))))))))....."
+        },
+        "description": "3218231-3218347",
+        "id": "uid:10|RF00001fw",
+        "Bio.Seq": {
+          "seq": "CCUGAUGACCAUAGCGACGUGGUACCACUCCUUCCCAUCCCGAACAGGACAGUGAAACGACUUUGCGCCGAUGAUAGUGCGGGUUCCCGUGUGAAAGUAGGUCAUCGUCAGGCAUUA",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 3334112,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 3334135,
+          "extended_end": 3334229,
+          "query_end": 3334217,
+          "super_start": 3334102,
+          "trimmed_ee": false,
+          "extended_start": 3334112,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 3334239,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 3334217,
+              "query_start": 24,
+              "query_end": 106,
+              "identities": 57,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "AACCACCCCACTCCATGCCGAACTGGGTCGTGAAACGTGGCAGCGCCTATGATACTTGGAC-CG-CAGGGTCCTGGAAAAGTCGG",
+              "bits": 32.6,
+              "sbjct_start": 3334135,
+              "gaps": 4,
+              "score": 21,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 85,
+              "num_alignments": null,
+              "query": "AACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTAC-TGCACTCGACAGGGT-GTGGGAGAGTAGG",
+              "match": "|||| |||    |||| ||||||  ||  |  || |    ||||||| ||| ||| || || || ||||||  ||| | ||| ||",
+              "expect": 0.043
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:11|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UCCCCGUGCCUUUAGCGCCUCGGAACCACCCCACUCCAUGCCGAACUGGGUCGUGAAACGUGGCAGCGCCUAUGAUACUUGGACCGCAGGGUCCUGGAAAAGUCGGUGCAGUGCGGGG",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 3334229,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 3334217,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 106,
+              "frame": [],
+              "sbjct": "AACCACCCCACTCCATGCCGAACTGGGTCGTGAAACGTGGCAGCGCCTATGATACTTGGAC-CG-CAGGGTCCTGGAAAAGTCGG",
+              "match": "|||| |||    |||| ||||||  ||  |  || |    ||||||| ||| ||| || || || ||||||  ||| | ||| ||",
+              "expect": 0.043,
+              "sbjct_end": 3334217,
+              "query_start": 24,
+              "score": 21,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 32.6,
+              "sbjct_start": 3334135,
+              "gaps": 4,
+              "identities": 57,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 85,
+              "num_alignments": null,
+              "query": "AACCGCCCGGTCCCATTCCGAACCCGGAAGCTAAGCCCTCCAGCGCCGATGGTAC-TGCACTCGACAGGGT-GTGGGAGAGTAGG"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 3334135,
+          "extended_end": 3334229,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 3334112,
+          "ambiguous": false,
+          "super_end": 3334239,
+          "cmstat": {
+            "avg_pp": 0.846,
+            "seq_name": "uid:11|RF00001fw",
+            "mem": 1.16,
+            "length": 118,
+            "cm_to": 118,
+            "band_calc": 0.01,
+            "alignment": 0.03,
+            "cm_from": 1,
+            "bit_sc": 7.62,
+            "total": 0.04,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 3334102
+        },
+        "letter_annotations": {
+          "rnafold": ".((((((((.......(((.((..((.((((...((......))...)))).))....)).))).(((((.((....((.(((((....))))).))....)).))))).))))))))"
+        },
+        "description": "3334112-3334229",
+        "id": "uid:11|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UCCCCGUGCCUUUAGCGCCUCGGAACCACCCCACUCCAUGCCGAACUGGGUCGUGAAACGUGGCAGCGCCUAUGAUACUUGGACCGCAGGGUCCUGGAAAAGUCGGUGCAGUGCGGGG",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 687594,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 687599,
+          "extended_end": 687711,
+          "query_end": 687652,
+          "super_start": 687584,
+          "trimmed_ee": false,
+          "extended_start": 687594,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 687721,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 687652,
+              "query_start": 6,
+              "query_end": 59,
+              "identities": 38,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "CGGCCATATCCGAGAC-ACGCGTACCGGAACCCATTCCGAATTCCGAAGTCAAGC",
+              "bits": 26.8,
+              "sbjct_start": 687599,
+              "gaps": 2,
+              "score": 17,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 55,
+              "num_alignments": null,
+              "query": "CGGCCATAGCGGAGGGGAAACCGCCCGGT-CCCATTCCGAACCCGGAAGCTAAGC",
+              "match": "|||||||| | |||   |  |   ||||  |||||||||||  | ||||  ||||",
+              "expect": 2.2
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:12|RF00001fw",
+        "Bio.Seq": {
+          "seq": "ACGUACGGCCAUAUCCGAGACACGCGUACCGGAACCCAUUCCGAAUUCCGAAGUCAAGCGUCCGCGAGUUGGGUUAGUAAUCUGGUGAAAGAUCACAGGCGAACCCCCAAUGCUGUAC",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 687711,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 687652,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 59,
+              "frame": [],
+              "sbjct": "CGGCCATATCCGAGAC-ACGCGTACCGGAACCCATTCCGAATTCCGAAGTCAAGC",
+              "match": "|||||||| | |||   |  |   ||||  |||||||||||  | ||||  ||||",
+              "expect": 2.2,
+              "sbjct_end": 687652,
+              "query_start": 6,
+              "score": 17,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 26.8,
+              "sbjct_start": 687599,
+              "gaps": 2,
+              "identities": 38,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 55,
+              "num_alignments": null,
+              "query": "CGGCCATAGCGGAGGGGAAACCGCCCGGT-CCCATTCCGAACCCGGAAGCTAAGC"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 687599,
+          "extended_end": 687711,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 687594,
+          "ambiguous": false,
+          "super_end": 687721,
+          "cmstat": {
+            "avg_pp": 0.83,
+            "seq_name": "uid:12|RF00001fw",
+            "mem": 3.51,
+            "length": 118,
+            "cm_to": 115,
+            "band_calc": 0.0,
+            "alignment": 0.06,
+            "cm_from": 1,
+            "bit_sc": -11.86,
+            "total": 0.06,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 687584
+        },
+        "letter_annotations": {
+          "rnafold": "..(((((((....((((.(((.(......(((((..(.....)..))))).......).))))).))((((((...((...((.((((....)))).))...)).)))))))))))))"
+        },
+        "description": "687594-687711",
+        "id": "uid:12|RF00001fw",
+        "Bio.Seq": {
+          "seq": "ACGUACGGCCAUAUCCGAGACACGCGUACCGGAACCCAUUCCGAAUUCCGAAGUCAAGCGUCCGCGAGUUGGGUUAGUAAUCUGGUGAAAGAUCACAGGCGAACCCCCAAUGCUGUAC",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 1345532,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 1345546,
+          "extended_end": 1345649,
+          "query_end": 1345570,
+          "super_start": 1345522,
+          "trimmed_ee": false,
+          "extended_start": 1345532,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 1345659,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 1345570,
+              "query_start": 15,
+              "query_end": 39,
+              "identities": 21,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "CGGATGGGTAACCGCCCGGCTCCAT",
+              "bits": 26.8,
+              "sbjct_start": 1345546,
+              "gaps": 0,
+              "score": 17,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 25,
+              "num_alignments": null,
+              "query": "CGGAGGGGAAACCGCCCGGTCCCAT",
+              "match": "|||| ||| ||||||||||  ||||",
+              "expect": 2.2
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:13|RF00001fw",
+        "Bio.Seq": {
+          "seq": "GCGAGACUUGUGGCCGGAUGGGUAACCGCCCGGCUCCAUGACAGCAUUCCCGGUGUAGUAGGAAGCUAAGUGCGACCGAGCACCGUCCUACGCGUCAGCCGAGAGAGGUCCCAUGUUU",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 1345649,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 1345570,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 39,
+              "frame": [],
+              "sbjct": "CGGATGGGTAACCGCCCGGCTCCAT",
+              "match": "|||| ||| ||||||||||  ||||",
+              "expect": 2.2,
+              "sbjct_end": 1345570,
+              "query_start": 15,
+              "score": 17,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 26.8,
+              "sbjct_start": 1345546,
+              "gaps": 0,
+              "identities": 21,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 25,
+              "num_alignments": null,
+              "query": "CGGAGGGGAAACCGCCCGGTCCCAT"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 1345546,
+          "extended_end": 1345649,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 1345532,
+          "ambiguous": false,
+          "super_end": 1345659,
+          "cmstat": {
+            "avg_pp": 0.674,
+            "seq_name": "uid:13|RF00001fw",
+            "mem": 7.79,
+            "length": 118,
+            "cm_to": 118,
+            "band_calc": 0.0,
+            "alignment": 0.09,
+            "cm_from": 1,
+            "bit_sc": -17.72,
+            "total": 0.09,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 1345522
+        },
+        "letter_annotations": {
+          "rnafold": "...........((((((.(((....))).)))))).((((..(.(.(((.((((...((((((......((((......))))..))))))......)))).))).).)..))))..."
+        },
+        "description": "1345532-1345649",
+        "id": "uid:13|RF00001fw",
+        "Bio.Seq": {
+          "seq": "GCGAGACUUGUGGCCGGAUGGGUAACCGCCCGGCUCCAUGACAGCAUUCCCGGUGUAGUAGGAAGCUAAGUGCGACCGAGCACCGUCCUACGCGUCAGCCGAGAGAGGUCCCAUGUUU",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    },
+    {
+      "templates": {},
+      "best_start": 2424590,
+      "query_name": "",
+      "source": {
+        "annotations": {
+          "query_start": 2424621,
+          "extended_end": 2424707,
+          "query_end": 2424653,
+          "super_start": 2424580,
+          "trimmed_ee": false,
+          "extended_start": 2424590,
+          "trimmed_ss": false,
+          "msgs": [],
+          "super_end": 2424717,
+          "blast": [
+            "RF00001",
+            {
+              "sbjct_end": 2424653,
+              "query_start": 32,
+              "query_end": 64,
+              "identities": 25,
+              "frame": [],
+              "positives": [
+                null,
+                null
+              ],
+              "sbjct": "GGTCCCTTTCCAGCCCCGTAAGCGTTGCCCTCC",
+              "bits": 26.8,
+              "sbjct_start": 2424621,
+              "gaps": 0,
+              "score": 17,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 33,
+              "num_alignments": null,
+              "query": "GGTCCCATTCCGAACCCGGAAGCTAAGCCCTCC",
+              "match": "|||||| ||||   |||| ||||   |||||||",
+              "expect": 2.2
+            }
+          ],
+          "strand": 1,
+          "trimmed_se": false,
+          "trimmed_es": false
+        },
+        "letter_annotations": {},
+        "description": "RF00001 artificial chr. from /home/big-user/Documents/WORK/db_known_str/art_chr_with_nseq_limit/art_chr_from_cleaned_str/RF00001-seqs_source.fasta, shuffled sequences, surronding DNA with prob [A:0.25, T:0.25, C:0.25, G:0.25]",
+        "id": "uid:14|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UCGCGUUCACUCAUUAGCAACAUAUAUUAGGGGUCCCUUUCCAGCCCCGUAAGCGUUGCCCUCCGCGAGAUCGGUCGCCAGGUAGUGAAGGUUAGAACCAAUAUUUCCCGCCCAUUGG",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      },
+      "best_end": 2424707,
+      "extension": {
+        "annotations": {
+          "trimmed_es": false,
+          "query_end": 2424653,
+          "trimmed_ee": false,
+          "trimmed_ss": false,
+          "msgs": [],
+          "blast": [
+            "RF00001",
+            {
+              "query_end": 64,
+              "frame": [],
+              "sbjct": "GGTCCCTTTCCAGCCCCGTAAGCGTTGCCCTCC",
+              "match": "|||||| ||||   |||| ||||   |||||||",
+              "expect": 2.2,
+              "sbjct_end": 2424653,
+              "query_start": 32,
+              "score": 17,
+              "positives": [
+                null,
+                null
+              ],
+              "bits": 26.8,
+              "sbjct_start": 2424621,
+              "gaps": 0,
+              "identities": 25,
+              "strand": [
+                "Plus",
+                "Plus"
+              ],
+              "align_length": 33,
+              "num_alignments": null,
+              "query": "GGTCCCATTCCGAACCCGGAAGCTAAGCCCTCC"
+            }
+          ],
+          "trimmed_se": false,
+          "query_start": 2424621,
+          "extended_end": 2424707,
+          "score": null,
+          "sss": [
+            "rnafold"
+          ],
+          "extended_start": 2424590,
+          "ambiguous": false,
+          "super_end": 2424717,
+          "cmstat": {
+            "avg_pp": 0.9790000000000001,
+            "seq_name": "uid:14|RF00001fw",
+            "mem": 9.81,
+            "length": 118,
+            "cm_to": 2,
+            "band_calc": 0.0,
+            "alignment": 0.14,
+            "cm_from": 1,
+            "bit_sc": -19.06,
+            "total": 0.14,
+            "trunc": "no"
+          },
+          "strand": 1,
+          "super_start": 2424580
+        },
+        "letter_annotations": {
+          "rnafold": "..((.((((((.....(((((.(.(((..(((((.........)))))))).).)))))(((..((((......)))).))).)))))).)).....(((((...........)))))"
+        },
+        "description": "2424590-2424707",
+        "id": "uid:14|RF00001fw",
+        "Bio.Seq": {
+          "seq": "UCGCGUUCACUCAUUAGCAACAUAUAUUAGGGGUCCCUUUCCAGCCCCGUAAGCGUUGCCCUCCGCGAGAUCGGUCGCCAGGUAGUGAAGGUUAGAACCAAUAUUUCCCGCCCAUUGG",
+          "alphabet": "80036342696f2e416c7068616265740a524e41416c7068616265740a7100298171012e"
+        },
+        "features": [],
+        "name": "RF00001fw",
+        "dbxrefs": []
+      }
+    }
+  ],
+  "_runstat": 1,
+  "query": {
+    "annotations": {
+      "cmstat": {
+        "avg_pp": 1.0,
+        "seq_name": "X15126.1_3-120",
+        "mem": 0.39,
+        "length": 118,
+        "cm_to": 118,
+        "band_calc": 0.0,
+        "alignment": 0.01,
+        "cm_from": 1,
+        "bit_sc": 153.97,
+        "total": 0.01,
+        "trunc": "no"
+      },
+      "ambiguous": false
+    },
+    "letter_annotations": {},
+    "description": "X15126.1_3-120 X15126.1/3-120",
+    "id": "X15126.1_3-120",
+    "Bio.Seq": {
+      "seq": "UACGGCGGCCAUAGCGGAGGGGAAACCGCCCGGUCCCAUUCCGAACCCGGAAGCUAAGCCCUCCAGCGCCGAUGGUACUGCACUCGACAGGGUGUGGGAGAGUAGGACACCGCCGAAC",
+      "alphabet": "80036342696f2e416c7068616265740a53696e676c654c6574746572416c7068616265740a7100298171012e"
+    },
+    "features": [],
+    "name": "X15126.1_3-120",
+    "dbxrefs": []
+  },
+  "args": {
+    "filter_by_bitscore": null,
+    "html": null,
+    "zip_json": false,
+    "filter_by_eval": null,
+    "locarna_params": "--struct-local=0 --sequ-local=0 --free-endgaps=++++",
+    "blast_db": "/home/big-user/PycharmProjects/foldx_tmp2/test_func/test_data/blastdb/RF00001-art.blastdb",
+    "blast_query": "/home/big-user/PycharmProjects/foldx_tmp2/test_func/test_data/RF00001.fasta",
+    "pred_params": {
+      "M-A-U-r-Rc": {
+        "cmscore_percent": 40,
+        "pred_sim_threshold": 50,
+        "query_max_len_diff": 0.15,
+        "repred_unpaired_tr": "*",
+        "conseq_conserved": 3
+      },
+      "rfam-sub": {
+        "mfold": [
+          10,
+          2,
+          80
+        ]
+      },
+      "fq-sub": {
+        "mfold": [
+          5,
+          2,
+          5
+        ]
+      },
+      "rfam-Rc": {},
+      "Turbo-fast": {
+        "max_seqs_in_prediction": 4,
+        "query_max_len_diff": 0.05
+      },
+      "TurboFold": {
+        "cmscore_percent": 20,
+        "max_seqs_in_prediction": 4,
+        "query_max_len_diff": 0.15
+      },
+      "rnafold": {},
+      "M-A-r-Rc": {
+        "cmscore_percent": 20,
+        "pred_sim_threshold": 90,
+        "query_max_len_diff": 0.05
+      },
+      "centroid-fast": {
+        "centroid_homfold": "--engine_s CONTRAfold",
+        "max_seqs_in_prediction": 3,
+        "query_max_len_diff": 0.1
+      },
+      "M-A-sub": {
+        "cmscore_percent": 0,
+        "pred_sim_threshold": 50,
+        "mfold": [
+          10,
+          2,
+          50
+        ],
+        "query_max_len_diff": 0.1
+      },
+      "centroid": {
+        "cmscore_percent": 10,
+        "pred_sim_threshold": 70,
+        "centroid_homfold": "--engine_s CONTRAfold",
+        "query_max_len_diff": 0.15
+      },
+      "C-A-sub": {
+        "cmscore_percent": 0,
+        "pred_sim_threshold": 50,
+        "mfold": [
+          5,
+          2,
+          50
+        ],
+        "query_max_len_diff": 0.1
+      },
+      "rfam-centroid": {
+        "centroid_homfold": "--engine_s McCaskill",
+        "n_seqs": 9
+      },
+      "C-A-r-Rc": {
+        "cmscore_percent": 30,
+        "pred_sim_threshold": 90,
+        "query_max_len_diff": 0.05
+      },
+      "C-A-U-r-Rc": {
+        "cmscore_percent": 40,
+        "pred_sim_threshold": 50,
+        "query_max_len_diff": 0.1,
+        "repred_unpaired_tr": "*",
+        "conseq_conserved": 3
+      }
+    },
+    "db_type": "blastdb",
+    "keep_all": false,
+    "dev_pred": false,
+    "locarna_anchor_length": 7,
+    "cm_file": null,
+    "pandas_dump": null,
+    "subseq_window_locarna": 30,
+    "b_type": "plain",
+    "logfile": null,
+    "blast_in": "/home/big-user/PycharmProjects/foldx_tmp2/test_func/test_data/RF00001_short.blastout",
+    "config_file": null,
+    "threads": null,
+    "blast_regexp": "(?<=\\|)[A-Z0-9]*\\.?\\d*$",
+    "use_rfam": false,
+    "turbo_fast_preset": false,
+    "show_gene_browser": true,
+    "prediction_method": [
+      "rnafold"
+    ],
+    "download_rfam": false,
+    "enable_overwrite": false,
+    "csv": null,
+    "centroid_fast_preset": false,
+    "skip_missing": false,
+    "dump": null,
+    "logmsgs": [],
+    "mode": "simple",
+    "verbose": 0,
+    "pm_param_file": null,
+    "json": "/home/big-user/PycharmProjects/foldx_tmp2/test_func/test_data/RF00001_output.json",
+    "repredict_file": null,
+    "command": [
+      "/home/big-user/PycharmProjects/foldx_tmp2/rna_blast_analyze/BA.py",
+      "--blast_in",
+      "/home/big-user/PycharmProjects/foldx_tmp2/test_func/test_data/RF00001_short.blastout",
+      "--blast_query",
+      "/home/big-user/PycharmProjects/foldx_tmp2/test_func/test_data/RF00001.fasta",
+      "--blast_db",
+      "/home/big-user/PycharmProjects/foldx_tmp2/test_func/test_data/blastdb/RF00001-art.blastdb",
+      "--mode",
+      "simple",
+      "--blast_regexp",
+      "(?<=\\|)[A-Z0-9]*\\.?\\d*$",
+      "--b_type",
+      "plain",
+      "--json",
+      "/home/big-user/PycharmProjects/foldx_tmp2/test_func/test_data/RF00001_output.json",
+      "--prediction_method",
+      "rnafold"
+    ]
+  },
+  "creation": 1562584595.8182397
+}

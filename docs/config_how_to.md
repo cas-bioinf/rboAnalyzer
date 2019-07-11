@@ -15,16 +15,11 @@ There are 3 sections
 
 - TOOL_PATHS
 
-  defines path to executable parent directory
+  defines path to executable __parent__ directory
 
 - DATA
 
-  defines paths to databases
-
-- SSH
-
-  used for development installation of RapidShapes inside virtual machine and
-  made accessible through SSH (with sshpass).
+  defines paths to data and databases
 
 Each section is specified by its name in square brackets.
 
@@ -47,11 +42,8 @@ rfam_dir = /home/user/rfamdir/
  - locarna (`locarna`)
  - viennarna_bin (`RNAfold`, `RNAalifold`, `RNAplot`)
  - mfold (`hybrid-ss-min`)
- - t-coffee (`t_coffee`)
  - centroid (`centroid_homfold`)
  - turbofold (`TurboFold`)
- - rnashapes
- - rapidshapes
 
 ### DATA
  - rsearch_ribosum
@@ -60,13 +52,14 @@ rfam_dir = /home/user/rfamdir/
 
  - rfam_dir
 
-  custom path where Rfam database should be stored.
+  custom path where Rfam database should be stored. (default: `INSTALL_LOCATION/rna_blast_analyze/3rd_party_source/rfamdb/`)
 
  - rfam_url
 
   custom url from where the `rfam.cm.gz` (database dump) should be downloaded.
   This url is also checked when update is requested (wget timestamp is checked).
-  (default: `INSTALL_LOCATION/rna_blast_analyze/3rd_party_source/rfamdb/`)
+  (default: `ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/rfam.cm.gz`)
+  
 
  - html_template_dir
 
@@ -74,4 +67,4 @@ rfam_dir = /home/user/rfamdir/
 
  - rnastructure_datapath
 
-  datapath for RNAstructure (see installation notes for RNAstructure)
+  datapath for RNAstructure (see installation notes for RNAstructure https://rna.urmc.rochester.edu/Text/Thermodynamics.html)

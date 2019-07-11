@@ -4,35 +4,29 @@ from rna_blast_analyze.BR_core.fname import fname
 
 ml = logging.getLogger(__name__)
 
+OPERATIONS = {
+    '>': operator.gt,
+    '<': operator.lt,
+    '=': operator.eq,
+    '>=': operator.ge,
+    '<=': operator.le,
+}
 
-def filter_by_eval(blast_hitlist, relation, eval):
+
+def filter_by_eval(blast_hitlist, getter, relation, eval):
     ml.debug(fname())
-    operations = {
-        '>': operator.gt,
-        '<': operator.lt,
-        '=': operator.eq,
-        '>=': operator.ge,
-        '<=': operator.le,
-    }
     filtered = []
     for h in blast_hitlist:
-        if operations[relation](h[1].expect, eval):
+        if OPERATIONS[relation](getter(h).expect, eval):
             filtered.append(h)
     return filtered
 
 
-def filter_by_bits(blast_hitlist, relation, bits):
+def filter_by_bits(blast_hitlist, getter, relation, bits):
     ml.debug(fname())
-    operations = {
-        '>': operator.gt,
-        '<': operator.lt,
-        '=': operator.eq,
-        '>=': operator.ge,
-        '<=': operator.le,
-    }
     filtered = []
     for h in blast_hitlist:
-        if operations[relation](h[1].bits, bits):
+        if OPERATIONS[relation](getter(h).bits, bits):
             filtered.append(h)
     return filtered
 

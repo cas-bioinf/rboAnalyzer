@@ -1,7 +1,23 @@
 {% extends "base.html" %}
-{% block header %}
-<p>pipeline output for {{hea.input}}</p>
+{% block script %}
+    {% if show_gene_browser %}
+    <script type="text/javascript" src="https://www.ncbi.nlm.nih.gov/projects/sviewer/js/sviewer.js"></script>
+    {% endif %}
 {% endblock %}
+
+{% block header %}
+<div>
+<pre>BLAST output file:   {{hea.input}}
+Query sequence file: {{hea.query}}
+{% if hea.best_matching_model %}
+RFAM model with best score to a query sequence   <div class="tooltip">?<pre class="tooltiptext">Infered from query sequence by cmscan program.</pre></div>
+Family name: {{hea.best_matching_model['target_name']}}
+E-value:     {{hea.best_matching_model['E-value']}}{% endif %}
+</pre>
+</div>
+
+{% endblock %}
+
 {% block content %}
     {% macro create_onehit(data) %}
     <div class="onehit"
@@ -16,34 +32,75 @@
             <div class="row reports">
                 <div class="blast_text repitem">
                     <p class="header-bhname">{{data.blast_hit_name}}</p>
-                    <pre>
+                    <pre class="blasttext">
+                        <div class="tooltip blasttooltip">
+?<pre class="tooltiptext">
+This is BLAST alignment as read from the input file</pre>
+                        </div>
 {{data.blast_text}}</pre>
                 </div>
                 <div class="repitem">
-                    <p><u>Extension report:</u></p>
+                    <label class="repheader"><u>Report:</u></label>
                     <table>
                         <tr>
                             <th class="left" scope="row">sequence start:</th>
                             <td class="right" id="{{data.intid}}SeqStart">{{data.ext_start}}</td>
+                            <td>
+                                <div class="tooltip"> ?
+                                    <pre class="tooltiptext">
+Start position of the estimated full-length sequence in genome.
+Start index < end index.</pre>
+                                </div>
+                            </td>
                         </tr>
                         <tr>
                             <th class="left" scope="row">sequence end:</th>
                             <td class="right" id="{{data.intid}}SeqEnd">{{data.ext_end}}</td>
+                            <td>
+                                <div class="tooltip"> ?
+                                    <pre class="tooltiptext">
+End position of the estimated full-length sequence in genome.
+Start index < end index.</pre>
+                                </div>
+                            </td>
                         </tr>
                         <tr>
-                            <th class="left" scope="row">RSEARCH bits score:</th>
+                            <th class="left" scope="row">bit score (CM):</th>
                             <td class="right">{{data.rsearchbitscore}}</td>
+                            <td>
+                                <div class="tooltip"> ?
+                                    <pre class="tooltiptext">
+The score for aligning estimated full-length sequence to CM model
+  (computed by RSEARCH -> default,
+  infered from Rfam or provided by user)</pre>
+                                </div>
+                            </td>
                         </tr>
                         <tr>
                             <th class="left" scope="row">Homology estimate:</th>
                             <td class="rigth">{{data.h_estimate}}</td>
+                            <td>
+                                <div class="tooltip"> ?
+                                    <pre class="tooltiptext">
+Quick homology estimate:
+  Not homologous: bit score < 0
+  Homologous: bit score > 20 and bit score > 0.5 * query bit score
+  Uncertain otherwise</pre>
+                                </div>
+                            </td>
                         </tr>
                     </table>
                 </div>
                 <div class="repitem">
                     <div>
-                        <label for="{{data.intid}}SeqCheck"><u>Extended sequence fasta:</u></label>
+                        <label for="{{data.intid}}SeqCheck" class="repheader"><u>Estimated full-length sequence:</u></label>
                         <input type="checkbox" class="individualSequenceCheckbox" id="{{data.intid}}SeqCheck">
+                        <div class="tooltip repheader">?
+                            <pre class="tooltiptext">
+Click checkbox to select multiple seuqences.
+Fasta header format:
+  UID|accession.versionSTRAND start-end</pre>
+                        </div>
                     </div>
                     <textarea id="{{data.intid}}FormSeq" readonly="true" rows="5" cols="65">{{data.formated_seq}}</textarea>
                 </div>
@@ -55,14 +112,20 @@
                             <img class="rnapic" src="{{pic.pic}}" />
                         </a>
                         <figcaption>
-                            {{pic.picname}}
-                            <input type="checkbox" class="individualStructureCheckbox" id="{{data.intid}}{{data.picname}}StrCheck">
+                            <label class="repheader">{{pic.picname}}</label>
+                            <input type="checkbox" class="individualStructureCheckbox" id="{{data.intid}}{{data.picname}}StrCheck" data-method="{{pic.picname}}">
+                            <div class="tooltip repheader">?
+                                <pre class="tooltiptext">
+Visualisation of predicted secondary structure.
+To save the image:
+  Right click on the image -> Save Image as.</pre>
+                            </div>
                         </figcaption>
                     </figure>
                 {% endfor %}
             </div>
 
-        {% if data.draw_seqview %}
+        {% if show_gene_browser %}
 
             <div id="sv{{data.intid}}" data-sv_params="{{data.seqviewurl}}" class="sv">
                 <button class= "seqviewbtn" onclick="viewRegion(this)" title="View selected Regions">Load Sequence viewer</button>

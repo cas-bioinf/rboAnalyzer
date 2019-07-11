@@ -1,114 +1,70 @@
 {
-  "alifold_refold": {
-    "cmscore_percent": 50,
-    "pred_sim_threshold": 70,
+  "C-A-r-Rc": {
+    "cmscore_percent": 30,
+    "pred_sim_threshold": 90,
     "query_max_len_diff": 0.05
   },
-  "alifold_refold_rnafold_c": {
-    "cmscore_percent": 10,
-    "pred_sim_threshold": 100,
-    "query_max_len_diff": 0.1
-  },
   "TurboFold": {
-    "cmscore_percent": 30,
-    "query_max_len_diff": 0.1
+    "cmscore_percent": 20,
+    "query_max_len_diff": 0.15,
+    "max_seqs_in_prediction": 4
   },
-  "TurboFold_fast": {
+  "Turbo-fast": {
     "query_max_len_diff": 0.05,
     "max_seqs_in_prediction": 4
   },
-  "rfam_subopt": {
+  "rfam-sub": {
+    "mfold": [10, 2, 80]
   },
-  "tcoffee_rcoffee_alifold_refold_rnafoldc": {
-    "cmscore_percent": 10,
-    "pred_sim_threshold": 80,
-    "query_max_len_diff": 0.1
-  }, 
-  "rfam_rapidshapes": {
-  },
-  "dh_clustal_alifold_conserved_ss_rnafoldc": {
+  "M-A-U-r-Rc": {
     "cmscore_percent": 40,
-    "pred_sim_threshold": 60,
-    "query_max_len_diff": 0.05
-  },
-  "dh_tcoffee_alifold_conserved_ss_rnafoldc": {
-    "cmscore_percent": 50,
-    "pred_sim_threshold": 70,
-    "query_max_len_diff": 0.15
+    "pred_sim_threshold": 50,
+    "query_max_len_diff": 0.15,
+    "conseq_conserved": 3,
+    "repred_unpaired_tr": "*"
   }, 
-  "muscle_alifold_unpaired_conserved_refold": {
-    "cmscore_percent": 70,
-    "pred_sim_threshold": 90,
-    "query_max_len_diff": 0.15
-  }, 
-  "subopt_fold_muscle_alifold": {
-    "cmscore_percent": 90,
-    "query_max_len_diff": 0.1
-  }, 
-  "subopt_fold_query": {
-    "mfold": [10, 2, 60]
-  },
-  "subopt_fold_clustal_alifold": {
-    "cmscore_percent": 80,
-    "query_max_len_diff": 0.1
-  }, 
-  "rfam_rnafoldc": {}, 
-  "muscle_alifold_refold_rnafold_c": {
+  "M-A-sub": {
     "cmscore_percent": 0,
-    "pred_sim_threshold": 90,
-    "query_max_len_diff": 0.15
+    "pred_sim_threshold": 50,
+    "query_max_len_diff": 0.1,
+    "mfold": [10, 2, 50]
   }, 
-  "pairwise_centroid_homfold": {
-    "centroid_homfold": "--engine_s CONTRAfold",
+  "fq-sub": {
+    "mfold": [5, 2, 5]
+  },
+  "C-A-sub": {
+    "cmscore_percent": 0,
+    "pred_sim_threshold": 50,
+    "query_max_len_diff": 0.1,
+    "mfold": [5, 2, 50]
+  }, 
+  "rfam-Rc": {},
+  "M-A-r-Rc": {
     "cmscore_percent": 20,
-    "pred_sim_threshold": 80,
-    "query_max_len_diff": 0.1
-  }, 
-  "alifold_unpaired_conserved_refold": {
-    "cmscore_percent": 60,
-    "pred_sim_threshold": 80,
-    "query_max_len_diff": 0.15
-  }, 
-  "tcoffee_rcoffee_alifold_conserved_ss_rnafoldc": {
-    "cmscore_percent": 90,
-    "pred_sim_threshold": 80,
-    "query_max_len_diff": 0.1
-  },
-  "clustalo_alifold_rapidshapes": {
-  },
-  "muscle_alifold_refold": {
-    "cmscore_percent": 70,
     "pred_sim_threshold": 90,
-    "query_max_len_diff": 0.15
-  }, 
-  "dh_clustal_alifold_refold_rnafoldc": {
-    "cmscore_percent": 0,
-    "pred_sim_threshold": 100,
-    "query_max_len_diff": 0.15
-  },
-  "tcoffee_rcoffee_alifold_refold": {
-    "cmscore_percent": 50,
-    "pred_sim_threshold": 80,
     "query_max_len_diff": 0.05
   }, 
-  "dh_tcoffee_alifold_refold_rnafoldc": {
+  "centroid": {
+    "centroid_homfold": "--engine_s CONTRAfold",
     "cmscore_percent": 10,
-    "pred_sim_threshold": 80,
-    "query_max_len_diff": 0.1
-  }, 
-  "muscle_alifold_rapidshapes": {
-  }, 
-  "rcoffee_alifold_rapidshapes": {
-  }, 
-  "rnafold": {}, 
-  "dh_tcoffee_alifold_refold": {
-    "cmscore_percent": 50,
     "pred_sim_threshold": 70,
-    "query_max_len_diff": 0.05
+    "query_max_len_diff": 0.15
   }, 
-  "dh_clustal_alifold_refold": {
-    "cmscore_percent": 90,
-    "pred_sim_threshold": 90,
-    "query_max_len_diff": 0.1
+  "C-A-U-r-Rc": {
+    "cmscore_percent": 40,
+    "pred_sim_threshold": 50,
+    "query_max_len_diff": 0.1,
+    "conseq_conserved": 3,
+    "repred_unpaired_tr": "*"
+  },
+  "rnafold": {},
+  "centroid-fast": {
+    "query_max_len_diff": 0.1,
+    "max_seqs_in_prediction": 3,
+    "centroid_homfold": "--engine_s CONTRAfold"
+  },
+  "rfam-centroid": {
+    "n_seqs": 9,
+    "centroid_homfold": "--engine_s McCaskill"
   }
 }

@@ -73,9 +73,8 @@ function writeSelectionStructures() {
   for (i = 0; i < sel.length; i++) {
     var intid = parseInt(sel[i].id)
     var oh = document.getElementById(intid + "onehit");
-    var method = sel[i].parentNode.textContent.trim()
-    var seqname = oh.dataset.brna_seqname + "-" + method + " " + document.getElementById(intid + "SeqStart").textContent + "-" + document.getElementById(intid + "SeqEnd").textContent
-    exportdata += buildFastaStructure(seqname, oh.dataset.brna_sequence, document.getElementById(intid + method).dataset.brna_secondary_structure);
+    var seqname = oh.dataset.brna_seqname + "-" + sel[i].dataset.method + " " + document.getElementById(intid + "SeqStart").textContent + "-" + document.getElementById(intid + "SeqEnd").textContent
+    exportdata += buildFastaStructure(seqname, oh.dataset.brna_sequence, document.getElementById(intid + sel[i].dataset.method).dataset.brna_secondary_structure);
   }
   mySaveFile("data:application/txt," + encodeURIComponent(exportdata), "structures.txt");
 }
@@ -230,4 +229,3 @@ function viewAllRegions() {
 
 console.log("script loaded correctly");
 </script>
-<script type="text/javascript" src="https://www.ncbi.nlm.nih.gov/projects/sviewer/js/sviewer.js"></script>
