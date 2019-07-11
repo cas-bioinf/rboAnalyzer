@@ -1,5 +1,5 @@
 {
-  "clustalo_alifold_refold_rnafoldc": {
+  "C-A-r-Rc": {
     "cmscore_percent": 30,
     "pred_sim_threshold": 90,
     "query_max_len_diff": 0.05
@@ -9,48 +9,48 @@
     "query_max_len_diff": 0.15,
     "max_seqs_in_prediction": 4
   },
-  "TurboFold_fast": {
+  "Turbo-fast": {
     "query_max_len_diff": 0.05,
     "max_seqs_in_prediction": 4
   },
-  "rfam_subopt": {
+  "rfam-sub": {
     "mfold": [10, 2, 80]
   },
-  "muscle_alifold_unpaired_conserved_refold_rnafoldc": {
+  "M-A-U-r-Rc": {
     "cmscore_percent": 40,
     "pred_sim_threshold": 50,
     "query_max_len_diff": 0.15,
     "conseq_conserved": 3,
     "repred_unpaired_tr": "*"
   }, 
-  "subopt_fold_muscle_alifold": {
+  "M-A-sub": {
     "cmscore_percent": 0,
     "pred_sim_threshold": 50,
     "query_max_len_diff": 0.1,
     "mfold": [10, 2, 50]
   }, 
-  "subopt_fold_query": {
+  "fq-sub": {
     "mfold": [5, 2, 5]
   },
-  "subopt_fold_clustal_alifold": {
+  "C-A-sub": {
     "cmscore_percent": 0,
     "pred_sim_threshold": 50,
     "query_max_len_diff": 0.1,
     "mfold": [5, 2, 50]
   }, 
-  "rfam_rnafoldc": {}, 
-  "muscle_alifold_refold_rnafoldc": {
+  "rfam-Rc": {},
+  "M-A-r-Rc": {
     "cmscore_percent": 20,
     "pred_sim_threshold": 90,
     "query_max_len_diff": 0.05
   }, 
-  "centroid_homfold": {
+  "centroid": {
     "centroid_homfold": "--engine_s CONTRAfold",
     "cmscore_percent": 10,
     "pred_sim_threshold": 70,
     "query_max_len_diff": 0.15
   }, 
-  "clustalo_alifold_unpaired_conserved_refold_rnafoldc": {
+  "C-A-U-r-Rc": {
     "cmscore_percent": 40,
     "pred_sim_threshold": 50,
     "query_max_len_diff": 0.1,
@@ -58,12 +58,12 @@
     "repred_unpaired_tr": "*"
   },
   "rnafold": {},
-  "centroid_homfold_fast": {
+  "centroid-fast": {
     "query_max_len_diff": 0.1,
     "max_seqs_in_prediction": 3,
     "centroid_homfold": "--engine_s CONTRAfold"
   },
-  "rfam_centroid_homfold": {
+  "rfam-centroid": {
     "n_seqs": 9,
     "centroid_homfold": "--engine_s McCaskill"
   }

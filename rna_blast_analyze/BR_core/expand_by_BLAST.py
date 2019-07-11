@@ -228,13 +228,13 @@ def blast_wrapper_inner(args_inner, shared_list=None):
 
         all_short = all_blast_hits
 
-        # expand hits according to query + 10 nucleotides +-
+        # the extra here is given "pro forma" the sequence is extended exactly by lenghts of unaligned portions of query
         if args_inner.db_type == "blastdb":
             shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits(
                 all_short,
                 args_inner.blast_db,
                 bhp.query_length,
-                extra=args_inner.subseq_window_simple_ext,
+                extra=10,
                 blast_regexp=args_inner.blast_regexp,
                 skip_missing=args_inner.skip_missing,
                 msgs=args_inner.logmsgs,
@@ -244,7 +244,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 all_short,
                 args_inner.blast_db,
                 bhp.query_length,
-                extra=args_inner.subseq_window_simple_ext,
+                extra=10,
                 blast_regexp=args_inner.blast_regexp,
                 skip_missing=args_inner.skip_missing,
                 msgs=args_inner.logmsgs,
@@ -285,7 +285,13 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 )
 
         # this part predicts homology - it is not truly part of repredict
-        homology_prediction, homol_seqs, cm_file_rfam_user = infer_homology(analyzed_hits=analyzed_hits, args=args_inner, cm_model_file=ih_file, multi_query=multi_query, iteration=iteration)
+        homology_prediction, homol_seqs, cm_file_rfam_user = infer_homology(
+            analyzed_hits=analyzed_hits,
+            args=args_inner,
+            cm_model_file=ih_file,
+            multi_query=multi_query,
+            iteration=iteration
+        )
         # add homology prediction to the data
         for hit, pred in zip(analyzed_hits.hits, homology_prediction):
             hit.hpred = pred

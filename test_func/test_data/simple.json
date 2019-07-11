@@ -2278,7 +2278,6 @@
     ],
     "turbofold_fast_preset": false,
     "filter_by_bitscore": null,
-    "subseq_window_simple_ext": 10,
     "centroid_fast_preset": false,
     "blast_query": "/home/big-user/PycharmProjects/foldx/test_func/test_data/RF00001.fasta",
     "mode": "simple",
@@ -2286,18 +2285,18 @@
     "zip_json": false,
     "config_file": null,
     "pred_params": {
-      "centroid_homfold": {
+      "centroid": {
         "centroid_homfold": "--engine_s CONTRAfold",
         "cmscore_percent": 10,
         "pred_sim_threshold": 70,
         "query_max_len_diff": 0.15
       },
-      "muscle_alifold_refold_rnafoldc": {
+      "M-A-r-Rc": {
         "cmscore_percent": 20,
         "pred_sim_threshold": 90,
         "query_max_len_diff": 0.05
       },
-      "clustalo_alifold_refold_rnafoldc": {
+      "C-A-r-Rc": {
         "cmscore_percent": 30,
         "pred_sim_threshold": 90,
         "query_max_len_diff": 0.05
@@ -2307,7 +2306,7 @@
         "pred_sim_threshold": 80,
         "query_max_len_diff": 0.1
       },
-      "subopt_fold_clustal_alifold": {
+      "C-A-sub": {
         "cmscore_percent": 80,
         "query_max_len_diff": 0.1
       },
@@ -2316,26 +2315,26 @@
         "max_seqs_in_prediction": 3,
         "query_max_len_diff": 0.05
       },
-      "muscle_alifold_unpaired_conserved_refold_rnafoldc": {
+      "M-A-U-r-Rc": {
         "cmscore_percent": 40,
         "pred_sim_threshold": 50,
         "conseq_conserved": 3,
         "repred_unpaired_tr": "*",
         "query_max_len_diff": 0.15
       },
-      "subopt_fold_query": {
+      "fq-sub": {
         "mfold": [
           5,
           2,
           5
         ]
       },
-      "centroid_homfold_fast": {
+      "centroid-fast": {
         "centroid_homfold": "--engine_s CONTRAfold",
         "query_max_len_diff": 0.1,
         "max_seqs_in_prediction": 3
       },
-      "rfam_centroid_homfold": {
+      "rfam-centroid": {
         "centroid_homfold": "--engine_s CONTRAfold",
         "n_seqs": 3
       },
@@ -2344,11 +2343,11 @@
         "pred_sim_threshold": 60,
         "query_max_len_diff": 0.05
       },
-      "subopt_fold_muscle_alifold": {
+      "M-A-sub": {
         "cmscore_percent": 90,
         "query_max_len_diff": 0.1
       },
-      "clustalo_alifold_unpaired_conserved_refold_rnafoldc": {
+      "C-A-U-r-Rc": {
         "cmscore_percent": 40,
         "pred_sim_threshold": 50,
         "conseq_conserved": 3,
@@ -2365,18 +2364,18 @@
         "pred_sim_threshold": 70,
         "query_max_len_diff": 0.1
       },
-      "rfam_subopt": {
+      "rfam-sub": {
         "mfold": [
           10,
           2,
           80
         ]
       },
-      "TurboFold_fast": {
+      "Turbo-fast": {
         "query_max_len_diff": 0.05,
         "max_seqs_in_prediction": 4
       },
-      "rfam_rnafoldc": {},
+      "rfam-Rc": {},
       "dh_rcoffee_alifold_refold_rnafoldc": {
         "cmscore_percent": 0,
         "pred_sim_threshold": 70,

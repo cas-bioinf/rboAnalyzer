@@ -21,10 +21,10 @@ def find_and_extract_cm_model(args, analyzed_hits):
     ml.info('Infer homology - searching RFAM for best matching model.')
     cmscan_results = get_cm_model_table(args.blast_query, threads=args.threads)
     best_matching_cm_model = select_best_matching_model_from_cmscan(cmscan_results)
-    if best_matching_cm_model['score'] > 0:
-        analyzed_hits.best_matching_model = best_matching_cm_model
-    best_cm_model_name = analyzed_hits.best_matching_model['target_name']
-    ml.info('Infer homology - best matching RFAM model: {}'.format(best_cm_model_name))
+    analyzed_hits.best_matching_model = best_matching_cm_model
+
+    if best_matching_cm_model is not None:
+        ml.info('Infer homology - best matching RFAM model: {}'.format(analyzed_hits.best_matching_model['target_name']))
 
     if args.cm_file:
         # use provided cm file
@@ -40,7 +40,7 @@ def find_and_extract_cm_model(args, analyzed_hits):
             ml.error('No RFAM model was matched with score > 0. Nothing to build homology to.')
             sys.exit(0)
 
-        cm_model_file = run_cmfetch(rfam.file_path, best_cm_model_name)
+        cm_model_file = run_cmfetch(rfam.file_path, analyzed_hits.best_matching_model['target_name'])
     else:
         ml.info('Infer homology - using RSEARCH to build model')
         # default to using RSEARCH

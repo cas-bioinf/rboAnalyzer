@@ -96,7 +96,7 @@ def centroid_homfold_fast_prep(all_seqs, query, n, len_diff):
     assert n >= 1
 
     if query.annotations['ambiguous']:
-        msgfail = "Query sequence contains ambiguous characters. Can't use centroid_homfold_fast."
+        msgfail = "Query sequence contains ambiguous characters. Can't use centroid-fast."
         ml.error(msgfail)
         raise AmbiguousQuerySequenceException(msgfail)
 

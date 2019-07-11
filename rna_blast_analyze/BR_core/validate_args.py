@@ -106,12 +106,7 @@ def validate_args(args):
 
     check_int(args.subseq_window_locarna)
     if args.subseq_window_locarna <= 0:
-        ml.error("Argument 'subseq_window_locarna' can't be negative.")
-        return False
-
-    check_int(args.subseq_window_simple_ext)
-    if args.subseq_window_simple_ext <= 0:
-        ml.error("Argument 'subseq_window_simple_ext' can't be negative.")
+        ml.error("Argument 'subseq_window_locarna' can't be negative or zero.")
         return False
 
     check_int(args.locarna_anchor_length)

@@ -41,7 +41,7 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
             '--threads', '2',
             '--pm_param_file', os.path.join(fwd, test_data_dir, 'empty_params.json'),
             '--centroid_fast_preset',
-            '--turbofold_fast_preset',
+            '--turbo_fast_preset',
             '--enable_overwrite'
         ]
 
@@ -73,10 +73,10 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
         self.run = run
 
     def test_TurboFold_fast(self):
-        self.run('TurboFold_fast')
+        self.run('Turbo-fast')
 
     def test_centroid_homfold_fast(self):
-        self.run('centroid_homfold_fast')
+        self.run('centroid-fast')
 
 
 if __name__ == '__main__':

@@ -26,7 +26,7 @@ def turbofold_fast(all_seqs, seqs2predict, query, cpu, n, turbofold_params, len_
     ml.debug(fname())
 
     if query.annotations['ambiguous']:
-        msgfail = "Query sequence contains ambiguous characters. Can't use TurboFold_fast."
+        msgfail = "Query sequence contains ambiguous characters. Can't use Turbo-fast."
         ml.error(msgfail)
         raise ValueError(msgfail)
 

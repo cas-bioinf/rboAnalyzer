@@ -83,45 +83,45 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
         self.run('TurboFold')
 
     def test_TurboFold_fast(self):
-        self.run('TurboFold_fast')
+        self.run('Turbo-fast')
 
     def test_clustalo_alifold_refold_rnafoldc(self):
-        self.run('clustalo_alifold_refold_rnafoldc')
+        self.run('C-A-r-Rc')
 
     def test_clustalo_alifold_unpaired_conserved_refold_rnafoldc(self):
-        self.run('clustalo_alifold_unpaired_conserved_refold_rnafoldc')
+        self.run('C-A-U-r-Rc')
 
     def test_muscle_alifold_refold_rnafoldc(self):
-        self.run('muscle_alifold_refold_rnafoldc')
+        self.run('M-A-r-Rc')
 
     def test_muscle_alifold_unpaired_conserved_refold_rnafoldc(self):
-        self.run('muscle_alifold_unpaired_conserved_refold_rnafoldc')
+        self.run('M-A-U-r-Rc')
 
     def test_centroid_homfold(self):
-        self.run('centroid_homfold')
+        self.run('centroid')
 
     def test_centroid_homfold_fast(self):
-        self.run('centroid_homfold_fast')
+        self.run('centroid-fast')
 
     def test_rfam_centroid_homfold(self):
-        self.run('rfam_centroid_homfold')
+        self.run('rfam-centroid')
 
     def test_rfam_rnafoldc(self):
-        self.run('rfam_rnafoldc')
+        self.run('rfam-Rc')
 
     # ----only if mfold is installed----
     # As most of the testing is done internally, we expect that this is True
     def test_rfam_subopt(self):
-        self.run('rfam_subopt')
+        self.run('rfam-sub')
 
     def test_subopt_fold_query(self):
-        self.run('subopt_fold_query')
+        self.run('fq-sub')
 
     def test_subopt_fold_clustal_alifold(self):
-        self.run('subopt_fold_clustal_alifold')
+        self.run('C-A-sub')
 
     def test_subopt_fold_muscle_alifold(self):
-        self.run('subopt_fold_muscle_alifold')
+        self.run('M-A-sub')
     # -----------------------------------
 
     def test_rnafold(self):

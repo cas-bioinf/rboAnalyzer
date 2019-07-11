@@ -2,13 +2,25 @@
 A tool for analyzing BLAST search output for non-coding RNAs (ncRNAs).
 
 ## Short description
-rboAnalyzer is a tool for complement BLAST algorithm when searching for query sequence that is non-coding RNA (ncRNA) with secondary structure (which does not have to be known).
+rboAnalyzer is a tool for complement BLAST algorithm when searching for query
+ sequence that is non-coding RNA (ncRNA) with secondary structure
+ (which does not have to be known).
 
-The HSPs in BLAST output are often incomplete (ie. the alignment in HSP does not cover whole query sequence). This is major drawback when trying to characterize the potential ncRNA indicated by the HSP.
+The HSPs in BLAST output are often incomplete
+ (ie. the alignment in HSP does not cover whole query sequence).
+This is major drawback when trying to characterize the potential ncRNA
+ indicated by the HSP.
 
-Therefor the rboAnalyzer completes the incomplete HSPs from the BLAST output and predicts secondary structure with one or more methods. Score for similarity (as proxy to homology) between the completed sequence and is also computed. The BLAST output is combined with computed data and presented in form of inteactive HTML page.
+Therefor the rboAnalyzer estimates full-length RNA sequences
+ from the incomplete HSPs from the BLAST output and predicts secondary structure
+ with one or more methods.
+Score for similarity (as proxy to homology) between the estimated full-length sequence
+ and query sequence is also computed.
+The BLAST output is combined with computed data and presented in form of inteactive HTML page.
 
-For this the rboAnalyzer need the BLAST input and output. That is the query sequence, the BLAST database containing sequences within the output and the BLAST output itself.
+For this the rboAnalyzer need the BLAST input and output.
+That is the query sequence, the BLAST database containing sequences within the output
+ and the BLAST output itself.
 
 
 ## Installation
@@ -86,19 +98,19 @@ Which should return number of the installed version.
 
 <a name="rfamdownload" id="rfamdownload"></a>
 
-### Obtain RFAM database
-For correct function the rboAnalyze needs a copy of RFAM database.
+### Obtain Rfam database
+For correct function the rboAnalyze needs a copy of Rfam database.
 
 There are 2 ways:
 1. Run rboAnalyzer with `--download_rfam` flag.
     ```shell
     rboAnalyzer --download_rfam
     ```
-This will download RFAM covariance models to default directory
+This will download Rfam covariance models to default directory
 (`[INSTALL_LOCATION]/rna_blast_analyze/3rd_party_source/rfam`).
 
 2. Alternatively download the `Rfam.cm.gz` file from
-[RFAM CURRENT](ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT),
+[Rfam CURRENT](ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT),
 unpack it and add the path to directory containing `Rfam.cm` file to your `config.txt` file.
 Note that running rboAnalyzer with `--download_rfam` will overwrite this manualy installed file.
 
@@ -171,7 +183,7 @@ Examples are provided in example directory.
 
 To try examples you will need to:
 
-  1. Install the rboAnalyzer and download rfam [how to](#rfam_download).
+  1. Install the rboAnalyzer and download Rfam [how to](#rfam_download).
 
   2. Obtain a copy of `example` directory
    [here](https://github.com/cas-bioinf/rna_blast_analyze/tree/master/example).
@@ -218,18 +230,19 @@ We get the BLAST database as in previous example. (If the `genomes_from_blast`
   as input and only the sequences not in the database will be downloaded).
 
 With the database (assume `genomes.fasta.bdb`) we can run the rboAnalyzer.
-We can expect that the BLAST output contain many false positive HSPs, so we choose prediction methods which do not rely on information in the BLAST output itself.
+We can expect that the BLAST output contain many false positive HSPs,
+so we choose prediction methods which do not rely on information in the BLAST output itself.
 These are:
 - rnafold
-- rfam_rnafoldc
-- rfam_centroid_homfold
-- Turbofold_fast with "max_seqs_in_prediction" parameter set to 2 (`--turbofold_fast_preset` flag)
-- centroid_homfold_fast with "max_seqs_in_prediction" parameter set to 1 (`--centroid_fast_preset` flag)
-- rfam_subopt (If `UnaFold` is installed.)
+- rfam-Rc
+- rfam-centroid
+- Turbo-fast with "max_seqs_in_prediction" parameter set to 2 (`--turbo_fast_preset` flag)
+- centroid-fast with "max_seqs_in_prediction" parameter set to 1 (`--centroid_fast_preset` flag)
+- rfam-sub (If `UnaFold` is installed.)
 
 In this case we will use the rnafold, rfam_rnafoldc and Turbofold_fast with preset.
 ```shell
-rboAnalyzer -in MS1_BLAST_output -q MS1_query.fasta -db genomes.fasta.bdb -html MS1_out.html --prediction_method rnafold rfam_rnafoldc TurboFold_fast --turbofold_fast_preset
+rboAnalyzer -in MS1_BLAST_output -q MS1_query.fasta -db genomes.fasta.bdb -html MS1_out.html --prediction_method rnafold rfam-Rc Turbo-fast --turbo_fast_preset
 ```
 
 ## Solving issues:
@@ -307,6 +320,8 @@ This work was supported by ELIXIR CZ research infrastructure project (MEYS Grant
 
 ![elixir logo](docs/ELIXIR_CZECHREPUBLIC_white_background_small.png)
 
-This work was supported from European Regional Development Fund-Project ELIXIR-CZ (No. CZ.02.1.01/0.0/0.0/16_013/0001777).
+This work was supported from European Regional Development Fund - Project "ELIXIR-CZ: Budování kapacit" (No. CZ.02.1.01/0.0/0.0/16_013/0001777).
 
 ![msmt logo](docs/logolink_OP_VVV_hor_barva_eng.jpg)
+
+This work was also supported by Czech Science Foundation GA15-00885S.k

@@ -311,7 +311,7 @@ class TestDirectExecution(unittest.TestCase):
             '--blast_db', blast_db,
             '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
             '--b_type', 'plain',
-            '--prediction_method', 'rnafold', 'subopt_fold_query',
+            '--prediction_method', 'rnafold', 'fq-sub',
             '--html', self.html,
             '--json', self.json,
             '--csv', self.csv,

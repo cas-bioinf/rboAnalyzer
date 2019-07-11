@@ -40,7 +40,7 @@ This is BLAST alignment as read from the input file</pre>
 {{data.blast_text}}</pre>
                 </div>
                 <div class="repitem">
-                    <label class="repheader"><u>Extension report:</u></label>
+                    <label class="repheader"><u>Report:</u></label>
                     <table>
                         <tr>
                             <th class="left" scope="row">sequence start:</th>
@@ -48,7 +48,7 @@ This is BLAST alignment as read from the input file</pre>
                             <td>
                                 <div class="tooltip"> ?
                                     <pre class="tooltiptext">
-Start position of the extended sequence in genome.
+Start position of the estimated full-length sequence in genome.
 Start index < end index.</pre>
                                 </div>
                             </td>
@@ -59,7 +59,7 @@ Start index < end index.</pre>
                             <td>
                                 <div class="tooltip"> ?
                                     <pre class="tooltiptext">
-End position of the extended sequence in genome.
+End position of the estimated full-length sequence in genome.
 Start index < end index.</pre>
                                 </div>
                             </td>
@@ -70,9 +70,9 @@ Start index < end index.</pre>
                             <td>
                                 <div class="tooltip"> ?
                                     <pre class="tooltiptext">
-The score for aligning extended sequence to CM model
+The score for aligning estimated full-length sequence to CM model
   (computed by RSEARCH -> default,
-  infered from rfam or provided by user)</pre>
+  infered from Rfam or provided by user)</pre>
                                 </div>
                             </td>
                         </tr>
@@ -93,7 +93,7 @@ Quick homology estimate:
                 </div>
                 <div class="repitem">
                     <div>
-                        <label for="{{data.intid}}SeqCheck" class="repheader"><u>Extended sequence fasta:</u></label>
+                        <label for="{{data.intid}}SeqCheck" class="repheader"><u>Estimated full-length sequence:</u></label>
                         <input type="checkbox" class="individualSequenceCheckbox" id="{{data.intid}}SeqCheck">
                         <div class="tooltip repheader">?
                             <pre class="tooltiptext">

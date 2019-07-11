@@ -487,6 +487,7 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
 
     # rnafold params
     rnafold_params = params.get('RNAfold', '-C')
+    assert isinstance(rnafold_params, str)
     if '-C' not in rnafold_params:
         # some parameters given but -C not present
         rnafold_params += ' -C'

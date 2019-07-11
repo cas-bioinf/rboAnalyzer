@@ -33,9 +33,9 @@ ml = logging.getLogger(__name__)
 
 safe_prediction_method = [
     'rnafold',
-    'centroid_homfold',
-    'TurboFold_fast',
-    'rfam_rnafoldc',
+    'centroid',
+    'Turbo-fast',
+    'rfam-Rc',
 ]
 
 
@@ -80,6 +80,17 @@ def wrapped_ending_with_prediction(
         )
         analyzed_hits.hits = hits2predict
 
+    # if used_cm_file is provided do not override it with CM from RFAM
+    # if use_rfam flag was given, then used_cm_file is already the best_matching model
+    # if analyzed_hits.best_matching_model is None - then we could not find the best matching model in RFAM
+    #  and the rfam based methods should fail (i.e. not predict anything)
+    # todo: change handling of obtained models (ie delete)
+    delete_cm = False
+    if used_cm_file is None and analyzed_hits.best_matching_model is not None:
+        rfam = RfamInfo()
+        used_cm_file = run_cmfetch(rfam.file_path, analyzed_hits.best_matching_model['target_name'])
+        delete_cm = True
+
     new_structures, exe_time = repredict_structures_for_homol_seqs(
         analyzed_hits.query,
         analyzed_hits.hits,
@@ -89,6 +100,12 @@ def wrapped_ending_with_prediction(
         all_hits=all_hits,
         use_cm_file=used_cm_file,
         )
+
+    if delete_cm:
+        try:
+            os.remove(used_cm_file)
+        except OSError:
+            pass
 
     if 'default' not in pred_method:
         for i, hit in enumerate(analyzed_hits.hits):
@@ -446,39 +463,25 @@ def repredict_structures_for_homol_seqs(
         # do nothing
         pass
 
-    if 'rfam_rnafoldc' in prediction_method:
-        pkey = 'rfam_rnafoldc'
+    if 'rfam-Rc' in prediction_method:
+        pkey = 'rfam-Rc'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
 
-        method_parameters = pred_method_params.get(pkey, {})
-
         if use_cm_file is None:
-            fd, temp_query_file = mkstemp(prefix='rba_', suffix='_61', dir=CONFIG.tmpdir)
-            with os.fdopen(fd, 'w') as f:
-                f.write('>{}\n{}\n'.format(query.id, str(query.seq)))
-
-            best_model = get_cm_model(temp_query_file, params=method_parameters, threads=threads)
-
-            rfam = RfamInfo()
-            single_cm_file = run_cmfetch(rfam.file_path, best_model)
-            os.remove(temp_query_file)
+            ml.warning("No CM model. Can't use {}.".format(pkey))
         else:
-            single_cm_file = use_cm_file
+            structures[pkey], exec_time[pkey] = cmmodel_rnafold_c(
+                seqs2predict_fasta,
+                use_cm_file,
+                threads=threads,
+                params=pred_method_params.get(pkey, {})
+            )
 
-        structures[pkey], exec_time[pkey] = cmmodel_rnafold_c(
-            seqs2predict_fasta,
-            single_cm_file,
-            threads=threads,
-            params=pred_method_params.get(pkey, None)
-        )
-
-        if use_cm_file is None:
-            os.remove(single_cm_file)
         del pkey
 
-    if 'rfam_centroid_homfold' in prediction_method:
-        pkey = 'rfam_centroid_homfold'
+    if 'rfam-centroid' in prediction_method:
+        pkey = 'rfam-centroid'
         print('Running: {}...'.format(pkey))
         ml.info(pkey)
         # run cmscan if needed
@@ -489,64 +492,36 @@ def repredict_structures_for_homol_seqs(
         method_parameters = pred_method_params.get(pkey, {})
 
         if use_cm_file is None:
-            fd, temp_query_file = mkstemp(prefix='rba_', suffix='_61', dir=CONFIG.tmpdir)
-            with os.fdopen(fd, 'w') as f:
-                f.write('>{}\n{}\n'.format(query.id, str(query.seq)))
-
-            best_model = get_cm_model(temp_query_file, params=method_parameters, threads=threads)
-
-            rfam = RfamInfo()
-            single_cm_file = run_cmfetch(rfam.file_path, best_model)
-            os.remove(temp_query_file)
+            ml.warning("No CM model. Can't use {}.".format(pkey))
         else:
-            single_cm_file = use_cm_file
+            cep = method_parameters.get('cmemit', '')
+            if '-u' not in cep:
+                cep += ' -u'
+            if '-N' not in cep:
+                cep += ' -N {}'.format(method_parameters.get('n_seqs', 10))
 
-        cep = method_parameters.get('cmemit', '')
-        if '-u' not in cep:
-            cep += ' -u'
-        if '-N' not in cep:
-            cep += ' -N {}'.format(method_parameters.get('n_seqs', 10))
+            hf_file = run_cmemit(use_cm_file, params=cep)
 
-        hf_file = run_cmemit(single_cm_file, params=cep)
+            structures[pkey], exec_time[pkey] = me_centroid_homfold(seqs2predict_fasta, hf_file, params=method_parameters)
 
-        structures[pkey], exec_time[pkey] = me_centroid_homfold(seqs2predict_fasta, hf_file, params=method_parameters)
-
-        if use_cm_file is None:
-            os.remove(single_cm_file)
-        os.remove(hf_file)
+            os.remove(hf_file)
         del pkey
 
-    if 'rfam_subopt' in prediction_method:
-        pkey = 'rfam_subopt'
+    if 'rfam-sub' in prediction_method:
+        pkey = 'rfam-sub'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         if use_cm_file is None:
-            fd, temp_query_file = mkstemp(prefix='rba_', suffix='_62', dir=CONFIG.tmpdir)
-            with os.fdopen(fd, 'w') as f:
-                f.write('>{}\n{}\n'.format(query.id, str(query.seq)))
-
-            if pkey in pred_method_params and pred_method_params[pkey]:
-                best_model = get_cm_model(temp_query_file, params=pred_method_params[pkey], threads=threads)
-            else:
-                best_model = get_cm_model(temp_query_file, threads=threads)
-
-            rfam = RfamInfo()
-            single_cm_file = run_cmfetch(rfam.file_path, best_model)
-            os.remove(temp_query_file)
+            ml.warning("No CM model. Can't use {}.".format(pkey))
         else:
-            single_cm_file = use_cm_file
+            ref_structure = extract_ref_from_cm(use_cm_file)
 
-        ref_structure = extract_ref_from_cm(single_cm_file)
-
-        structures[pkey], exec_time[pkey] = rfam_subopt_pred(
-            seqs2predict_fasta,
-            ref_structure,
-            params=pred_method_params.get(pkey, None),
-            threads=threads,
-        )
-
-        if use_cm_file is None:
-            os.remove(single_cm_file)
+            structures[pkey], exec_time[pkey] = rfam_subopt_pred(
+                seqs2predict_fasta,
+                ref_structure,
+                params=pred_method_params.get(pkey, None),
+                threads=threads,
+            )
 
         del pkey
 
@@ -560,8 +535,8 @@ def repredict_structures_for_homol_seqs(
         )
         del pkey
 
-    if 'subopt_fold_query' in prediction_method:
-        pkey = 'subopt_fold_query'
+    if 'fq-sub' in prediction_method:
+        pkey = 'fq-sub'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
 
@@ -580,8 +555,8 @@ def repredict_structures_for_homol_seqs(
 
         del pkey
 
-    if 'subopt_fold_clustal_alifold' in prediction_method:
-        pkey = 'subopt_fold_clustal_alifold'
+    if 'C-A-sub' in prediction_method:
+        pkey = 'C-A-sub'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         try:
@@ -619,8 +594,8 @@ def repredict_structures_for_homol_seqs(
         finally:
             del pkey
 
-    if 'subopt_fold_muscle_alifold' in prediction_method:
-        pkey = 'subopt_fold_muscle_alifold'
+    if 'M-A-sub' in prediction_method:
+        pkey = 'M-A-sub'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         try:
@@ -658,8 +633,8 @@ def repredict_structures_for_homol_seqs(
         finally:
             del pkey
 
-    if 'clustalo_alifold_refold_rnafoldc' in prediction_method:
-        pkey = 'clustalo_alifold_refold_rnafoldc'
+    if 'C-A-r-Rc' in prediction_method:
+        pkey = 'C-A-r-Rc'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         try:
@@ -690,8 +665,8 @@ def repredict_structures_for_homol_seqs(
         finally:
             del pkey
 
-    if 'muscle_alifold_refold_rnafoldc' in prediction_method:
-        pkey = 'muscle_alifold_refold_rnafoldc'
+    if 'M-A-r-Rc' in prediction_method:
+        pkey = 'M-A-r-Rc'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         try:
@@ -721,8 +696,8 @@ def repredict_structures_for_homol_seqs(
         finally:
             del pkey
 
-    if 'clustalo_alifold_unpaired_conserved_refold_rnafoldc' in prediction_method:
-        pkey = 'clustalo_alifold_unpaired_conserved_refold_rnafoldc'
+    if 'C-A-U-r-Rc' in prediction_method:
+        pkey = 'C-A-U-r-Rc'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         try:
@@ -752,8 +727,8 @@ def repredict_structures_for_homol_seqs(
         finally:
             del pkey
 
-    if 'muscle_alifold_unpaired_conserved_refold_rnafoldc' in prediction_method:
-        pkey = 'muscle_alifold_unpaired_conserved_refold_rnafoldc'
+    if 'M-A-U-r-Rc' in prediction_method:
+        pkey = 'M-A-U-r-Rc'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
         try:
@@ -783,8 +758,8 @@ def repredict_structures_for_homol_seqs(
         finally:
             del pkey
 
-    if 'centroid_homfold' in prediction_method:
-        pkey = 'centroid_homfold'
+    if 'centroid' in prediction_method:
+        pkey = 'centroid'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
 
@@ -827,8 +802,8 @@ def repredict_structures_for_homol_seqs(
         del nr_homo_hits_file
         del pkey
 
-    if 'centroid_homfold_fast' in prediction_method:
-        pkey = 'centroid_homfold_fast'
+    if 'centroid-fast' in prediction_method:
+        pkey = 'centroid-fast'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
 
@@ -866,7 +841,7 @@ def repredict_structures_for_homol_seqs(
 
             structures[pkey] = raw_structures
         except exceptions.AmbiguousQuerySequenceException:
-            msgfail = "Query sequence contains ambiguous characters. Can't use centroid_homfold_fast."
+            msgfail = "Query sequence contains ambiguous characters. Can't use centroid-fast."
             ml.error(msgfail)
         del pkey
 
@@ -926,8 +901,8 @@ def repredict_structures_for_homol_seqs(
         finally:
             del pkey
 
-    if 'TurboFold_fast' in prediction_method:
-        pkey = 'TurboFold_fast'
+    if 'Turbo-fast' in prediction_method:
+        pkey = 'Turbo-fast'
         print('Runing: {}...'.format(pkey))
         ml.info(pkey)
 

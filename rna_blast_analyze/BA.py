@@ -124,11 +124,11 @@ def f_parser():
         )
     )
     parameters_group.add_argument(
-        '--turbofold_fast_preset',
+        '--turbo_fast_preset',
         default=False,
         action='store_true',
         help=(
-            "Act's as parameter preset for TurboFold_fast setting the max_seqs_in_prediction to 2."
+            "Act's as parameter preset for Turbo-fast setting the max_seqs_in_prediction to 2."
             " This means that only the query sequence is used as homologous sequence."
             " It is useful if analyzing very distant BLAST HITs."
         )
@@ -138,7 +138,7 @@ def f_parser():
         default=False,
         action='store_true',
         help=(
-            "Parameter preset for centroid_homfold_fast. Set's the max_seqs_in_prediction to 1."
+            "Parameter preset for centroid-fast. Set's the max_seqs_in_prediction to 1."
             " This means that only the query sequence is used as homologous sequence for prediction."
             " It is useful if analyzing very distant BLAST HITs."
         )
@@ -206,7 +206,7 @@ def f_parser():
         nargs='*',
         type=str,
         metavar='prediction_method_name',
-        default=['centroid_homfold', 'rfam_rnafoldc', 'rnafold'],
+        default=['TurboFold', 'rfam-Rc', 'rnafold'],
         choices=prediction_methods,
         help=(
             'Prediction method to use. Multiple prediction methods are allowed. '
@@ -233,13 +233,6 @@ def f_parser():
         help='Path to where logfile should be written.'
     )
     parameters_group.add_argument(
-        '--subseq_window_simple_ext',
-        type=int,
-        default=10,
-        help=argparse.SUPPRESS,
-        # help='N of nucleotides to add to expected start/end of sequence.'
-    )
-    parameters_group.add_argument(
         '--subseq_window_locarna',
         type=int,
         default=30,
@@ -250,7 +243,8 @@ def f_parser():
         '--locarna_params',
         type=str,
         default='--struct-local=0 --sequ-local=0 --free-endgaps=++++',
-        help="Parameters for locarna execution. Used when 'mode' is 'locarna' or 'joined'."
+        help=argparse.SUPPRESS
+        # help="Parameters for locarna execution. Used when 'mode' is 'locarna' or 'joined'."
     )
     parameters_group.add_argument(
         '--locarna_anchor_length',
@@ -368,13 +362,13 @@ def f_parser():
             provided_params = json.load(ff)
             params.update(provided_params)
 
-    if args.turbofold_fast_preset:
-        print('Using Turbofold_fast preset')
-        params['TurboFold_fast']['max_seqs_in_prediction'] = 2
+    if args.turbo_fast_preset:
+        print('Using Turbo-fast preset')
+        params['Turbo-fast']['max_seqs_in_prediction'] = 2
 
     if args.centroid_fast_preset:
-        print('Using centroid_homfold_fast preset')
-        params['centroid_homfold_fast']['max_seqs_in_prediction'] = 1
+        print('Using centroid-fast preset')
+        params['centroid-fast']['max_seqs_in_prediction'] = 1
 
     # check if prediction method params are valid
     check_params(params)

@@ -14,14 +14,13 @@ class Pseudoargs(Namespace):
             blast_regexp=accession_regex,
             keep_all=False,
             subseq_window_locarna=30,
-            subseq_window_simple_ext=10,
             dump=None,
             pandas_dump=None,
             logfile=None,
             locarna_params='--struct-local 0 --sequ-local 0 --free-endgaps ++++',
             locarna_anchor_length=7,
             repredict_file=None,
-            prediction_method=('clustalo_alifold_unpaired_conserved_refold_rnafoldc',),
+            prediction_method=('C-A-U-r-Rc',),
             pred_params=None,
             dev_pred=False,
             threads=1,
@@ -50,7 +49,6 @@ class Pseudoargs(Namespace):
         self.keep_all = keep_all
         self.blast_query = blast_query
         self.subseq_window_locarna = subseq_window_locarna
-        self.subseq_window_simple_ext = subseq_window_simple_ext
         self.dump = dump
         self.pandas_dump = pandas_dump
         self.logfile = logfile

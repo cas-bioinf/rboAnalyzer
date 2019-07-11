@@ -521,6 +521,8 @@ def get_cm_model(query_file, params=None, threads=None):
     ml.debug(fname())
     cmscan_data = get_cm_model_table(query_file, params, threads)
     best_model_row = select_best_matching_model_from_cmscan(cmscan_data)
+    if best_model_row is None:
+        return None
 
     best_model = best_model_row['target_name']
 
@@ -547,7 +549,20 @@ def get_cm_model_table(query_file, params=None, threads=None):
 def select_best_matching_model_from_cmscan(cmscan_data):
     ei = cmscan_data['E-value'].idxmin()
     si = cmscan_data['score'].idxmax()
-    assert ei == si
+    if ei != si:
+        ml.warning(
+            'The CM with best E-val ({}) is not the same as the CM with best score ({}).'
+            ' Returning as unknown model.'.format(
+                cmscan_data[ei]['target_name'],
+                cmscan_data[si]['target_name']
+            )
+        )
+        return None
 
     best_model = cmscan_data.loc[ei].to_dict()
+
+    if best_model['score'] <= 0:
+        ml.info('No CM model with score > 0 found.')
+        return None
+
     return best_model

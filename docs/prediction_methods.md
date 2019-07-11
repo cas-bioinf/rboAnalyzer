@@ -81,26 +81,26 @@ is a string argument for `muscle` aligner. For more details, see muscle
 
 By default `-seqtype rna -quiet -clwstrict` are used and cannot be changed.
 
-### Reference set of trusted extended sequences generation parameters
-Parameters used for selection of sequences related to the query sequence.
+### Selection of estimated full-length sequences to provide reference for secondary structure prediction (reference sequences)
+Parameters used for selection of sequences similar to the query sequence.
 The selection parameters influence how much each sequence can differ from covariance model,
   how much the sequences can be similar to each other and what is maximum
-  accepted length difference of extended and query sequence.
+  accepted length difference between the estimated full-length sequence and the query sequence.
 
-Standard trusted extended sequences processing works in this way:
-All extended sequences are filtered based on cm bit-score, then selected
-  sequences are filtered according to their length to be within specified
-  length difference from query sequence. Remaining sequences are filtered
-  based on sequence similarity (from pairwise sequence identity), so only
-  those sequences with similarity less then defined similarity threshold
-  are retained.
+Selection of estimated full-length sequences:
+All estimated full-length sequences are filtered based on cm bit-score,
+  then the remaining sequences are filtered according to their length to
+  be within specified length difference from query sequence.
+  After that, the remaining sequences are filtered based on sequence similarity with each other
+  (from pairwise sequence identity), so only those sequences with similarity
+  less then defined similarity threshold are retained.
 
 #### cmscore_percent: CMSCORE_PERCENT
 Defines inclusion threshold in percent of bit-score value obtained by
   aligning query sequence to covariance model.
 It serves as filter for not sufficiently related sequences.
 The inclusion threshold is computed by `CMSCORE_PERCENT`&nbsp;*&nbsp;`QUERY_BITSCORE`&nbsp;/&nbsp;`100`,
-  only extended sequences with CM alignment bit-score higher then inclusion
+  only estimated full-length sequences with CM alignment bit-score higher then inclusion
   threshold are considered for further computation.
 `CMSCORE_PERCENT` ranges from 0 to 100, allowed values are integers.
 
@@ -108,9 +108,10 @@ The higher the threshold, the more conservative setting for trusted sequences
   (i.e. more similarity to cm is required).
 
 #### query_max_len_diff: MAX_LEN_DIFF_to_QUERY
-Defines a maximum length difference from query sequence for extended sequence.
+Defines a maximum length difference between the query sequence and the estimated full-length sequence.
 This serves complementary to cmscore_percent to allow setting low cmscore_percent,
-while preventing truncated hits (for any reason) to be part of trusted sequence set.
+while preventing very short or very long estimated full-length sequences (for any reason)
+ to be part of selected sequences set.
 
 `MAX_LEN_DIFF_to_QUERY` ranges from 0 to 1, allowed valuse are floating point (with decimal dot).
 
@@ -118,25 +119,25 @@ The higher the threshold, the more difference is allowed.
 
 #### pred_sim_threshold: PRED_SIM_THRESHOLD
 Defines exclusion threshold in percent of sequence similarity.
-This serves as a protection from populating set of trusted sequences with
+This serves as a protection from populating set of selected sequences with
   too many too similar sequences (as it may skew alignment and other prediction methods).
 `PRED_SIM_THRESHOLD` ranges from 0 to 100, allowed values are integers.
 
 The query is included as first sequence and all sequences which are similar to it
-  down to defined threshold are excluded. Then next remaining sequences are
+  down to defined threshold are excluded. Then next sequence from the remaining sequences is
   analyzed in same manner.
 
 The higher the similarity the more similar sequences are accepted.
   (i.e. `PRED_SIM_THRESHOLD = 100` means that only exact duplicate sequences are removed)
 
 #### repred_unpaired_tr: REPRED_UNPAIRED_TR
-Serves for prediction method where as constraints are taken the unpaired position.
+Serves for prediction methods where the conserved unpaired positions in alignment are taken as constraints.
 Defines how much MSA column must be conserved at to denote the position
-  as singlestrand constraint for `RNAfold`.
+  as single-strand constraint for `RNAfold`.
 This parameter is always used together with conseq_conserved.
 
 #### conseq_conserved: CONSEQ_CONSERVED
-Serves for prediction method where as constraints are taken the unpaired position.
+Serves for prediction method where the conserved unpaired positions in alignment are taken as constraints.
 Defines how many bases in a row must be conserved to denote the position
   as singlestrand constraint for `RNAfold`.
 This parameter is always used together with repred_unpaired_tr.
@@ -148,7 +149,7 @@ Used with TurboFold to set required (and maximum) number of sequences in
 
 
 ## rnafold
-Predict secondary structure for each extended sequence with RNAFold.
+Predict secondary structure for each estimated full-length sequence with RNAFold.
 
 parameters:
 ```
@@ -158,14 +159,14 @@ parameters:
     }
 ```
 
-## rfam_rnafoldc
-Obtain the related CM (either find highest scoring one in Rfam by `cmscan`
-  or use the one provided with `--cm_file`), align extended sequences to it (`cmalign`),
-  then take conserved bp as constrains for for folding with `RNAfold`.
+## rfam-Rc
+Obtain the related covariance model (either find highest scoring one in Rfam by `cmscan`
+  or use the one provided with `--cm_file`), align estimated full-length sequences to it (`cmalign`),
+  then take conserved bp as constrains for for folding with `RNAfold -C`.
 
 parameters:
 ```
-  {"rfam_rnafoldc": {
+  {"rfam-Rc": {
       "RNAfold": "RNAFOLD PARAMETERS",
       "cmscan": "CMSCAN PARAMETERS",
       "cmalign": "CMALIGN PARAMETERS"
@@ -178,45 +179,46 @@ Non optional parameters:
 - `cmscan`: `-g` (global aligment of models to query sequence)
 - `cmalign`: `--notrunc` (disable truncated hits detection - speeds up computation).
 
-## rfam_subopt
+## rfam-sub
 Obtain the related CM (either find highest scoring one in Rfam by `cmscan`
-  or use the one provided with `--cm_file`), extract reference structure,
-  run `hybrid-ss-min` (UNAFold) for suboptimals and select the most similar
-  one to the one in CM.
+  or use the one provided with `--cm_file`), extract reference secondary structure,
+  run `hybrid-ss-min` (UNAFold) for suboptimal structures and select the most similar
+  one to the one from CM.
 
 parameters:
 ```
-    {"rfam_subopt" : {
+    {"rfam-sub" : {
         "mfold": [P, W, X]
         }
     }
 
 ```
 
-## subopt_fold_query
-Predict structure of query with RNAFold and take it as reference,
+## fq-sub
+Predict structure of query with RNAFold and take it as reference structure,
   then predict suboptimal structures with `hybrid-ss-min` (UNAFold) and select
-  structure most similar to predicted structure of query (by `RNAdistance` score).
+  structure most similar to the predicted structure of query (by `RNAdistance` score).
 
 parameters:
 ```
-    {"subopt_fold_query" : {
+    {"fq-sub" : {
         "RNAfold": "RNAFOLD PARAMETERS",
         "mfold": [P, W, X]
         }
     }
 ```
 
-## subopt_fold_clustal_alifold
-Select trusted extended sequences, align them with `clustalo` (Clustal Omega),
+## C-A-sub
+clustalo - RNAalifold - hybrid-ss-min
+Select reference estimated full-length sequences, align them with `clustalo` (Clustal Omega),
   predict consensus structure with `RNAalifold`.
-For each extended sequence compute suboptimal structures with `hybrid-ss-min`
+For each estimated full-length sequence compute suboptimal structures with `hybrid-ss-min`
   and select structure from predicted suboptimal structures the one most
   similar to the consensus structure (by `RNAdistance` score).
 
 parameters:
 ```
-    {"subopt_fold_clustal_alifold" : {
+    {"C-A-sub" : {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
         "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
@@ -227,16 +229,20 @@ parameters:
     }
 ```
 
-## subopt_fold_muscle_alifold
-Select trusted extended sequences, align them with `muscle`,
+## M-A-sub
+clustalo - RNAalifold - hybrid-ss-min
+Select reference estimated full-length sequences, align them with `muscle`,
   predict consensus structure with `RNAalifold`.
-For each extended sequence compute suboptimal structures with `hybrid-ss-min`
+For each estimated full-length sequence compute suboptimal structures with `hybrid-ss-min`
   and select structure from predicted suboptimal structures the one most
-  similar to the consensus structure.
+  similar to the consensus structure (by `RNAdistance` score).
 
 parameters:
 ```
-    {"subopt_fold_muscle_alifold" : {
+    {"M-A-sub" : {
+        "cmscore_percent" : CMSCORE_PERCENT,
+        "pred_sim_threshold": PRED_SIM_THRESHOLD,
+        "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "muscle": "MUSCLE PARAMETERS",
         "alifold": "ALIFOLD PARAMETERS",
         "mfold": [P, W, X]
@@ -244,16 +250,17 @@ parameters:
     }
 ```
 
-## clustalo_alifold_refold_rnafoldc
-Select trusted sequences subset, compute alignment with `clustalo` for
-  the trusted sequences, compute consensus structure with `RNAalifold`,
-  then compute profile alignment of aligned trusted sequences with all extended sequences,
-  then add the consensus structure to all sequences from profile alignment,
-  and finally run `refold.pl` and `RNAFold` for the result alignment.
+## C-A-r-Rc
+clustalo - RNAalifold - refold.pl - rnafold-C
+Select reference estimated full-length sequences, compute alignment with `clustalo` (MSA1)
+  and then compute consensus secondary structure with `RNAalifold` from the MSA1.
+Then compute profile alignment of MSA1 with all estimated full-length sequences
+  and add the consensus structure to all estimated full-length sequences from profile alignment,
+  finally run `refold.pl` and `RNAFold` for the result.
 
 parameters:
 ```
-    {"clustalo_alifold_refold_rnafoldc": {
+    {"C-A-r-Rc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
         "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
@@ -265,17 +272,18 @@ parameters:
 ```
 
 
-## clustalo_alifold_unpaired_conserved_refold_rnafoldc
-Select trusted sequences subset, compute alignment with `clustalo` in those
-  sequences, compute consensus structure with `RNAalifold`,
-  compute profile alignment of selected sequences with all sequences,
-  match the reference structure to all sequence from profile alignment,
-  select conserved parts of alignment that have singlestrand consensus
-  structure annotation and use them as constrains for `RNAFold -c`.
+## C-A-U-r-Rc
+clustalo - RNAalifold - unpaired conserved - refold.pl - rnafold-C
+Select reference estimated full-length sequences, compute alignment with `clustalo` (MSA1)
+  and then compute consensus secondary structure with `RNAalifold` from the MSA1.
+Then compute profile alignment of MSA1 with all estimated full-length sequences,
+  and add the consensus structure to all estimated full-length sequences from profile alignment.
+Then select conserved parts of alignment where the consensus secondary
+  structure annotation is single-strand (i.e. no base-pairs) and use them as constrains for `RNAFold -c`.
 
 parameters:
 ```
-    {"clustalo_alifold_unpaired_conserved_refold_rnafoldc": {
+    {"C-A-U-r-Rc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
         "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
@@ -290,16 +298,17 @@ parameters:
 
 
 
-## muscle_alifold_refold_rnafoldc
-Select trusted sequences subset, compute alignment with `muscle` for
-  the trusted sequences, compute consensus structure with `RNAalifold`,
-  then compute profile alignment of aligned trusted sequences with all extended sequences,
-  then add the consensus structure to all sequences from profile alignment,
-  and finally run `refold.pl` and `RNAFold -C`.
+## M-A-r-Rc
+muscle - RNAalifold - refold.pl - rnafold -C
+Select reference estimated full-length sequences, compute alignment with `muscle` (MSA1)
+  and then compute consensus secondary structure with `RNAalifold` from the MSA1.
+Then compute profile alignment of MSA1 with all estimated full-length sequences
+  and add the consensus structure to all estimated full-length sequences from profile alignment,
+  finally run `refold.pl` and `RNAFold` for the result.
 
 parameters:
 ```
-    {"muscle_alifold_refold_rnafoldc": {
+    {"M-A-r-Rc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
         "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
@@ -310,17 +319,18 @@ parameters:
     }
 ```
 
-## muscle_alifold_unpaired_conserved_refold_rnafoldc
-Select trusted sequences subset, compute alignment with `muscle` for these
-  sequences, compute consensus structure with `RNAalifold`,
-  compute profile alignment of selected sequences with all sequences,
-  match the reference structure to all sequence from profile alignment,
-  select conserved parts of alignment that have singlestrand consensus
-  structure annotation and use them as constrains for `RNAFold -C`
+## M-A-U-r-Rc
+muscle - RNAalifold - unpaired conserved - refold.pl - rnafold-C
+Select reference estimated full-length sequences, compute alignment with `muscle` (MSA1)
+  and then compute consensus secondary structure with `RNAalifold` from the MSA1.
+Then compute profile alignment of MSA1 with all estimated full-length sequences,
+  and add the consensus structure to all estimated full-length sequences from profile alignment.
+Then select conserved parts of alignment where the consensus secondary
+  structure annotation is single-strand (i.e. no base-pairs) and use them as constrains for `RNAFold -c`.
 
 parameters:
 ```
-    {"muscle_alifold_refold_rnafoldc": {
+    {"M-A-U-r-Rc": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
         "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
@@ -333,16 +343,18 @@ parameters:
     }
 ```
 
-## centroid_homfold
-Select trusted sequences. Then pass the selected sequences to `centroid_homfold` as
-  homologous sequence set and predict all sequences. The `centroid_homfold`
-  is by default called with `-g -1` parameter. With this setting the
-  `centroid_homfold` predict multiple structures - the structure with
-  best score is chosen.
+## centroid
+centroid_homfold
+Select reference estimated full-length sequences and pass them to `centroid_homfold` as
+  homologous sequences, predict secondary structure for all estimated full-length sequences.
+The `centroid_homfold` is by default called with `-g -1` parameter.
+With this setting the `centroid_homfold` predicts multiple structures
+ (see [cetroid_homfold documentation](https://github.com/satoken/centroid-rna-package/)),
+ the structure with best score is chosen.
 
 parameters:
 ```
-    {"centroid_homfold": {
+    {"centroid": {
         "cmscore_percent" : CMSCORE_PERCENT,
         "pred_sim_threshold": PRED_SIM_THRESHOLD,
         "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
@@ -351,17 +363,18 @@ parameters:
     }
 ```
 
-## centroid_homfold_fast
-With centroid_homfold_fast we take non-redundant sequences without ambiguous
- bases with cm_score > 0 within allowed length query difference as trusted sequences.
- We take up to `N` trusted sequences as homologous sequences for centroid_homfold.
- The sequences are added in order of the original BLAST hits, starting with query.
- For this method there is also parameter preset avalible which sets `N` to 1
+## centroid-fast
+With centroid-fast the reference estimated full-length sequences are selected as follows:
+ we take non-redundant estimated full-length sequences without ambiguous
+ bases with cm_score > 0 within allowed length-to-query-length difference.
+Then we take up to `N` reference sequences as homologous sequences for `centroid_homfold`.
+ The sequences are added in order of the original BLAST HSPs, starting with query.
+For this method there is also parameter preset avalible which sets `N` to 1
  meaning that only query will be used as homologous sequence in prediction.
 
 parameters:
 ```
-    {"centroid_homfold_fast": {
+    {"centroid-fast": {
         "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "centroid_homfold": "CENTROID_HOMFOLD PARAMETERS",
         "max_seqs_in_prediction": MAX_SEQS_IN_PREDICTION,
@@ -369,18 +382,18 @@ parameters:
     }
 ```
 
-## rfam_centroid_homfold
-Use covariance model (CM) to generate set of sequences considered homologous.
+## rfam-centroid
+Use covariance model (CM) to generate set of reference sequences for `centroid_homfold`.
 By default the highest scoring CM in Rfam is found by `cmscan`
- (or provided one is used `--cm_file` option). Then requested number of
- sequences is generated under the covariance model with `cmemit` which
- are used as homologous sequences.
- The generated sequences can differ between runs. If repeatable behaviour
+ (or provided one is used `--cm_file` option).
+Then requested number of sequences (`N_SEQS`) is generated from the covariance model with `cmemit`.
+The sequences are used as homologous sequences for `centroid_homfold`.
+The generated sequences can differ between runs. If repeatable behaviour
  is desired the `cmemit` can be seeded (see it's options).
 
 parameters:
 ```
-    {"rfam_centroid_homfold": {
+    {"rfam-centroid": {
         "n_seqs": N_SEQS,
         "cmscan": "CMSCAN PARAMETERS",
         "cmemit": "CMEMIT PARAMETERS",
@@ -388,22 +401,24 @@ parameters:
     }
 ```
 
-## TurboFold_fast
-With TurboFold_fast we take non-redundant sequences without ambiguous
- bases with cm_score > 0 within allowed length query difference as trusted sequences.
- For each predicted sequence, we make non-redundant group of sequences
- consisting of the predicted sequence and up to `N` trusted sequences.
- The sequences are added in order of the original BLAST hits, starting with query.
- That means that if `N` is 2 and query does not contain ambiguous bases,
- then each extended sequence secondary structure is computed with query sequence as a reference.
- This setting is also available as commandline argument with `--turbofold_fast_preset` flag and
+## Turbo-fast
+With Turbo-fast the reference estimated full-length sequences are selected as follows:
+we take non-redundant estimated full-length sequences without ambiguous
+ bases with cm_score > 0 within allowed length-to-query-length difference.
+For each estimated full-length sequence, we make non-redundant group of sequences
+ consisting of the estimated full-length sequence for which we want to predict secondary structure
+ and up to `N`-1 reference sequences.
+The sequences are added in order of the original BLAST HSPs, starting with query.
+That means that if `N` is 2 and query does not contain ambiguous bases,
+ then each estimated full-length sequence secondary structure is computed with query sequence as a reference.
+This setting is also available as commandline argument with `--turbo_fast_preset` flag and
  will override the `"max_seqs_in_prediction"` value from prediction_parameters file.
 
- The `N` can be defined in parameters as `"max_seqs_in_prediction": MAX_SEQS_IN_PREDICTION`.
+The `N` can be defined in parameters as `"max_seqs_in_prediction": MAX_SEQS_IN_PREDICTION`.
 
 parameters:
 ```
-    {"TurboFold_fast": {
+    {"Turbo-fast": {
         "query_max_len_diff": MAX_LEN_DIFF_to_QUERY,
         "max_seqs_in_prediction": MAX_SEQS_IN_PREDICTION,
         "TurboFold": "TurboFold PARAMETERS"
@@ -412,7 +427,8 @@ parameters:
 ```
 
 ## TurboFold
-Select trusted sequences (unambiguous). Then continue as with Turbofold_fast.
+Select reference estimated full-length sequences without ambiguous bases.
+Then continue as with Turbo-fast.
 
 parameters:
 ```

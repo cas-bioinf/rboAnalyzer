@@ -9,32 +9,50 @@ centroid_homfold_minimal_version = [0, 0, 15]
 turbofold_minimal_version = [6, 0]
 mfold_minimal_version = [3, 6]
 
+names2shortcuts = {
+    'clustalo_alifold_unpaired_conserved_refold_rnafoldc': 'C-A-U-r-Rc',
+    'clustalo_alifold_refold_rnafoldc': 'C-A-r-Rc',
+    'centroid_homfold': 'centroid',
+    'rnafold': 'rnafold',
+    'subopt_fold_query': 'fq-sub',
+    'subopt_fold_clustal_alifold': 'C-A-sub',
+    'subopt_fold_muscle_alifold': 'M-A-sub',
+    'muscle_alifold_refold_rnafoldc': 'M-A-r-Rc',
+    'muscle_alifold_unpaired_conserved_refold_rnafoldc': 'M-A-U-r-Rc',
+    'rfam_subopt': 'rfam-sub',
+    'rfam_rnafoldc': 'rfam-Rc',
+    'TurboFold': 'TurboFold',
+    'TurboFold_fast': 'Turbo-fast',
+    'centroid_homfold_fast': 'centroid-fast',
+    'rfam_centroid_homfold': 'rfam-centroid',
+}
+shortcuts2names = {v: k for k, v in names2shortcuts.items()}
+
+
 # ===== All possible prediction methods =====
 #  list only methods which are not required by default
 method_required_tools = {
     'locarna': {'locarna', 'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'refold.pl', 'rfam'},
     'simple': {'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'rfam'},
     'joined': {'locarna', 'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'refold.pl', 'rfam'},
-    'rfam_rnafoldc': {'rfam'},
-    'rfam_subopt': {'mfold', 'rfam'},
+    'rfam-Rc': {'rfam'},
+    'rfam-sub': {'mfold', 'rfam'},
     'rnafold': set(),
-    'subopt_fold_query': {'mfold', 'RNAdistance'},
-    'subopt_fold_clustal_alifold': {'mfold', 'RNAalifold', 'RNAdistance'},
-    'subopt_fold_muscle_alifold': {'mfold', 'RNAalifold', 'RNAdistance'},
-    'clustalo_alifold_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
-    'muscle_alifold_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
-    'clustalo_alifold_unpaired_conserved_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
-    'muscle_alifold_unpaired_conserved_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
-    'dh_clustal_alifold_refold_rnafoldc': {'RNAalifold', 'refold.pl'},
-    'dh_clustal_alifold_unpaired_conserved_rnafoldc': {'RNAalifold', 'refold.pl'},
-    'centroid_homfold': {'centroid_homfold'},
-    'TurboFold_fast': {'turbofold'},
+    'fq-sub': {'mfold', 'RNAdistance'},
+    'C-A-sub': {'mfold', 'RNAalifold', 'RNAdistance'},
+    'M-A-sub': {'mfold', 'RNAalifold', 'RNAdistance'},
+    'C-A-r-Rc': {'RNAalifold', 'refold.pl'},
+    'M-A-r-Rc': {'RNAalifold', 'refold.pl'},
+    'C-A-U-r-Rc': {'RNAalifold', 'refold.pl'},
+    'M-A-U-r-Rc': {'RNAalifold', 'refold.pl'},
+    'centroid': {'centroid_homfold'},
+    'Turbo-fast': {'turbofold'},
     'TurboFold': {'turbofold'},
-    'centroid_homfold_fast': {'centroid_homfold'},
-    'rfam_centroid_homfold': {'centroid_homfold', 'rfam'}
+    'centroid-fast': {'centroid_homfold'},
+    'rfam-centroid': {'centroid_homfold', 'rfam'}
 }
 
-prediction_methods = set(method_required_tools.keys()) - {'simple', 'locarna', 'joined'}
+prediction_methods = set(shortcuts2names.keys())
 
 pred_params = {
     'cmscore_percent',
@@ -56,34 +74,34 @@ pred_params = {
 }
 
 allowed_params = {
-    'rfam_rnafoldc': {
+    'rfam-Rc': {
         'RNAfold', 'cmscan', 'cmalign'
     },
-    'rfam_subopt': {
+    'rfam-sub': {
         'mfold'
     },
     'rnafold': {
         'RNAfold'
     },
-    'subopt_fold_query': {
+    'fq-sub': {
         'mfold', 'RNAfold'
     },
-    'subopt_fold_clustal_alifold': {
+    'C-A-sub': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "clustalo", "alifold", "mfold"
     },
-    'subopt_fold_muscle_alifold': {
+    'M-A-sub': {
         "muscle", "alifold", "mfold"
     },
-    'clustalo_alifold_refold_rnafoldc': {
+    'C-A-r-Rc': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "clustalo", "alifold", "RNAfold"
     },
-    'muscle_alifold_refold_rnafoldc': {
+    'M-A-r-Rc': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "muscle", "alifold", "RNAfold"
     },
-    'clustalo_alifold_unpaired_conserved_refold_rnafoldc': {
+    'C-A-U-r-Rc': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "repred_unpaired_tr", "conseq_conserved", "clustalo", "alifold", "RNAfold"
     },
-    'muscle_alifold_unpaired_conserved_refold_rnafoldc': {
+    'M-A-U-r-Rc': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "repred_unpaired_tr", "conseq_conserved", "muscle", "alifold", "RNAfold"
     },
     'dh_clustal_alifold_refold_rnafoldc': {
@@ -92,19 +110,19 @@ allowed_params = {
     'dh_clustal_alifold_unpaired_conserved_rnafoldc': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "repred_unpaired_tr", "conseq_conserved", "clustalo", "alifold", "RNAfold"
     },
-    'centroid_homfold': {
+    'centroid': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "centroid_homfold"
     },
-    'TurboFold_fast': {
+    'Turbo-fast': {
         "query_max_len_diff", "max_seqs_in_prediction", "TurboFold"
     },
     'TurboFold': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "max_seqs_in_prediction", "TurboFold"
     },
-    'centroid_homfold_fast': {
+    'centroid-fast': {
         "query_max_len_diff", "centroid_homfold", "max_seqs_in_prediction"
     },
-    'rfam_centroid_homfold': {
+    'rfam-centroid': {
         "n_seqs", "cmscan", "cmemit", "centroid_homfold"
     }
 }
