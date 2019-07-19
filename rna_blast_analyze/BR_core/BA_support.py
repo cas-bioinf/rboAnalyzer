@@ -25,7 +25,7 @@ from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt as bla
 # idiotic matplotlib
 locale.setlocale(locale.LC_ALL, 'C')
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 def write_fasta_from_list_of_seqrecords(f, seq_list):
@@ -745,22 +745,31 @@ def annotate_ambiguos_bases(seqlist):
     iupac = IUPACmapping()
     reg = re.compile("[^" + "^".join(iupac.unambiguous) + "]+", re.IGNORECASE)
     for seq in seqlist:
-        m = re.search(reg, str(seq.seq))
-        if m:
-            msg = "Ambiguous base dected in {}, violating base {}, pos {}".format(
-                seq.id,
-                m.group(),
-                m.start()
-            )
-            ml.warning(msg)
-            seq.annotations['ambiguous'] = True
-            if 'msgs' not in seq.annotations:
-                seq.annotations['msgs'] = []
-            seq.annotations['msgs'].append(msg)
-        else:
-            seq.annotations['ambiguous'] = False
-
+        annotate_ambiguos_base(seq, iupac=iupac, reg=reg)
     return seqlist
+
+
+def annotate_ambiguos_base(seq, iupac=None, reg=None):
+    if iupac is None:
+        iupac = IUPACmapping()
+    if reg is None:
+        reg = re.compile("[^" + "^".join(iupac.unambiguous) + "]+", re.IGNORECASE)
+    m = re.search(reg, str(seq.seq))
+    if m:
+        msg = "Ambiguous base detected in {}, violating base {}, pos {}".format(
+            seq.id,
+            m.group(),
+            m.start()
+        )
+        ml.warning(msg)
+        seq.annotations['ambiguous'] = True
+        if 'msgs' not in seq.annotations:
+            seq.annotations['msgs'] = []
+        seq.annotations['msgs'].append(msg)
+    else:
+        seq.annotations['ambiguous'] = False
+
+    return seq
 
 
 class IUPACmapping(object):

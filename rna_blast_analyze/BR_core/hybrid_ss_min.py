@@ -9,7 +9,7 @@ from Bio import SeqIO
 from rna_blast_analyze.BR_core.BA_support import rebuild_structures_output_from_pred, ct2db
 from rna_blast_analyze.BR_core.config import CONFIG
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 def _run_hybrid_ss_min_wrapper(seq, P, W, M):

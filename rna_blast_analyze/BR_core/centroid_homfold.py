@@ -12,7 +12,7 @@ from rna_blast_analyze.BR_core import BA_support
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.exceptions import AmbiguousQuerySequenceException
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 def run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_params='', outfile=None):

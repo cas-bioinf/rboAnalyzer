@@ -24,7 +24,7 @@ from rna_blast_analyze.BR_core.infer_homology import alignment_column_conservati
 from rna_blast_analyze.BR_core.par_distance import compute_distances
 from rna_blast_analyze.BR_core.stockholm_parser import read_st, trim_cmalign_sequence_by_refseq_one_seq
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 def _parse_first_record_only(file):

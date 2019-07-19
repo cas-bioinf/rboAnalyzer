@@ -69,7 +69,6 @@ class Pseudoargs(Namespace):
         self.filter_by_eval = filter_by_eval
         self.filter_by_bitscore = filter_by_bitscore
         self.skip_missing = skipp_missing
-        self.logmsgs = []
         self.dev_pred = dev_pred
         self.enable_overwrite = enable_overwrite
         self.db_type = db_type

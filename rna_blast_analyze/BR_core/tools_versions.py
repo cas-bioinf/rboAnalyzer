@@ -34,7 +34,7 @@ shortcuts2names = {v: k for k, v in names2shortcuts.items()}
 method_required_tools = {
     'locarna': {'locarna', 'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'refold.pl', 'rfam'},
     'simple': {'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'rfam'},
-    'joined': {'locarna', 'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'refold.pl', 'rfam'},
+    'meta': {'locarna', 'infernal', 'blastdbcmd', 'clustalo', 'RNAfold', 'RNAplot', 'RNAdistance', 'muscle', 'refold.pl', 'rfam'},
     'rfam-Rc': {'rfam'},
     'rfam-sub': {'mfold', 'rfam'},
     'rnafold': set(),

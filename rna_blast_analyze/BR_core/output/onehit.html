@@ -132,9 +132,11 @@ To save the image:
         {% endif %}
         {% if len(data.msgs) != 0 %}
             <div class="warnmsgs">
+                <p class="warn">
                 {% for msg in data.msgs %}
-                    <p class="warn">{{msg}}</p>
+                   {{msg}}<br>
                 {% endfor %}
+                </p>
             </div>
         {% endif %}
         </div>
@@ -169,7 +171,12 @@ To save the image:
         {% if len(foo.logdup) != 0 %}
             <p><u>program log:</u></p>
             {% for s in foo.logdup %}
-                <p class="warn">{{s}}</p>
+                <p class="warn">
+                {% set texts = s.split('\n') %}
+                {% for t in texts %}
+                    {{t}}<br>
+                {% endfor %}
+                </p>
             {% endfor %}
         {% endif %}
     </div>

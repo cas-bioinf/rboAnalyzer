@@ -12,7 +12,7 @@ from rna_blast_analyze.BR_core.tools_versions import blast_minimal_version, loca
     centroid_homfold_minimal_version, turbofold_minimal_version,\
     mfold_minimal_version, method_required_tools, blast_maximal_version
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 def verify_query_blast(blast, query):

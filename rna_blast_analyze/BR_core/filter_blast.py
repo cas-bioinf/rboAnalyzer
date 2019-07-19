@@ -2,7 +2,7 @@ import operator
 import logging
 from rna_blast_analyze.BR_core.fname import fname
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 OPERATIONS = {
     '>': operator.gt,

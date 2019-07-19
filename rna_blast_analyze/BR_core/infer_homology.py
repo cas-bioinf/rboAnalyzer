@@ -13,7 +13,7 @@ from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
 import shutil
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 def find_and_extract_cm_model(args, analyzed_hits):

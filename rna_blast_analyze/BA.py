@@ -6,19 +6,9 @@ import sys
 import json
 import os
 
-import logging
-
 # this must precede the CONFIG
 from rna_blast_analyze.BR_core.tools_versions import method_required_tools, prediction_methods, pred_params
 from rna_blast_analyze.BR_core.parse_accession import accession_regex
-
-logger = logging.getLogger('rna_blast_analyze')
-
-ch = logging.StreamHandler()
-formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
-
-logger.addHandler(ch)
 
 cfg_name = '--config_file'
 download_name = '--download_rfam'
@@ -115,12 +105,12 @@ def f_parser():
         '--mode',
         type=str,
         default='locarna',
-        choices=['simple', 'locarna', 'joined'],
+        choices=['simple', 'locarna', 'meta'],
         help=(
             'Choose mode of hit elongation: '
             'simple (extend by unaligned parts of query) '
             'locarna (run locarna algorithm - uses secondary structure for better alignment) '
-            'joined (uses both methods and chooses the alignment which has better RSEARCH score).'
+            'meta (uses both methods and chooses the alignment which has better RSEARCH score).'
         )
     )
     parameters_group.add_argument(
@@ -207,7 +197,7 @@ def f_parser():
         type=str,
         metavar='prediction_method_name',
         default=['TurboFold', 'rfam-Rc', 'rnafold'],
-        choices=prediction_methods,
+        choices=prediction_methods | {'all'},
         help=(
             'Prediction method to use. Multiple prediction methods are allowed. '
             'Possible values: {}'.format(' '.join(prediction_methods))
@@ -244,7 +234,7 @@ def f_parser():
         type=str,
         default='--struct-local=0 --sequ-local=0 --free-endgaps=++++',
         help=argparse.SUPPRESS
-        # help="Parameters for locarna execution. Used when 'mode' is 'locarna' or 'joined'."
+        # help="Parameters for locarna execution. Used when 'mode' is 'locarna' or 'meta'."
     )
     parameters_group.add_argument(
         '--locarna_anchor_length',
@@ -370,6 +360,9 @@ def f_parser():
         print('Using centroid-fast preset')
         params['centroid-fast']['max_seqs_in_prediction'] = 1
 
+    if 'all' in args.prediction_method:
+        args.prediction_method = list(prediction_methods)
+
     # check if prediction method params are valid
     check_params(params)
 
@@ -418,14 +411,22 @@ def main():
 def lunch_with_args(args):
     # ========= imports ==========
     # move slow imports here, so the argcomplete would be fast
+    import logging
     from rna_blast_analyze.BR_core import BA_verify
     from rna_blast_analyze.BR_core import cmalign
     from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper_inner
     from rna_blast_analyze.BR_core.expand_by_BLAST import blast_wrapper_inner
     from rna_blast_analyze.BR_core.expand_by_joined_pred_with_rsearch import joined_wrapper_inner
     from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
+    from rna_blast_analyze.BR_core.continue_interrupted import continue_computation
 
-    args.logmsgs = []
+    logger = logging.getLogger('rboAnalyzer')
+
+    ch = logging.StreamHandler()
+    formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+
+    logger.addHandler(ch)
 
     # set logger level
     logger.setLevel(max(3 - args.verbose, 1) * 10)
@@ -439,7 +440,7 @@ def lunch_with_args(args):
         fh.setFormatter(formatter)
         logger.addHandler(fh)
 
-    start_msg = 'rboAnalyzer start.'
+    start_msg = 'STATUS: starting rboAnalyzer...'
     print(start_msg)
     logger.info(start_msg)
 
@@ -467,12 +468,32 @@ def lunch_with_args(args):
     BA_verify.check_necessery_tools(methods=args.prediction_method + [args.mode])
 
     # ========= run =========
+    choice = 'no'
+    if os.path.exists(args.blast_in + '.tmp_rboAnalyzer'):
+        msg = 'An intermediate backup file was found from interrupted computation of BLAST output file:\n' \
+              '{}'.format(args.blast_in)
+        sys.stdout.write(msg)
+
+        stat_msg = '\nDo you want to continue the computation from that point? [yes/no] [ENTER] '
+        while True:
+            sys.stdout.write(stat_msg)
+            choice = input().lower()
+            if choice in {'yes', 'no'}:
+                sys.stdout.write('\n')
+                break
+
+    last_iter = -1
+    if choice == 'yes':
+        # run the continue code
+        # set_last_iter
+        last_iter = continue_computation(args.blast_in + '.tmp_rboAnalyzer')
+
     if args.mode == 'simple':
-        _, result = blast_wrapper_inner(args)
+        _, result = blast_wrapper_inner(args, start_from=last_iter+1)
     elif args.mode == 'locarna':
-        _, result = locarna_anchored_wrapper_inner(args)
-    elif args.mode == 'joined':
-        _, result = joined_wrapper_inner(args)
+        _, result = locarna_anchored_wrapper_inner(args, start_from=last_iter+1)
+    elif args.mode == 'meta':
+        _, result = joined_wrapper_inner(args, start_from=last_iter+1)
     else:
         raise ValueError('Unknown option - should be cached by argparse.')
     return result

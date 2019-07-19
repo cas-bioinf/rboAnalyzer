@@ -166,7 +166,7 @@ class TestExecMultiQuery(unittest.TestCase):
             '--blast_in', self.blast_xml,
             '--blast_query', self.query_double,
             '--blast_db', blast_db,
-            '--mode', 'joined',
+            '--mode', 'meta',
             '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
             '--b_type', 'xml',
             '--html', self.html,

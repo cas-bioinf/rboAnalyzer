@@ -15,7 +15,7 @@ from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.stockholm_parser import stockholm_read
 from rna_blast_analyze.BR_core.fname import fname
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 # this file holds files needed for running and parsing infernal tools
 
 

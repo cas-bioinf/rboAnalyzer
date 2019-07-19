@@ -66,21 +66,21 @@ conda install -c conda-forge -c bioconda rboAnalyzer
 
  __Prerequisites__
 * python >= 3.4
-* ncbi-blast+ >= 2.6
-* locarna >= 1.9
-* infernal >= 1.1.2
-* clustalo
-* muscle
+* ncbi-blast+ >= 2.6, < 2.8.1
+* locarna >= 1.9.2
+* infernal >= 1.1
+* clustalo >= 1.2.4
+* muscle >= 3.8.31
 
 For prediction:
-* viennarna (with refold.pl in PATH)
-* centroid_homfold
+* viennarna >=2.3.5 (with refold.pl in PATH)
+* centroid_homfold >= 0.0.15
 * RNAstructure >= 6.0 (TurboFold)
 
 Optional (some prediction methods are not available without):
 * UNAFold >= 3.8
 
-Clone or download this repository. Go to root folder and run
+Clone or download this repository, unpack it if needed. Go to root folder and run
 
 ```shell
 python3 setup.py install
@@ -92,7 +92,7 @@ To test it, restart terminal (close and open new) and run
 ```shell
 rboAnalyzer --version
 ```
-Which should return number of the installed version.
+Which should return the version number.
 
 ## Preparation
 
@@ -133,7 +133,7 @@ register-python-argcomplete rboAnalyzer >> ~/.bashrc
 The rboAnalyzer needs to get relevant 5' and 3' regions of subject sequence of HSPs, for this we use the BLAST database used in the BLAST search.
 For each analysis you need to provide the nucleotide BLAST database containing whole sequences (complete genomes, etc.) for the sequence ids present in the BLAST output.
 
-The procedure on how to get the BLAST databases for the examples is described in the Example section. For the general case, please see the BLAST databases section
+The procedure on how to get the BLAST databases for the examples is described in the Example section. For the general information, please see the BLAST databases [section](#blastdatabase).
 
 ## Basic Usage
 ### Help
@@ -151,10 +151,10 @@ Examples are provided in example directory.
 
 To try examples you will need to:
 
-  1. Install the rboAnalyzer and download Rfam [how to](#rfam_download).
+  1. Install the rboAnalyzer and download Rfam. [How to?](#rfamdownload).
 
-  2. Obtain a copy of `example` directory
-   [here](https://github.com/cas-bioinf/rna_blast_analyze/tree/master/example).
+  2. Obtain a copy of `example` directory. If you've cloned or downloaded the program you should already have it.
+   Otherwise it is [here](https://github.com/cas-bioinf/rna_blast_analyze/tree/master/example).
 
   3. cd to `example` directory.
 
@@ -186,10 +186,10 @@ Analyzing subset of NCBI blast HITs for [6S RNA](https://doi.org/10.1038%2F22914
 3) The output is single html file. You can scroll through analyzed HSPs, show the genomic loci of the HSP and select data to export.
 
 #### Example 2:
-Analyzing possible remote homologs for [MS1 RNA](https://doi.org/10.1093%2Fnar%2Fgku793).
+Analyzing possible remote homologs for [MS1 RNA](https://doi.org/10.1093%2Fnar%2Fgku793). This take about 10 minutes on average pc.
 
 ```shell
-# update genome database with new sequences
+# update the genome database with new sequences
 genomes_from_blast -e YOUR_EMAIL -in MS1_BLAST_output.txt -o genomes.bdb
 
 # run the rboAnalyzer
@@ -200,7 +200,7 @@ The BLAST was run with database where Streptomycetaceae and Mycobacteriaceae fam
 As the MS1 RNA is primarily known from Mycobacteriaceae family we can expect
   incomplete HITs and many false positives.
 
-Also you can notice, that the BLAST output is now in text format, the rboAnalyzer accepts BLAST output in plain text and xml.
+Also you can notice, that the BLAST output was in text format, the rboAnalyzer accepts BLAST output in plain text and xml.
 
 The BLAST database is obtained with similar command as in previous example.
 Since the output BLAST database file is the same as before the `genomes_from_blast`
@@ -254,6 +254,8 @@ These are:
   If not, you must add path to `RNAstructure/data_tables` to config.txt (see docs/config_how_to.md).
 -->
 
+<a name="blastdatabase" id="blastdatabase"></a>
+
 ### BLAST databases
 
 #### BLAST on NCBI web
@@ -278,11 +280,11 @@ This code snippet can be used to obtain and update the database:
   If you do not wish to download whole blastdb you may use prepared script
  `genomes_from_blast`, which downloads only the needed sequences
   (those in the BLAST output) and build the blastdb from them.
-  This command will download all needed genomes and create blast database for you.
+  This command will download all needed genomes and create BLAST database for you.
     ```shell
     # The `YOUR_EMAIL` is needed so the NCBI would contact you in case of missuse of their resources.
 
-    genomes_from_blast -e YOUR_EMAIL -in BLAST_OUT_FILE -o FASTA_FILE_OUT
+    genomes_from_blast -e YOUR_EMAIL -in BLAST_OUT_FILE -o BLAST_DATABASE_OUT
     ```
 
 #### Custom BLAST database
@@ -322,6 +324,10 @@ RNA, 18 no. 5, pp. 900-14, 2012. <https://doi.org/10.1261/rna.029041.111>, [webs
  Methods in Molecular Biology™, vol 453. Humana Press. <https://doi.org/10.1007/978-1-60327-429-6_1>, [website](http://unafold.rna.albany.edu/)
 - Biopython: Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics.
  Bioinformatics 2009 Jun 1; 25(11) 1422-3. <http://dx.doi.org/10.1093/bioinformatics/btp163>, [website](https://biopython.org/)
+- NumPy [website](www.numpy.org)
+- Pandas [website](pandas.pydata.org)
+- Jinja2 [website](jinja.pocoo.org)
+- Matplotlib [website](www.matplotlib.org)
 
 ## Funding
 

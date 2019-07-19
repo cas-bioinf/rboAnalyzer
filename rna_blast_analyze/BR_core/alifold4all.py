@@ -7,7 +7,7 @@ import shlex
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 def compute_clustalo_clasic(file, clustalo_params=''):

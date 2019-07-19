@@ -10,15 +10,18 @@ class BlastSearchRecompute(object):
     """
     wrapper class for whole blast search
     """
-    def __init__(self):
+    def __init__(self, args, query, iteration):
         self.hits = HitList()
         self.pandas = None
-        self.query = None
+        self.query = query
         self.creation = time.time()
         self._runstat = 1
-        self.args = None
+        self.args = args
         self.date_of_run = time.localtime()
         self.best_matching_model = None
+        self.iteration = iteration
+        self.multi_query = False
+        self.msgs = []
 
     def stop_timer(self):
         if self._runstat:
@@ -170,11 +173,14 @@ class BlastSearchRecompute(object):
         return [hit.extension for hit in self.hits]
 
     def copy(self):
-        new = BlastSearchRecompute()
-        new.args = copy.deepcopy(self.args)
+        new = BlastSearchRecompute(
+            copy.deepcopy(self.args),
+            self.query,
+            self.iteration
+        )
         new.hits = self.hits.copy()
         new.pandas = self.pandas
-        new.query = self.query
+        new.multi_query = self.multi_query
         return new
 
     def extract_all_structures(self):
@@ -208,42 +214,6 @@ class HitList(list):
         if not isinstance(p_object, Subsequences):
             raise Exception('passed object is not of expected class (Subsequences)')
         super(HitList, self).append(p_object)
-
-
-def to_tab_delim_line(input_args):
-    A = vars(input_args)
-    B = sorted(A.keys())
-    if input_args.pred_params:
-        pp = str(input_args.pred_params)
-        l = [str(A[key]) for key in B]
-        ol = []
-        for p in input_args.pred_params:
-            o = []
-            flag = '|pred_params|' + re.sub(' ', '', str(p))
-            for i in l:
-                if i == pp:
-                    i = re.sub(' ', '', str(p))
-                if '.dump' in i:
-                    spa = i.split('.')
-                    i = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                if '.pandas_dump' in i:
-                    spa = i.split('.')
-                    i = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                if '.o_tbl' in i:
-                    spa = i.split('.')
-                    i = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                if '.dill' in i:
-                    spa = i.split('.')
-                    i = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                if '.pdf_out' in i:
-                    spa = i.split('.')
-                    i = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                o.append(i)
-            ol.append('\t'.join(o))
-        line = '\n'.join(ol)
-    else:
-        line = '\t'.join([str(i) for i in A.values()])
-    return line
 
 
 def to_tab_delim_line_simple(input_args):

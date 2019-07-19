@@ -28,11 +28,10 @@ setup(
     },
     install_requires=[
         'matplotlib',
-        'dill',
         'numpy',
         'Jinja2>=2, <3',
         'pandas>=0.22',
-        'biopython',
+        'biopython>=1.72',
         'argcomplete',
     ],
     packages=['rna_blast_analyze', 'rna_blast_analyze.BR_core', 'rna_blast_analyze.BR_core.output'],

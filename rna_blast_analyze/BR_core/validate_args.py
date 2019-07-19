@@ -4,7 +4,7 @@ import logging
 import rna_blast_analyze.BR_core.tools_versions as tools
 from rna_blast_analyze.BR_core.filter_blast import OPERATIONS
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 SPECIAL_CHARS = "`!@#$^&*(){}|[]\\;\'\",<>?"
 
@@ -146,8 +146,6 @@ def validate_args(args):
     if precheck_file_exist(args.html) and not args.enable_overwrite:
         ml.error("Refusing to overwrite 'html' {}.".format(args.html))
         return False
-
-    assert isinstance(args.logmsgs, list)
 
     if any(set(args.prediction_method) - tools.prediction_methods):
         ml.error("Required prediction method(s) not avalible: {}.".format(

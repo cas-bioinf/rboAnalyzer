@@ -17,7 +17,7 @@ from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.cmalign import get_cm_model, run_cmfetch, RfamInfo
 from rna_blast_analyze.BR_core.validate_args import validate_args
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 def joined_wrapper(args_inner, shared_list=None):
@@ -26,7 +26,7 @@ def joined_wrapper(args_inner, shared_list=None):
     return ret_line
 
 
-def joined_wrapper_inner(args_inner, shared_list=None):
+def joined_wrapper_inner(args_inner, shared_list=None, start_from=0):
     ml.debug(fname())
     # update params if different config is requested
     CONFIG.override(tools_paths(args_inner.config_file))
@@ -48,7 +48,6 @@ def joined_wrapper_inner(args_inner, shared_list=None):
         args.prediction_method = []
         args.pred_params = dict()
         args.dump = None
-        args.dill = None
         args.pdf_out = None
         args.pandas_dump = None
         args.repredict_file = repred_file + str(i)
@@ -88,11 +87,13 @@ def joined_wrapper_inner(args_inner, shared_list=None):
         # update -> use only blast and locarna
         #  also combine repredict file here
 
-        analyzed_hits = BlastSearchRecompute()
-        analyzed_hits.args = args_inner
+        if start_from > iteration:
+            if start_from + 1 == len(p_blast):
+                print('skipping query: {} - iteration {}'.format(b_hits.query.id, iteration))
+            continue
 
-        # add query from simple extension to analyzed hits of joined pred (need cm bit score for html out)
-        analyzed_hits.query = query = b_hits.query
+        analyzed_hits = BlastSearchRecompute(args_inner, b_hits.query, iteration)
+        analyzed_hits.multi_query = multi_query
         analyzed_hits.best_matching_model = b_hits.best_matching_model
 
         all_analyzed.append(analyzed_hits)
@@ -214,9 +215,6 @@ def joined_wrapper_inner(args_inner, shared_list=None):
                     if getattr(args_inner, 'pandas_dump', False):
                         spa = args_inner.pandas_dump.split('.')
                         ah.args.pandas_dump = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                    if getattr(args_inner, 'dill', False):
-                        spa = args_inner.dill.split('.')
-                        ah.args.dill = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
                     if getattr(args_inner, 'pdf_out', False):
                         spa = args_inner.pdf_out.split('.')
                         ah.args.pdf_out = '.'.join(spa[:-1]) + flag + '.' + spa[-1]

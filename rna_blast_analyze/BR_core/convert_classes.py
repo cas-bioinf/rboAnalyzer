@@ -196,20 +196,27 @@ def blastsearchrecompute2dict(bsr):
         'args': vars(bsr.args),
         'date_of_run': list(bsr.date_of_run),
         'best_matching_model': bsr.best_matching_model,
+        'iteration': bsr.iteration,
+        'multi_query': bsr.multi_query,
+        'msgs': bsr.msgs
     }
     return out
 
 
 def blastsearchrecomputefromdict(indict):
-    out = rna_blast_analyze.BR_core.BA_methods.BlastSearchRecompute()
+    out = rna_blast_analyze.BR_core.BA_methods.BlastSearchRecompute(
+        Namespace(**indict['args']),
+        seqrecordfromdict(indict['query']),
+        indict.get('iteration', 0)
+    )
     out.hits = hitlistfromdict(indict['hits'])
-    out.query = seqrecordfromdict(indict['query'])
     out.creation = indict['creation']
     out._runstat = indict['_runstat']
-    out.args = Namespace(**indict['args'])
     out.date_of_run = time.struct_time(indict['date_of_run'])
+    out.multi_query = indict.get('multi_query', False)
     if 'best_matching_model' in indict:
         out.best_matching_model = indict['best_matching_model']
+    out.msgs = indict.get('msgs', [])
     return out
 
 

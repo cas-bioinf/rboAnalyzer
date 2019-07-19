@@ -1,16 +1,11 @@
 import os
 import unittest
 import re
-import logging
 
 from test_func.test_execution import fwd, test_data_dir
 from test_func.pseudoargs_class import Pseudoargs
-from rna_blast_analyze.BR_core.expand_by_BLAST import blast_wrapper_inner
-from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper_inner
-from rna_blast_analyze.BR_core.expand_by_joined_pred_with_rsearch import joined_wrapper_inner
+from rna_blast_analyze.BA import lunch_with_args
 from Bio import SeqIO
-
-logger = logging.getLogger()
 
 blast_in = os.path.join(fwd, test_data_dir, 'edge_cases_out.txt')
 blast_query = os.path.join(fwd, test_data_dir, 'edge_cases_q.fa')
@@ -34,9 +29,10 @@ class TestExecution(unittest.TestCase):
             self.seqs = [s for s in SeqIO.parse(fh, format='fasta')]
 
     def test_logs_and_correct_seqs_simple(self):
-        logger.setLevel('WARNING')
-        with self.assertLogs('rna_blast_analyze.BR_core.extend_hits', level='WARNING') as l:
-            _, out = blast_wrapper_inner(self.args, [])
+        with self.assertLogs('rboAnalyzer', level='WARNING') as l:
+            args = self.args
+            args.mode = 'simple'
+            out = lunch_with_args(args)
 
             for o in l.output:
                 self.assertIn('Sequence cannot be extended sufficiently', o.split(':')[-1])
@@ -60,9 +56,10 @@ class TestExecution(unittest.TestCase):
                             self.assertEqual(ss, rec_s)
 
     def test_logs_and_correct_seqs_locarna(self):
-        logger.setLevel('WARNING')
-        with self.assertLogs('rna_blast_analyze.BR_core.extend_hits', level='WARNING') as l:
-            _, out = locarna_anchored_wrapper_inner(self.args, [])
+        with self.assertLogs('rboAnalyzer', level='WARNING') as l:
+            args = self.args
+            args.mode = 'locarna'
+            out = lunch_with_args(args)
 
             for o in l.output:
                 self.assertIn('Sequence cannot be extended sufficiently', o.split(':')[-1])
@@ -86,9 +83,10 @@ class TestExecution(unittest.TestCase):
                             self.assertEqual(ss, rec_s)
 
     def test_logs_and_correct_seqs_joined(self):
-        logger.setLevel('WARNING')
-        with self.assertLogs('rna_blast_analyze.BR_core.extend_hits', level='WARNING') as l:
-            _, out = joined_wrapper_inner(self.args, [])
+        with self.assertLogs('rboAnalyzer', level='WARNING') as l:
+            args = self.args
+            args.mode = 'meta'
+            out = lunch_with_args(args)
 
             for o in l.output:
                 self.assertIn('Sequence cannot be extended sufficiently', o.split(':')[-1])

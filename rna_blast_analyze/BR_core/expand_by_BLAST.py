@@ -23,7 +23,7 @@ from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.cmalign import run_cmfetch, get_cm_model, RfamInfo
 from rna_blast_analyze.BR_core.validate_args import validate_args
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 def blast_wrapper(args_inner, shared_list=None):
@@ -129,7 +129,7 @@ def create_blast_only_report_object(exp_hit, query_len):
 
     pos_match = re.search(str(ns.seq), str(ns.seq), flags=re.IGNORECASE)
     if not pos_match:
-        raise Exception('Subsequnce not found in supersequence.')
+        raise Exception('Subsequence not found in supersequence.')
 
     bl = ns.annotations['blast'][1]
 
@@ -144,7 +144,10 @@ def create_blast_only_report_object(exp_hit, query_len):
 
     # if whole subject sequence too short, this assertion will fail
     if tss or tse or tes or tee:
-        ml.warning('Skipping check ({}) - subject sequence too short.'.format(ns.id))
+        msg = 'STATUS: Skipping sequence check ({}) - subject sequence too short.'.format(ns.id)
+        ml.info(msg)
+        if ml.level > 20:
+            print(msg)
     else:
         assert len(ns.seq) == abs(bls - ble) + 1
         assert bls == ns.annotations['extended_start']
@@ -155,7 +158,7 @@ def create_blast_only_report_object(exp_hit, query_len):
     return hit
 
 
-def blast_wrapper_inner(args_inner, shared_list=None):
+def blast_wrapper_inner(args_inner, shared_list=None, start_from=0):
     ml.debug(fname())
     if not shared_list:
         shared_list = []
@@ -188,6 +191,11 @@ def blast_wrapper_inner(args_inner, shared_list=None):
     ml_out_line = []
     all_analyzed = []
     for iteration, (bhp, query) in enumerate(itertools.zip_longest(p_blast, query_seqs)):
+        if start_from > iteration:
+            if start_from + 1 == len(p_blast):
+                print('skipping query: {} - iteration {}'.format(query.id, iteration))
+            continue
+
         print('processing query: {}'.format(query.id))
         ml.info('processing query: {}'.format(query.id))
         # check query and blast
@@ -198,9 +206,8 @@ def blast_wrapper_inner(args_inner, shared_list=None):
 
         BA_verify.verify_query_blast(blast=bhp, query=query)
 
-        analyzed_hits = BlastSearchRecompute()
-        analyzed_hits.args = args_inner
-        analyzed_hits.query = query
+        analyzed_hits = BlastSearchRecompute(args_inner, query, iteration)
+        analyzed_hits.multi_query = multi_query
         all_analyzed.append(analyzed_hits)
 
         # run cm model build
@@ -237,7 +244,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 extra=10,
                 blast_regexp=args_inner.blast_regexp,
                 skip_missing=args_inner.skip_missing,
-                msgs=args_inner.logmsgs,
+                msgs=analyzed_hits.msgs,
             )
         elif args_inner.db_type in ["fasta", "gb", "server"]:
             shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits_from_fasta(
@@ -247,7 +254,7 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                 extra=10,
                 blast_regexp=args_inner.blast_regexp,
                 skip_missing=args_inner.skip_missing,
-                msgs=args_inner.logmsgs,
+                msgs=analyzed_hits.msgs,
                 format=args_inner.db_type,
             )
         else:
@@ -341,9 +348,6 @@ def blast_wrapper_inner(args_inner, shared_list=None):
                     if getattr(args_inner, 'pandas_dump', False):
                         spa = args_inner.pandas_dump.split('.')
                         ah.args.pandas_dump = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                    if getattr(args_inner, 'dill', False):
-                        spa = args_inner.dill.split('.')
-                        ah.args.dill = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
                     if getattr(args_inner, 'pdf_out', False):
                         spa = args_inner.pdf_out.split('.')
                         ah.args.pdf_out = '.'.join(spa[:-1]) + flag + '.' + spa[-1]

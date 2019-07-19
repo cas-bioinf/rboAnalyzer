@@ -1,6 +1,6 @@
 import logging
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 try:
     import RNA

@@ -9,7 +9,7 @@ from Bio import SeqIO
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 def load_genome(root_dir, accession, start, end):

@@ -1,7 +1,7 @@
 import configparser
 import os
 import logging
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 # Beware of lazy or conditional import with config!!!! It would overwrite custom config file.
 
 

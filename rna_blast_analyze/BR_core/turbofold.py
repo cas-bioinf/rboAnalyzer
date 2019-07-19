@@ -13,18 +13,19 @@ from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.decorators import timeit_decorator
 from rna_blast_analyze.BR_core.fname import fname
 
-ml = logging.getLogger(__name__)
+ml = logging.getLogger('rboAnalyzer')
 
 
 @timeit_decorator
 def turbofold_fast(all_seqs, seqs2predict, query, cpu, n, turbofold_params, len_diff):
-    # ambiguos sequence cannot be predicted with turbofold
-    # do not predict sequence twice
-    # seqs2predict must be subset of all_seqs
-    # todo add test for this
-
+    """Run Turbo-fast prediction
+    - ambiguous sequences cannot be predicted with TurboFold
+    - do not predict sequence twice
+    - seqs2predict must be subset of all_seqs
+    """
     ml.debug(fname())
 
+    # this is backup (in rboAnalyzer this is handled on higher level)
     if query.annotations['ambiguous']:
         msgfail = "Query sequence contains ambiguous characters. Can't use Turbo-fast."
         ml.error(msgfail)
@@ -40,7 +41,7 @@ def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params):
     # do not predict sequence twice
     ml.debug(fname())
 
-    msg_short_list = 'Turbofold: Number of sequences is less then required.'
+    msg_short_list = 'Turbo-fast: Number of sequences is less then required.'
 
     if not len(nrset) == len(BA_support.filter_ambiguous_seqs_from_list(nrset)) == len(BA_support.non_redundant_seqs(nrset)):
         msgfail = 'Wrong nr set specification.'
@@ -54,17 +55,21 @@ def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params):
     list2predict = []
     for seq in all_seqs:
         if seq.annotations.get('ambiguous', False):
-            ml.warning('Skipping TurboFold prediction for {} (ambiguous base)'.format(seq.id))
+            ml.warning('Skipping prediction for {} (ambiguous base)'.format(seq.id))
             continue
         seq_set = _prepare_set_n(seq, nrset, n)
 
         if len(seq_set) < 2:
-            ml.error("Turbofold can't be used with less then 2 sequences.")
-            raise rna_blast_analyze.BR_core.exceptions.NoHomologousSequenceException
+            msgfail = "Turbo-fast can't be used with less then 2 sequences - {}".format(seq.id)
+            ml.warning(msgfail)
+            if ml.level > 30:
+                print(msgfail)
+            continue
 
         if len(seq_set) < n:
-            ml.warning(msg_short_list)
-            seq.annotations['msgs'].append(msg_short_list)
+            msg_short_list_custom = msg_short_list + ' n={} ({})'.format(len(seq_set), n)
+            ml.info(msg_short_list_custom + ' ' + seq.id)
+            seq.annotations['msgs'].append(msg_short_list_custom)
         list2predict.append((seq_set, turbofold_params, seq.id))
 
     if cpu == 1:
@@ -167,7 +172,7 @@ def run_turbofold(sequences, params):
             r = call(cmd, stdout=FNULL, env=env)
 
         if r:
-            msgfail = 'Call to turbofold failed, cmd below:'
+            msgfail = 'Call to TurboFold failed, cmd below:'
             ml.error(msgfail)
             ml.error(cmd)
             raise ChildProcessError(msgfail)
@@ -205,7 +210,7 @@ def turbofold_with_homologous(all_sequences, nr_homologous, params, n, cpu):
     """
     ml.debug(fname())
 
-    msg_short_list = 'Turbofold: Number of sequences is less then required.'
+    msg_short_list = 'TurboFold: Number of sequences is less then required.'
 
     nr_homologous_set = {str(seq.seq) for seq in nr_homologous}
 
@@ -217,12 +222,16 @@ def turbofold_with_homologous(all_sequences, nr_homologous, params, n, cpu):
         seq_set = _prepare_set_n(seq, nr_homologous, n)
 
         if len(seq_set) < 2:
-            ml.error("Turbofold can't be used with less then 2 sequences.")
-            raise rna_blast_analyze.BR_core.exceptions.NoHomologousSequenceException
+            msgfail = "TurboFold: can't be used with less then 2 sequences - {}".format(seq.id)
+            ml.warning(msgfail)
+            if ml.level > 30:
+                print(msgfail)
+            continue
 
         if len(seq_set) < n:
-            ml.warning(msg_short_list)
-            seq.annotations['msgs'].append(msg_short_list)
+            msg_short_list_custom = msg_short_list + ' n={} ({})'.format(len(seq_set), n)
+            ml.info(msg_short_list_custom + ' ' + seq.id)
+            seq.annotations['msgs'].append(msg_short_list_custom)
         list2predict.append((seq_set, params, seq.id))
 
     if cpu == 1:

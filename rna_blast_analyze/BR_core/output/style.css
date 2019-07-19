@@ -177,6 +177,8 @@
     }
     p.warn {
         color: red;
+        font-family: Lucida Console, Lucida Sans Typewriter, monaco, Bitstream Vera Sans Mono, monospace;
+        font-size: 13px;
     }
     #headergrad {
         height: 50px;

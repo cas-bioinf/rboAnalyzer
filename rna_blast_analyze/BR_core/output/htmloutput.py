@@ -99,7 +99,7 @@ def _prepare_body(data):
         rr['pictures'] = _prepare_pictures(ext)
         rr['eval'] = onehit.source.annotations['blast'][1].expect
         rr['intid'] = str(i)
-        rr['msgs'] = onehit.source.annotations['msgs']
+        rr['msgs'] = set(onehit.source.annotations['msgs'] + onehit.extension.annotations['msgs'])
 
         # estimate the homology
         q_sc = data.query.annotations['cmstat']['bit_sc']
@@ -185,8 +185,9 @@ def _prepare_footer(data):
     p_text = []
     for arg in params:
         if arg == 'pred_params':
+            preprocessed_pred_params = {k: v for k, v in getattr(data.args, arg).items() if k in data.args.prediction_method}
             js = json.dumps(
-                getattr(data.args, arg),
+                preprocessed_pred_params,
                 sort_keys=True,
                 indent=4,
             )
@@ -201,6 +202,6 @@ def _prepare_footer(data):
         'command': command,
         'parameters': p_text,
         'exec_date': data.date_of_run,
-        'logdup': data.args.logmsgs
+        'logdup': data.msgs
     }
     return prepared_footer_data
