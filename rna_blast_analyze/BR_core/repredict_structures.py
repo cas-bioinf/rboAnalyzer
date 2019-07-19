@@ -133,7 +133,11 @@ def wrapped_ending_with_prediction(
     backup_file = args_inner.blast_in + '.tmp_rboAnalyzer'
     backup_base_obj = blastsearchrecompute2dict(analyzed_hits)
     with open(backup_file, 'w') as ff:
-        json.dump([backup_base_obj, {}, {}], ff, indent=2)
+        json.dump(
+            [backup_base_obj, {k: [seqrecord2dict(s) for s in v] for k, v in new_structures.items()}, exec_time],
+            ff,
+            indent=2
+        )
 
     # prediction methods present in analyzed_hits
     #  which might be loaded from intermediate file

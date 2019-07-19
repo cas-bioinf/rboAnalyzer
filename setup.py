@@ -15,7 +15,7 @@ package_data = {
 }
 
 setup(
-    name='rna_blast_analyze',
+    name='rboAnalyzer',
     version=version,
     description='Analyze BLAST output for RNA query',
     author='Marek Schwarz',
@@ -28,10 +28,10 @@ setup(
     },
     install_requires=[
         'matplotlib',
-        'numpy',
+        'numpy>=1.14',
         'Jinja2>=2, <3',
         'pandas>=0.22',
-        'biopython>=1.72',
+        'biopython>=1.72, <1.74',
         'argcomplete',
     ],
     packages=['rna_blast_analyze', 'rna_blast_analyze.BR_core', 'rna_blast_analyze.BR_core.output'],
