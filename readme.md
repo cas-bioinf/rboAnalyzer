@@ -66,7 +66,7 @@ conda install -c conda-forge -c bioconda rboAnalyzer
 
  __Prerequisites__
 * python >= 3.4 [link](https://www.python.org/downloads/)
-* ncbi-blast+ >= 2.6, < 2.8.1 [link](ftp://ftp.ncbi.nih.gov/blast/executables/blast+/2.7.1/)
+* ncbi-blast+ >= 2.6, < 2.8.1 <a href="ftp://ftp.ncbi.nih.gov/blast/executables/blast+/2.7.1/">link</a>
 * locarna >= 1.9.2 [link](https://github.com/s-will/LocARNA/releases/tag/v1.9.2.2)
 * infernal >= 1.1 [link](http://eddylab.org/infernal/)
 * clustalo >= 1.2.4 [link](http://www.clustal.org/omega/)
