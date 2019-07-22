@@ -65,20 +65,22 @@ conda install -c conda-forge -c bioconda rboAnalyzer
 ### Install from source
 
  __Prerequisites__
-* python >= 3.4 [link](https://www.python.org/downloads/)
-* ncbi-blast+ >= 2.6, < 2.8.1 [link](http://ftp.ncbi.nih.gov/blast/executables/blast+/2.7.1/)
-* locarna >= 1.9.2 [link](https://github.com/s-will/LocARNA/releases/tag/v1.9.2.2)
-* infernal >= 1.1 [link](http://eddylab.org/infernal/)
-* clustalo >= 1.2.4 [link](http://www.clustal.org/omega/)
-* muscle >= 3.8.31 [link](https://www.drive5.com/muscle/downloads.htm)
+- python >= 3.4 [link](https://www.python.org/downloads/)
+- ncbi-blast+ >= 2.6, < 2.8.1 [link](http://ftp.ncbi.nih.gov/blast/executables/blast+/2.7.1/)
+- locarna >= 1.9.2 [link](https://github.com/s-will/LocARNA/releases/tag/v1.9.2.2)
+- infernal >= 1.1 [link](http://eddylab.org/infernal/)
+- clustalo >= 1.2.4 [link](http://www.clustal.org/omega/)
+- muscle >= 3.8.31 [link](https://www.drive5.com/muscle/downloads.htm)
 
 For prediction:
-* viennarna >=2.3.5 (with refold.pl in PATH) [link](https://www.tbi.univie.ac.at/RNA/download/sourcecode/2_3_x/ViennaRNA-2.3.5.tar.gz)
-* centroid_homfold >= 0.0.15 [link](https://github.com/satoken/centroid-rna-package/releases/tag/v0.0.15)
-* RNAstructure >= 6.0 (TurboFold) [link](https://rna.urmc.rochester.edu/RNAstructure.html)
+- viennarna >=2.3.5 (with refold.pl in PATH) [link](https://www.tbi.univie.ac.at/RNA/download/sourcecode/2_3_x/ViennaRNA-2.3.5.tar.gz)   
+  don't forget to add `refold.pl` to your `PATH`. The script is located in the `ViennaRNA-[version]/src/Utils/`
+- centroid_homfold >= 0.0.15 [link](https://github.com/satoken/centroid-rna-package/releases/tag/v0.0.15)
+- RNAstructure >= 6.0 (TurboFold - Text (Command Line) Interfaces ) [link](https://rna.urmc.rochester.edu/RNAstructure.html)   
+  don't forget to set the `DATAPATH` environment variable [link](http://rna.urmc.rochester.edu/Text/Thermodynamics.html)
 
 Optional (some prediction methods are not available without):
-* UNAFold >= 3.8 [link](http://unafold.rna.albany.edu/?q=DINAMelt/software)
+- UNAFold >= 3.8 [link](http://unafold.rna.albany.edu/?q=DINAMelt/software)
 
 Clone or download this repository, unpack it if needed. Go to root folder and run
 
