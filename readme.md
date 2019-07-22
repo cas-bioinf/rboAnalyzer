@@ -82,7 +82,7 @@ For prediction:
 Optional (some prediction methods are not available without):
 - UNAFold >= 3.8 [link](http://unafold.rna.albany.edu/?q=DINAMelt/software)
 
-Clone or download this repository, unpack it if needed. Go to root folder and run
+Clone or download this repository, unpack it if needed. Go to directory with the source code for the rboAnalyzer and run
 
 ```shell
 python3 setup.py install
