@@ -553,8 +553,8 @@ def select_best_matching_model_from_cmscan(cmscan_data):
         ml.warning(
             'The CM with best E-val ({}) is not the same as the CM with best score ({}).'
             ' Returning as unknown model.'.format(
-                cmscan_data[ei]['target_name'],
-                cmscan_data[si]['target_name']
+                cmscan_data.loc[ei]['target_name'],
+                cmscan_data.loc[si]['target_name']
             )
         )
         return None
