@@ -52,11 +52,7 @@ Installation to virtual environment
 conda create -n YOUR_VIRTUAL_ENV_NAME
 
 # activate it
-# new conda version (> 4.4)
 conda activate YOUR_VIRTUAL_ENV_NAME
-
-## old conda version
-#source activate YOUR_VIRTUAL_ENV_NAME
 
 # run installation
 conda install -c conda-forge -c bioconda rboAnalyzer
@@ -176,10 +172,10 @@ Analyzing subset of NCBI blast HITs for [6S RNA](https://doi.org/10.1038%2F22914
  Here we describe the variant with downloading only the necessary sequences.
  This is done by using the `genomes_from_blast` by calling:
     ```shell
-    genomes_from_blast -e YOUR_EMAIL -in 6S_super_short.xml -o genomes.bdb
+    genomes_from_blast -e YOUR_EMAIL_ADDRESS -in 6S_super_short.xml -o genomes.bdb
     ```
-    The `YOUR_EMAIL` should be valid email on which NCBI staff could contact you
-    if they need to. It is not saved nor logged by the tool.
+    The `YOUR_EMAIL_ADDRESS` should be your valid email address on which NCBI staff could contact you
+    if they need to. It is not logged by the tool.
 
     The BLAST database with name `genomes.bdb` was created for you if everything was successful.
     You will need it in the next step.
@@ -198,7 +194,7 @@ Analyzing possible remote homologs for [MS1 RNA](https://doi.org/10.1093%2Fnar%2
 
 ```shell
 # update the genome database with new sequences
-genomes_from_blast -e YOUR_EMAIL -in MS1_BLAST_output.txt -o genomes.bdb
+genomes_from_blast -e YOUR_EMAIL_ADDRESS -in MS1_BLAST_output.txt -o genomes.bdb
 
 # run the rboAnalyzer
 rboAnalyzer -in MS1_BLAST_output.txt -q MS1_query.fasta -db genomes.bdb --html MS1_out.html --prediction_method rnafold rfam-Rc Turbo-fast --turbo_fast_preset
@@ -227,15 +223,15 @@ These are:
 
 
 ### Solving issues:
-- __One or more records not found__
+- __One or more records not found__   
   Reason: the blastdbcmd was not able to find sequence(s) with respective id(s) in provided database.
   This is due to inconsistency between the sequence accessions and the BLAST database.
   The inconsistency may rise from:
-    1. __sequence is not in the database__
+    1. __sequence is not in the database__   
       Solution: Provide correct blast database (update current or create new with `genomes_from_blast`).
-    2. __capturing regexp does not capture the accession number__
+    2. __capturing regexp does not capture the accession number__   
       Solution: Provide capturing regular expression (python 3 syntax) for capturing the sequence id from the fasta header (it must match the id to the BLAST database used)
-    3. __the BLAST database was created without the `-parse_seqids` flag__
+    3. __the BLAST database was created without the `-parse_seqids` flag__   
       Solution: Create new database from the sequences used to create new one, this time with `-parse_seqids` flag.
 
   Another option is to call pipeline with `--skip_missing` flag.
@@ -244,7 +240,7 @@ These are:
   Note that no HSP for the missing sequence will be included in pipeline output
   and some prediction methods may be influenced by the missing sequence.
 
-- __The `genomes_from_blast` failed__
+- __The `genomes_from_blast` failed__   
   The `genomes_from_blast` script has build in handling of failed downloads,
   but by default it tries only 10 times. If you are on unstable connection
   you might get better results by setting the `--retry` to some larger number.
@@ -259,7 +255,8 @@ These are:
 4. WARNING - The TurboFold is installed but the DATAPATH environment variable is not set nor present in config.txt
   Issued when TurboFold's DATAPATH env variable is not set.
   If everything was installed with conda to same environment, this will be resolved automatically.
-  If not, you must add path to `RNAstructure/data_tables` to config.txt (see docs/config_how_to.md).
+  If not, you must set the `DATAPATH` enviroment variable to path pointing to `RNAstructure/data_tables` directory.
+  Alternatively you can add path to `RNAstructure/data_tables` to config.txt (see docs/config_how_to.md).
 -->
 
 <a name="blastdatabase" id="blastdatabase"></a>
@@ -270,7 +267,7 @@ These are:
 
 If you used the BLAST using the NCBI web service against one of preformatted databased, you can download the whole database or use a `genomes_from_blast` script for download.
 
-1. downloading whole database (~50GB)
+1. downloading whole database (~50GB)   
 The latest databases are provided here [NCBI LATEST](ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST).
 Note that databases included in the BLAST database releases are not the latest ones.
 This code snippet can be used to obtain and update the database:
@@ -284,15 +281,15 @@ This code snippet can be used to obtain and update the database:
     wget -N ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST/[database name]*
     ```
 
-2. downloading only relevant sequences
+2. downloading only relevant sequences   
   If you do not wish to download whole blastdb you may use prepared script
  `genomes_from_blast`, which downloads only the needed sequences
   (those in the BLAST output) and build the blastdb from them.
   This command will download all needed genomes and create BLAST database for you.
     ```shell
-    # The `YOUR_EMAIL` is needed so the NCBI would contact you in case of missuse of their resources.
+    # The `YOUR_EMAIL_ADDRESS` is needed so the NCBI would contact you in case of missuse of their resources.
 
-    genomes_from_blast -e YOUR_EMAIL -in BLAST_OUT_FILE -o BLAST_DATABASE_OUT
+    genomes_from_blast -e YOUR_EMAIL_ADDRESS -in BLAST_OUT_FILE -o BLAST_DATABASE_OUTFILE_NAME
     ```
 
 #### Custom BLAST database
