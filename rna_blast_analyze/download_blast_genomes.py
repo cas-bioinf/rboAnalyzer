@@ -182,6 +182,21 @@ def retrieve_and_write(handle, accessions):
         )
         rollback_fasta(handle)
 
+    except KeyboardInterrupt:
+        sys.stdout.write(
+            'Script interrupted. Trying to rollback to last complete entry.'
+        )
+        rollback_fasta(handle)
+
+    except:
+        # bare except by desing
+        sys.stdout.write(
+            'Unknown exception. Trying to rollback to last complete entry.'
+        )
+        rollback_fasta(handle)
+        sys.stdout.write(' Exiting...')
+        exit(1)
+
 
 def rollback_fasta(handle):
     handle.seek(0, 2)

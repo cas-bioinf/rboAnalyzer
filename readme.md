@@ -65,7 +65,13 @@ conda install -c conda-forge -c bioconda rboAnalyzer
 ### Install from source
 
  __Prerequisites__
-- python >= 3.4 [link](https://www.python.org/downloads/)
+- python >= 3.4 [link](https://www.python.org/downloads/)   
+  Verify that you have working up-to date `pip3`.
+  ```
+  pip3 install --upgrade pip
+  # or
+  pip3 install --upgrade pip --user
+  ```
 - ncbi-blast+ >= 2.6, < 2.8.1 [link](http://ftp.ncbi.nih.gov/blast/executables/blast+/2.7.1/)
 - locarna >= 1.9.2 [link](https://github.com/s-will/LocARNA/releases/tag/v1.9.2.2)
 - infernal >= 1.1 [link](http://eddylab.org/infernal/)
@@ -74,10 +80,10 @@ conda install -c conda-forge -c bioconda rboAnalyzer
 
 For prediction:
 - viennarna >=2.3.5 (with refold.pl in PATH) [link](https://www.tbi.univie.ac.at/RNA/download/sourcecode/2_3_x/ViennaRNA-2.3.5.tar.gz)   
-  don't forget to add `refold.pl` to your `PATH`. The script is located in the `ViennaRNA-[version]/src/Utils/`
+  Don't forget to add `refold.pl` to your `PATH`. The `refold.pl` script is located in the `ViennaRNA-[version]/src/Utils/`.
 - centroid_homfold >= 0.0.15 [link](https://github.com/satoken/centroid-rna-package/releases/tag/v0.0.15)
 - RNAstructure >= 6.0 (TurboFold - Text (Command Line) Interfaces ) [link](https://rna.urmc.rochester.edu/RNAstructure.html)   
-  don't forget to set the `DATAPATH` environment variable [link](http://rna.urmc.rochester.edu/Text/Thermodynamics.html)
+  Don't forget to set the `DATAPATH` environment variable [link](http://rna.urmc.rochester.edu/Text/Thermodynamics.html).
 
 Optional (some prediction methods are not available without):
 - UNAFold >= 3.8 [link](http://unafold.rna.albany.edu/?q=DINAMelt/software)
@@ -85,7 +91,7 @@ Optional (some prediction methods are not available without):
 Clone or download this repository, unpack it if needed. Go to directory with the source code for the rboAnalyzer and run
 
 ```shell
-python3 setup.py install
+python3 setup.py install --user
 ```
 
 The rboAnalyzer executable should be created.

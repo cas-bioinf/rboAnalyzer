@@ -679,14 +679,19 @@ def rnafold(fastafile, outfile, parameters=''):
         shlex.quote(fastafile),
         shlex.quote(outfile)
     )
-    r = call(cmd, shell=True)
 
-    if r:
-        msgfail = 'call to rnafold failed, please check if rnafold is in path'
-        ml.error(msgfail)
-        ml.error(cmd)
-        raise ChildProcessError(msgfail)
-    return outfile
+    with open(os.devnull, 'w') as FNULL:
+        if ml.getEffectiveLevel() == 10:
+            r = call(cmd, shell=True)
+        else:
+            r = call(cmd, shell=True, stderr=FNULL)
+
+        if r:
+            msgfail = 'call to RNAfold failed, please check if RNAfold is in path'
+            ml.error(msgfail)
+            ml.error(cmd)
+            raise ChildProcessError(msgfail)
+        return outfile
 
 
 @timeit_decorator

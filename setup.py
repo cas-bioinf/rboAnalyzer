@@ -27,7 +27,7 @@ setup(
         ],
     },
     install_requires=[
-        'matplotlib',
+        'matplotlib<3',
         'numpy>=1.14',
         'Jinja2>=2, <3',
         'pandas>=0.22',
