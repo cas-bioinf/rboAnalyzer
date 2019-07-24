@@ -385,27 +385,42 @@ def check_if_rfam_needed(inargs):
 
 
 def main():
+    try:
+        # outer envelope for the script
+        # ========= perform argument parsing =========
 
-    # outer envelope for the script
-    # ========= perform argument parsing =========
+        if download_name in sys.argv and not ('-q' in sys.argv or '--blast_query' in sys.argv):
+            # run download rfam here
+            # do not run, if given with normal run request
+            from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
+            from rna_blast_analyze.BR_core import cmalign
+            if cfg_name in sys.argv:
+                CONFIG.override(tools_paths(config_file=sys.argv[sys.argv.index(cfg_name) + 1]))
+            cmalign.download_cmmodels_file()
+            # rfam database downloaded
+            sys.exit(0)
 
-    if download_name in sys.argv and not ('-q' in sys.argv or '--blast_query' in sys.argv):
-        # run download rfam here
-        # do not run, if given with normal run request
-        from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
-        from rna_blast_analyze.BR_core import cmalign
-        if cfg_name in sys.argv:
-            CONFIG.override(tools_paths(config_file=sys.argv[sys.argv.index(cfg_name) + 1]))
-        cmalign.download_cmmodels_file()
-        # rfam database downloaded
+        args = f_parser()
+
+        _ = lunch_with_args(args)
+
+        # if we reach here, exit with 0
         sys.exit(0)
+    except Exception as e:
+        print('Something went wrong.')
+        try:
+            import traceback
+            print(
+                'The error traceback is written to rboAnalyzer.log . '
+                'Please send it along with the query file and BLAST input to the developers.'
+            )
 
-    args = f_parser()
-
-    _ = lunch_with_args(args)
-
-    # if we reach here, exit with 0
-    sys.exit(0)
+            with open('rboAnalyzer.log', 'w') as fd:
+                fd.write(str(e))
+                fd.write(traceback.format_exc())
+        except:
+            pass
+        sys.exit(1)
 
 
 def lunch_with_args(args):
