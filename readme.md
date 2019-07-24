@@ -24,40 +24,39 @@ To achive this, rboAnalyzer takes as input:
 
 
 ## Installation
+This tool was tested on 64-bit linux (Ubuntu 14, 18 and Centos 7). 
 
-<!---
 ### Install via Conda
- The easies way to install this pipeline is to use conda. This package is available
- from bioconda channel.
+ The most convinient way to install this pipeline is to use Conda package manager. 
+ 
+ If you don't have Conda for `Python3`, install it. We recomend the [miniconda3](https://conda.io/en/latest/miniconda.html).
 
- If you don't have conda, install it. [conda docs](https://conda.io/docs/index.html)
+The `rboanalyzer` package is available from `schwarz.marek` channel. You also need to include the `bioconda` and `conda-forge` channels when installing the `rboanalyzer`.
 
- Then open terminal and run
+ 
+__Installation to new virtual environment__
 
-System wide installation
- The `rboAnalyzer` and `genomes_from_blast` executables and their
-  dependencies will be available from terminal.
+The `rboAnalyzer` and its dependencies will be available only in the shell session for which the virtual environment was activated. You will need to `activate` the virtual enviroment for each session.
 
-```shell
-conda install -c conda-forge -c bioconda rboAnalyzer
-```
-
-Installation to virtual environment
- The `rboAnalyzer` and its dependencies will be available only in shell
-  for which the virtual environment was activated. If virtual environment is
-  used, then you need to activate virtual environment before usage.
+Following commands will install the rboAnalyzer into new conda environment named "rbo". If you dont wish to install rboAnalyzer to new environment, ommit commands `1)` and `2)`.
 
 ```shell
-# create virtual environment
-conda create -n YOUR_VIRTUAL_ENV_NAME
+# 1) update conda
+conda update conda
 
-# activate it
-conda activate YOUR_VIRTUAL_ENV_NAME
+# 2) create virtual environment
+#conda create -n YOUR_VIRTUAL_ENV_NAME
+conda create -n rbo
 
-# run installation
-conda install -c conda-forge -c bioconda rboAnalyzer
+# 3) activate it
+# conda activate YOUR_VIRTUAL_ENV_NAME
+conda activate rbo
+
+# 4) run installation
+# ommit "-c conda-forge" and/or "-c bioconda" if those channels are in your .condarc file
+conda install -c conda-forge -c bioconda -c schwarz.marek rboanalyzer
 ```
--->
+
 ### Install from source
 
  __Prerequisites__
