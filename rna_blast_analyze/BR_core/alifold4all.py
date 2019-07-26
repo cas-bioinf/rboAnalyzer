@@ -1,11 +1,12 @@
 import logging
 import os
 from subprocess import call
-from tempfile import mkstemp
+from tempfile import mkstemp, TemporaryFile
 import shlex
 
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
+from rna_blast_analyze.BR_core import exceptions
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -16,9 +17,8 @@ def compute_clustalo_clasic(file, clustalo_params=''):
 
     fd, out_path = mkstemp(prefix='rba_', suffix='_01', dir=CONFIG.tmpdir)
     os.close(fd)
-    FNULL = open(os.devnull, 'w')
 
-    try:
+    with TemporaryFile(mode='w+') as tmp:
         parlist = clustalo_params.split()
         cmd = [
             '{}clustalo'.format(CONFIG.clustal_path),
@@ -27,18 +27,14 @@ def compute_clustalo_clasic(file, clustalo_params=''):
             '-o', out_path
         ]
         ml.debug(cmd)
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd)
-        else:
-            r = call(cmd, stdout=FNULL)
+        r = call(cmd, stdout=tmp, stderr=tmp)
 
         if r:
-            msgfail = 'call to clustalo failed for files: in: {}, out: {}'.format(file, out_path)
+            msgfail = 'Call to clustalo failed.'
+            tmp.seek(0)
             ml.error(msgfail)
             ml.error(cmd)
-            raise ChildProcessError(msgfail)
-    finally:
-        FNULL.close()
+            raise exceptions.ClustaloException(msgfail, tmp.read())
 
     return out_path
 
@@ -49,7 +45,7 @@ def compute_alifold(msa_file, alifold_params=''):
     fd, out_path = mkstemp(prefix='rba_', suffix='_02', dir=CONFIG.tmpdir)
     os.close(fd)
 
-    with open(os.devnull, 'w') as FNULL:
+    with TemporaryFile(mode='w+') as tmp:
         cmd = '{} --noPS -f C {} < {} > {}'.format(
             shlex.quote('{}RNAalifold'.format(CONFIG.viennarna_path)),
             ' '.join([shlex.quote(i) for i in shlex.split(alifold_params)]),
@@ -57,16 +53,13 @@ def compute_alifold(msa_file, alifold_params=''):
             shlex.quote(out_path)
         )
         ml.debug(cmd)
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd, shell=True)
-        else:
-            r = call(cmd, shell=True, stderr=FNULL)
+        r = call(cmd, shell=True, stderr=tmp, stdout=tmp)
 
         if r:
-            msgfail = 'RNAalifold failed for files: in: {}, out {}'.format(msa_file, out_path)
+            msgfail = 'RNAalifold failed.'
             ml.error(msgfail)
-            ml.error(cmd)
-            raise ChildProcessError(msgfail)
+            tmp.seek(0)
+            raise exceptions.RNAalifoldException(msgfail, tmp.read())
 
         return out_path
 
@@ -88,11 +81,12 @@ def compute_refold(alig_file, cons_file):
         shlex.quote(out_path)
     )
     ml.debug(cmd)
-    k = call(cmd, shell=True)
-    if k:
-        msgfail = 'refold.pl failed for files in: {}, {}, out: {}'.format(alig_file, cons_file, out_path)
-        ml.error(msgfail)
-        ml.error(cmd)
-        raise ChildProcessError(msgfail)
+    with TemporaryFile(mode='w+') as tmp:
+        r = call(cmd, shell=True)
+        if r:
+            msgfail = 'Call to refold.pl failed.'
+            ml.error(msgfail)
+            tmp.seek(0)
+            raise exceptions.RefoldException(msgfail, tmp.read())
 
-    return out_path
+        return out_path

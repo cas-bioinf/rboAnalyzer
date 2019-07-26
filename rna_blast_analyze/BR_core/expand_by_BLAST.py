@@ -5,7 +5,6 @@ import re
 from copy import deepcopy
 from random import shuffle
 from tempfile import mkstemp
-import itertools
 import logging
 
 from Bio import SeqIO
@@ -16,12 +15,11 @@ from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_de
 from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
 from rna_blast_analyze.BR_core.infer_homology import infer_homology, find_and_extract_cm_model
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
-from rna_blast_analyze.BR_core.stockholm_alig import StockholmFeatureStock
 from rna_blast_analyze.BR_core import BA_verify
 from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.cmalign import run_cmfetch, get_cm_model, RfamInfo
-from rna_blast_analyze.BR_core.validate_args import validate_args
+from rna_blast_analyze.BR_core import exceptions
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -127,10 +125,6 @@ def create_blast_only_report_object(exp_hit, query_len):
 
     hit.extension = ns
 
-    pos_match = re.search(str(ns.seq), str(ns.seq), flags=re.IGNORECASE)
-    if not pos_match:
-        raise Exception('Subsequence not found in supersequence.')
-
     bl = ns.annotations['blast'][1]
 
     if bl.sbjct_start < bl.sbjct_end:
@@ -140,13 +134,13 @@ def create_blast_only_report_object(exp_hit, query_len):
         bls = bl.sbjct_end - (query_len - bl.query_end)
         ble = bl.sbjct_start + bl.query_start - 1
     else:
-        raise Exception('Unknown strand option.')
+        raise exceptions.UnknownStrand("Can't determine HSP strand (sbjct_start appears equal sbjct_end)")
 
     # if whole subject sequence too short, this assertion will fail
     if tss or tse or tes or tee:
         msg = 'STATUS: Skipping sequence check ({}) - subject sequence too short.'.format(ns.id)
         ml.info(msg)
-        if ml.level > 20:
+        if ml.getEffectiveLevel() > 20:
             print(msg)
     else:
         assert len(ns.seq) == abs(bls - ble) + 1
@@ -163,24 +157,16 @@ def blast_wrapper_inner(args_inner, shared_list=None, start_from=0):
     if not shared_list:
         shared_list = []
 
-    if not validate_args(args_inner):
-        print("There was an error with provided arguments. Please see the error message.")
-        sys.exit(1)
-
     # update params if different config is requested
     CONFIG.override(tools_paths(args_inner.config_file))
-
-    stockholm_features = StockholmFeatureStock()
-    stockholm_features.add_custom_parser_tags('GC', {'cA1': 'anchor letter tag',
-                                                     'cA2': 'anchor number tag'})
 
     p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
     query_seqs = [i for i in SeqIO.parse(args_inner.blast_query, 'fasta')]
 
     if len(p_blast) != len(query_seqs):
         ml.error('Number of query sequences in provided BLAST output file ({}) does not match number of query sequences'
-                 ' in query FASTA file ({})'.format(len(p_blast), len(query_seqs)))
-        sys.exit(0)
+                 ' in query FASTA file ({}).'.format(len(p_blast), len(query_seqs)))
+        sys.exit(1)
 
     if len(p_blast) > 1:
         multi_query = True
@@ -190,7 +176,7 @@ def blast_wrapper_inner(args_inner, shared_list=None, start_from=0):
     # this is done for each query
     ml_out_line = []
     all_analyzed = []
-    for iteration, (bhp, query) in enumerate(itertools.zip_longest(p_blast, query_seqs)):
+    for iteration, (bhp, query) in enumerate(zip(p_blast, query_seqs)):
         if start_from > iteration:
             if start_from + 1 == len(p_blast):
                 print('skipping query: {} - iteration {}'.format(query.id, iteration))
@@ -199,11 +185,6 @@ def blast_wrapper_inner(args_inner, shared_list=None, start_from=0):
         print('processing query: {}'.format(query.id))
         ml.info('processing query: {}'.format(query.id))
         # check query and blast
-        if bhp is None:
-            raise ValueError('There is more query sequences in provided fastafile then there are BLAST outputs.')
-        if query is None:
-            raise ValueError('There is more BLAST outputs then query sequences provided.')
-
         BA_verify.verify_query_blast(blast=bhp, query=query)
 
         analyzed_hits = BlastSearchRecompute(args_inner, query, iteration)
@@ -258,7 +239,7 @@ def blast_wrapper_inner(args_inner, shared_list=None, start_from=0):
                 format=args_inner.db_type,
             )
         else:
-            raise ValueError
+            raise exceptions.IncorrectDatabaseChoice()
 
         # check, if blast hits are non - overlapping, if so, add the overlapping hit info to the longer hit
         # reflect this in user output

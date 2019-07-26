@@ -6,8 +6,7 @@ from copy import deepcopy
 from multiprocessing import Pool
 from random import shuffle
 from subprocess import call
-from tempfile import mkstemp
-import itertools
+from tempfile import mkstemp, TemporaryFile
 import logging
 import shlex
 
@@ -22,12 +21,12 @@ from rna_blast_analyze.BR_core.config import CONFIG, tools_paths
 from rna_blast_analyze.BR_core.infer_homology import infer_homology, find_and_extract_cm_model
 from rna_blast_analyze.BR_core.locarna_clustal_like_2stockholm import parse_locarna_alignment
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
-from rna_blast_analyze.BR_core.stockholm_parser import StockholmFeatureStock, trim_alignment_by_sequence
+from rna_blast_analyze.BR_core.stockholm_parser import trim_alignment_by_sequence
 from rna_blast_analyze.BR_core import BA_verify
 from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.cmalign import get_cm_model, run_cmfetch, RfamInfo
-from rna_blast_analyze.BR_core.validate_args import validate_args
+from rna_blast_analyze.BR_core import exceptions
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -41,66 +40,79 @@ def write_clustal_like_file_with_anchors(fid, seq_name, cseq, my_anchors):
 
 def locarna_worker(pack):
     ml.debug(fname())
-    one_expanded_hit, query_seq, stockholm_features, locarna_params, anchor_length = pack
-    # read the aligned segment and use it as anchors for locarna
-    # run locarna in local mode and put the query sequence with the extended sequence with the blast aligned
-    # segment as anchor
-    blast_entry = one_expanded_hit.annotations['blast'][1]
+    one_expanded_hit, query_seq, locarna_params, anchor_length = pack
 
-    anchors = LocarnaAnchor(
-        to_rna(blast_entry.query),
-        blast_entry.match,
-        to_rna(blast_entry.sbjct),
-        anchor_length=anchor_length
-    )
-    # extracted temp is my query
+    locarna_file1 = locarna_file2 = loc_out_file = None
 
-    # access the locarna aligner directly
-    # CARNA for some reason wount accept its own designed format, but, it will eat a pseudo-clustal
-    fd1, locarna_file1 = mkstemp(prefix='rba_', suffix='_20', dir=CONFIG.tmpdir)
-    with os.fdopen(fd1, 'w') as fp_locarna_file_1:
-        ql1, ql2 = anchors.anchor_whole_seq(str(query_seq), 'query')
-        write_clustal_like_file_with_anchors(fp_locarna_file_1,
-                                             'query',
-                                             str(query_seq),
-                                             (
-                                                 ('#A1', ql1.split()[0]),
-                                                 ('#A2', ql2.split()[0])
-                                             ))
+    try:
+        # read the aligned segment and use it as anchors for locarna
+        # run locarna in local mode and put the query sequence with the extended sequence with the blast aligned
+        # segment as anchor
+        blast_entry = one_expanded_hit.annotations['blast'][1]
 
-    fd2, locarna_file2 = mkstemp(prefix='rba_', suffix='_21', dir=CONFIG.tmpdir)
-    with os.fdopen(fd2, 'w') as fp_locarna_file_2:
-        sl1, sl2 = anchors.anchor_whole_seq(str(one_expanded_hit.seq), 'subject')
-        write_clustal_like_file_with_anchors(fp_locarna_file_2,
-                                             one_expanded_hit.id,
-                                             str(one_expanded_hit.seq),
-                                             (
-                                                 ('#A1', sl1.split()[0]),
-                                                 ('#A2', sl2.split()[0])
-                                             ))
+        anchors = LocarnaAnchor(
+            to_rna(blast_entry.query),
+            blast_entry.match,
+            to_rna(blast_entry.sbjct),
+            anchor_length=anchor_length
+        )
+        # extracted temp is my query
 
-    loc_out_file = run_locarna(
-        locarna_file1,
-        locarna_file2,
-        locarna_params
-    )
+        # access the locarna aligner directly
+        fd1, locarna_file1 = mkstemp(prefix='rba_', suffix='_20', dir=CONFIG.tmpdir)
+        with os.fdopen(fd1, 'w') as fp_locarna_file_1:
+            ql1, ql2 = anchors.anchor_whole_seq(str(query_seq), 'query')
+            write_clustal_like_file_with_anchors(fp_locarna_file_1,
+                                                 'query',
+                                                 str(query_seq),
+                                                 (
+                                                     ('#A1', ql1.split()[0]),
+                                                     ('#A2', ql2.split()[0])
+                                                 ))
 
-    # debug only
-    # call('cat {} >> /tmp/all_locarna_files.txt'.format(loc_out_file), shell=True)
+        fd2, locarna_file2 = mkstemp(prefix='rba_', suffix='_21', dir=CONFIG.tmpdir)
+        with os.fdopen(fd2, 'w') as fp_locarna_file_2:
+            sl1, sl2 = anchors.anchor_whole_seq(str(one_expanded_hit.seq), 'subject')
+            write_clustal_like_file_with_anchors(fp_locarna_file_2,
+                                                 one_expanded_hit.id,
+                                                 str(one_expanded_hit.seq),
+                                                 (
+                                                     ('#A1', sl1.split()[0]),
+                                                     ('#A2', sl2.split()[0])
+                                                 ))
 
-    # read locarna alignment
-    with open(loc_out_file, 'r') as f:
-        locarna_alig = parse_locarna_alignment(f)
+        loc_out_file = run_locarna(
+            locarna_file1,
+            locarna_file2,
+            locarna_params
+        )
 
-    if len(locarna_alig) != 2:
-        raise Exception('locarna alignment must be length 2')
+        # read locarna alignment
+        with open(loc_out_file, 'r') as f:
+            locarna_alig = parse_locarna_alignment(f)
 
-    loc_rep = create_report_object_from_locarna(one_expanded_hit, locarna_alig)
+        if len(locarna_alig) != 2:
+            raise exceptions.SubseqMatchError('There must be 2 sequences in Locarna alignment.')
 
-    os.remove(locarna_file1)
-    os.remove(locarna_file2)
-    os.remove(loc_out_file)
-    return loc_rep
+        loc_rep = create_report_object_from_locarna(one_expanded_hit, locarna_alig)
+
+        return loc_rep
+    except exceptions.LocarnaException as e:
+        one_expanded_hit.annotations['msgs'] = [str(e), e.errors]
+        empty_hit = BA_support.Subsequences(one_expanded_hit)
+        return empty_hit
+    except exceptions.SubseqMatchError as e:
+        one_expanded_hit.annotations['msgs'] = [str(e)]
+        empty_hit = BA_support.Subsequences(one_expanded_hit)
+        return empty_hit
+    except (TypeError, AttributeError, FileNotFoundError) as e:
+        one_expanded_hit.annotations['msgs'] = [str(e)]
+        empty_hit = BA_support.Subsequences(one_expanded_hit)
+        return empty_hit
+    finally:
+        for f in [locarna_file1, locarna_file2, loc_out_file]:
+            if f is not None:
+                BA_support.remove_one_file_with_try(f)
 
 
 def locarna_anchored_wrapper(args_inner, shared_list=None):
@@ -117,21 +129,17 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None, start_from=0):
     # update params if different config is requested
     CONFIG.override(tools_paths(args_inner.config_file))
 
-    if not validate_args(args_inner):
-        print("There was an error with provided arguments. Please see the error message.")
-        sys.exit(1)
-
-    stockholm_features = StockholmFeatureStock()
-    stockholm_features.add_custom_parser_tags('GC', {'cA1': 'anchor letter tag',
-                                                     'cA2': 'anchor number tag'})
+    # stockholm_features = StockholmFeatureStock()
+    # stockholm_features.add_custom_parser_tags('GC', {'cA1': 'anchor letter tag',
+    #                                                  'cA2': 'anchor number tag'})
 
     p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
     query_seqs = [i for i in SeqIO.parse(args_inner.blast_query, 'fasta')]
 
     if len(p_blast) != len(query_seqs):
         ml.error('Number of query sequences in provided BLAST output file ({}) does not match number of query sequences'
-                 ' in query FASTA file ({})'.format(len(p_blast), len(query_seqs)))
-        sys.exit(0)
+                 ' in query FASTA file ({}).'.format(len(p_blast), len(query_seqs)))
+        sys.exit(1)
 
     if len(p_blast) > 1:
         multi_query = True
@@ -141,18 +149,13 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None, start_from=0):
     # this is done for each query
     ml_out_line = []
     all_analyzed = []
-    for iteration, (bhp, query) in enumerate(itertools.zip_longest(p_blast, query_seqs)):
+    for iteration, (bhp, query) in enumerate(zip(p_blast, query_seqs)):
         if start_from > iteration:
             if start_from + 1 == len(p_blast):
                 print('skipping query: {} - iteration {}'.format(query.id, iteration))
             continue
 
         print('processing query: {}'.format(query.id))
-        # check query and blast
-        if bhp is None:
-            raise ValueError('There is more query sequences in provided fastafile then there are BLAST outputs.')
-        if query is None:
-            raise ValueError('There is more BLAST outputs then query sequences provided.')
 
         BA_verify.verify_query_blast(blast=bhp, query=query)
 
@@ -208,7 +211,7 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None, start_from=0):
                 format=args_inner.db_type,
             )
         else:
-            raise ValueError
+            raise exceptions.IncorrectDatabaseChoice()
 
         # check, if blast hits are non - overlapping, if so, add the overlapping hit info to the longer hit
         # reflect this in user output
@@ -228,7 +231,6 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None, start_from=0):
                         (
                             oeh,
                             query_seq,
-                            stockholm_features,
                             args_inner.locarna_params,
                             args_inner.locarna_anchor_length
                         )
@@ -241,7 +243,6 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None, start_from=0):
                     (
                         oeh,
                         query_seq,
-                        stockholm_features,
                         args_inner.locarna_params,
                         args_inner.locarna_anchor_length
                     )
@@ -357,6 +358,13 @@ def locarna_anchored_wrapper_inner(args_inner, shared_list=None, start_from=0):
     return '\n'.join(ml_out_line), all_analyzed
 
 
+def _select_refold_structure(refold_structures_, exp_hit_id):
+    for seq_refold in refold_structures_:
+        # seq_refold can be different due too pipe through CLUSTAL
+        if seq_refold.id in exp_hit_id:
+            return seq_refold
+
+
 def create_report_object_from_locarna(exp_hit, locarna_alig):
     """
     create object which will be appended to BlastSearchRecompute class
@@ -370,7 +378,7 @@ def create_report_object_from_locarna(exp_hit, locarna_alig):
     # chop alignment by seq
     query_ind = [i for i, j in enumerate(locarna_alig) if j.id == 'query']
     if len(query_ind) != 1:
-        raise Exception('multiple hits with id "query" in the alignment')
+        raise exceptions.SubseqMatchError('Got multiple hits with id "query" in the Locarna alignment.')
     trimmed_locarna_alig = trim_alignment_by_sequence(
         locarna_alig,
         str(locarna_alig[query_ind[0]].seq),
@@ -391,12 +399,6 @@ def create_report_object_from_locarna(exp_hit, locarna_alig):
     refold_structures = refold_stockholm(trimmed_locarna_alig, trimmed_locarna_alig.column_annotations['SS_cons'])
 
     # select refold structure for my seq
-    def _select_refold_structure(refold_structures_, exp_hit_id):
-        for seq_refold in refold_structures_:
-            # seq_refold can be different due too pipe through CLUSTAL
-            if seq_refold.id in exp_hit_id:
-                return seq_refold
-
     seq_refold_structure = _select_refold_structure(refold_structures, exp_hit.id)
 
     aligned_subsequence.letter_annotations['ss0'] = seq_refold_structure.letter_annotations['ss0']
@@ -411,7 +413,9 @@ def create_report_object_from_locarna(exp_hit, locarna_alig):
     # find the matching sequence
     pos_match = re.search(str(aligned_subsequence.seq), str(exp_hit.seq), flags=re.IGNORECASE)
     if not pos_match:
-        raise Exception('Subsequnce not found in supersequence. Terminating.')
+        raise exceptions.SubseqMatchError(
+            'Aligned portion of subject sequence in Locarna alignment was not found in parent sequence.'
+        )
 
     hit.best_start, hit.best_end = compute_true_location_locarna(hit, pos_match)
 
@@ -471,15 +475,17 @@ def run_locarna(query_file, subject_file, locarna_params):
         shlex.quote(subject_file + '.loc_out'),
     )
     ml.debug(cmd)
-    r = call(cmd, shell=True)
-    if r:
-        msgfail = 'call to locarna failed for files in1:{} in2:{} out:{}'.format(
-            query_file, subject_file, subject_file + '.loc_out'
-        )
-        ml.error(msgfail)
-        raise ChildProcessError(msgfail)
+    with TemporaryFile() as tmp:
+        r = call(cmd, shell=True, stdout=tmp, stderr=tmp)
+        if r:
+            msgfail = 'Call to locarna failed for files in1:{} in2:{} out:{}'.format(
+                query_file, subject_file, subject_file + '.loc_out'
+            )
+            ml.error(msgfail)
+            tmp.seek(0)
+            raise exceptions.LocarnaException(msgfail, tmp.read())
 
-    return subject_file + '.loc_out'
+        return subject_file + '.loc_out'
 
 
 def write_locarna_anchors_with_min_length(match_line, min_anchor_length=1):
@@ -564,7 +570,7 @@ class LocarnaAnchor(object):
         assert len(self.anchor_l1) == len(self.anchor_l2) == len(self.query) == len(self.subject)
 
         if anchor_length < 0:
-            print('infered anchor length {}'.format(self.anchor_length))
+            print('inferred anchor length {}'.format(self.anchor_length))
 
         self.squeezed_query, self.q_al1, self.q_al2 = squeeze_locarna_anchors_to_aligned_seq(self.query,
                                                                                              self.anchor_l1,
@@ -594,18 +600,25 @@ class LocarnaAnchor(object):
 
         # find matching sequence in seq
         if seq_line == 'query':
-            match_o = re.search(self.squeezed_query, sequence)
+            match_o = re.search(self.squeezed_query, sequence, flags=re.IGNORECASE)
             if not match_o:
-                raise Exception('no match for squeeze query with provided sequence')
+                raise exceptions.SubseqMatchError(
+                    'Could not find match between provided query sequence and QUERY sequence from BLAST output.'
+                )
 
             start = ''.join(['.' for i in range(match_o.span()[0])])
             end = ''.join(['.' for i in range(match_o.span()[1], len(sequence))])
             l1 = start + self.q_al1 + end + ' #1'
             l2 = start + self.q_al2 + end + ' #2'
         else:
-            match_o = re.search(self.squeezed_subject, sequence)
+            match_o = re.search(self.squeezed_subject, sequence, flags=re.IGNORECASE)
             if not match_o:
-                raise Exception('no match for squeeze query with provided sequence')
+                raise exceptions.SubseqMatchError(
+                    'Could not find match between subject sequence from the database and subject sequence from BLAST '
+                    'output. This can be DATABASE problem. Try to recreate the database and/or check if the accessions'
+                    ' in the BLAST output correspond with accessions in the provided database (i.e.'
+                    ' the sequences are the same ones).'
+                )
 
             start = ''.join(['.' for i in range(match_o.span()[0])])
             end = ''.join(['.' for i in range(match_o.span()[1], len(sequence))])

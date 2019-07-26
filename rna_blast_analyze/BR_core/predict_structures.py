@@ -4,7 +4,7 @@ import os
 import re
 import unicodedata
 from subprocess import call
-from tempfile import mkstemp
+from tempfile import mkstemp, TemporaryFile
 import shlex
 import multiprocessing
 
@@ -23,6 +23,7 @@ from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.infer_homology import alignment_column_conservation
 from rna_blast_analyze.BR_core.par_distance import compute_distances
 from rna_blast_analyze.BR_core.stockholm_parser import read_st, trim_cmalign_sequence_by_refseq_one_seq
+from rna_blast_analyze.BR_core import exceptions
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -487,7 +488,7 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
 
     # rnafold params
     rnafold_params = params.get('RNAfold', '-C')
-    assert isinstance(rnafold_params, str)
+    assert isinstance(rnafold_params, str), "Incorrect parameters for RNAfold -C"
     if '-C' not in rnafold_params:
         # some parameters given but -C not present
         rnafold_params += ' -C'
@@ -631,7 +632,8 @@ def rfam_subopt_pred(all_sequence_fasta, cm_ref_str, params=None, threads=1):
         params = dict()
 
     if params and ('mfold' in params) and params['mfold']:
-        assert isinstance(params['mfold'], (tuple, list)) and 3 == len(params['mfold'])
+        assert isinstance(params['mfold'], (tuple, list)) and 3 == len(params['mfold']), \
+            "Incorrect parameters for hybrid_ss_min given. Need tuple of 3 numbers."
         subs = run_hybrid_ss_min(all_sequence_fasta, mfold=params['mfold'], threads=threads)
     else:
         subs = run_hybrid_ss_min(all_sequence_fasta, threads=threads)
@@ -679,18 +681,15 @@ def rnafold(fastafile, outfile, parameters=''):
         shlex.quote(fastafile),
         shlex.quote(outfile)
     )
-
-    with open(os.devnull, 'w') as FNULL:
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd, shell=True)
-        else:
-            r = call(cmd, shell=True, stderr=FNULL)
+    ml.debug(cmd)
+    with TemporaryFile(mode='w+') as tmp:
+        r = call(cmd, shell=True, stderr=tmp, stdout=tmp)
 
         if r:
-            msgfail = 'call to RNAfold failed, please check if RNAfold is in path'
+            msgfail = 'Call to RNAfold failed, please check if RNAfold is in path.'
             ml.error(msgfail)
-            ml.error(cmd)
-            raise ChildProcessError(msgfail)
+            tmp.seek(0)
+            raise exceptions.RNAfold(msgfail, tmp.read())
         return outfile
 
 
@@ -859,7 +858,7 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
         c_fd, clustalo_file = mkstemp(prefix='rba_', suffix='_57', dir=CONFIG.tmpdir)
         os.close(c_fd)
 
-    with open(os.devnull, 'w') as FNULL:
+    with TemporaryFile(mode='w+') as tmp:
         cmd = [
             '{}clustalo'.format(CONFIG.clustal_path),
             '--force',
@@ -870,18 +869,8 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
         if clustalo_params != '':
             cmd += clustalo_params.split()
 
-        # cmd = '{}clustalo {} --force -i {} --profile1 {} -o {}'.format(
-        #     CONFIG.clustal_path,
-        #     clustalo_params,
-        #     fasta_seq_file,
-        #     msa_file,
-        #     clustalo_file
-        # )
         ml.debug(cmd)
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd)
-        else:
-            r = call(cmd, stdout=FNULL, stderr=FNULL)
+        r = call(cmd, stdout=tmp, stderr=tmp)
 
         if r:
             ml.warning('Profile align failed.')
@@ -897,22 +886,16 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
             ]
             if clustalo_params:
                 cmd2 += clustalo_params.split()
-            # cmd2 = '{}clustalo {} --force -i {} --profile1 {} -o {}'.format(
-            #     CONFIG.clustal_path,
-            #     clustalo_params,
-            #     fasta_seq_file,
-            #     rewriten_msa,
-            #     clustalo_file
-            # )
+
             ml.debug(cmd2)
-            r2 = call(cmd2)
+            r2 = call(cmd2, stdout=tmp, stderr=tmp)
 
             os.remove(rewriten_msa)
 
             if r2 != 0:
-                msgfail = 'call to clustalo profile to sequences failed'
+                msgfail = 'Call to clustalo for aligning profile to sequences failed.'
                 ml.error(msgfail)
                 ml.error(cmd)
                 ml.error(cmd2)
-                raise ChildProcessError(msgfail + ' ' + cmd)
+                raise exceptions.ClustaloException(msgfail, tmp.read())
     return clustalo_file

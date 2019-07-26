@@ -7,7 +7,7 @@ import shutil
 from io import StringIO
 from random import choice
 from subprocess import call, check_output, CalledProcessError
-from tempfile import mkstemp, gettempdir
+from tempfile import mkstemp, gettempdir, TemporaryFile
 from warnings import warn
 import shlex
 
@@ -21,6 +21,7 @@ from Bio.SeqRecord import SeqRecord
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt as blast_minimal_parser
+from rna_blast_analyze.BR_core import exceptions
 
 # idiotic matplotlib
 locale.setlocale(locale.LC_ALL, 'C')
@@ -287,31 +288,34 @@ def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
             ' '.join([shlex.quote(i) for i in shlex.split(muscle_params)])
         ]
     ml.debug(cmd)
-    r = call(cmd)
-    if r:
-        msgfail = 'call to muscle failed'
-        ml.error(msgfail)
-        ml.error(cmd)
-        raise ChildProcessError(msgfail)
 
-    if reorder:
-        # reorder sequences acording to input file
-        with open(fasta_file, 'r') as ff, open(cl_file, 'r+') as oo:
-            orig_seqs = [i.id for i in SeqIO.parse(ff, format='fasta')]
-            muscle_align = {i.id: i for i in AlignIO.read(oo, format='clustal')}
+    with TemporaryFile(mode='w+') as tmp:
+        r = call(cmd, stdout=tmp, stderr=tmp)
+        if r:
+            msgfail = 'Call to muscle failed.'
+            ml.error(msgfail)
 
-            # reorder
-            reo_alig = []
-            for s_name in orig_seqs:
-                # muscle cuts names
-                reo_alig.append(muscle_align[s_name[:32]])
-            alig = AlignIO.MultipleSeqAlignment(reo_alig)
-            # write
-            oo.seek(0)
-            AlignIO.write(alig, oo, format='clustal')
-            oo.truncate()
+            tmp.seek(0)
+            raise exceptions.MuscleException(msgfail, tmp.read())
 
-    return cl_file
+        if reorder:
+            # reorder sequences acording to input file
+            with open(fasta_file, 'r') as ff, open(cl_file, 'r+') as oo:
+                orig_seqs = [i.id for i in SeqIO.parse(ff, format='fasta')]
+                muscle_align = {i.id: i for i in AlignIO.read(oo, format='clustal')}
+
+                # reorder
+                reo_alig = []
+                for s_name in orig_seqs:
+                    # muscle cuts names
+                    reo_alig.append(muscle_align[s_name[:32]])
+                alig = AlignIO.MultipleSeqAlignment(reo_alig)
+                # write
+                oo.seek(0)
+                AlignIO.write(alig, oo, format='clustal')
+                oo.truncate()
+
+        return cl_file
 
 
 def RNAfold(sequence):
@@ -348,7 +352,7 @@ def select_analyzed_aligned_hit(one_alig, exp_hit_id):
 
 def rebuild_structures_output_from_pred(reference_sequences_list, predicted_structures_list, method=None):
     ml.debug(fname())
-    structuresids = [seq.id for seq in predicted_structures_list]
+    structuresids = [seq.id for seq in predicted_structures_list if hasattr(seq, 'id')]
     structures_list = []
     for seq in reference_sequences_list:
         nr = SeqRecord(
@@ -361,14 +365,13 @@ def rebuild_structures_output_from_pred(reference_sequences_list, predicted_stru
         )
         if seq.id in structuresids:
             n = structuresids.index(seq.id)
-            # nr.letter_annotations['ss0'] = predicted_structures_list[n].letter_annotations['ss0']
             nr.letter_annotations.update(predicted_structures_list[n].letter_annotations)
             nr.annotations.update(predicted_structures_list[n].annotations)
             nr.annotations['predicted'] = True
         else:
             if method:
-                wmsg = 'method: {} failed to predict structure for seq {}'.format(method, nr.id)
-                warn(wmsg)
+                wmsg = '{} failed to predict structure for seq {}.'.format(method, nr.id)
+                ml.warning(wmsg)
             nr.annotations['predicted'] = False
 
         structures_list.append(nr)

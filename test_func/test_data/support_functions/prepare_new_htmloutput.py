@@ -23,5 +23,15 @@ def prepare_new_htmlout():
 
     os.remove(html_file)
 
+    bb.hits[1].extension = None
+    with open(html_file, 'w') as h:
+        h.write(write_html_output(bb))
+
+    target = os.path.abspath(os.path.dirname(__file__) + '/../RF00001_reference_missing_hit.html.md5')
+    with open(html_file, 'rb') as f, open(target, 'w') as t:
+        t.write(hashlib.md5(f.read()).hexdigest())
+    os.remove(html_file)
+
+
 if __name__ == '__main__':
     prepare_new_htmlout()

@@ -1,7 +1,7 @@
 import os
 import logging
 from subprocess import call
-from tempfile import mkstemp
+from tempfile import mkstemp, TemporaryFile
 
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
@@ -10,7 +10,7 @@ from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.decorators import timeit_decorator
 from rna_blast_analyze.BR_core import BA_support
 from rna_blast_analyze.BR_core.fname import fname
-from rna_blast_analyze.BR_core.exceptions import AmbiguousQuerySequenceException
+from rna_blast_analyze.BR_core.exceptions import AmbiguousQuerySequenceException, CentroidHomfoldException
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -33,17 +33,15 @@ def run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_
         '-o', ch_outfile,
         fasta2predict
     ]
-    r = call(cmd)
-    if r:
-        raise ChildProcessError(
-            'call to run centroid_homfold failed for files'
-            ' in:{} homologs:{} outfile:{}'.format(
-                fasta2predict,
-                fasta_homologous_seqs,
-                ch_outfile
+    with TemporaryFile(mode='w+') as tmp:
+        r = call(cmd, stdout=tmp, stderr=tmp)
+        if r:
+            tmp.seek(0)
+            raise CentroidHomfoldException(
+                'Call to centroid_homfold failed.',
+                tmp.read()
             )
-        )
-    return ch_outfile
+        return ch_outfile
 
 
 @timeit_decorator
@@ -68,9 +66,9 @@ def me_centroid_homfold(fasta2predict, fasta_homologous_seqs, params=None):
         ch_params += params['centroid_homfold']
 
     if '-g ' in ch_params and '-g -1' not in ch_params or '-t ' in params:
-        print('We only allow to run centroid homfold wit automatic mode where the structure is predicted with multiple'
-              ' weights and then best scoring is selected, thresholding is also forbiden as it implies -g.')
-        raise AttributeError('Error centroid homfold not permited to run with "-g" or "-t".')
+        print("We only allow to run centroid homfold in automatic mode where the structure is predicted with multiple"
+              " weights and then best scoring structure is selected, threshold's are also forbidden as it implies -g.")
+        raise AttributeError('Centroid homfold is not permitted to run with "-g" or "-t".')
     ch_params += ' -g -1'
 
     first_structures = run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_params=ch_params)
@@ -93,7 +91,7 @@ def centroid_homfold_fast(all_seqs, query, all_seqs_fasta, n, centroid_homfold_p
 def centroid_homfold_fast_prep(all_seqs, query, n, len_diff):
     ml.debug(fname())
 
-    assert n >= 1
+    assert n >= 1, "Number of sequences for centroid-fast must be greater then 0."
 
     if query.annotations['ambiguous']:
         msgfail = "Query sequence contains ambiguous characters. Can't use centroid-fast."

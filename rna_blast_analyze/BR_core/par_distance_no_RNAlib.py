@@ -22,17 +22,20 @@ def vypocet(oi):
     """
     runs RNAdistance without need for RNAlib
     """
+    try:
+        ret = check_output(
+            [
+                '{}RNAdistance'.format(CONFIG.viennarna_path)
+            ],
+            input='{}\n{}'.format(oi[0], oi[1]).encode()
+        )
 
-    ret = check_output(
-        [
-            '{}RNAdistance'.format(CONFIG.viennarna_path)
-        ],
-        input='{}\n{}'.format(oi[0], oi[1]).encode()
-    )
+        dist = int(ret.decode().strip().split(':')[1])
 
-    dist = int(ret.decode().strip().split(':')[1])
-
-    return dist
+        return dist
+    except ChildProcessError as e:
+        print('RNAdistance failed. Returning large number ({})'.format(10**10))
+        return 10**10
 
 
 def the_main(fp):

@@ -4,6 +4,7 @@ import unittest
 from subprocess import call
 from test_func.test_execution import blast_in, blast_query, blast_db, fwd, base_script, root
 test_dir = 'test_data'
+test_html_file = os.path.join(fwd, test_dir, 'test_rboAnalyzer.html')
 
 
 class TestDirectExecution(unittest.TestCase):
@@ -20,7 +21,8 @@ class TestDirectExecution(unittest.TestCase):
             '--b_type', 'plain',
             '--prediction_method', 'rnafold',
             '--logfile', self.log,
-            '--enable_overwrite'
+            '--enable_overwrite',
+            '--html', test_html_file
         ]
 
     def test_logger_warn(self):
@@ -34,6 +36,7 @@ class TestDirectExecution(unittest.TestCase):
             self.assertNotRegex(a, '.+')
 
         os.remove(self.log)
+        os.remove(test_html_file)
 
     def test_logger_info(self):
         bb = call(self.cmd + ['-v'], cwd=root)
@@ -46,6 +49,7 @@ class TestDirectExecution(unittest.TestCase):
             self.assertRegex(a, 'INFO')
 
         os.remove(self.log)
+        os.remove(test_html_file)
 
     def test_logger_debug(self):
         bb = call(self.cmd + ['-vv'], cwd=root)
@@ -58,3 +62,4 @@ class TestDirectExecution(unittest.TestCase):
             self.assertRegex(a, 'DEBUG')
 
         os.remove(self.log)
+        os.remove(test_html_file)

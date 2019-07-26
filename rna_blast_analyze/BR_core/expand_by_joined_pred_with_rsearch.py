@@ -1,5 +1,4 @@
 import os
-import sys
 import pickle
 import re
 from copy import deepcopy
@@ -12,10 +11,8 @@ from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
 from rna_blast_analyze.BR_core.expand_by_BLAST import blast_wrapper_inner
 from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper_inner
 from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
-from rna_blast_analyze.BR_core.stockholm_alig import StockholmFeatureStock
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.cmalign import get_cm_model, run_cmfetch, RfamInfo
-from rna_blast_analyze.BR_core.validate_args import validate_args
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -30,10 +27,6 @@ def joined_wrapper_inner(args_inner, shared_list=None, start_from=0):
     ml.debug(fname())
     # update params if different config is requested
     CONFIG.override(tools_paths(args_inner.config_file))
-
-    if not validate_args(args_inner):
-        print("There was an error with provided arguments. Please see the error message.")
-        sys.exit(1)
 
     blast_args = deepcopy(args_inner)
     locarna_args = deepcopy(args_inner)
@@ -61,10 +54,6 @@ def joined_wrapper_inner(args_inner, shared_list=None, start_from=0):
 
     if not shared_list:
         shared_list = []
-
-    stockholm_features = StockholmFeatureStock()
-    stockholm_features.add_custom_parser_tags('GC', {'cA1': 'anchor letter tag',
-                                                     'cA2': 'anchor number tag'})
 
     p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
     # this is done for each query
@@ -99,7 +88,23 @@ def joined_wrapper_inner(args_inner, shared_list=None, start_from=0):
         all_analyzed.append(analyzed_hits)
         order_out = []
         for bh, lh in zip(b_hits.hits, l_hits.hits):
+
             hits = [bh, lh]
+            # fallback to simple if locarna returned empty hit
+            # deal with the situlation when both ways returned empty hits
+            filtered_hits = [h for h in hits if h.extension is not None]
+            if len(filtered_hits) == 1:
+                msg = 'Only one extension method completed successfully for {}. ' \
+                      'Choosing the successfully extended sequence to the output.'.format(filtered_hits[0].extension.id)
+                ml.info(msg)
+                if ml.getEffectiveLevel() < 20:
+                    print(msg)
+                analyzed_hits.hits.append(filtered_hits[0])
+                continue
+            elif len(filtered_hits) == 0:
+                # append empty extension
+                analyzed_hits.hits.append(lh)
+                continue
 
             bit_scores = [i.extension.annotations['cmstat']['bit_sc'] for i in hits]
 

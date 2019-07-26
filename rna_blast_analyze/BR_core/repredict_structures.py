@@ -549,19 +549,32 @@ def repredict_structures_for_homol_seqs(
         return None, None, []
 
     elif 'rfam-Rc' == prediction_method:
-
-        if use_cm_file is None:
-            msg = "No CM model. Can't use {}.".format(prediction_method)
-            ml.warning(msg)
-            return None, None, [msg]
-        else:
-            structures, exec_time = cmmodel_rnafold_c(
-                seqs2predict_fasta,
-                use_cm_file,
-                threads=threads,
-                params=pred_method_params.get(prediction_method, {})
+        try:
+            if use_cm_file is None:
+                msg = "No CM model. Can't use {}.".format(prediction_method)
+                ml.warning(msg)
+                return None, None, [msg]
+            else:
+                structures, exec_time = cmmodel_rnafold_c(
+                    seqs2predict_fasta,
+                    use_cm_file,
+                    threads=threads,
+                    params=pred_method_params.get(prediction_method, {})
+                )
+                return structures, exec_time, []
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
             )
-            return structures, exec_time, []
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'rfam-centroid' == prediction_method:
         # run cmscan if needed
@@ -570,61 +583,118 @@ def repredict_structures_for_homol_seqs(
         # run centroid_homfold
 
         method_parameters = pred_method_params.get(prediction_method, {})
+        try:
+            if use_cm_file is None:
+                msg = "No CM model. Can't use {}.".format(prediction_method)
+                ml.warning(msg)
+                return None, None, [msg]
+            else:
+                cep = method_parameters.get('cmemit', '')
+                if '-u' not in cep:
+                    cep += ' -u'
+                if '-N' not in cep:
+                    cep += ' -N {}'.format(method_parameters.get('n_seqs', 10))
 
-        if use_cm_file is None:
-            msg = "No CM model. Can't use {}.".format(prediction_method)
-            ml.warning(msg)
-            return None, None, [msg]
-        else:
-            cep = method_parameters.get('cmemit', '')
-            if '-u' not in cep:
-                cep += ' -u'
-            if '-N' not in cep:
-                cep += ' -N {}'.format(method_parameters.get('n_seqs', 10))
+                hf_file = run_cmemit(use_cm_file, params=cep)
 
-            hf_file = run_cmemit(use_cm_file, params=cep)
+                structures, exec_time = me_centroid_homfold(seqs2predict_fasta, hf_file, params=method_parameters)
 
-            structures, exec_time = me_centroid_homfold(seqs2predict_fasta, hf_file, params=method_parameters)
+                os.remove(hf_file)
+                return structures, exec_time, []
 
-            os.remove(hf_file)
-            return structures, exec_time, []
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'rfam-sub' == prediction_method:
-        if use_cm_file is None:
-            msg = "No CM model. Can't use {}.".format(prediction_method)
-            ml.warning(msg)
-            return None, None, [msg]
-        else:
-            ref_structure = extract_ref_from_cm(use_cm_file)
+        try:
+            if use_cm_file is None:
+                msg = "No CM model. Can't use {}.".format(prediction_method)
+                ml.warning(msg)
+                return None, None, [msg]
+            else:
+                ref_structure = extract_ref_from_cm(use_cm_file)
 
-            structures, exec_time = rfam_subopt_pred(
-                seqs2predict_fasta,
-                ref_structure,
-                params=pred_method_params.get(prediction_method, None),
-                threads=threads,
+                structures, exec_time = rfam_subopt_pred(
+                    seqs2predict_fasta,
+                    ref_structure,
+                    params=pred_method_params.get(prediction_method, None),
+                    threads=threads,
+                )
+                return structures, exec_time, []
+
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
             )
-            return structures, exec_time, []
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'rnafold' == prediction_method:
-        structures, exec_time = rnafold_wrap_for_predict(
-            seqs2predict_fasta,
-            params=pred_method_params.get(prediction_method, {}).get('RNAfold', '')
-        )
-        return structures, exec_time, []
+        try:
+            structures, exec_time = rnafold_wrap_for_predict(
+                seqs2predict_fasta,
+                params=pred_method_params.get(prediction_method, {}).get('RNAfold', '')
+            )
+            return structures, exec_time, []
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'fq-sub' == prediction_method:
-        a, qf = mkstemp(prefix='rba_', suffix='_55', dir=CONFIG.tmpdir)
-        with os.fdopen(a, 'w') as fd:
-            fd.write('>query\n{}\n'.format(str(query.seq)))
+        try:
+            a, qf = mkstemp(prefix='rba_', suffix='_55', dir=CONFIG.tmpdir)
+            with os.fdopen(a, 'w') as fd:
+                fd.write('>query\n{}\n'.format(str(query.seq)))
 
-        structures, exec_time = subopt_fold_query(
-            seqs2predict_fasta,
-            qf,
-            params=pred_method_params.get(prediction_method, None),
-            threads=threads
-        )
-        os.remove(qf)
-        return structures, exec_time, []
+            structures, exec_time = subopt_fold_query(
+                seqs2predict_fasta,
+                qf,
+                params=pred_method_params.get(prediction_method, None),
+                threads=threads
+            )
+            os.remove(qf)
+            return structures, exec_time, []
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'C-A-sub' == prediction_method:
         try:
@@ -661,6 +731,19 @@ def repredict_structures_for_homol_seqs(
         except exceptions.NoHomologousSequenceException:
             msg = nonhomseqwarn(prediction_method)
             return None, None, [msg]
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'M-A-sub' == prediction_method:
         try:
@@ -697,6 +780,19 @@ def repredict_structures_for_homol_seqs(
         except exceptions.NoHomologousSequenceException:
             msg = nonhomseqwarn(prediction_method)
             return None, None, [msg]
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'C-A-r-Rc' == prediction_method:
         try:
@@ -726,6 +822,19 @@ def repredict_structures_for_homol_seqs(
         except exceptions.NoHomologousSequenceException:
             msg = nonhomseqwarn(prediction_method)
             return None, None, [msg]
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'M-A-r-Rc' == prediction_method:
         try:
@@ -754,6 +863,19 @@ def repredict_structures_for_homol_seqs(
         except exceptions.NoHomologousSequenceException:
             msg = nonhomseqwarn(prediction_method)
             return None, None, [msg]
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'C-A-U-r-Rc' == prediction_method:
         try:
@@ -782,6 +904,19 @@ def repredict_structures_for_homol_seqs(
         except exceptions.NoHomologousSequenceException:
             msg = nonhomseqwarn(prediction_method)
             return None, None, [msg]
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'M-A-U-r-Rc' == prediction_method:
         try:
@@ -810,45 +945,72 @@ def repredict_structures_for_homol_seqs(
         except exceptions.NoHomologousSequenceException:
             msg = nonhomseqwarn(prediction_method)
             return None, None, [msg]
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'centroid' == prediction_method:
         method_parameters = pred_method_params.get(prediction_method, {})
+        try:
 
-        nr_homo_hits_file, _, msgs = create_nr_homolog_hits_file_MSA_unsafe(
-            all_hits=all_hits_list,
-            query=query,
-            sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
-            cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
-            cm_threshold_percent=method_parameters.get('cmscore_percent', None),
-            len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
-        )
+            nr_homo_hits_file, _, msgs = create_nr_homolog_hits_file_MSA_unsafe(
+                all_hits=all_hits_list,
+                query=query,
+                sim_threshold_percent=method_parameters.get('pred_sim_threshold', default_sim_tr_perc),
+                cmscore_tr=method_parameters.get('cmscore_tr', default_score_tr),
+                cm_threshold_percent=method_parameters.get('cmscore_percent', None),
+                len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
+            )
 
-        raw_structures, exec_time = me_centroid_homfold(
-            seqs2predict_fasta, nr_homo_hits_file,
-            params=method_parameters
-        )
+            raw_structures, exec_time = me_centroid_homfold(
+                seqs2predict_fasta, nr_homo_hits_file,
+                params=method_parameters
+            )
 
-        # check noncanonical
-        if prediction_method in pred_method_params and pred_method_params[prediction_method]:
-            allow_nc = pred_method_params[prediction_method].get('allow_noncanonical', False)
-            allow_lp = pred_method_params[prediction_method].get('allow_lonely_pairs', False)
-        else:
-            allow_nc = False
-            allow_lp = False
-        if not allow_nc:
-            for seq in raw_structures:
-                repstr = find_nc_and_remove(str(seq.seq), structure=seq.letter_annotations['ss0'])
-                seq.letter_annotations['ss0'] = repstr
+            # check noncanonical
+            if prediction_method in pred_method_params and pred_method_params[prediction_method]:
+                allow_nc = pred_method_params[prediction_method].get('allow_noncanonical', False)
+                allow_lp = pred_method_params[prediction_method].get('allow_lonely_pairs', False)
+            else:
+                allow_nc = False
+                allow_lp = False
+            if not allow_nc:
+                for seq in raw_structures:
+                    repstr = find_nc_and_remove(str(seq.seq), structure=seq.letter_annotations['ss0'])
+                    seq.letter_annotations['ss0'] = repstr
 
-        # check lonely basepairs
-        if not allow_lp:
-            for seq in raw_structures:
-                repstr = check_lonely_bp(seq.letter_annotations['ss0'])
-                seq.letter_annotations['ss0'] = repstr
+            # check lonely basepairs
+            if not allow_lp:
+                for seq in raw_structures:
+                    repstr = check_lonely_bp(seq.letter_annotations['ss0'])
+                    seq.letter_annotations['ss0'] = repstr
 
-        os.remove(nr_homo_hits_file)
-        del nr_homo_hits_file
-        return raw_structures, exec_time, msgs
+            os.remove(nr_homo_hits_file)
+            del nr_homo_hits_file
+            return raw_structures, exec_time, msgs
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'centroid-fast' == prediction_method:
         method_parameters = pred_method_params.get(prediction_method, {})
@@ -890,6 +1052,19 @@ def repredict_structures_for_homol_seqs(
             if ml.level > 30:
                 print(msgfail)
             return None, None, [msgfail]
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'TurboFold' == prediction_method:
         # set arbitrary sim_threshold_percent to 100, because we want to remove only identical sequences from prediction
@@ -941,6 +1116,19 @@ def repredict_structures_for_homol_seqs(
             msgfail = "Query sequence contains ambiguous characters. Can't use {}.".format(prediction_method)
             ml.warning(msgfail)
             return None, None, [msgfail]
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     elif 'Turbo-fast' == prediction_method:
         try:
@@ -971,5 +1159,18 @@ def repredict_structures_for_homol_seqs(
             msgfail = "Query sequence contains ambiguous characters. Can't use {}.".format(prediction_method)
             ml.warning(msgfail)
             return None, None, [msgfail]
+        except exceptions.SubprocessException as e:
+            msg = "{} can't be used. Error message follows: {} \n{}".format(
+                prediction_method,
+                str(e),
+                e.errors
+            )
+            ml.error(msg)
+            return None, None, [str(e)]
+        except Exception as e:
+            ml.error("{} can't be used. Error message follows: \n{}.".format(
+                prediction_method, str(e))
+            )
+            return None, None, [str(e)]
 
     assert False, "Should not reach here (bad prediction method name)."

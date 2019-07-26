@@ -2,11 +2,12 @@ import os
 import logging
 import multiprocessing
 from subprocess import call
-from tempfile import mkstemp
+from tempfile import mkstemp, TemporaryFile
 
 from Bio import SeqIO
 
 from rna_blast_analyze.BR_core.BA_support import rebuild_structures_output_from_pred, ct2db
+from rna_blast_analyze.BR_core import exceptions
 from rna_blast_analyze.BR_core.config import CONFIG
 
 ml = logging.getLogger('rboAnalyzer')
@@ -21,7 +22,7 @@ def _run_hybrid_ss_min_wrapper(seq, P, W, M):
         predicted_ss = _run_hybrid_ss_min_single(tmp_fasta, P, W, M)
         return predicted_ss[0]
 
-    except ChildProcessError:
+    except exceptions.HybridssminException as e:
         return None
 
     finally:
@@ -29,7 +30,7 @@ def _run_hybrid_ss_min_wrapper(seq, P, W, M):
 
 
 def _run_hybrid_ss_min_single(file_path, P, W, M):
-    with open(os.devnull, 'w') as FNULL:
+    with TemporaryFile(mode='w') as tmp:
         cmd3 = [
             '{}hybrid-ss-min'.format(CONFIG.mfold_path),
             '--suffix=DAT',
@@ -39,27 +40,25 @@ def _run_hybrid_ss_min_single(file_path, P, W, M):
             file_path
         ]
         ml.debug(cmd3)
-        if ml.getEffectiveLevel() == 10:
-            rt = call(cmd3, cwd=''.join(os.path.join(os.path.split(file_path)[:-1])))
-        else:
-            rt = call(
-                cmd3,
-                cwd=''.join(os.path.join(os.path.split(file_path)[:-1])),
-                stdout=FNULL,
-                stderr=FNULL
-            )
+
+        rt = call(
+            cmd3,
+            cwd=''.join(os.path.join(os.path.split(file_path)[:-1])),
+            stdout=tmp,
+            stderr=tmp
+        )
 
         if rt:
             msgfail = 'Execution of hybrid-ss-min failed'
             ml.error(msgfail)
-            ml.error(cmd3)
-            raise ChildProcessError(msgfail)
+            tmp.seek(0)
+            raise exceptions.HybridssminException(msgfail, tmp.read())
 
         if not os.path.isfile(file_path + '.ct'):
             msgfail = 'Execution of hybrid-ss-min failed - not output file'
             ml.error(msgfail)
-            ml.error(cmd3)
-            raise ChildProcessError(msgfail)
+            tmp.seek(0)
+            raise exceptions.HybridssminException(msgfail, tmp.read())
 
         with open(file_path + '.ct', 'r') as sout:
             pred_structures = ct2db(sout)
@@ -92,7 +91,7 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20), threads=1):
     if threads == 1:
         try:
             suboptimals = _run_hybrid_ss_min_single(in_path, P, W, M)
-        except ChildProcessError:
+        except exceptions.HybridssminException as e:
             suboptimals = []
             for seq in SeqIO.parse(in_path, format='fasta'):
                 suboptimals.append(

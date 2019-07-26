@@ -1,9 +1,11 @@
 import copy
-import re
 import time
 import pandas as pd
+import logging
 
 from rna_blast_analyze.BR_core.BA_support import Subsequences
+
+ml = logging.getLogger('rboAnalyzer')
 
 
 class BlastSearchRecompute(object):
@@ -27,16 +29,6 @@ class BlastSearchRecompute(object):
         if self._runstat:
             self._runstat = 0
             self.total_time = time.time() - self.creation
-
-    def export_pandas_all(self):
-        """
-        wrap everything to the pandas datastructure, can latter use it for exports etc.
-        :return:
-        """
-        self.stop_timer()
-        for hit in self.hits:
-            pass
-        print('not implemented yet')
 
     def to_pandas_dump(self, output_file):
         if self.pandas is None:
@@ -81,7 +73,11 @@ class BlastSearchRecompute(object):
         for col in export_columns + self.args.prediction_method:
             data[col] = []
 
-        for hit in self.hits:
+        for i, hit in enumerate(self.hits):
+            if hit.extension is None:
+                ml.warning("Skipping exporting hit {}, which was not extended.".format(i))
+                continue
+
             for k in data.keys():
                 if k == 'blast_query':
                     # query name

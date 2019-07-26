@@ -21,6 +21,7 @@ blast_db = os.path.join(fwd, test_data_dir, 'blastdb', 'RF00001-art.blastdb')
 blast_db_fasta = os.path.join(fwd, test_data_dir, 'blastdb')
 blast_output = os.path.join(fwd, test_data_dir, 'RF00001_output.json')
 backup_file = blast_in + '.tmp_rboAnalyzer'
+test_output_file = os.path.join(fwd, test_data_dir, 'test_output.html')
 root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 base_script = ['python3', '-m', 'rna_blast_analyze.BA']
 
@@ -40,6 +41,7 @@ class TestContinuation(unittest.TestCase):
             blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
             enable_overwrite=True,
             mode='simple',
+            html=test_output_file,
         )
 
         ff, csv = tempfile.mkstemp(prefix='rba_', suffix='_t1')
@@ -65,6 +67,7 @@ class TestContinuation(unittest.TestCase):
             data = blastsearchrecomputefromdict(json.load(f))
             data.args.blast_in = blast_in
             data.args.json = None
+            data.args.html = test_output_file
             for hit in data.hits:
                 del hit.extension.letter_annotations['rnafold']
 
@@ -104,6 +107,7 @@ class TestContinuation(unittest.TestCase):
                     self.json,
                     self.fasta_structures,
                     self.fasta,
+                    test_output_file,
                 ],
                 'failed to delete: '
             )
@@ -115,6 +119,7 @@ class TestContinuation(unittest.TestCase):
             data = blastsearchrecomputefromdict(json.load(f))
             data.args.blast_in = blast_in
             data.args.json = None
+            data.args.html = test_output_file
             data.args.prediction_method += ['centroid']
 
             new_structures = {'rnafold': []}
@@ -148,13 +153,13 @@ class TestContinuation(unittest.TestCase):
             )
             self.assertEqual(t, True)
 
-
             remove_files_with_try(
                 [
                     self.csv,
                     self.json,
                     self.fasta_structures,
                     self.fasta,
+                    test_output_file
                 ],
                 'failed to delete: '
             )

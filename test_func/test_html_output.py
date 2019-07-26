@@ -38,6 +38,31 @@ class TestHTMLoutput(unittest.TestCase):
             except:
                 print('removing temporary test files failed')
 
+    def test_output_with_sequence_fail(self):
+        f = open(self.json_file, 'r')
+        mydata = json.load(f)
+        f.close()
+        bb = convert_classes.blastsearchrecomputefromdict(mydata)
+        bb.hits[1].extension = None
+        with open(self.htmlo, 'w') as h:
+            h.write(write_html_output(bb))
+
+        try:
+            with open(self.htmlo, 'rb') as f, open(
+                os.path.abspath(
+                    os.path.dirname(__file__) + '/test_data/RF00001_reference_missing_hit.html.md5'
+                )
+            ) as r:
+                self.assertEqual(
+                    hashlib.md5(f.read()).hexdigest(),
+                    r.read()
+                )
+        finally:
+            try:
+                os.remove(self.htmlo)
+            except:
+                print('removing temporary test files failed')
+
 
 if __name__ == '__main__':
     unittest.main()

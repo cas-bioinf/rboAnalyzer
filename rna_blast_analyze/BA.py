@@ -22,12 +22,19 @@ class ParseFilter(argparse.Action):
         ops1 = {'>', '<', '='}
         ops2 = {'>=', '<='}
         if values[:2] in ops2:
-            setattr(args, self.dest, (values[:2], float(values[2:])))
+            try:
+                val = float(values[2:])
+                setattr(args, self.dest, (values[:2], val))
+            except ValueError:
+                raise argparse.ArgumentError(self, "Filtering value must be a number, not '{}'.".format(values[2:]))
         elif values[0] in ops1:
-            setattr(args, self.dest, (values[0], float(values[1:])))
+            try:
+                val = float(values[1:])
+                setattr(args, self.dest, (values[0], val))
+            except ValueError:
+                raise argparse.ArgumentError(self, "Filtering value must be a number, not '{}'.".format(values[1:]))
         else:
-            print('Do not understand operator. Allowed are: >, <, =, <= and >=.')
-            raise argparse.ArgumentError
+            raise argparse.ArgumentError(self, 'Do not understand operator. Allowed are: >, <, =, <= and >=.')
 
 
 def f_parser():
@@ -385,10 +392,9 @@ def check_if_rfam_needed(inargs):
 
 
 def main():
-    try:
+    # try:
         # outer envelope for the script
         # ========= perform argument parsing =========
-
         if download_name in sys.argv and not ('-q' in sys.argv or '--blast_query' in sys.argv):
             # run download rfam here
             # do not run, if given with normal run request
@@ -406,21 +412,21 @@ def main():
 
         # if we reach here, exit with 0
         sys.exit(0)
-    except Exception as e:
-        print('Something went wrong.')
-        try:
-            import traceback
-            print(
-                'The error traceback is written to rboAnalyzer.log . '
-                'Please send it along with the query file and BLAST input to the developers.'
-            )
-
-            with open('rboAnalyzer.log', 'w') as fd:
-                fd.write(str(e))
-                fd.write(traceback.format_exc())
-        except:
-            pass
-        sys.exit(1)
+    # except Exception as e:
+    #     print('Something went wrong.')
+    #     try:
+    #         import traceback
+    #         print(
+    #             'The error traceback is written to rboAnalyzer.log . '
+    #             'Please send it along with the query file and BLAST input to the developers.'
+    #         )
+    #
+    #         with open('rboAnalyzer.log', 'w') as fd:
+    #             fd.write(str(e))
+    #             fd.write(traceback.format_exc())
+    #     except:
+    #         pass
+    #     sys.exit(1)
 
 
 def lunch_with_args(args):
@@ -434,6 +440,7 @@ def lunch_with_args(args):
     from rna_blast_analyze.BR_core.expand_by_joined_pred_with_rsearch import joined_wrapper_inner
     from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
     from rna_blast_analyze.BR_core.continue_interrupted import continue_computation
+    from rna_blast_analyze.BR_core.validate_args import validate_args
 
     logger = logging.getLogger('rboAnalyzer')
 
@@ -481,6 +488,11 @@ def lunch_with_args(args):
 
     # ========= check if tools needed for requested methods are installed =========
     BA_verify.check_necessery_tools(methods=args.prediction_method + [args.mode])
+
+    # ========= check if parameters make sense =========
+    if not validate_args(args):
+        print("There was an error with provided arguments. Please see the error message.")
+        sys.exit(1)
 
     # ========= run =========
     choice = 'no'

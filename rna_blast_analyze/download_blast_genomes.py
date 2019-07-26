@@ -190,12 +190,7 @@ def retrieve_and_write(handle, accessions):
 
     except:
         # bare except by desing
-        sys.stdout.write(
-            'Unknown exception. Trying to rollback to last complete entry.'
-        )
         rollback_fasta(handle)
-        sys.stdout.write(' Exiting...')
-        exit(1)
 
 
 def rollback_fasta(handle):
@@ -224,7 +219,11 @@ def rollback_fasta(handle):
         )
 
     handle.truncate(fasta_start[-1])
+    # write linebreak just to be on the safe side
+    handle.write('\n')
     sys.stdout.write('Rollback successful.\n')
+    return
+
 
 if __name__ == '__main__':
     main()

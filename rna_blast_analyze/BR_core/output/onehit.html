@@ -22,8 +22,10 @@ E-value:     {{hea.best_matching_model['E-value']}}{% endif %}
     {% macro create_onehit(data) %}
     <div class="onehit"
          id="{{data.intid}}onehit"
-         data-brna_sequence="{{data.sequence}}"
-         data-brna_seqname="{{data.seqname}}"
+         {% if data.get("seqname", False) %}
+            data-brna_sequence="{{data.sequence}}"
+            data-brna_seqname="{{data.seqname}}"
+         {% endif %}
          data-eval="{{data.eval}}">
         <h3 class="onehit_heading" style="background:{{data.h_color}};">
             Hit: {{data.source_seq_name}}
@@ -39,6 +41,7 @@ This is BLAST alignment as read from the input file</pre>
                         </div>
 {{data.blast_text}}</pre>
                 </div>
+                {% if data.get("rsearchbitscore", False) %}
                 <div class="repitem">
                     <label class="repheader"><u>Report:</u></label>
                     <table>
@@ -91,6 +94,8 @@ Quick homology estimate:
                         </tr>
                     </table>
                 </div>
+                {% endif %}
+                {% if data.get("formated_seq", False) %}
                 <div class="repitem">
                     <div>
                         <label for="{{data.intid}}SeqCheck" class="repheader"><u>Estimated full-length sequence:</u></label>
@@ -104,7 +109,9 @@ Fasta header format:
                     </div>
                     <textarea id="{{data.intid}}FormSeq" readonly="true" rows="5" cols="65">{{data.formated_seq}}</textarea>
                 </div>
+                {% endif %}
             </div>
+            {% if data.get("pictures", False) %}
             <div class="row">
                 {% for pic in data.pictures %}
                     <figure class="column" data-brna_secondary_structure="{{pic.secondary_structure}}" id="{{data.intid}}{{pic.picname}}">
@@ -122,6 +129,7 @@ To save the image:
                     </figure>
                 {% endfor %}
             </div>
+            {% endif %}
 
         {% if show_gene_browser %}
 

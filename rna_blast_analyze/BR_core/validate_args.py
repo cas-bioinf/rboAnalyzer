@@ -1,8 +1,11 @@
 import os
 import re
+import sys
 import logging
 import rna_blast_analyze.BR_core.tools_versions as tools
 from rna_blast_analyze.BR_core.filter_blast import OPERATIONS
+from Bio import SeqIO
+from rna_blast_analyze.BR_core.BA_support import IUPACmapping
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -51,6 +54,9 @@ def validate_args(args):
     if args.b_type not in ['guess', 'xml', 'plain']:
         ml.error("Wrong provided BLAST type.")
         return False
+
+    # check if file appears to be correct fasta file
+    check_fasta(args.blast_query)
 
     dbtype = ["blastdb", "fasta", "gb", "server"]
     if args.db_type not in dbtype:
@@ -103,6 +109,13 @@ def validate_args(args):
 
     if not isinstance(args.enable_overwrite, bool):
         raise TypeError
+
+    if not any([args.json, args.html, args.csv, args.pandas_dump, args.dump]):
+        ml.error(
+            "It appears that no output file was requested."
+            " Please provide --html and/or --json and/or --csv argument(s)."
+        )
+        return False
 
     check_int(args.subseq_window_locarna)
     if args.subseq_window_locarna <= 0:
@@ -190,3 +203,48 @@ def validate_args(args):
         return False
 
     return True
+
+
+def check_fasta(file):
+    status = False
+    try:
+        iupac = IUPACmapping()
+        am = set(iupac.ambiguous) | set(i.lower() for i in iupac.ambiguous)
+        un = set(iupac.unambiguous) | set(i.lower() for i in iupac.unambiguous)
+        with open(file, 'r') as f:
+            c = 0
+            for s in SeqIO.parse(f, format='fasta'):
+                c += 1
+                # check if fasta is rna/dna
+                seq_seq = set(str(s.seq))
+                if len(seq_seq - un) == 0:
+                    # sequence is OK
+                    pass
+                elif len(seq_seq - am) == 0:
+                    # sequence contains ambiguous bases
+                    pass
+                else:
+                    # sequence contains not allowed characters
+                    ml.error('Sequence {} contains disallowed characters. Please check the sequence.'.format(s.id))
+                    status = True
+
+                # check fasta id
+                # we allow A-Za-z0-9_|[]- apart form control ">"
+                if not re.fullmatch('[A-Za-z0-9_\|\[\]\-\.]*', s.id):
+                    ml.error(
+                        'Sequence id contains disallowed characters. '
+                        'Please check the sequence id. '
+                        'We allow following characters: "A-Za-z0-9_|[]-".')
+                    status = True
+
+            if c == 0:
+                raise Exception(
+                    'The provided FASTA file appears to be empty. '
+                    '(No sequence in FASTA format (starting with ">") detected.)'
+                )
+
+        if status:
+            raise Exception('One or more sequences contains characters not allowed in DNA/RNA FASTA file.')
+    except Exception as e:
+        ml.error('There was an error with provided FASTA file "{}":\n{}'.format(file, e))
+        sys.exit(1)

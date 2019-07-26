@@ -30,14 +30,16 @@ def verify_query_blast(blast, query):
             )
         )
     if len(query) != blast.query_length:
-        ml.warning(
-            'Provided query lenght ({}: {}) do not match BLAST query length ({}: {}).'.format(
+        ml.error(
+            'Provided query lenght ({}: {}) do not match BLAST query length ({}: {}).\n'
+            'Please provide correct query sequence.'.format(
                 query.id,
                 len(query),
                 blast.query,
                 blast.query_length
             )
         )
+        sys.exit(1)
     return
 
 

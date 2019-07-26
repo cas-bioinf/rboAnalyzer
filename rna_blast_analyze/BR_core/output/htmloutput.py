@@ -84,34 +84,54 @@ def _prepare_body(data):
 
     jj = []
     for i, onehit in enumerate(data.hits):
-        ext = onehit.extension
-        h_bit_sc = ext.annotations['cmstat']['bit_sc']
         rr = dict()
         rr['source_seq_name'] = onehit.source.annotations['blast'][0]
-        rr['seqname'] = ext.id
-        rr['sequence'] = str(ext.seq)
-        rr['formated_seq'] = ext.format('fasta')
-        rr['rsearchbitscore'] = h_bit_sc
         rr['blast_hit_name'] = _prep_hit_name(onehit.source.annotations['blast'][0], onehit.source.description)
-        rr['ext_start'] = onehit.best_start
-        rr['ext_end'] = onehit.best_end
         rr['blast_text'] = blasthsp2pre(onehit.source.annotations['blast'][1])
-        rr['pictures'] = _prepare_pictures(ext)
         rr['eval'] = onehit.source.annotations['blast'][1].expect
         rr['intid'] = str(i)
-        rr['msgs'] = set(onehit.source.annotations['msgs'] + onehit.extension.annotations['msgs'])
+        rr['msgs'] = set(onehit.source.annotations['msgs'])
+        if onehit.extension is not None:
+            rr['msgs'] |= set(onehit.extension.annotations['msgs'])
 
-        # estimate the homology
-        q_sc = data.query.annotations['cmstat']['bit_sc']
-        if h_bit_sc < 0:
-            h_estimate = 'Not homologous'
-        elif h_bit_sc/q_sc >= 0.5 and h_bit_sc >= 20:
-            h_estimate = 'Homologous'
+        lx = len(data.query.seq)
+
+        seqview = [
+            '?embeded=true',
+            '&noviewheader=true',
+            '&id={}'.format(onehit.source.annotations['blast'][0]),
+            '&appname=rboAnalyzer',
+            '&multipanel=false',
+            '&slim=true'
+        ]
+
+        if onehit.extension is not None:
+            ext = onehit.extension
+            h_bit_sc = ext.annotations['cmstat']['bit_sc']
+
+            rr['seqname'] = ext.id
+            rr['sequence'] = str(ext.seq)
+            rr['formated_seq'] = ext.format('fasta')
+            rr['rsearchbitscore'] = h_bit_sc
+            rr['ext_start'] = onehit.best_start
+            rr['ext_end'] = onehit.best_end
+            rr['pictures'] = _prepare_pictures(ext)
+
+            # estimate the homology
+            # q_sc = data.query.annotations['cmstat']['bit_sc']
+            if h_bit_sc < 0:
+                h_estimate = 'Not homologous'
+            elif h_bit_sc/lx >= 0.5 and h_bit_sc >= 20:
+                h_estimate = 'Homologous'
+            else:
+                h_estimate = 'Uncertain'
+
+            rr['h_estimate'] = h_estimate
+            rr['h_color'] = colors.rgb2hex(mm.to_rgba(h_bit_sc))
+
+            seqview += ['&mk={}:{}|BestMatch!'.format(onehit.best_start, onehit.best_end)]
         else:
-            h_estimate = 'Uncertain'
-
-        rr['h_estimate'] = h_estimate
-        rr['h_color'] = colors.rgb2hex(mm.to_rgba(h_bit_sc))
+            rr['h_color'] = colors.rgb2hex(mm.to_rgba(0))
 
         # create seqviewurl here
         es = onehit.source.annotations['extended_start']
@@ -119,28 +139,16 @@ def _prepare_body(data):
         if es > ee:
             es, ee = [ee, es]
 
-        diff = 1000 + 2*len(ext)
+        diff = 1000 + 2*lx
         es -= diff
         ee += diff
 
         if es < 0:
             es = 1
 
-        # if getattr(data.args, 'show_gene_browser', False):
-        #     rr['draw_seqview'] = True
-        # else:
-        #     rr['draw_seqview'] = False
+        seqview += ['&v={}:{}'.format(es, ee)]
 
-        rr['seqviewurl'] = ''.join([
-            '?embeded=true',
-            '&noviewheader=true',
-            '&id={}'.format(onehit.source.annotations['blast'][0]),
-            '&v={}:{}'.format(es, ee),
-            '&appname=rboAnalyzer',
-            '&mk={}:{}|BestMatch!'.format(onehit.best_start, onehit.best_end),
-            '&multipanel=false',
-            '&slim=true'
-        ])
+        rr['seqviewurl'] = ''.join(seqview)
         rr['seqvid'] = 'seqv_{}'.format(i)
 
         jj.append(rr)

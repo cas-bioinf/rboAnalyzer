@@ -2,7 +2,7 @@ import os
 import re
 from io import StringIO
 from subprocess import call, check_output, STDOUT
-from tempfile import mkstemp
+from tempfile import mkstemp, TemporaryFile
 import logging
 import gzip
 import shutil
@@ -14,6 +14,7 @@ from rna_blast_analyze.BR_core.BA_support import parse_seq_str
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.stockholm_parser import stockholm_read
 from rna_blast_analyze.BR_core.fname import fname
+from rna_blast_analyze.BR_core import exceptions
 
 ml = logging.getLogger('rboAnalyzer')
 # this file holds files needed for running and parsing infernal tools
@@ -42,7 +43,7 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
     else:
         cm_file = os.path.join(rfam.rfam_dir, rfam.rfam_file_name)
 
-    with open(os.devnull, 'w') as FNULL:
+    with TemporaryFile(mode='w+') as tmp:
 
         # build commandline
         cmd = ['{}cmscan'.format(CONFIG.infernal_path)]
@@ -53,16 +54,13 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
             cm_file, fastafile
         ]
         ml.debug(cmd)
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd)
-        else:
-            r = call(cmd, stdout=FNULL)
+        r = call(cmd, stdout=tmp, stderr=tmp)
 
         if r:
-            msgfail = 'cmscan failed'
+            msgfail = 'Call to cmscan failed.'
             ml.error(msgfail)
-            ml.error(cmd)
-            raise ChildProcessError(msgfail)
+            tmp.seek(0)
+            raise exceptions.CmscanException(msgfail, tmp.read())
 
     return out
 
@@ -118,7 +116,7 @@ def run_cmemit(model, params='', out_file=None):
         fd, out = mkstemp(prefix='rba_', suffix='_12', dir=CONFIG.tmpdir)
         os.close(fd)
 
-    with open(os.devnull, 'w') as FNULL:
+    with TemporaryFile(mode='w+') as tmp:
         # build commandline
         cmd = ['{}cmemit'.format(CONFIG.infernal_path)]
         if params != '':
@@ -126,16 +124,13 @@ def run_cmemit(model, params='', out_file=None):
         cmd += ['-o', out, model]
 
         ml.debug(cmd)
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd)
-        else:
-            r = call(cmd, stdout=FNULL)
+        r = call(cmd, stdout=tmp, stderr=tmp)
 
         if r:
-            msgfail = 'call to cmemit failed'
+            msgfail = 'Call to cmemit failed.'
             ml.error(msgfail)
-            ml.error(cmd)
-            raise ChildProcessError(msgfail)
+            tmp.seek(0)
+            raise exceptions.CmemitException(msgfail, tmp.read(0))
     return out
 
 
@@ -165,7 +160,7 @@ def extract_ref_from_cm(cm_file):
     os.remove(single_alig_file)
 
     if len(salig) != 1:
-        raise Exception('cmemit file does not have only one record in (not including reference)')
+        raise AssertionError('File from cmemit does not have only one record in (not including reference).')
 
     # recode structure, return it
     ss = salig.column_annotations['SS_cons']
@@ -364,8 +359,8 @@ def run_cmalign_on_fasta(fasta_file, model_file, cmalign_params='--notrunc', ali
     ml.debug(fname())
     cma_fd, cma_file = mkstemp(prefix='rba_', suffix='_14', dir=CONFIG.tmpdir)
     os.close(cma_fd)
-    FNULL = open(os.devnull, 'w')
-    try:
+
+    with TemporaryFile(mode='w+') as tmp:
         cmd = [
             '{}cmalign'.format(CONFIG.infernal_path),
             '--informat', 'fasta',
@@ -376,19 +371,13 @@ def run_cmalign_on_fasta(fasta_file, model_file, cmalign_params='--notrunc', ali
         cmd += ['-o', cma_file, model_file, fasta_file]
 
         ml.debug(cmd)
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd)
-        else:
-            r = call(cmd, stdout=FNULL)
+        r = call(cmd, stdout=tmp, stderr=tmp)
 
         if r:
-            msgfail = 'call to cmalign failed'
+            msgfail = 'Call to cmalign failed.'
             ml.error(msgfail)
-            ml.error(cmd)
-            raise ChildProcessError('{} for files:\nmodel file:{}fasta file:{}\noutput file:{}'.format(
-                msgfail, model_file, fasta_file, cma_file))
-    finally:
-        FNULL.close()
+            tmp.seek(0)
+            raise exceptions.CmalignException(msgfail, tmp.read())
 
     return cma_file
 
@@ -519,9 +508,17 @@ def parse_cmalign_infernal_table(tbl):
 
 def get_cm_model(query_file, params=None, threads=None):
     ml.debug(fname())
-    cmscan_data = get_cm_model_table(query_file, params, threads)
-    best_model_row = select_best_matching_model_from_cmscan(cmscan_data)
-    if best_model_row is None:
+    try:
+        cmscan_data = get_cm_model_table(query_file, params, threads)
+        best_model_row = select_best_matching_model_from_cmscan(cmscan_data)
+        if best_model_row is None:
+            return None
+    except exceptions.CmscanException as e:
+        msg = 'rboAnalyzer was not able to determine covariance model for the query sequence from RFAM automatically. ' \
+              'You can extract covariance model manualy and provide it to rboAnalyzer with "--cm_file" argument.'
+        ml.info(msg)
+        if ml.getEffectiveLevel() < 20:
+            print('STATUS: ' + msg)
         return None
 
     best_model = best_model_row['target_name']
@@ -549,20 +546,23 @@ def get_cm_model_table(query_file, params=None, threads=None):
 def select_best_matching_model_from_cmscan(cmscan_data):
     ei = cmscan_data['E-value'].idxmin()
     si = cmscan_data['score'].idxmax()
+    msg = 'rboAnalyzer was not able to determine covariance model for the query sequence from RFAM automatically. ' \
+          'You can extract covariance model manualy and provide it to rboAnalyzer with "--cm_file" argument.'
+
     if ei != si:
-        ml.warning(
-            'The CM with best E-val ({}) is not the same as the CM with best score ({}).'
-            ' Returning as unknown model.'.format(
-                cmscan_data.loc[ei]['target_name'],
-                cmscan_data.loc[si]['target_name']
-            )
-        )
+        ml.info(msg)
+        ml.debug('Best CM by score does not match best CM by E-val.')
+        if ml.getEffectiveLevel() < 20:
+            print('STATUS: ' + msg)
         return None
 
     best_model = cmscan_data.loc[ei].to_dict()
 
     if best_model['score'] <= 0:
-        ml.info('No CM model with score > 0 found.')
+        ml.info(msg)
+        ml.debug('No CM model with score > 0.')
+        if ml.getEffectiveLevel() < 20:
+            print('STATUS: ' + msg)
         return None
 
     return best_model
