@@ -30,7 +30,7 @@ def _run_hybrid_ss_min_wrapper(seq, P, W, M):
 
 
 def _run_hybrid_ss_min_single(file_path, P, W, M):
-    with TemporaryFile(mode='w') as tmp:
+    with TemporaryFile(mode='w', encoding='utf-8') as tmp:
         cmd3 = [
             '{}hybrid-ss-min'.format(CONFIG.mfold_path),
             '--suffix=DAT',

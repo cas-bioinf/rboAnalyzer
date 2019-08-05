@@ -837,7 +837,7 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
         c_fd, clustalo_file = mkstemp(prefix='rba_', suffix='_57', dir=CONFIG.tmpdir)
         os.close(c_fd)
 
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         cmd = [
             '{}clustalo'.format(CONFIG.clustal_path),
             '--force',

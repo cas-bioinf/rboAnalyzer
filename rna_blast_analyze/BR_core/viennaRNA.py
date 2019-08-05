@@ -27,7 +27,7 @@ def rnafold(fastafile, outfile, parameters=''):
         shlex.quote(outfile)
     )
     ml.debug(cmd)
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         r = call(cmd, shell=True, stderr=tmp, stdout=tmp)
 
         if r:
@@ -80,7 +80,7 @@ def run_rnaplot(seq, structure=None, format='svg', outfile=None):
         shlex.quote(tmpfile)
     )
     ml.debug(cmd)
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         r = call(cmd, shell=True, stdout=tmp, stderr=tmp)
         if r:
             msgfail = 'Call to RNAplot failed.'

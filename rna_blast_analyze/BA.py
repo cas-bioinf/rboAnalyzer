@@ -531,6 +531,8 @@ def lunch_with_args(args):
     # ========= run =========
     blast_fn = os.path.basename(args.blast_in) + '.r-' + hashstring[:10]
     blast_dir = os.path.dirname(args.blast_in)
+    if blast_dir == '':
+        blast_dir = os.getcwd()
     potential_matches = [f for f in os.listdir(blast_dir) if f == blast_fn]
     if len(potential_matches) == 0:
         with open(args.blast_in + '.r-' + args.sha1[:10], 'w') as f:

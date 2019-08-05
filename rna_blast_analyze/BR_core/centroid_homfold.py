@@ -33,7 +33,7 @@ def run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_
         '-o', ch_outfile,
         fasta2predict
     ]
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         r = call(cmd, stdout=tmp, stderr=tmp)
         if r:
             tmp.seek(0)

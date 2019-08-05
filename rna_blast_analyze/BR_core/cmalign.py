@@ -44,7 +44,7 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
     else:
         cm_file = os.path.join(rfam.rfam_dir, rfam.rfam_file_name)
 
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
 
         # build commandline
         cmd = ['{}cmscan'.format(CONFIG.infernal_path)]
@@ -83,7 +83,7 @@ def run_cmfetch(cmfile, modelid, outfile=None):
         fd, out = mkstemp(prefix='rba_', suffix='_11', dir=CONFIG.tmpdir)
         os.close(fd)
 
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         cmd = [
             '{}cmfetch'.format(CONFIG.infernal_path),
             '-o', out,
@@ -116,7 +116,7 @@ def run_cmemit(model, params='', out_file=None):
         fd, out = mkstemp(prefix='rba_', suffix='_12', dir=CONFIG.tmpdir)
         os.close(fd)
 
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         # build commandline
         cmd = ['{}cmemit'.format(CONFIG.infernal_path)]
         if params != '':
@@ -266,40 +266,46 @@ def download_cmmodels_file(path=None, url=None):
     ml.debug(cmd)
 
     ml.info('Downloading RFAM database (aprox 300Mb). This may take a while...')
-    with TemporaryFile(mode='w+') as tmp:
-        r = check_output(cmd, stderr=tmp)
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
+        r = call(cmd, stderr=tmp, stdout=tmp)
 
-        if not r:
+        if r:
             msgfail = 'Call to wget failed. Please check the internet connection and/or availability of "wget".'
             ml.error(msgfail)
             ml.debug(cmd)
             sys.exit(1)
 
-    if 'Remote file no newer than local file ‘Rfam.cm.gz’ -- not retrieving.' in r.decode():
-        # do not download
-        ml.info('No new data. Nothing to do.')
-    else:
-        # unzip using build in gzip
-        with gzip.open(os.path.join(path, rfam.gzname), 'rb') as fin:
-            with open(os.path.join(path, rfam.rfam_file_name), 'wb') as fout:
-                shutil.copyfileobj(fin, fout)
+        tmp.seek(0)
+        cmd_output = tmp.read()
 
-        # run cmpress to create binary files needed to run cmscan
-        try:
-            run_cmpress(os.path.join(path, rfam.rfam_file_name))
-        except exceptions.CmpressException as e:
-            ml.error(str(e))
-            ml.error('The Rfam file might be corrupt. Please check following output to get more information.\n')
-            print(e.errors)
-            sys.exit(1)
+        if 'Remote file no newer than local file' in cmd_output:
+            # do not download
+            msg = 'No new data. Nothing to do.'
+            ml.info(msg)
+            if ml.getEffectiveLevel() > 20:
+                print(msg)
+        else:
+            # unzip using build in gzip
+            with gzip.open(os.path.join(path, rfam.gzname), 'rb') as fin:
+                with open(os.path.join(path, rfam.rfam_file_name), 'wb') as fout:
+                    shutil.copyfileobj(fin, fout)
 
-    return os.path.join(path, rfam.rfam_file_name)
+            # run cmpress to create binary files needed to run cmscan
+            try:
+                run_cmpress(os.path.join(path, rfam.rfam_file_name))
+            except exceptions.CmpressException as e:
+                ml.error(str(e))
+                ml.error('The Rfam file might be corrupt. Please check following output to get more information.\n')
+                print(e.errors)
+                sys.exit(1)
+
+        return os.path.join(path, rfam.rfam_file_name)
 
 
 def run_cmpress(file2process):
     ml.info('Running cmpress.')
     ml.debug(fname())
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         cmd = ['{}cmpress'.format(CONFIG.infernal_path), '-F', file2process]
         ml.debug(cmd)
         r = call(cmd, stdout=tmp, stderr=tmp)
@@ -328,7 +334,7 @@ def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
     cm_fd, cm_file = mkstemp(prefix='rba_', suffix='_13', dir=CONFIG.tmpdir)
     os.close(cm_fd)
 
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         cmd = ['{}cmbuild'.format(CONFIG.infernal_path), '-F']
         if cmbuild_params != '':
             cmd += cmbuild_params.split()
@@ -358,7 +364,7 @@ def run_cmalign_on_fasta(fasta_file, model_file, cmalign_params='--notrunc', ali
     cma_fd, cma_file = mkstemp(prefix='rba_', suffix='_14', dir=CONFIG.tmpdir)
     os.close(cma_fd)
 
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         cmd = [
             '{}cmalign'.format(CONFIG.infernal_path),
             '--informat', 'fasta',

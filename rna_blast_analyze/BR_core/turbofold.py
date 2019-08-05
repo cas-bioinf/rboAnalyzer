@@ -193,7 +193,7 @@ def _turbofold_worker(sequences, params):
     )
 
     # run without prediction progress reporting output
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         cmd = [
             '{}TurboFold'.format(CONFIG.turbofold_path),
             con_file

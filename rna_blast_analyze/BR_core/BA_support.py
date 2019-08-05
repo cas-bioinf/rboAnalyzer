@@ -255,7 +255,7 @@ def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
         ]
     ml.debug(cmd)
 
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         r = call(cmd, stdout=tmp, stderr=tmp)
         if r:
             msgfail = 'Call to muscle failed.'
@@ -286,7 +286,7 @@ def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
 
 def RNAfold(sequence):
     ml.debug(fname())
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         r = check_output(
             [
                 '{}RNAfold'.format(CONFIG.viennarna_path),

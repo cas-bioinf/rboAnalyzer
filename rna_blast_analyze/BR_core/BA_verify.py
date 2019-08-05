@@ -10,7 +10,7 @@ from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.tools_versions import blast_minimal_version, locarna_minimal_version, \
     infernal_minimal_version, vrna_minimal_version, clustalo_minimal_version, muscle_minimal_version, \
     centroid_homfold_minimal_version, turbofold_minimal_version,\
-    mfold_minimal_version, method_required_tools, blast_maximal_version
+    mfold_minimal_version, method_required_tools, blast_maximal_version, locarna_maximal_version
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -47,7 +47,7 @@ def verify_blastdbcmd(minimal_version, maximal_version):
         return False
 
 
-def verify_locarna(minimal_version):
+def verify_locarna(minimal_version, maximal_version):
     msgversion = 'Locarna is not installed in required version, required version is {}.{}.{}'.format(*locarna_minimal_version)
     msgpath = '{}LocARNA could not be located (not in PATH).'.format(CONFIG.locarna_path)
     msgsuccess = 'Locarna is installed in required version'
@@ -61,7 +61,12 @@ def verify_locarna(minimal_version):
         a = a.decode()
         if a.startswith('LocARNA'):
             r = [int(m.group()) for m in re.finditer('[0-9]+', a)]
-            return version_check(r, minimal_version, msgsuccess, msgversion)
+            bb_min = version_check(r, minimal_version, msgsuccess, msgversion)
+            bb_max = version_check(r, maximal_version, msgsuccess, msgversion, operator.le)
+            if bb_min and bb_max:
+                return True
+            else:
+                return False
         else:
             ml.warning(msgversion)
             return False
@@ -313,7 +318,7 @@ def check_3rd_party_tools():
     if verify_blastdbcmd(blast_minimal_version, blast_maximal_version):
         installed.add('blastdbcmd')
 
-    if verify_locarna(locarna_minimal_version):
+    if verify_locarna(locarna_minimal_version, locarna_maximal_version):
         installed.add('locarna')
 
     if verify_infernal('cmbuild', infernal_minimal_version):

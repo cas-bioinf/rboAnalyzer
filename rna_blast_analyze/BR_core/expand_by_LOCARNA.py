@@ -299,7 +299,7 @@ def run_locarna(query_file, subject_file, locarna_params):
         shlex.quote(subject_file + '.loc_out'),
     )
     ml.debug(cmd)
-    with TemporaryFile(mode='w+') as tmp:
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
         r = call(cmd, shell=True, stdout=tmp, stderr=tmp)
         if r:
             msgfail = 'Call to locarna failed for files in1:{} in2:{} out:{}'.format(
