@@ -12,12 +12,11 @@ class Pseudoargs(Namespace):
             blast_db,
             b_type='guess',
             blast_regexp=accession_regex,
-            keep_all=False,
             subseq_window_locarna=30,
             dump=None,
             pandas_dump=None,
             logfile=None,
-            locarna_params='--struct-local 0 --sequ-local 0 --free-endgaps ++++',
+            locarna_params='--struct-local=0 --sequ-local=0 --free-endgaps=++++',
             locarna_anchor_length=7,
             repredict_file=None,
             prediction_method=('C-A-U-r-Rc',),
@@ -46,7 +45,6 @@ class Pseudoargs(Namespace):
         self.b_type = b_type
         self.blast_db = blast_db
         self.blast_regexp = blast_regexp
-        self.keep_all = keep_all
         self.blast_query = blast_query
         self.subseq_window_locarna = subseq_window_locarna
         self.dump = dump
@@ -78,6 +76,7 @@ class Pseudoargs(Namespace):
         if self.filter_by_eval is not None and self.filter_by_bitscore is not None:
             raise AttributeError('filter_by_eval is not allowed with filter_by_bitscore')
 
+        self.sha1 = None
         # manage default parameters
         default_file = os.path.abspath(
             os.path.dirname(__file__) + '/../rna_blast_analyze/BR_core/prediction_parameters.json'

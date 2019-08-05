@@ -6,6 +6,8 @@ from test_func.test_execution import fwd, test_data_dir
 from test_func.pseudoargs_class import Pseudoargs
 from rna_blast_analyze.BA import lunch_with_args
 from Bio import SeqIO
+from rna_blast_analyze.BR_core.BA_support import remove_files_with_try
+import glob
 
 blast_in = os.path.join(fwd, test_data_dir, 'edge_cases_out.txt')
 blast_query = os.path.join(fwd, test_data_dir, 'edge_cases_q.fa')
@@ -22,13 +24,21 @@ class TestExecution(unittest.TestCase):
             blast_db,
             b_type='plain',
             prediction_method=['rnafold'],
-            blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
+            blast_regexp=r'(?<=\|)[A-Z0-9]*\.?\d*$',
             enable_overwrite=True,
             html=test_output_file,
         )
 
         with open(source_fasta, 'r') as fh:
             self.seqs = [s for s in SeqIO.parse(fh, format='fasta')]
+
+    def tearDown(self):
+        files = glob.glob(blast_in + '.r-*')
+        remove_files_with_try(
+            [
+                test_output_file,
+            ] + files
+        )
 
     def test_logs_and_correct_seqs_simple(self):
         with self.assertLogs('rboAnalyzer', level='WARNING') as l:
@@ -56,7 +66,6 @@ class TestExecution(unittest.TestCase):
                             else:
                                 rec_s = str(rec.seq.reverse_complement())
                             self.assertEqual(ss, rec_s)
-            os.remove(test_output_file)
 
     def test_logs_and_correct_seqs_locarna(self):
         with self.assertLogs('rboAnalyzer', level='WARNING') as l:
@@ -84,7 +93,6 @@ class TestExecution(unittest.TestCase):
                             else:
                                 rec_s = str(rec.seq.reverse_complement())
                             self.assertEqual(ss, rec_s)
-            os.remove(test_output_file)
 
     def test_logs_and_correct_seqs_joined(self):
         with self.assertLogs('rboAnalyzer', level='WARNING') as l:
@@ -112,4 +120,3 @@ class TestExecution(unittest.TestCase):
                             else:
                                 rec_s = str(rec.seq.reverse_complement())
                             self.assertEqual(ss, rec_s)
-            os.remove(test_output_file)

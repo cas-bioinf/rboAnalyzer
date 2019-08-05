@@ -82,7 +82,7 @@ def compute_refold(alig_file, cons_file):
     )
     ml.debug(cmd)
     with TemporaryFile(mode='w+') as tmp:
-        r = call(cmd, shell=True)
+        r = call(cmd, shell=True, stdout=tmp, stderr=tmp)
         if r:
             msgfail = 'Call to refold.pl failed.'
             ml.error(msgfail)

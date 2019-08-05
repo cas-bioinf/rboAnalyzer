@@ -18,23 +18,50 @@ with open(os.path.join(os.path.dirname(__file__), 'VERSION'), 'r') as o:
 
 
 class ParseFilter(argparse.Action):
+    def __init__(self, *args, **kwargs):
+        self.ops1 = {'>', '<', '='}
+        self.ops2 = {'>=', '<='}
+        super().__init__(*args, **kwargs)
+
     def __call__(self, parser, args, values, option_string=None):
-        ops1 = {'>', '<', '='}
-        ops2 = {'>=', '<='}
-        if values[:2] in ops2:
-            try:
-                val = float(values[2:])
-                setattr(args, self.dest, (values[:2], val))
-            except ValueError:
-                raise argparse.ArgumentError(self, "Filtering value must be a number, not '{}'.".format(values[2:]))
-        elif values[0] in ops1:
-            try:
-                val = float(values[1:])
-                setattr(args, self.dest, (values[0], val))
-            except ValueError:
-                raise argparse.ArgumentError(self, "Filtering value must be a number, not '{}'.".format(values[1:]))
+        vv = values.split(',')
+        if len(vv) in {1, 2}:
+            setattr(
+                args,
+                self.dest,
+                [self._return_parsed_val(v) for v in vv]
+            )
         else:
-            raise argparse.ArgumentError(self, 'Do not understand operator. Allowed are: >, <, =, <= and >=.')
+            raise argparse.ArgumentError(self, 'Incorrect filtering argument.')
+
+    def _return_parsed_val(self, argval):
+            vv = argval.strip()
+            if vv[:2] in self.ops2:
+                try:
+                    val = float(vv[2:])
+                    return vv[:2], val
+                except ValueError:
+                    raise argparse.ArgumentError(self, "Filtering value must be a number, not '{}'.".format(vv[2:]))
+            elif vv[0] in self.ops1:
+                try:
+                    val = float(vv[1:])
+                    return vv[0], val
+                except ValueError:
+                    raise argparse.ArgumentError(self, "Filtering value must be a number, not '{}'.".format(vv[1:]))
+            else:
+                raise argparse.ArgumentError(self, 'Do not understand operator. Allowed are: >, <, =, <= and >=.')
+
+
+def str2bool(v):
+    # from https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 def f_parser():
@@ -101,9 +128,6 @@ def f_parser():
     misc_group.add_argument(
         '--blast_regexp',
         type=str,
-        # default='(?<=\|)[A-Z0-9]*\.?\d*$',
-        # default='[A-Z0-9a-z_]+\.[1-9]+',
-        # default='[A-Z]+[A-Z_0-9]+\.[0-9]+',
         default=accession_regex,
         help='Provide python valid regular expression which capture the index key to blastdb'
         ' (usualy the accession.version number).'
@@ -278,17 +302,22 @@ def f_parser():
         help=argparse.SUPPRESS,
         # help='same data as with --csv but in binary (pandas pickle) format'
     )
-    parser.add_argument(
-        '--keep_all',
-        default=False,
-        type=bool,
-        # help='keep all files (debug)'
-        help=argparse.SUPPRESS,
-    )
+    # parser.add_argument(
+    #     '--no_backup',
+    #     action='store_true',
+    #     default=False,
+    #     help="rboAnalyzer will NOT store the backup data (the [BLAST FILE].r-[HASH] files).",
+    # )
+    # parser.add_argument(
+    #     '--clean',
+    #     action='store_true',
+    #     default=False,
+    #     help="rboAnalyzer will not use the backup data (the [BLAST FILE].r-[HASH] files) even if present."
+    # )
     parser.add_argument(
         '--show_gene_browser',
         default=True,
-        type=bool,
+        type=str2bool,
         # help='option to hide gene browser for debugging output web page'
         help=argparse.SUPPRESS,
     )
@@ -299,6 +328,7 @@ def f_parser():
         action=ParseFilter,
         help='Filter the input blast by E-value. Only hits following the rule will be kept. '
              'Example ">10e-10" will keep only hits with eval greater then 10e-10. '
+             'Interval can be specified with "," e.g. ">10e-100, <10e-1". '
              'The homologous sequences used with certain prediction methods are taken from all hits '
              '(regardless of the filtering).'
     )
@@ -308,6 +338,7 @@ def f_parser():
         action=ParseFilter,
         help='Filter the input blast by bit score. Only hits following the rule will be kept. '
              'Example "<20" will keep only hits with bit score less then 20. '
+             'Interval can be specified with "," e.g. ">30, <45". '
              'The homologous sequences used with certain prediction methods are taken from all hits '
              '(regardless of the filtering).'
     )
@@ -392,7 +423,7 @@ def check_if_rfam_needed(inargs):
 
 
 def main():
-    # try:
+    try:
         # outer envelope for the script
         # ========= perform argument parsing =========
         if download_name in sys.argv and not ('-q' in sys.argv or '--blast_query' in sys.argv):
@@ -412,21 +443,21 @@ def main():
 
         # if we reach here, exit with 0
         sys.exit(0)
-    # except Exception as e:
-    #     print('Something went wrong.')
-    #     try:
-    #         import traceback
-    #         print(
-    #             'The error traceback is written to rboAnalyzer.log . '
-    #             'Please send it along with the query file and BLAST input to the developers.'
-    #         )
-    #
-    #         with open('rboAnalyzer.log', 'w') as fd:
-    #             fd.write(str(e))
-    #             fd.write(traceback.format_exc())
-    #     except:
-    #         pass
-    #     sys.exit(1)
+    except Exception as e:
+        print('Something went wrong.')
+        try:
+            import traceback
+            print(
+                'The error traceback is written to rboAnalyzer.log . '
+                'Please send it along with the query file and BLAST input to the developers.'
+            )
+
+            with open('rboAnalyzer.log', 'w') as fd:
+                fd.write(str(e))
+                fd.write(traceback.format_exc())
+        except Exception:
+            pass
+        sys.exit(1)
 
 
 def lunch_with_args(args):
@@ -435,12 +466,11 @@ def lunch_with_args(args):
     import logging
     from rna_blast_analyze.BR_core import BA_verify
     from rna_blast_analyze.BR_core import cmalign
-    from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper_inner
-    from rna_blast_analyze.BR_core.expand_by_BLAST import blast_wrapper_inner
-    from rna_blast_analyze.BR_core.expand_by_joined_pred_with_rsearch import joined_wrapper_inner
     from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
-    from rna_blast_analyze.BR_core.continue_interrupted import continue_computation
-    from rna_blast_analyze.BR_core.validate_args import validate_args
+    from rna_blast_analyze.BR_core.validate_args import validate_args, compute_args_hash
+    from rna_blast_analyze.BR_core.luncher import lunch_computation
+    from rna_blast_analyze.BR_core.convert_classes import blastsearchrecompute2dict
+    from rna_blast_analyze.BR_core.cmalign import RfamInfo
 
     logger = logging.getLogger('rboAnalyzer')
 
@@ -476,12 +506,11 @@ def lunch_with_args(args):
     CONFIG.override(tools_paths(config_file=args.config_file))
 
     # ========= check rfam =========
-    if check_if_rfam_needed(args):
-        if not args.download_rfam and not cmalign.check_rfam_present():
-            raise ValueError(
-                'RFAM models file is not present in specified path. '
-                'Please enable rfam download (--download_rfam) or provide prepared directory.'
-            )
+    if not args.download_rfam and not cmalign.check_rfam_present():
+        msgfail = 'RFAM models file is not present in specified path. ' \
+                  'Please enable rfam download (--download_rfam) or provide prepared directory.'
+        logger.error(msgfail)
+        sys.exit(1)
 
     if args.download_rfam:
         cmalign.download_cmmodels_file()
@@ -494,36 +523,24 @@ def lunch_with_args(args):
         print("There was an error with provided arguments. Please see the error message.")
         sys.exit(1)
 
+    # ========= compute args hash =========
+    rfam = RfamInfo()
+    hashstring = compute_args_hash(args, os.path.join(rfam.rfam_dir, rfam.gzname))
+    setattr(args, 'sha1', hashstring)
+
     # ========= run =========
-    choice = 'no'
-    if os.path.exists(args.blast_in + '.tmp_rboAnalyzer'):
-        msg = 'An intermediate backup file was found from interrupted computation of BLAST output file:\n' \
-              '{}'.format(args.blast_in)
-        sys.stdout.write(msg)
+    blast_fn = os.path.basename(args.blast_in) + '.r-' + hashstring[:10]
+    blast_dir = os.path.dirname(args.blast_in)
+    potential_matches = [f for f in os.listdir(blast_dir) if f == blast_fn]
+    if len(potential_matches) == 0:
+        with open(args.blast_in + '.r-' + args.sha1[:10], 'w') as f:
+            json.dump(None, f)
 
-        stat_msg = '\nDo you want to continue the computation from that point? [yes/no] [ENTER] '
-        while True:
-            sys.stdout.write(stat_msg)
-            choice = input().lower()
-            if choice in {'yes', 'no'}:
-                sys.stdout.write('\n')
-                break
+    _, results = lunch_computation(args)
+    with open(os.path.join(blast_dir, blast_fn), 'w') as f:
+        json.dump([blastsearchrecompute2dict(r) for r in results], f, indent=2)
 
-    last_iter = -1
-    if choice == 'yes':
-        # run the continue code
-        # set_last_iter
-        last_iter = continue_computation(args.blast_in + '.tmp_rboAnalyzer')
-
-    if args.mode == 'simple':
-        _, result = blast_wrapper_inner(args, start_from=last_iter+1)
-    elif args.mode == 'locarna':
-        _, result = locarna_anchored_wrapper_inner(args, start_from=last_iter+1)
-    elif args.mode == 'meta':
-        _, result = joined_wrapper_inner(args, start_from=last_iter+1)
-    else:
-        raise ValueError('Unknown option - should be cached by argparse.')
-    return result
+    return results
 
 
 def check_params(par: dict):

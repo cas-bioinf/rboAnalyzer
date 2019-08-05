@@ -17,7 +17,7 @@ ml = logging.getLogger('rboAnalyzer')
 
 
 @timeit_decorator
-def turbofold_fast(all_seqs, seqs2predict, query, cpu, n, turbofold_params, len_diff):
+def turbofold_fast(all_seqs, seqs2predict, query, cpu, n, turbofold_params, len_diff, pkey, sha1val):
     """Run Turbo-fast prediction
     - ambiguous sequences cannot be predicted with TurboFold
     - do not predict sequence twice
@@ -33,10 +33,10 @@ def turbofold_fast(all_seqs, seqs2predict, query, cpu, n, turbofold_params, len_
 
     nr_na_ld = BA_support.sel_seq_simple(all_seqs, query, len_diff)
 
-    return turbofold_ext_nr_fast(seqs2predict, nr_na_ld, cpu, n, turbofold_params)
+    return turbofold_ext_nr_fast(seqs2predict, nr_na_ld, cpu, n, turbofold_params, pkey, sha1val)
 
 
-def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params):
+def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params, pkey='Turbo-fast', sha1val=''):
     # ambiguos sequence cannot be predicted with turbofold
     # do not predict sequence twice
     ml.debug(fname())
@@ -57,6 +57,11 @@ def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params):
         if seq.annotations.get('ambiguous', False):
             ml.warning('Skipping prediction for {} (ambiguous base)'.format(seq.id))
             continue
+
+        if pkey in seq.letter_annotations and seq.annotations.get('sha1', {}).get(pkey) == sha1val:
+            # nothing to do, the structure already computed
+            continue
+
         seq_set = _prepare_set_n(seq, nrset, n)
 
         if len(seq_set) < 2:
@@ -88,7 +93,8 @@ def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params):
         if isinstance(out, exceptions.SubprocessException):
             seq = next(s for s in all_seqs if s.id == l_in[2])
             seq.annotations['msgs'].append(str(out))
-            seq.annotations['msgs'].append(out.errors)
+            # do not propagate call output
+            # seq.annotations['msgs'].append(out.errors)
             continue
         elif isinstance(out, Exception):
             seq = next(s for s in all_seqs if s.id == l_in[2])
@@ -109,8 +115,9 @@ def _prepare_set_n(seq, nr_seqs, n):
     i = 0
     while i != len(nr_seqs) - n + 1:
         seqs = [seq] + nr_seqs[:n - 1 + i]
-        if len(BA_support.non_redundant_seqs(seqs)) == n:
-            return seqs
+        n_nr_seqs = BA_support.non_redundant_seqs(seqs)
+        if len(n_nr_seqs) == n:
+            return n_nr_seqs
         i += 1
 
     return BA_support.non_redundant_seqs([seq] + nr_seqs)
@@ -168,63 +175,66 @@ def run_turbofold(sequences, params):
     ml.info('Running Turbofold.')
     ml.debug(fname())
     try:
-
-        env = os.environ.copy()
-        if 'DATAPATH' not in env:
-            env['DATAPATH'] = CONFIG.rnastructure_datapath
-
-        tmpdir, con_file, output_structure_files = write_turbofold_confile(
-            input_sequences=sequences,
-            turbofold_params=params,
-        )
-
-        # run without prediction progress reporting output
-        with TemporaryFile(mode='w+') as tmp:
-            cmd = [
-                '{}TurboFold'.format(CONFIG.turbofold_path),
-                con_file
-            ]
-            ml.debug(cmd)
-            r = call(cmd, env=env, stdout=tmp, stderr=tmp)
-
-            if r:
-                msgfail = 'Call to TurboFold failed, cmd below:'
-                ml.info(msgfail)
-                ml.info(cmd)
-                tmp.seek(0)
-                raise exceptions.TurboFoldException(msgfail, tmp.read())
-
-            # now convert ct files produced by TurboFold
-            new_structures = []
-            for out_str_file, orig_seq in zip(output_structure_files, sequences):
-                o = open(out_str_file, 'r')
-                seq_with_pred_str = BA_support.ct2db(o, energy_txt='ENERGY')
-                o.close()
-
-                assert str(seq_with_pred_str[0].seq) == str(orig_seq.seq), \
-                    'Input and output sequences of TurboFold call does not match.\n{}\n{}'.format(
-                        str(seq_with_pred_str[0].seq), str(orig_seq.seq)
-                    )
-
-                new_structures.append(
-                    SeqRecord(
-                        orig_seq.seq,
-                        id=orig_seq.id,
-                        annotations={'sss': ['ss0']},
-                        letter_annotations={'ss0': seq_with_pred_str[0].letter_annotations['ss0']}
-                    )
-                )
-
-            rmtree(tmpdir)
-            return new_structures
+        return _turbofold_worker(sequences, params)
     except exceptions.TurboFoldException as e:
         return e
     except AssertionError as e:
         return e
 
 
+def _turbofold_worker(sequences, params):
+    env = os.environ.copy()
+    if 'DATAPATH' not in env:
+        env['DATAPATH'] = CONFIG.rnastructure_datapath
+
+    tmpdir, con_file, output_structure_files = write_turbofold_confile(
+        input_sequences=sequences,
+        turbofold_params=params,
+    )
+
+    # run without prediction progress reporting output
+    with TemporaryFile(mode='w+') as tmp:
+        cmd = [
+            '{}TurboFold'.format(CONFIG.turbofold_path),
+            con_file
+        ]
+        ml.debug(cmd)
+        r = call(cmd, env=env, stdout=tmp, stderr=tmp)
+
+        if r:
+            msgfail = 'Call to TurboFold failed, cmd below:'
+            ml.info(msgfail)
+            ml.info(cmd)
+            tmp.seek(0)
+            raise exceptions.TurboFoldException(msgfail, tmp.read())
+
+        # now convert ct files produced by TurboFold
+        new_structures = []
+        for out_str_file, orig_seq in zip(output_structure_files, sequences):
+            o = open(out_str_file, 'r')
+            seq_with_pred_str = BA_support.ct2db(o, energy_txt='ENERGY')
+            o.close()
+
+            assert str(seq_with_pred_str[0].seq) == str(orig_seq.seq), \
+                'Input and output sequences of TurboFold call does not match.\n{}\n{}'.format(
+                    str(seq_with_pred_str[0].seq), str(orig_seq.seq)
+                )
+
+            new_structures.append(
+                SeqRecord(
+                    orig_seq.seq,
+                    id=orig_seq.id,
+                    annotations={'sss': ['ss0']},
+                    letter_annotations={'ss0': seq_with_pred_str[0].letter_annotations['ss0']}
+                )
+            )
+
+        rmtree(tmpdir)
+        return new_structures
+
+
 @timeit_decorator
-def turbofold_with_homologous(all_sequences, nr_homologous, params, n, cpu):
+def turbofold_with_homologous(all_sequences, nr_homologous, params, n, cpu, pkey='TurboFold', sha1val=''):
     """
     Trubofold mode is MEA by default
     :param all_sequences:
@@ -243,6 +253,10 @@ def turbofold_with_homologous(all_sequences, nr_homologous, params, n, cpu):
 
     list2predict = []
     for seq in all_sequences:
+        if pkey in seq.letter_annotations and seq.annotations.get('sha1', {}).get(pkey) == sha1val:
+            # nothing to do, the structure already computed
+            continue
+
         seq_set = _prepare_set_n(seq, nr_homologous, n)
 
         if len(seq_set) < 2:

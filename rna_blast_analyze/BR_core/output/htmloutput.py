@@ -4,9 +4,12 @@ import logging
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from jinja2.exceptions import TemplateError
 from time import strftime
+import re
 
-from rna_blast_analyze.BR_core.BA_support import blasthsp2pre, run_rnaplot
+from rna_blast_analyze.BR_core.BA_support import blasthsp2pre, remove_one_file_with_try
+from rna_blast_analyze.BR_core.viennaRNA import run_rnaplot
 from rna_blast_analyze.BR_core.config import CONFIG
+from rna_blast_analyze.BR_core.exceptions import RNAplotException
 
 from matplotlib import colors, cm
 
@@ -82,8 +85,18 @@ def _prepare_body(data):
     norm = colors.Normalize(vmin=0, vmax=data.query.annotations['cmstat']['bit_sc']/2, clip=True)
     mm = cm.ScalarMappable(norm=norm, cmap=rog)
 
+    # rebuild original order of hits in case there was missing one:
+    d = dict()
+    for h in data.hits + data.hits_failed:
+        key = int(re.split('[|:]', h.source.id)[1])
+        d[key] = h
+
+    records2draw = []
+    for key in sorted(d.keys()):
+        records2draw.append(d[key])
+
     jj = []
-    for i, onehit in enumerate(data.hits):
+    for i, onehit in enumerate(records2draw):
         rr = dict()
         rr['source_seq_name'] = onehit.source.annotations['blast'][0]
         rr['blast_hit_name'] = _prep_hit_name(onehit.source.annotations['blast'][0], onehit.source.description)
@@ -103,6 +116,11 @@ def _prepare_body(data):
             '&appname=rboAnalyzer',
             '&multipanel=false',
             '&slim=true'
+        ]
+        sviewlink = [
+            'https://www.ncbi.nlm.nih.gov/nuccore/',
+            '{}'.format(onehit.source.annotations['blast'][0]),
+            '?report=graph',
         ]
 
         if onehit.extension is not None:
@@ -129,7 +147,10 @@ def _prepare_body(data):
             rr['h_estimate'] = h_estimate
             rr['h_color'] = colors.rgb2hex(mm.to_rgba(h_bit_sc))
 
-            seqview += ['&mk={}:{}|BestMatch!'.format(onehit.best_start, onehit.best_end)]
+            marker = ['&mk={}:{}|BestMatch!'.format(onehit.best_start, onehit.best_end)]
+
+            seqview += marker
+            sviewlink += marker
         else:
             rr['h_color'] = colors.rgb2hex(mm.to_rgba(0))
 
@@ -146,10 +167,13 @@ def _prepare_body(data):
         if es < 0:
             es = 1
 
-        seqview += ['&v={}:{}'.format(es, ee)]
+        position = ['&v={}:{}'.format(es, ee)]
+        seqview += position
+        sviewlink += position
 
         rr['seqviewurl'] = ''.join(seqview)
         rr['seqvid'] = 'seqv_{}'.format(i)
+        rr['seqviewlink'] = ''.join(sviewlink)
 
         jj.append(rr)
     return jj
@@ -157,26 +181,32 @@ def _prepare_body(data):
 
 def _prepare_pictures(sub):
     pictureslist = []
+    picfile = None
     for key in sub.letter_annotations.keys():
         np = dict()
         np['picname'] = key
         np['secondary_structure'] = sub.letter_annotations[key]
 
-        picfile = run_rnaplot(
-            seq=str(sub.seq),
-            structure=sub.letter_annotations[key],
-            format='svg'
-        )
-        with open(picfile) as f:
-            np['pic'] = "data:image/svg+xml;utf8," + f.read()
-
-        pictureslist.append(np)
         try:
-            os.remove(picfile)
+            picfile = run_rnaplot(
+                seq=str(sub.seq),
+                structure=sub.letter_annotations[key],
+                format='svg'
+            )
+            with open(picfile) as f:
+                np['pic'] = "data:image/svg+xml;utf8," + f.read()
+
+            pictureslist.append(np)
+
+            remove_one_file_with_try(picfile)
+        except RNAplotException:
+            print("can't draw structure with RNAfold for {}.".format(sub.id))
         except FileNotFoundError:
-            print('cannot remove file: {}, file not found'.format(picfile))
+            if picfile is not None:
+                print('cannot remove file: {}, file not found'.format(picfile))
         except OSError:
-            print('cannot remove file: {}, file is directory'.format(picfile))
+            if picfile is not None:
+                print('cannot remove file: {}, file is directory'.format(picfile))
 
     return pictureslist
 

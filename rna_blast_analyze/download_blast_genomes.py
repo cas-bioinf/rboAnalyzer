@@ -14,7 +14,7 @@ from http.client import HTTPException
 def parser():
     p = argparse.ArgumentParser(
         description=(
-            'Download whole sequences whose accessions are present in BLAST output from NCBI.'
+            'Download whole nucleotide sequences whose accessions are present in BLAST output from NCBI.'
             ' The script will download records in BLAST output from NCBI nucleotide database using entrez.'
             ' And create the BLAST database needed for running rboAnalyzer.'
             ' The intermediate FASTA file (appending ".fasta" to the BLAST database name) is saved as sequences can be added to it.'
@@ -73,16 +73,18 @@ def fetch_by_accession(aclist):
             yield data
 
 
-def check_accessions(file):
-    with open(file, 'r+') as h:
-        known_accs = set()
-        while True:
-            l = h.readline()
-            if l == '':
-                break
-            if l[0] == '>':
-                known_accs.add(l.split()[0][1:])
-        return known_accs
+def check_accessions(handle):
+    handle.seek(0)
+    known_accs = []
+    last_pos = None
+    while True:
+        line = handle.readline()
+        if line == '':
+            break
+        if line[0] == '>':
+            last_pos = handle.tell() - len(line)
+            known_accs.append(line.split()[0][1:])
+    return known_accs, last_pos
 
 
 def main():
@@ -98,9 +100,12 @@ def main():
                 blast_regexp = args.blast_regexp
             hname = re.search(blast_regexp, a.hit_id)
             if not hname:
+                msg = 'Provided regexp returned no result for {}, ' \
+                      'please provide regexp valid even for this name'.format(a)
+                print(msg)
                 print(blast_regexp)
-                raise RuntimeError('provided regexp returned no result for %s,'
-                                   ' please provide regexp valid even for this name', a)
+                sys.exit(1)
+
             bdb_accession = hname.group()
             accessions.add(bdb_accession)
 
@@ -117,26 +122,31 @@ def main():
 
     while True:
         if os.path.exists(of):
-            known_accs = check_accessions(of)
-            if c >= args.retry and len(accessions - known_accs) != 0:
-                sys.stdout.write(
-                    "Failed to retrieve all sequences. BLAST db will still be created. "
-                    "Option --skipp_missing might be required to rna_blast_analyze pipeline to run. "
-                    "This may be caused by connection problems or by old BLAST search with invalid accessions."
-                )
-                break
-            elif len(accessions - known_accs) == 0:
-                # nothing to retrieve & check successful
-                break
+            # check completeness
+            with open(of, 'a+') as fh:
+                # rollback in necessary (incomplete file)
+                known_accs_list = _rollback(fh)
 
-            with open(of, 'r+') as h:
+                known_accs = set(known_accs_list)
+                if c >= args.retry and len(accessions - known_accs) != 0:
+                    sys.stdout.write(
+                        "Failed to retrieve all sequences. BLAST db will still be created.\n"
+                        "You can rerun the command for another try at downloading all required sequences.\n"
+                        "Option --skipp_missing might be required to rna_blast_analyze pipeline to run. "
+                        "This may be caused by connection problems or by old BLAST search with invalid accessions."
+                    )
+                    break
+                elif len(accessions - known_accs) == 0:
+                    # nothing to retrieve & check successful
+                    break
+
                 # seek to EOF
-                h.seek(0, 2)
+                fh.seek(0, 2)
                 # remove already retrieved accessions
                 accessions -= known_accs
                 sys.stdout.write('\n{} sequences to retrieve.\n'.format(len(accessions)))
 
-                retrieve_and_write(h, accessions)
+                retrieve_and_write(fh, accessions)
         else:
             with open(of, 'w+') as h:
                 retrieve_and_write(h, accessions)
@@ -154,11 +164,45 @@ def main():
     ]
     r = call(cmd)
     if r:
-        print(cmd)
-        raise ChildProcessError('Call to makeblastdb failed.')
+        print('Call to "makeblastdb" failed. Please check that the "makeblastdb" is in your PATH.')
+        sys.exit(1)
+
+
+def assert_complete_file(handle):
+    handle.seek(0, 2)
+    cp = handle.tell()
+    if cp > 3:
+        handle.seek(cp - 3, 0)
+        cs = handle.read()
+        if cs == "\n\n\n":
+            return True
+    # return False otherwise
+    return False
+
+
+def _rollback(handle):
+    # check completeness
+    # if not complete record (indicated by "\n\n\n") truncate the file to last entry
+    known_accs_list, last_pos = check_accessions(handle)
+    if not assert_complete_file(handle):
+        sys.stdout.write(
+            "Output file appear to be incomplete. Removing last potentially incomplete record. "
+            "It will be downloaded again if necessary."
+        )
+        if last_pos is None:
+            # this appears to contain no records
+            handle.seek(0)
+        else:
+            handle.seek(last_pos, 0)
+        handle.truncate()
+        handle.write('\n\n\n')
+        known_accs_list = known_accs_list[:-1]
+    return known_accs_list
 
 
 def retrieve_and_write(handle, accessions):
+    # seek to eof
+    handle.seek(0, 2)
     try:
         formater = '\rRetrieving: {:' + str(max([len(i) for i in accessions])) + '}'
 
@@ -168,62 +212,41 @@ def retrieve_and_write(handle, accessions):
                     toprint = acc_l.split()[0]
                     sys.stdout.write(formater.format(toprint))
             handle.write(chunk)
+        # write 3 linebreaks denoting that retrieval was successful
+        handle.write('\n\n\n')
         return
 
     except HTTPException:
         sys.stdout.write(
             'Connection problem encountered. Rolling back last retrieved record as it may be incomplete.\n'
         )
-        rollback_fasta(handle)
+        _rollback(handle)
 
     except IOError:
         sys.stdout.write(
             'Network problem encountered. Rolling back last retrieved record as it may be incomplete.\n'
         )
-        rollback_fasta(handle)
+        _rollback(handle)
 
     except KeyboardInterrupt:
         sys.stdout.write(
-            'Script interrupted. Trying to rollback to last complete entry.'
+            'Script interrupted. Trying to rollback to last complete entry.\n'
         )
-        rollback_fasta(handle)
+        _rollback(handle)
 
-    except:
-        # bare except by desing
-        rollback_fasta(handle)
-
-
-def rollback_fasta(handle):
-    handle.seek(0, 2)
-    curr_size = handle.tell()
-
-    n = 1
-    while 1024 * n < curr_size:
-        handle.seek(curr_size - 1024 * n)
-
-        fasta_start = []
-        while True:
-            line = handle.readline()
-            if not line:
-                break
-
-            if line[0] == '>':
-                fasta_start.append(handle.tell() - len(line))
-
-        if any(fasta_start):
-            break
-        n += 1
-    else:
-        raise EOFError(
-            'The fasta file does not contain any fasta header (line starting with ">"). Cannot rollback.'
+    except Exception as e:
+        sys.stdout.write(
+            'Unexpected error when retrieving sequences. Trying to rollback to last complete entry.\n'
+            'Error message: {}'.format(str(e))
         )
-
-    handle.truncate(fasta_start[-1])
-    # write linebreak just to be on the safe side
-    handle.write('\n')
-    sys.stdout.write('Rollback successful.\n')
-    return
+        _rollback(handle)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+        sys.exit(0)
+    except Exception as e:
+        print('Something went wrong. Please contact the developers.')
+        print(str(e))
+        sys.exit(1)

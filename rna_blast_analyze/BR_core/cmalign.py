@@ -1,16 +1,17 @@
 import os
 import re
 from io import StringIO
-from subprocess import call, check_output, STDOUT
+from subprocess import call, check_output
 from tempfile import mkstemp, TemporaryFile
 import logging
 import gzip
 import shutil
+import sys
 
 from Bio import AlignIO
 import pandas as pd
 
-from rna_blast_analyze.BR_core.BA_support import parse_seq_str
+from rna_blast_analyze.BR_core.BA_support import parse_seq_str, remove_one_file_with_try
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.stockholm_parser import stockholm_read
 from rna_blast_analyze.BR_core.fname import fname
@@ -60,7 +61,9 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
             msgfail = 'Call to cmscan failed.'
             ml.error(msgfail)
             tmp.seek(0)
-            raise exceptions.CmscanException(msgfail, tmp.read())
+            details = tmp.read()
+            ml.debug(details)
+            raise exceptions.CmscanException(msgfail, details)
 
     return out
 
@@ -80,7 +83,7 @@ def run_cmfetch(cmfile, modelid, outfile=None):
         fd, out = mkstemp(prefix='rba_', suffix='_11', dir=CONFIG.tmpdir)
         os.close(fd)
 
-    with open(os.devnull, 'w') as FNULL:
+    with TemporaryFile(mode='w+') as tmp:
         cmd = [
             '{}cmfetch'.format(CONFIG.infernal_path),
             '-o', out,
@@ -88,16 +91,13 @@ def run_cmfetch(cmfile, modelid, outfile=None):
             modelid
         ]
         ml.debug(cmd)
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd)
-        else:
-            r = call(cmd, stdout=FNULL)
+        r = call(cmd, stdout=tmp, stderr=tmp)
 
         if r:
-            msgfail = 'call to cmfetch failed'
+            msgfail = 'Call to cmfetch failed.'
             ml.error(msgfail)
-            ml.error(cmd)
-            raise ChildProcessError(msgfail)
+            tmp.seek(0)
+            raise exceptions.CmfetchException(msgfail, tmp.read())
         return out
 
 
@@ -146,7 +146,7 @@ def extract_ref_structure_fromRFAM_CM(model_name):
     single_cm_file = run_cmfetch(rfam.file_path, model_name)
 
     ref_structure = extract_ref_from_cm(single_cm_file)
-    os.remove(single_cm_file)
+    remove_one_file_with_try(single_cm_file)
     return ref_structure
 
 
@@ -157,7 +157,7 @@ def extract_ref_from_cm(cm_file):
     salig = stockholm_read(o)
     o.close()
 
-    os.remove(single_alig_file)
+    remove_one_file_with_try(single_alig_file)
 
     if len(salig) != 1:
         raise AssertionError('File from cmemit does not have only one record in (not including reference).')
@@ -188,9 +188,9 @@ def cm_strucutre2br(seq):
     :param seq:
     :return:
     """
-    ns = re.sub('[-:,_~]', '.', seq)
-    ns = re.sub('[<({\[]', '(', ns)
-    ns = re.sub('[>)}\]]', ')', ns)
+    ns = re.sub(r'[-:,_~]', '.', seq)
+    ns = re.sub(r'[<({\[]', '(', ns)
+    ns = re.sub(r'[>)}\]]', ')', ns)
     return ns
 
 
@@ -216,7 +216,13 @@ def check_rfam_present():
     cm_present = os.path.isfile(rfam.file_path)
     if cm_present:
         if not check_if_cmpress_processed():
-            run_cmpress(rfam.file_path)
+            try:
+                run_cmpress(rfam.file_path)
+            except exceptions.CmpressException as e:
+                ml.error(str(e))
+                ml.error('The Rfam file might be corrupt. Please check following output to get more information.\n')
+                print(e.errors)
+                return False
         return True
     else:
         return False
@@ -260,13 +266,14 @@ def download_cmmodels_file(path=None, url=None):
     ml.debug(cmd)
 
     ml.info('Downloading RFAM database (aprox 300Mb). This may take a while...')
-    r = check_output(cmd, stderr=STDOUT)
+    with TemporaryFile(mode='w+') as tmp:
+        r = check_output(cmd, stderr=tmp)
 
-    if not r:
-        msgfail = 'call to wget failed'
-        ml.error(msgfail)
-        ml.error(cmd)
-        raise ChildProcessError(msgfail)
+        if not r:
+            msgfail = 'Call to wget failed. Please check the internet connection and/or availability of "wget".'
+            ml.error(msgfail)
+            ml.debug(cmd)
+            sys.exit(1)
 
     if 'Remote file no newer than local file ‘Rfam.cm.gz’ -- not retrieving.' in r.decode():
         # do not download
@@ -278,7 +285,13 @@ def download_cmmodels_file(path=None, url=None):
                 shutil.copyfileobj(fin, fout)
 
         # run cmpress to create binary files needed to run cmscan
-        run_cmpress(os.path.join(path, rfam.rfam_file_name))
+        try:
+            run_cmpress(os.path.join(path, rfam.rfam_file_name))
+        except exceptions.CmpressException as e:
+            ml.error(str(e))
+            ml.error('The Rfam file might be corrupt. Please check following output to get more information.\n')
+            print(e.errors)
+            sys.exit(1)
 
     return os.path.join(path, rfam.rfam_file_name)
 
@@ -286,19 +299,17 @@ def download_cmmodels_file(path=None, url=None):
 def run_cmpress(file2process):
     ml.info('Running cmpress.')
     ml.debug(fname())
-    with open(os.devnull, 'w') as FNULL:
+    with TemporaryFile(mode='w+') as tmp:
         cmd = ['{}cmpress'.format(CONFIG.infernal_path), '-F', file2process]
         ml.debug(cmd)
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd)
-        else:
-            r = call(cmd, stdout=FNULL, stderr=FNULL)
+        r = call(cmd, stdout=tmp, stderr=tmp)
 
         if r:
-            msgfail = 'call to cmpress failed'
+            msgfail = 'Call to cmpress failed.'
             ml.error(msgfail)
             ml.error(cmd)
-            raise ChildProcessError(msgfail)
+            tmp.seek(0)
+            raise exceptions.CmpressException(msgfail, tmp.read())
 
 
 def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
@@ -317,32 +328,19 @@ def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
     cm_fd, cm_file = mkstemp(prefix='rba_', suffix='_13', dir=CONFIG.tmpdir)
     os.close(cm_fd)
 
-    FNULL = open(os.devnull, 'w')
-    try:
+    with TemporaryFile(mode='w+') as tmp:
         cmd = ['{}cmbuild'.format(CONFIG.infernal_path), '-F']
         if cmbuild_params != '':
             cmd += cmbuild_params.split()
         cmd += [cm_file, cmbuild_input_file]
         ml.debug(cmd)
-        if ml.getEffectiveLevel() == 10:
-            r = call(cmd)
-        else:
-            r = call(cmd, stdout=FNULL)
+        r = call(cmd, stdout=tmp, stderr=tmp)
 
         if r:
-            msgfail = 'Call to cmbuild failed'
+            msgfail = 'Call to cmbuild failed.'
             ml.error(msgfail)
-            ml.error(cmd)
-            raise ChildProcessError(
-                '{} - files: {} {} \nparams: {}'.format(
-                    msgfail,
-                    cmbuild_input_file,
-                    cm_file,
-                    cmbuild_params
-                )
-            )
-    finally:
-        FNULL.close()
+            tmp.seek(0)
+            raise exceptions.CmbuildException(msgfail, tmp.read())
 
     return cm_file
 
@@ -427,7 +425,7 @@ def read_cmalign_sfile(f):
             'seq_name', 'length', 'cm_from', 'cm_to', 'trunc', 'bit_sc',
             'avg_pp', 'band_calc', 'alignment', 'total', 'mem'
         ),
-        sep='\s+',
+        sep=r'\s+',
         comment='#'
     )
 
@@ -484,7 +482,7 @@ def parse_cmalign_infernal_table(tbl):
 
     out = dict()
     for i, (s, e) in enumerate(span):
-        name = re.sub('\s+', '_', name_line[s:e].strip())
+        name = re.sub(r'\s+', '_', name_line[s:e].strip())
         if name != expected_names[i]:
             raise Exception('unknown column name in table {}'
                             '\nUpdate expected_names and output_names variables.'.format(name))
@@ -508,17 +506,9 @@ def parse_cmalign_infernal_table(tbl):
 
 def get_cm_model(query_file, params=None, threads=None):
     ml.debug(fname())
-    try:
-        cmscan_data = get_cm_model_table(query_file, params, threads)
-        best_model_row = select_best_matching_model_from_cmscan(cmscan_data)
-        if best_model_row is None:
-            return None
-    except exceptions.CmscanException as e:
-        msg = 'rboAnalyzer was not able to determine covariance model for the query sequence from RFAM automatically. ' \
-              'You can extract covariance model manualy and provide it to rboAnalyzer with "--cm_file" argument.'
-        ml.info(msg)
-        if ml.getEffectiveLevel() < 20:
-            print('STATUS: ' + msg)
+    cmscan_data = get_cm_model_table(query_file, params, threads)
+    best_model_row = select_best_matching_model_from_cmscan(cmscan_data)
+    if best_model_row is None:
         return None
 
     best_model = best_model_row['target_name']
@@ -535,19 +525,29 @@ def get_cm_model_table(query_file, params=None, threads=None):
     cmscan_params = '-g '
     if params and ('cmscan' in params) and params['cmscan']:
         cmscan_params += params['cmscan']
-    out_table = run_cmscan(query_file, params=cmscan_params, threads=threads)
-    f = open(out_table, 'r')
-    cmscan_data = parse_cmalign_infernal_table(f)
-    f.close()
-    os.remove(out_table)
-    return cmscan_data
+    try:
+        out_table = run_cmscan(query_file, params=cmscan_params, threads=threads)
+        f = open(out_table, 'r')
+        cmscan_data = parse_cmalign_infernal_table(f)
+        f.close()
+        remove_one_file_with_try(out_table)
+        return cmscan_data
+    except exceptions.CmscanException as e:
+        return None
 
 
 def select_best_matching_model_from_cmscan(cmscan_data):
-    ei = cmscan_data['E-value'].idxmin()
-    si = cmscan_data['score'].idxmax()
     msg = 'rboAnalyzer was not able to determine covariance model for the query sequence from RFAM automatically. ' \
           'You can extract covariance model manualy and provide it to rboAnalyzer with "--cm_file" argument.'
+    if cmscan_data is None:
+        ml.info(msg)
+        if ml.getEffectiveLevel() < 20:
+            print('STATUS: ' + msg)
+        return None
+
+    ei = cmscan_data['E-value'].idxmin()
+    si = cmscan_data['score'].idxmax()
+
 
     if ei != si:
         ml.info(msg)

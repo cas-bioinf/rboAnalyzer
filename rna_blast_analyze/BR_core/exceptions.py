@@ -10,6 +10,10 @@ class SubseqMatchError(Exception):
     pass
 
 
+class ParsingError(Exception):
+    pass
+
+
 class UnknownStrand(Exception):
     pass
 
@@ -57,7 +61,7 @@ class RefoldException(SubprocessException):
     pass
 
 
-class RNAfold(SubprocessException):
+class RNAplotException(SubprocessException):
     pass
 
 
@@ -74,4 +78,20 @@ class CmscanException(SubprocessException):
 
 
 class CmalignException(SubprocessException):
+    pass
+
+
+class CmpressException(SubprocessException):
+    pass
+
+
+class CmbuildException(SubprocessException):
+    pass
+
+
+class CmfetchException(SubprocessException):
+    pass
+
+
+class BlastFormatException(Exception):
     pass

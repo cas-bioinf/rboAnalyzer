@@ -5,14 +5,14 @@ import re
 import unicodedata
 from subprocess import call
 from tempfile import mkstemp, TemporaryFile
-import shlex
 import multiprocessing
 
 from Bio import AlignIO, SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from rna_blast_analyze.BR_core.BA_support import read_seq_str, sanitize_fasta_names_in_seqrec_list, desanitize_fasta_names_in_seqrec_list, run_muscle
+from rna_blast_analyze.BR_core.BA_support import read_seq_str, sanitize_fasta_names_in_seqrec_list, \
+    desanitize_fasta_names_in_seqrec_list, run_muscle, remove_one_file_with_try, remove_files_with_try
 from rna_blast_analyze.BR_core.hybrid_ss_min import run_hybrid_ss_min
 from rna_blast_analyze.BR_core.alifold4all import compute_refold, compute_clustalo_clasic, compute_alifold
 from rna_blast_analyze.BR_core.cmalign import build_stockholm_from_clustal_alig, run_cmalign_on_fasta, cm_strucutre2br
@@ -24,6 +24,7 @@ from rna_blast_analyze.BR_core.infer_homology import alignment_column_conservati
 from rna_blast_analyze.BR_core.par_distance import compute_distances
 from rna_blast_analyze.BR_core.stockholm_parser import read_st, trim_cmalign_sequence_by_refseq_one_seq
 from rna_blast_analyze.BR_core import exceptions
+from rna_blast_analyze.BR_core.viennaRNA import rnafold
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -133,7 +134,6 @@ def _refold_with_unpaired_conservation(stockholm_msa, repred_tr='8', conseq_cons
     # this can be probably easily done with stockholm_align class, as i've prepared such function there
     out = []
     for unaligned_rec in st_msa.get_unalined_seqs(keep_letter_ann=True):
-
         # infer constraints before repairing the structure ?
         # because when repairing, new - to predict -  are tagged with '.'
         # infer_constraints
@@ -211,14 +211,14 @@ def rnafoldc(seqr, constraints_id='cons'):
     :return:
     """
 
-    fd, tempfile = mkstemp(prefix='rba_', suffix='_31', dir=CONFIG.tmpdir)
+    fd, tmpf = mkstemp(prefix='rba_', suffix='_31', dir=CONFIG.tmpdir)
     with os.fdopen(fd, 'w') as fh:
         fh.write('>seq01\n{}\n{}\n'.format(
             str(seqr.seq),
             seqr.letter_annotations[constraints_id]
         ))
-    structure = rnafold_prediction(tempfile, params='-C')
-    os.remove(tempfile)
+    structure = rnafold_prediction(tmpf, params='-C')
+    remove_one_file_with_try(tmpf)
     return structure[0].letter_annotations['ss0']
 
 
@@ -330,7 +330,7 @@ def grouped(iterable, n):
     """
     # print return grouped from list
     # adapted from http://stackoverflow.com/questions/5389507/iterating-over-every-two-elements-in-a-list
-    return zip(*[iter(iterable)]*n)
+    return zip(*[iter(iterable)] * n)
 
 
 def sanitize_fasta_file(infasta, used_dict=None):
@@ -441,7 +441,7 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
         else:
             seq_str = read_seq_str(refold_file)
 
-        os.remove(refold_file)
+        remove_one_file_with_try(refold_file)
 
     else:
         st_alig_file = build_stockholm_from_clustal_alig(sliced_alignment_file, new_alifold_consensus_file)
@@ -453,17 +453,19 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
             repred_tr=repred_tr,
             conseq_conserved=conseq_conserved
         )
-        os.remove(st_alig_file)
+        remove_one_file_with_try(st_alig_file)
 
     structures_out = desanitize_fasta_names_in_seqrec_list(seq_str, san_dict)
 
-    os.remove(nr_path)
-    os.remove(all_path)
-    os.remove(sliced_alignment_file)
-    os.remove(new_alifold_consensus_file)
-    os.remove(cl_file)
-    os.remove(ali_file)
-    os.remove(realign_file)
+    remove_files_with_try([
+        nr_path,
+        all_path,
+        sliced_alignment_file,
+        new_alifold_consensus_file,
+        cl_file,
+        ali_file,
+        realign_file
+    ])
 
     return structures_out
 
@@ -494,11 +496,14 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
         rnafold_params += ' -C'
 
     alig_file = run_cmalign_on_fasta(allhits_fasta_file, cmmodel_file, cmalign_params=cmalign_params)
-    os.remove(allhits_fasta_file)
     # multiple sequence cm align
     # split by sequence, then run the rest
     cm_alig = read_st(alig_file)
-    os.remove(alig_file)
+
+    remove_files_with_try([
+        allhits_fasta_file,
+        alig_file
+    ])
 
     structures = []
     for single_alig in trim_cmalign_sequence_by_refseq_one_seq(cm_alig, rs='SS_cons', convert2uppercase=True):
@@ -518,7 +523,7 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
 
         single_structure = rnafold_prediction(temp_constraint_file, params=rnafold_params)
 
-        os.remove(temp_constraint_file)
+        remove_one_file_with_try(temp_constraint_file)
 
         # trimmed_seq.letter_annotations['final'] = single_structure[0].letter_annotations['ss0']
         structures.append(single_structure[0])
@@ -664,33 +669,8 @@ def rnafold_prediction(fasta2predict, params=''):
     structure_output_file = rnafold(fasta2predict, structure_output_file, params)
 
     structures = read_seq_str(structure_output_file)
-    os.remove(structure_output_file)
+    remove_one_file_with_try(structure_output_file)
     return structures
-
-
-def rnafold(fastafile, outfile, parameters=''):
-    """Run RNAfold on commandline
-
-    issue --noPS to prevent plotting of postscript structure
-    """
-    if '--noPS' not in parameters:
-        parameters += ' --noPS'
-    cmd = '{} {} < {} > {}'.format(
-        shlex.quote('{}RNAfold'.format(CONFIG.viennarna_path)),
-        ' '.join([shlex.quote(i) for i in parameters.split()]),
-        shlex.quote(fastafile),
-        shlex.quote(outfile)
-    )
-    ml.debug(cmd)
-    with TemporaryFile(mode='w+') as tmp:
-        r = call(cmd, shell=True, stderr=tmp, stdout=tmp)
-
-        if r:
-            msgfail = 'Call to RNAfold failed, please check if RNAfold is in path.'
-            ml.error(msgfail)
-            tmp.seek(0)
-            raise exceptions.RNAfold(msgfail, tmp.read())
-        return outfile
 
 
 @timeit_decorator
@@ -778,8 +758,7 @@ def subopt_fold_alifold(all_fasta_hits_file, homologs_file, aligner='muscle', pa
             tuples = [(seq, consensus_structure) for seq in subs]
             new_structures = pool.starmap(_helper_subopt, tuples)
 
-    os.remove(alif_file)
-    os.remove(alig_file)
+    remove_files_with_try([alif_file, alig_file])
     return new_structures
 
 
@@ -795,11 +774,11 @@ def _helper_subopt(seq, consensus_structure):
         # select best ie lowes score
         mindisti = rnadist_score.index(min(rnadist_score))
         return SeqRecord(
-                seq.seq,
-                id=seq.id,
-                annotations={'sss': ['ss0']},
-                letter_annotations={'ss0': seq.letter_annotations[key_list[mindisti]]}
-            )
+            seq.seq,
+            id=seq.id,
+            annotations={'sss': ['ss0']},
+            letter_annotations={'ss0': seq.letter_annotations[key_list[mindisti]]}
+        )
     else:
         return seq
 
@@ -808,7 +787,7 @@ def check_lonely_bp(structure, gap_char='.'):
     """
     check lonely bp in classic dot bracket structure notation
     """
-    match = re.search('\.\(\.|\.\)\.', structure)
+    match = re.search(r'\.\(\.|\.\)\.', structure)
     if not match:
         return structure
     # print('lp found')
@@ -890,7 +869,7 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
             ml.debug(cmd2)
             r2 = call(cmd2, stdout=tmp, stderr=tmp)
 
-            os.remove(rewriten_msa)
+            remove_one_file_with_try(rewriten_msa)
 
             if r2 != 0:
                 msgfail = 'Call to clustalo for aligning profile to sequences failed.'

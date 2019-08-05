@@ -43,7 +43,9 @@ class TestHTMLoutput(unittest.TestCase):
         mydata = json.load(f)
         f.close()
         bb = convert_classes.blastsearchrecomputefromdict(mydata)
-        bb.hits[1].extension = None
+        hit = bb.hits.pop(1)
+        hit.extension = None
+        bb.hits_failed.append(hit)
         with open(self.htmlo, 'w') as h:
             h.write(write_html_output(bb))
 

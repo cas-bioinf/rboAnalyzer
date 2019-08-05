@@ -1,33 +1,14 @@
-import os
 import sys
-import pickle
-import re
 from copy import deepcopy
-from random import shuffle
-from tempfile import mkstemp
 import logging
-
-from Bio import SeqIO
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
 import rna_blast_analyze.BR_core.extend_hits
-from rna_blast_analyze.BR_core.BA_methods import BlastSearchRecompute, to_tab_delim_line_simple
-from rna_blast_analyze.BR_core.config import tools_paths, CONFIG
-from rna_blast_analyze.BR_core.infer_homology import infer_homology, find_and_extract_cm_model
-from rna_blast_analyze.BR_core.repredict_structures import wrapped_ending_with_prediction
-from rna_blast_analyze.BR_core import BA_verify
-from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
-from rna_blast_analyze.BR_core.fname import fname
-from rna_blast_analyze.BR_core.cmalign import run_cmfetch, get_cm_model, RfamInfo
+from rna_blast_analyze.BR_core.infer_homology import infer_homology
 from rna_blast_analyze.BR_core import exceptions
+import rna_blast_analyze.BR_core.luncher
 
 ml = logging.getLogger('rboAnalyzer')
-
-
-def blast_wrapper(args_inner, shared_list=None):
-    ml.debug(fname())
-    ret_line, _ = blast_wrapper_inner(args_inner, shared_list=shared_list)
-    return ret_line
 
 
 def trim_before(seqs):
@@ -82,7 +63,11 @@ def trim_before(seqs):
         else:
             raise NotImplementedError('Unexpected combination when trimming extended sequence.')
 
-        nseq = seq[s:e]
+        # handle the case when e is not < 0, and indexing is not from the end
+        if not e < 0:
+            nseq = seq[s:]
+        else:
+            nseq = seq[s:e]
         nseq.annotations = ann
         nseqs.append(nseq)
     return nseqs
@@ -134,14 +119,12 @@ def create_blast_only_report_object(exp_hit, query_len):
         bls = bl.sbjct_end - (query_len - bl.query_end)
         ble = bl.sbjct_start + bl.query_start - 1
     else:
-        raise exceptions.UnknownStrand("Can't determine HSP strand (sbjct_start appears equal sbjct_end)")
+        raise exceptions.UnknownStrand("Can't determine HSP strand (sbjct_start appears equal to sbjct_end)")
 
     # if whole subject sequence too short, this assertion will fail
     if tss or tse or tes or tee:
         msg = 'STATUS: Skipping sequence check ({}) - subject sequence too short.'.format(ns.id)
         ml.info(msg)
-        if ml.getEffectiveLevel() > 20:
-            print(msg)
     else:
         assert len(ns.seq) == abs(bls - ble) + 1
         assert bls == ns.annotations['extended_start']
@@ -152,221 +135,72 @@ def create_blast_only_report_object(exp_hit, query_len):
     return hit
 
 
-def blast_wrapper_inner(args_inner, shared_list=None, start_from=0):
-    ml.debug(fname())
-    if not shared_list:
-        shared_list = []
+def extend_simple_core(analyzed_hits, query, args_inner, all_short, multi_query, iteration, ih_model):
+    # the extra here is given "pro forma" the sequence is extended exactly by lenghts of unaligned portions of query
+    if args_inner.db_type == "blastdb":
+        shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits(
+            all_short,
+            args_inner.blast_db,
+            len(query),
+            extra=0,
+            blast_regexp=args_inner.blast_regexp,
+            skip_missing=args_inner.skip_missing,
+            msgs=analyzed_hits.msgs,
+        )
+    elif args_inner.db_type in ["fasta", "gb", "server"]:
+        shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits_from_fasta(
+            all_short,
+            args_inner.blast_db,
+            len(query),
+            extra=0,
+            blast_regexp=args_inner.blast_regexp,
+            skip_missing=args_inner.skip_missing,
+            msgs=analyzed_hits.msgs,
+            format=args_inner.db_type,
+        )
+    else:
+        raise exceptions.IncorrectDatabaseChoice()
 
-    # update params if different config is requested
-    CONFIG.override(tools_paths(args_inner.config_file))
+    # check, if blast hits are non - overlapping, if so, add the overlapping hit info to the longer hit
+    # reflect this in user output
+    # shorts_expanded = merge_blast_hits(shorts_expanded)
 
-    p_blast = BA_support.blast_in(args_inner.blast_in, b=args_inner.b_type)
-    query_seqs = [i for i in SeqIO.parse(args_inner.blast_query, 'fasta')]
+    shorts_expanded = trim_before(shorts_expanded)
 
-    if len(p_blast) != len(query_seqs):
-        ml.error('Number of query sequences in provided BLAST output file ({}) does not match number of query sequences'
-                 ' in query FASTA file ({}).'.format(len(p_blast), len(query_seqs)))
+    shorts_expanded = BA_support.rc_hits_2_rna(shorts_expanded)
+
+    query_seq = query.seq.transcribe()
+
+    # blast only extension
+    for exp_hit in shorts_expanded:
+        try:
+            _out = create_blast_only_report_object(exp_hit, len(query_seq))
+            analyzed_hits.hits.append(_out)
+        except AssertionError as e:
+            exp_hit.annotations['msgs'] += [str(e)]
+            analyzed_hits.hits_failed.append(exp_hit)
+        except exceptions.UnknownStrand as e:
+            exp_hit.annotations['msgs'] += [str(e)]
+            analyzed_hits.hits_failed.append(exp_hit)
+        except Exception as e:
+            ml.error("Unexpected error when extending with 'simple'.")
+            exp_hit.annotations['msgs'] += [str(e)]
+
+    if len(analyzed_hits.hits) == 0:
+        ml.error(
+            "Extension failed for all sequences. Please see the error message. You can also try '--mode locarna'."
+        )
         sys.exit(1)
 
-    if len(p_blast) > 1:
-        multi_query = True
-    else:
-        multi_query = False
+    # assign Locarna score to None as it is not directly accessible from mlocarna
+    for hit in analyzed_hits.hits:
+        hit.extension.annotations['score'] = None
 
-    # this is done for each query
-    ml_out_line = []
-    all_analyzed = []
-    for iteration, (bhp, query) in enumerate(zip(p_blast, query_seqs)):
-        if start_from > iteration:
-            if start_from + 1 == len(p_blast):
-                print('skipping query: {} - iteration {}'.format(query.id, iteration))
-            continue
-
-        print('processing query: {}'.format(query.id))
-        ml.info('processing query: {}'.format(query.id))
-        # check query and blast
-        BA_verify.verify_query_blast(blast=bhp, query=query)
-
-        analyzed_hits = BlastSearchRecompute(args_inner, query, iteration)
-        analyzed_hits.multi_query = multi_query
-        all_analyzed.append(analyzed_hits)
-
-        # run cm model build
-        # allows to fail fast if rfam was selected and we dont find the model
-        ih_file, analyzed_hits = find_and_extract_cm_model(args_inner, analyzed_hits)
-
-        # select all
-        all_blast_hits = BA_support.blast_hsps2list(bhp)
-
-        if len(all_blast_hits) == 0:
-            ml.error('No hits found in {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
-            continue
-
-        # filter if needed
-        if args_inner.filter_by_eval is not None:
-            tmp = filter_by_eval(all_blast_hits, BA_support.blast_hit_getter_from_hits, *args_inner.filter_by_eval)
-            if len(tmp) == 0 and len(all_blast_hits) != 0:
-                ml.error('The requested filter removed all BLAST hits {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
-                continue
-        elif args_inner.filter_by_bitscore is not None:
-            tmp = filter_by_bits(all_blast_hits, BA_support.blast_hit_getter_from_hits, *args_inner.filter_by_bitscore)
-            if len(tmp) == 0 and len(all_blast_hits) != 0:
-                ml.error('The requested filter removed all BLAST hits {} - {}. Nothing to do.'.format(args_inner.blast_in, bhp.query))
-                continue
-
-        all_short = all_blast_hits
-
-        # the extra here is given "pro forma" the sequence is extended exactly by lenghts of unaligned portions of query
-        if args_inner.db_type == "blastdb":
-            shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits(
-                all_short,
-                args_inner.blast_db,
-                bhp.query_length,
-                extra=10,
-                blast_regexp=args_inner.blast_regexp,
-                skip_missing=args_inner.skip_missing,
-                msgs=analyzed_hits.msgs,
-            )
-        elif args_inner.db_type in ["fasta", "gb", "server"]:
-            shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits_from_fasta(
-                all_short,
-                args_inner.blast_db,
-                bhp.query_length,
-                extra=10,
-                blast_regexp=args_inner.blast_regexp,
-                skip_missing=args_inner.skip_missing,
-                msgs=analyzed_hits.msgs,
-                format=args_inner.db_type,
-            )
-        else:
-            raise exceptions.IncorrectDatabaseChoice()
-
-        # check, if blast hits are non - overlapping, if so, add the overlapping hit info to the longer hit
-        # reflect this in user output
-        # shorts_expanded = merge_blast_hits(shorts_expanded)
-
-        shorts_expanded = trim_before(shorts_expanded)
-
-        shorts_expanded = BA_support.rc_hits_2_rna(shorts_expanded)
-
-        query_seq = query.seq.transcribe()
-
-        # blast only extension
-        for exp_hit in shorts_expanded:
-            analyzed_hits.hits.append(create_blast_only_report_object(exp_hit, len(query_seq)))
-
-        # assign Locarna score to None as it is not directly accessible from mlocarna
-        for hit in analyzed_hits.hits:
-            hit.extension.annotations['score'] = None
-
-        # infer homology
-        # consider adding query sequence to alignment and scoring it as a proof against squed alignments and datasets
-        # write all hits to fasta
-        fda, all_hits_fasta = mkstemp(prefix='rba_', suffix='_17', dir=CONFIG.tmpdir)
-        with os.fdopen(fda, 'w') as fah:
-            for hit in analyzed_hits.hits:
-                if len(hit.extension.seq) == 0:
-                    continue
-                fah.write('>{}\n{}\n'.format(
-                    hit.extension.id,
-                    str(hit.extension.seq))
-                )
-
-        # this part predicts homology - it is not truly part of repredict
-        homology_prediction, homol_seqs, cm_file_rfam_user = infer_homology(
-            analyzed_hits=analyzed_hits,
-            args=args_inner,
-            cm_model_file=ih_file,
-            multi_query=multi_query,
-            iteration=iteration
-        )
-        # add homology prediction to the data
-        for hit, pred in zip(analyzed_hits.hits, homology_prediction):
-            hit.hpred = pred
-
-        out_line = []
-        # multiple prediction params
-        if args_inner.dev_pred:
-            dp_list = []
-            # acomodate more dev pred outputs
-            dpfile = None
-            if getattr(args_inner, 'dump', False):
-                dpfile = args_inner.dump.strip('dump')
-            if getattr(args_inner, 'pandas_dump', False):
-                dpfile = args_inner.pandas_dump.strip('pandas_dump')
-            if getattr(args_inner, 'json', False):
-                dpfile = args_inner.json.strip('json')
-
-            # optimization so the rfam cm file is used only once
-            if cm_file_rfam_user is None and 'rfam' in ''.join(args_inner.prediction_method):
-                best_model = get_cm_model(args_inner.blast_query, threads=args_inner.threads)
-                rfam = RfamInfo()
-                cm_file_rfam_user = run_cmfetch(rfam.file_path, best_model)
-
-            for method in args_inner.prediction_method:
-                method = method
-                # cycle the prediction method settings
-                # get set of params for each preditcion
-                selected_pred_params = [kk for kk in args_inner.pred_params if method in kk]
-                shuffle(selected_pred_params)
-                # for method_params in args_inner.pred_params:
-                for i, method_params in enumerate(selected_pred_params):
-                    ah = deepcopy(analyzed_hits)
-
-                    random_flag = BA_support.generate_random_name(8, shared_list)
-                    shared_list.append(random_flag)
-
-                    pname = re.sub(' ', '', str(method))
-                    flag = '|pred_params|' + random_flag
-
-                    # rebuild the args only with actualy used prediction settings
-                    ah.args.prediction_method = method
-                    ah.args.pred_params = method_params
-
-                    if getattr(args_inner, 'dump', False):
-                        spa = args_inner.dump.split('.')
-                        ah.args.dump = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                    if getattr(args_inner, 'pandas_dump', False):
-                        spa = args_inner.pandas_dump.split('.')
-                        ah.args.pandas_dump = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                    if getattr(args_inner, 'pdf_out', False):
-                        spa = args_inner.pdf_out.split('.')
-                        ah.args.pdf_out = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-                    if getattr(args_inner, 'json', False):
-                        spa = args_inner.json.split('.')
-                        ah.args.json = '.'.join(spa[:-1]) + flag + '.' + spa[-1]
-
-                    wrapped_ending_with_prediction(
-                        args_inner=ah.args,
-                        analyzed_hits=ah,
-                        pred_method=method,
-                        method_params=method_params,
-                        used_cm_file=cm_file_rfam_user,
-                        multi_query=multi_query,
-                        iteration=iteration,
-                    )
-                    success = True
-                    out_line.append(to_tab_delim_line_simple(ah.args))
-                    dp_list.append((i, method_params, success, flag, pname, random_flag, args_inner.pred_params))
-
-            if dpfile is not None:
-                with open(dpfile + 'devPredRep', 'wb') as devf:
-                    pickle.dump(dp_list, devf)
-        else:
-            wrapped_ending_with_prediction(
-                args_inner=args_inner,
-                analyzed_hits=analyzed_hits,
-                used_cm_file=cm_file_rfam_user,
-                multi_query=multi_query,
-                iteration=iteration
-            )
-            out_line.append(to_tab_delim_line_simple(args_inner))
-
-        ml_out_line.append('\n'.join(out_line))
-
-        if cm_file_rfam_user is not None and os.path.exists(cm_file_rfam_user):
-            os.remove(cm_file_rfam_user)
-
-        os.remove(all_hits_fasta)
-
-    return '\n'.join(ml_out_line), all_analyzed
+    # this part predicts homology - it is not truly part of repredict
+    homology_prediction, homol_seqs, cm_file_rfam_user = infer_homology(
+        analyzed_hits=analyzed_hits, args=args_inner, cm_model_file=ih_model, multi_query=multi_query,
+        iteration=iteration
+    )
+    for hit, pred in zip(analyzed_hits.hits, homology_prediction):
+        hit.hpred = pred
+    return analyzed_hits, homology_prediction, homol_seqs, cm_file_rfam_user

@@ -73,8 +73,8 @@ def _read_leading_info(f):
     lt = f.tell()
     while not (txt[:6] == "Query="):
         lt = f.tell()
-        if re.search('BLASTN \d+\.\d+\.\d+\+?', txt):
-            m = re.search('BLASTN \d+\.\d+\.\d+\+?', txt)
+        if re.search(r'BLASTN \d+\.\d+\.\d+\+?', txt):
+            m = re.search(r'BLASTN \d+\.\d+\.\d+\+?', txt)
             temp = m.group().split()
             data['application'] = temp[0]
             data['version'] = temp[1]
@@ -95,10 +95,10 @@ def _read_leading_info(f):
             # usualy two lines, end with "letters"
             txt, dbline = _read_until_word_or_blank(txt, f)
             al = dbline.split(";")
-            tl = re.search('\d+(?:[\d,]*\d)', al[-1])
+            tl = re.search(r'\d+(?:[\d,]*\d)', al[-1])
             if tl:
                 data['database_letters'] = int(tl.group().replace(',', ''))
-            ns = re.search('\d+ (?=sequences$)', al[-2])
+            ns = re.search(r'\d+ (?=sequences$)', al[-2])
             if ns:
                 data['database_sequences'] = int(ns.group())
         else:
@@ -134,8 +134,8 @@ def _get_trailing_section(f):
         l = IUPACAmbiguousDNA.letters + 'U-'
 
         reg1 = re.compile("Database: ")
-        reg2 = re.compile("Lambda\s+K\s+H\n?\s+\d+")
-        reg3 = re.compile("(Sbjct\s+\d+\s+[" + l + "]+\s+\d+)|(\*{5}\s+No hits found\s+\*{5})")
+        reg2 = re.compile(r"Lambda\s+K\s+H\n?\s+\d+")
+        reg3 = re.compile(r"(Sbjct\s+\d+\s+[" + l + r"]+\s+\d+)|(\*{5}\s+No hits found\s+\*{5})")
         return all((
             re.search(reg1, part),
             re.search(reg2, part),
@@ -171,7 +171,7 @@ def _parse_tail_section(tail_text):
 
     # matrix
     try:
-        pat = re.compile("(?<=Matrix:)\s*\w+\s+matrix:?\s*-?\d+\s+-?\d")
+        pat = re.compile(r"(?<=Matrix:)\s*\w+\s+matrix:?\s*-?\d+\s+-?\d")
         found = _find_matches(pat)
         ft = re.split(" |:", found.group().strip())
 
@@ -190,8 +190,8 @@ def _parse_tail_section(tail_text):
     try:
         pat = re.compile("(?<=Gap Penalties:).*")
         found = _find_matches(pat)
-        g1 = re.search("(?<=Existence:)\s*-?\d+", found.group())
-        g2 = re.search("(?<=Extension:)\s*-?\d+", found.group())
+        g1 = re.search(r"(?<=Existence:)\s*-?\d+", found.group())
+        g2 = re.search(r"(?<=Extension:)\s*-?\d+", found.group())
 
         ft = [float(g.group().strip()) if g else float('NaN') for g in (g1, g2)]
         assert all([not math.isnan(i) for i in ft])
@@ -207,7 +207,7 @@ def _parse_tail_section(tail_text):
 
     # lambda k, h
     try:
-        p1 = re.compile("Lambda\s+K\s+H")
+        p1 = re.compile(r"Lambda\s+K\s+H")
         p2 = re.compile("Gapped")
         p1m = _find_index_match(p1)
         p2m = _find_index_match(p2)
@@ -248,7 +248,7 @@ def _parse_tail_section(tail_text):
 
     for key in bat.keys():
         try:
-            pat = re.compile("(?<=" + bat[key] + ")\s*\d+")
+            pat = re.compile("(?<=" + bat[key] + r")\s*\d+")
             m = _find_matches(pat)
             ft = m.group().strip()
             data[key] = int(ft)
@@ -325,14 +325,14 @@ def _parse_blast_body(f, common_info):
         if do_query_name and re.search('^Query=', txt):
             # query_name = re.search('(?<=Query=)\ *\S+', txt).group().lstrip()
             # it is possible, that no query name is provided (web)
-            R.query = re.search('(?<=Query=)\s*\S*', txt).group().lstrip()
+            R.query = re.search(r'(?<=Query=)\s*\S*', txt).group().lstrip()
             do_query_name = False
             txt = bread(f)
             continue
 
         # parse query Lenght
         if do_query_length and re.search('^Length=', txt):
-            R.query_length = int(re.search('(?<=Length=)\ *\d+', txt).group().lstrip())
+            R.query_length = int(re.search(r'(?<=Length=) *\d+', txt).group().lstrip())
             txt = bread(f)
             do_query_length = False
             continue
@@ -353,7 +353,7 @@ def _parse_blast_body(f, common_info):
             R = copy.deepcopy(record_holder)
             do_query_name = True
             do_query_length = True
-        elif re.search('\*{5}\sNo hits found\s\*{5}', txt) or re.search("^Query=", txt):
+        elif re.search(r'\*{5}\sNo hits found\s\*{5}', txt) or re.search("^Query=", txt):
             # new record
             yield R
             R = copy.deepcopy(record_holder)
@@ -376,7 +376,7 @@ def read_aligns(f, R):
 
     """
     # parse_regexp = '[ACTGUactgu\-]+'
-    parse_regexp_q = '[ACGTUKSYMWRBDHVNacgtuksymwrbdhvn\-]+'
+    parse_regexp_q = '[ACGTUKSYMWRBDHVNacgtuksymwrbdhvn-]+'
     eor = True
     txt = bread(f)  # get line after alignments
     # if txt[0] == '>':  # enter a record
@@ -385,7 +385,7 @@ def read_aligns(f, R):
     while txt and eor:
         if txt[:6] == 'Query=':
             break
-        c = re.search('(?<=>) *[\S|.]+', txt)
+        c = re.search(r'(?<=>) *[\S|.]+', txt)
         def_rem = bread(f)
         while not re.search('Length=', def_rem):
             txt += def_rem
@@ -395,7 +395,7 @@ def read_aligns(f, R):
 
         curr_alig.hit_id = c.group()
         curr_alig.hit_def = txt[c.end() + 1:]
-        curr_alig.length = int(re.search('(?<=Length=)\d+', def_rem).group())
+        curr_alig.length = int(re.search(r'(?<=Length=)\d+', def_rem).group())
 
         # draw next line
         txt = bread(f)
@@ -414,28 +414,28 @@ def read_aligns(f, R):
                     # changing "score" to bits
                     # because the score is in "bits" units
                     curr_hsp.bits = float(
-                        re.search('(?<=Score =) *\d+\.?\d*', txt).group(0).lstrip()
+                        re.search(r'(?<=Score =) *\d+\.?\d*', txt).group(0).lstrip()
                     )
                     # if re.search('bits \(', txt):
 
                     # changing "bits" to score, because the number in brackets is match score (in nucleotide blast
                     #  same as number of identities)
                     curr_hsp.score = int(
-                        re.search('(?<=bits \() *\d+(?=\))', txt).group(0).lstrip()
+                        re.search(r'(?<=bits \() *\d+(?=\))', txt).group(0).lstrip()
                     )
                     # the regexp for scientific format from here:
                     # http://stackoverflow.com/questions/18152597/extract-scientific-number-from-string
                     curr_hsp.expect = float(
-                        re.search('(?<=Expect =)-? *[0-9]+\.?[0-9]*(?:[Ee] *-? *[0-9]+)?', txt).group(0).lstrip()
+                        re.search(r'(?<=Expect =)-? *[0-9]+\.?[0-9]*(?:[Ee] *-? *[0-9]+)?', txt).group(0).lstrip()
                     )
                 elif txt[:13] == " Identities =":
                     # return only first int in identities field to mimic the XML parser
 
                     tmp_idtts = [
-                        int(i) for i in re.search('(?<=Identities =) *\d+/\d+(?= *\()', txt).group(0).lstrip().split('/')
+                        int(i) for i in re.search(r'(?<=Identities =) *\d+/\d+(?= *\()', txt).group(0).lstrip().split('/')
                     ]
                     tmp_gaps = [
-                        int(i) for i in re.search('(?<=Gaps =) *\d+/\d+(?= *\()', txt).group(0).lstrip().split('/')
+                        int(i) for i in re.search(r'(?<=Gaps =) *\d+/\d+(?= *\()', txt).group(0).lstrip().split('/')
                     ]
                     curr_hsp.identities = tmp_idtts[0]
                     curr_hsp.gaps = tmp_gaps[0]
@@ -450,7 +450,7 @@ def read_aligns(f, R):
                 elif txt[:8] == " Strand=":
                     curr_hsp.strand = tuple(
                         re.search(
-                            '(?<=Strand=)\S+', txt).group(0).rstrip().split('/')
+                            r'(?<=Strand=)\S+', txt).group(0).rstrip().split('/')
                     )
                 elif txt[:10] == " Features ":
                     # must be enabled even if output isn't used, moves the pointer pas the features field
@@ -501,10 +501,10 @@ def read_aligns(f, R):
 
                 # get query start only at first instance
                 if count == 1:
-                    query_start = int(re.search('\d+', txt[5:]).group())
+                    query_start = int(re.search(r'\d+', txt[5:]).group())
 
                 # match query end at each instance
-                query_end = int(re.search('\d+$', txt).group())
+                query_end = int(re.search(r'\d+$', txt).group())
 
                 # allow lowercase masking sequences
                 # add 5 to prevent matching in Query
@@ -519,9 +519,9 @@ def read_aligns(f, R):
                 sseq += txt[q_info.start() + 5:q_info.end() + 5]
 
                 if count == 1:
-                    subject_start = int(re.search('\d+', txt[5:]).group())
+                    subject_start = int(re.search(r'\d+', txt[5:]).group())
 
-                subject_end = int(re.search('\d+$', txt).group())
+                subject_end = int(re.search(r'\d+$', txt).group())
 
                 # go next
                 txt = bread(f)

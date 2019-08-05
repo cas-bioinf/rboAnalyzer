@@ -92,7 +92,7 @@ def run_with_fasta(fasta_example, func, expect):
         '--blast_query', fdpath,
         '--blast_db', blast_db,
         '--mode', 'simple',
-        '--blast_regexp', '"(?<=\|)[A-Z0-9]*\.?\d*$"',
+        '--blast_regexp', r'"(?<=\|)[A-Z0-9]*\.?\d*$"',
         '--b_type', 'plain',
         '--prediction_method', 'rnafold',
         '--enable_overwrite',

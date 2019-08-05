@@ -12,6 +12,7 @@ from rna_blast_analyze.BR_core.stockholm_parser import read_st
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
 import shutil
+from rna_blast_analyze.BR_core import exceptions
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -26,28 +27,32 @@ def find_and_extract_cm_model(args, analyzed_hits):
     if best_matching_cm_model is not None:
         ml.info('Infer homology - best matching RFAM model: {}'.format(analyzed_hits.best_matching_model['target_name']))
 
-    if args.cm_file:
-        # use provided cm file
-        ml.info('Infer homology - using provided CM file: {}'.format(args.cm_file))
-        fd, cm_model_file = mkstemp(prefix='rba_', suffix='_27', dir=CONFIG.tmpdir)
-        os.close(fd)
-        ml.debug('Making a copy of provided cm model file to: {}'.format(cm_model_file))
-        shutil.copy(args.cm_file, cm_model_file)
+    try:
+        if args.cm_file:
+            # use provided cm file
+            ml.info('Infer homology - using provided CM file: {}'.format(args.cm_file))
+            fd, cm_model_file = mkstemp(prefix='rba_', suffix='_27', dir=CONFIG.tmpdir)
+            os.close(fd)
+            ml.debug('Making a copy of provided cm model file to: {}'.format(cm_model_file))
+            shutil.copy(args.cm_file, cm_model_file)
 
-    elif args.use_rfam:
-        ml.info('Infer homology - using RFAM CM file as reference model.')
-        if analyzed_hits.best_matching_model is None:
-            ml.error('No RFAM model was matched with score > 0. Nothing to build homology to.')
-            sys.exit(0)
+        elif args.use_rfam:
+            ml.info('Infer homology - using RFAM CM file as reference model.')
+            if analyzed_hits.best_matching_model is None:
+                ml.error('No RFAM model was matched with score > 0. Nothing to build homology to.')
+                sys.exit(1)
 
-        cm_model_file = run_cmfetch(rfam.file_path, analyzed_hits.best_matching_model['target_name'])
-    else:
-        ml.info('Infer homology - using RSEARCH to build model')
-        # default to using RSEARCH
-        # cm_model_file = build_cm_model_rsearch(analyzed_hits.query, args.ribosum)
-        cm_model_file = build_cm_model_rsearch(analyzed_hits.query, CONFIG.rsearch_ribosum)
+            cm_model_file = run_cmfetch(rfam.file_path, analyzed_hits.best_matching_model['target_name'])
+        else:
+            ml.info('Infer homology - using RSEARCH to build model')
+            # default to using RSEARCH
+            cm_model_file = build_cm_model_rsearch(analyzed_hits.query, CONFIG.rsearch_ribosum)
 
-    return cm_model_file, analyzed_hits
+        return cm_model_file, analyzed_hits
+    except exceptions.SubprocessException as e:
+        ml.error("Can't obtain covariance model.")
+        ml.error(str(e))
+        sys.exit(1)
 
 
 def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iteration=0):
@@ -72,8 +77,10 @@ def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iterat
     fd_f, fd_fasta = mkstemp(prefix='rba_', suffix='_28', dir=CONFIG.tmpdir)
     with os.fdopen(fd_f, 'w') as f:
         for seq in [analyzed_hits.query] + analyzed_hits.res_2_record_list():
-            f.write('>{}\n{}\n'.format(seq.id,
-                                       str(seq.seq)))
+            f.write('>{}\n{}\n'.format(
+                seq.id,
+                str(seq.seq))
+            )
 
     fd_sfile, cm_sfile_path = mkstemp(prefix='rba_', suffix='_29', dir=CONFIG.tmpdir)
     os.close(fd_sfile)
@@ -120,9 +127,11 @@ def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iterat
                 cm_align_scores.bit_sc[0]
             )
 
-    os.remove(fd_fasta)
-    os.remove(cm_sfile_path)
-    os.remove(cm_msa_file)
+    BA_support.remove_files_with_try([
+        fd_fasta,
+        cm_sfile_path,
+        cm_msa_file
+    ])
 
     selected_hits = [hit.extension for b, hit in zip(prediction, analyzed_hits.hits) if b]
 
@@ -130,7 +139,7 @@ def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iterat
         r_cm_file = cm_model_file
     else:
         r_cm_file = None
-        os.remove(cm_model_file)
+        BA_support.remove_one_file_with_try(cm_model_file)
 
     return prediction, selected_hits, r_cm_file
 
@@ -160,7 +169,7 @@ def build_cm_model_rsearch(query_seq, path2selected_sim_array):
     ))
 
     # cleanup
-    os.remove(stock_file)
+    BA_support.remove_one_file_with_try(stock_file)
     return cm_model_file
 
 

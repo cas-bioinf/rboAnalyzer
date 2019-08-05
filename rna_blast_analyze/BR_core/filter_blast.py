@@ -13,21 +13,21 @@ OPERATIONS = {
 }
 
 
-def filter_by_eval(blast_hitlist, getter, relation, eval):
+def filter_by_eval(blast_hitlist, getter, filter_conditions):
     ml.debug(fname())
-    filtered = []
-    for h in blast_hitlist:
-        if OPERATIONS[relation](getter(h).expect, eval):
-            filtered.append(h)
-    return filtered
+
+    result = blast_hitlist
+    for relation, condition in filter_conditions:
+        result = [h for h in result if OPERATIONS[relation](getter(h).expect, condition)]
+    return result
 
 
-def filter_by_bits(blast_hitlist, getter, relation, bits):
+def filter_by_bits(blast_hitlist, getter, filter_conditions):
     ml.debug(fname())
-    filtered = []
-    for h in blast_hitlist:
-        if OPERATIONS[relation](getter(h).bits, bits):
-            filtered.append(h)
-    return filtered
+
+    result = blast_hitlist
+    for relation, condition in filter_conditions:
+        result = [h for h in result if OPERATIONS[relation](getter(h).bits, condition)]
+    return result
 
 

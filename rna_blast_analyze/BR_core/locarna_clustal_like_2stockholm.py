@@ -1,6 +1,6 @@
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-
+from rna_blast_analyze.BR_core.exceptions import ParsingError
 from rna_blast_analyze.BR_core.stockholm_alig import StockholmAlig
 
 
@@ -8,7 +8,7 @@ def parse_locarna_alignment(fid_file):
 
     txt = fid_file.readline()
     if 'Score' not in txt:
-        raise Exception('Unrecognized format - expected "Score as a first argument"')
+        raise ParsingError('Unrecognized format - expected "Score as a first argument"')
     st = StockholmAlig()
     st.annotations['score'] = int(txt.split()[-1])
 
@@ -24,7 +24,7 @@ def parse_locarna_alignment(fid_file):
 
         l = txt.split()
         if len(l) != 2:
-            raise Exception('unrecognized format (unexpected white-space encountered on line {})'.format(c))
+            raise ParsingError('Unrecognized format (unexpected white-space encountered on line {})'.format(c))
         if l[0] in namespace.keys():
             namespace[l[0]] += l[1]
         else:

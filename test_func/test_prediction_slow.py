@@ -5,6 +5,7 @@ from subprocess import call
 
 from rna_blast_analyze.BR_core.BA_support import remove_files_with_try
 from test_func.test_execution import fwd, test_data_dir, tab_output_equal, base_script, root
+import glob
 
 
 class TestDirectExecution_with_prediction(unittest.TestCase):
@@ -29,7 +30,7 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
             '--blast_in', os.path.join(fwd, test_data_dir, 'RF00001_short.blastout'),
             '--blast_query', os.path.join(fwd, test_data_dir, 'RF00001.fasta'),
             '--blast_db', os.path.join(fwd, test_data_dir, 'blastdb', 'RF00001-art.blastdb'),
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', r'(?<=\|)[A-Z0-9]*\.?\d*$',
             '--b_type', 'plain',
             '--mode', 'simple',
             '--html', self.html,
@@ -50,17 +51,18 @@ class TestDirectExecution_with_prediction(unittest.TestCase):
                 pdfile=self.pandas_dump,
             )
             self.assertTrue(t)
-
-            remove_files_with_try(
-                [
-                    self.html,
-                    self.csv,
-                    self.json,
-                    self.pandas_dump,
-                ],
-                ''
-            )
         self.run = run
+
+    def tearDown(self):
+        files = glob.glob(os.path.join(fwd, test_data_dir, 'RF00001_short.blastout') + '.r-*')
+        remove_files_with_try(
+            [
+                self.html,
+                self.csv,
+                self.json,
+                self.pandas_dump,
+            ] + files
+        )
 
     def test_TurboFold(self):
         self.run('TurboFold')

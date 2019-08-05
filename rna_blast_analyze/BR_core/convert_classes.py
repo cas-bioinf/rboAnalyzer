@@ -190,6 +190,8 @@ def blastsearchrecompute2dict(bsr):
         raise TypeError('Accepts only BA_methods.BlastSearchRecompute. {} given'.format(type(bsr)))
     out = {
         'hits': hitlist2dict(bsr.hits),
+        'hits_failed': hitlist2dict(bsr.hits_failed),
+        '__all_hits': hitlist2dict(bsr.get_all_hits()),
         'query': seqrecord2dict(bsr.query),
         'creation': bsr.creation,
         '_runstat': bsr._runstat,
@@ -209,7 +211,11 @@ def blastsearchrecomputefromdict(indict):
         seqrecordfromdict(indict['query']),
         indict.get('iteration', 0)
     )
+    out.hits = hitlistfromdict(indict.get('__all_hits', []))
+    out.copy_hits()
+
     out.hits = hitlistfromdict(indict['hits'])
+    out.hits_failed = hitlistfromdict(indict.get('hits_failed', []))
     out.creation = indict['creation']
     out._runstat = indict['_runstat']
     out.date_of_run = time.struct_time(indict['date_of_run'])

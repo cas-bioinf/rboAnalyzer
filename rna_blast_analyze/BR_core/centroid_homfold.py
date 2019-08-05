@@ -5,7 +5,7 @@ from tempfile import mkstemp, TemporaryFile
 
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-
+from Bio import SeqIO
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.decorators import timeit_decorator
 from rna_blast_analyze.BR_core import BA_support
@@ -73,7 +73,7 @@ def me_centroid_homfold(fasta2predict, fasta_homologous_seqs, params=None):
 
     first_structures = run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_params=ch_params)
     structures2return = [ch_struc for ch_struc in centroid_homfold_select_best(first_structures)]
-    os.remove(first_structures)
+    BA_support.remove_one_file_with_try(first_structures)
     return structures2return
 
 
@@ -84,7 +84,7 @@ def centroid_homfold_fast(all_seqs, query, all_seqs_fasta, n, centroid_homfold_p
     homologous_file = centroid_homfold_fast_prep(all_seqs, query, n, len_diff)
 
     structures, _ = me_centroid_homfold(all_seqs_fasta, homologous_file, params=centroid_homfold_params)
-    os.remove(homologous_file)
+    BA_support.remove_one_file_with_try(homologous_file)
     return structures
 
 
@@ -103,7 +103,7 @@ def centroid_homfold_fast_prep(all_seqs, query, n, len_diff):
 
     ch, ch_hom = mkstemp(prefix='rba_', suffix='_74', dir=CONFIG.tmpdir)
     with os.fdopen(ch, 'w') as h:
-        BA_support.write_fasta_from_list_of_seqrecords(h, nr_na_ld_n)
+        SeqIO.write(nr_na_ld_n, h, 'fasta')
 
     return ch_hom
 

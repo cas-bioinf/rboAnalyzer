@@ -6,7 +6,7 @@ from tempfile import mkstemp, TemporaryFile
 
 from Bio import SeqIO
 
-from rna_blast_analyze.BR_core.BA_support import rebuild_structures_output_from_pred, ct2db
+from rna_blast_analyze.BR_core.BA_support import rebuild_structures_output_from_pred, ct2db, remove_one_file_with_try, remove_files_with_try
 from rna_blast_analyze.BR_core import exceptions
 from rna_blast_analyze.BR_core.config import CONFIG
 
@@ -26,7 +26,7 @@ def _run_hybrid_ss_min_wrapper(seq, P, W, M):
         return None
 
     finally:
-        os.remove(tmp_fasta)
+        remove_one_file_with_try(tmp_fasta)
 
 
 def _run_hybrid_ss_min_single(file_path, P, W, M):
@@ -63,11 +63,13 @@ def _run_hybrid_ss_min_single(file_path, P, W, M):
         with open(file_path + '.ct', 'r') as sout:
             pred_structures = ct2db(sout)
 
-        os.remove(file_path + '.run')
-        os.remove(file_path + '.plot')
-        os.remove(file_path + '.dG')
-        os.remove(file_path + '.ct')
-        os.remove(file_path + '.ann')
+        remove_files_with_try([
+            file_path + '.run',
+            file_path + '.plot',
+            file_path + '.dG',
+            file_path + '.ct',
+            file_path + '.ann',
+        ])
         return pred_structures
 
 

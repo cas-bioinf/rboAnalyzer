@@ -2,8 +2,9 @@ import copy
 import time
 import pandas as pd
 import logging
+from copy import deepcopy
 
-from rna_blast_analyze.BR_core.BA_support import Subsequences
+from rna_blast_analyze.BR_core.BA_support import Subsequences, get_hit_n, annotate_ambiguos_base
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -14,6 +15,8 @@ class BlastSearchRecompute(object):
     """
     def __init__(self, args, query, iteration):
         self.hits = HitList()
+        self.hits_failed = HitList()
+        self.__all_hits = HitList()
         self.pandas = None
         self.query = query
         self.creation = time.time()
@@ -24,6 +27,29 @@ class BlastSearchRecompute(object):
         self.iteration = iteration
         self.multi_query = False
         self.msgs = []
+
+    def copy_hits(self):
+        hits = deepcopy(self.hits)
+        for hit in hits:
+            annotate_ambiguos_base(hit.extension)
+        self.__all_hits = hits
+
+    def get_all_hits(self):
+        return deepcopy(self.__all_hits)
+
+    def update_hit_stuctures(self):
+        b_dict = {get_hit_n(h): h for h in self.hits}
+        for h in self.hits:
+            n = get_hit_n(h)
+            if n in b_dict:
+                h.extension.letter_annotations.update(b_dict[n].extension.letter_annotations)
+                h.extension.annotations.update(b_dict[n].extension.annotations)
+
+        for h in self.__all_hits:
+            n = get_hit_n(h)
+            if n in b_dict:
+                h.extension.letter_annotations.update(b_dict[n].extension.letter_annotations)
+                h.extension.annotations.update(b_dict[n].extension.annotations)
 
     def stop_timer(self):
         if self._runstat:
@@ -41,7 +67,6 @@ class BlastSearchRecompute(object):
         self.pandas.to_csv(output_file)
 
     def export_pandas_results(self):
-        # todo rewrite export so it exports data from one run to one file (ie multiple queries support)
         self.stop_timer()
 
         export_columns = [
@@ -154,14 +179,18 @@ class BlastSearchRecompute(object):
         self.stop_timer()
         with open(out_file, 'w') as f:
             for hit in self.hits:
-                f.write('>{}\n{}\n'.format(hit.extension.id,
-                                           str(hit.extension.seq)))
+                f.write('>{}\n{}\n'.format(
+                    hit.extension.id,
+                    str(hit.extension.seq))
+                )
 
     def write_results_structures(self, out_file):
         with open(out_file, 'w') as f:
             for hit in self.hits:
-                f.write('>{}\n{}\n'.format(hit.extension.id,
-                                           str(hit.extension.seq)))
+                f.write('>{}\n{}\n'.format(
+                    hit.extension.id,
+                    str(hit.extension.seq))
+                )
                 for st_key in hit.extension.letter_annotations.keys():
                     f.write('{} {}\n'.format(hit.extension.letter_annotations[st_key], st_key))
 
@@ -178,24 +207,6 @@ class BlastSearchRecompute(object):
         new.pandas = self.pandas
         new.multi_query = self.multi_query
         return new
-
-    def extract_all_structures(self):
-        all_structures = dict()
-        for key in self.hits[0].annotaions['sss']:
-            all_structures[key] = extract_structures(self.hits, key)
-        return all_structures
-
-
-def extract_structures(hit_list, str_key):
-    """
-    returns list of all structures from hits defined byt str_key
-    :param str_key: key to structure for retrieving
-    :return: list
-    """
-    outstr = []
-    for seqr in hit_list:
-        outstr.append(seqr.letter_annotations[str_key])
-    return outstr
 
 
 class HitList(list):
@@ -217,16 +228,3 @@ def to_tab_delim_line_simple(input_args):
     B = sorted(A.keys())
     line = '\t'.join([str(A[key]) for key in B])
     return line
-
-
-def to_tab_delim_header(input_args):
-    A = vars(input_args)
-    B = sorted(A.keys())
-    return '\t'.join(B)
-
-
-def add_loc_to_description(analyzed_hits):
-    for hit in analyzed_hits.hits:
-        d2a = '{}-{}'.format(hit.best_start, hit.best_end)
-        # hit.source.description += d2a
-        hit.extension.description += d2a

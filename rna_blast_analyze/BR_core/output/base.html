@@ -28,12 +28,7 @@
             {% block footer %}{% endblock %}
         </div>
         <div class="controls">
-            <button onclick="selectAllseqs(this)" id="selectSeqsBtn" title="Select All Sequences">Select all Seqs.</button>
-            <button onclick="selectAllstrs(this)" id="selectStrsBtn" title="Select All Structures">Select all Structs.</button>
-            <button onclick="writeSelectionFasta()" id="exportSeqsBtn" title="Export Selected Sequences">Export Sequences</button>
-            <button onclick="writeSelectionStructures()" id="exportStrBtn" title="Export Selected Structures">Export Structures</button>
-            <button onclick="sortByEval(this)" id="sortEvalBtn" title="Sort by e-value">Sort Eval desc.</button>
-            <button onclick="viewAllRegions()" id="viewAllRegionsBtn" title="View all Regions">View all Regions</button>
+            {% block controls %}{% endblock %}
         </div>
     </div>
 </body>

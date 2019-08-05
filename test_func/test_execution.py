@@ -6,15 +6,16 @@ from subprocess import call
 
 import pandas as pd
 from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 from rna_blast_analyze.BR_core.tools_versions import method_required_tools
-from rna_blast_analyze.BR_core.BA_support import remove_files_with_try, parse_named_structure_file
+from rna_blast_analyze.BR_core.BA_support import remove_files_with_try, parse_one_rec_in_multiline_structure
 from rna_blast_analyze.BR_core.convert_classes import blastsearchrecomputefromdict, blastsearchrecompute2dict
-from rna_blast_analyze.BR_core.expand_by_BLAST import blast_wrapper_inner
-from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper_inner
-from rna_blast_analyze.BR_core.expand_by_joined_pred_with_rsearch import joined_wrapper_inner
 from test_func.pseudoargs_class import Pseudoargs
 from rna_blast_analyze.BR_core.output.htmloutput import write_html_output
+from rna_blast_analyze.BA import lunch_with_args
+import glob
 
 # test SE
 # test locarna
@@ -33,16 +34,6 @@ base_script = ['python3', '-m', 'rna_blast_analyze.BA']
 
 class TestExecution(unittest.TestCase):
     def setUp(self):
-        self.args = Pseudoargs(
-            blast_query,
-            blast_in,
-            blast_db,
-            b_type='plain',
-            prediction_method=['rnafold'],
-            blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
-            enable_overwrite=True
-        )
-
         ff, csv = tempfile.mkstemp(prefix='rba_', suffix='_t1')
         os.close(ff)
         self.csv = csv
@@ -67,8 +58,34 @@ class TestExecution(unittest.TestCase):
         os.close(ff)
         self.fasta_structures = fasta_structures
 
+        self.args = Pseudoargs(
+            blast_query,
+            blast_in,
+            blast_db,
+            b_type='plain',
+            prediction_method=['rnafold'],
+            blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
+            enable_overwrite=True,
+            html=self.html,
+        )
+
+    def tearDown(self):
+        files = glob.glob(blast_in + '.r-*')
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.fasta_structures,
+                self.fasta,
+                self.html,
+
+            ] + files
+        )
+
     def test_simple_extension(self):
-        _, out = blast_wrapper_inner(self.args, [])
+        self.args.mode = 'simple'
+        out = lunch_with_args(self.args)
         self.assertEqual(1, 1)
 
         # test_output
@@ -93,20 +110,9 @@ class TestExecution(unittest.TestCase):
             )
             self.assertEqual(t, True)
 
-            remove_files_with_try(
-                [
-                    self.csv,
-                    self.json,
-                    self.pandas_dump,
-                    self.fasta_structures,
-                    self.fasta,
-                    self.html,
-                ],
-                ''
-            )
-
     def test_locarna_extension(self):
-        _, out = locarna_anchored_wrapper_inner(self.args, [])
+        self.args.mode = 'locarna'
+        out = lunch_with_args(self.args)
         self.assertEqual(1, 1)
         # test_output
         for i in range(len(out)):
@@ -130,19 +136,9 @@ class TestExecution(unittest.TestCase):
             )
             self.assertEqual(t, True)
 
-            remove_files_with_try(
-                [
-                    self.csv,
-                    self.json,
-                    self.pandas_dump,
-                    self.fasta_structures,
-                    self.fasta
-                ],
-                ''
-            )
-
     def test_lose_extenstion(self):
-        _, out = joined_wrapper_inner(self.args, [])
+        self.args.mode = 'meta'
+        out = lunch_with_args(self.args)
         self.assertEqual(1, 1)
         # test_output
         for i in range(len(out)):
@@ -166,17 +162,6 @@ class TestExecution(unittest.TestCase):
             )
             self.assertEqual(t, True)
 
-            remove_files_with_try(
-                [
-                    self.csv,
-                    self.json,
-                    self.pandas_dump,
-                    self.fasta_structures,
-                    self.fasta
-                ],
-                ''
-            )
-
 
 class TestDirectExecution(unittest.TestCase):
     def setUp(self):
@@ -195,6 +180,20 @@ class TestDirectExecution(unittest.TestCase):
         ff, json_file = tempfile.mkstemp(prefix='rba_', suffix='_t10')
         os.close(ff)
         self.json = json_file
+        self.re = '(?<=\|)[A-Z0-9]*\.?\d*$'
+
+    def tearDown(self):
+
+        files = glob.glob(blast_in + '.r-*')
+        remove_files_with_try(
+            [
+                self.csv,
+                self.json,
+                self.pandas_dump,
+                self.html
+
+            ] + files
+        )
 
     def test_BA_one_pred_method_simple(self):
         a = base_script + [
@@ -202,7 +201,7 @@ class TestDirectExecution(unittest.TestCase):
             '--blast_query', blast_query,
             '--blast_db', blast_db,
             '--mode', 'simple',
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
             '--html', self.html,
             '--json', self.json,
@@ -221,16 +220,6 @@ class TestDirectExecution(unittest.TestCase):
             ref_seqs_file=os.path.join(fwd, test_data_dir, 'simple.json')
         )
         self.assertTrue(t)
-
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
 
     def test_BA_one_pred_method_locarna(self):
         a = base_script + [
@@ -238,7 +227,7 @@ class TestDirectExecution(unittest.TestCase):
             '--blast_query', blast_query,
             '--blast_db', blast_db,
             '--mode', 'locarna',
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
             '--html', self.html,
             '--json', self.json,
@@ -257,16 +246,6 @@ class TestDirectExecution(unittest.TestCase):
             ref_seqs_file=os.path.join(fwd, test_data_dir, 'locarna.json')
         )
         self.assertTrue(t)
-
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
 
     def test_BA_one_pred_method_joined(self):
         a = base_script + [
@@ -274,7 +253,7 @@ class TestDirectExecution(unittest.TestCase):
             '--blast_query', blast_query,
             '--blast_db', blast_db,
             '--mode', 'meta',
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
             '--html', self.html,
             '--json', self.json,
@@ -294,24 +273,14 @@ class TestDirectExecution(unittest.TestCase):
         )
         self.assertTrue(t)
 
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
-
     def test_BA(self):
         a = base_script + [
             '--blast_in', blast_in,
             '--blast_query', blast_query,
             '--blast_db', blast_db,
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
-            '--prediction_method', 'rnafold', 'fq-sub',
+            '--prediction_method', 'rnafold', 'centroid',
             '--html', self.html,
             '--json', self.json,
             '--csv', self.csv,
@@ -329,22 +298,12 @@ class TestDirectExecution(unittest.TestCase):
         )
         self.assertTrue(t)
 
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
-
     def test_BA_shell(self):
         a = base_script + [
             '--blast_in', blast_in,
             '--blast_query', blast_query,
             '--blast_db', blast_db,
-            '--blast_regexp', '"(?<=\|)[A-Z0-9]*\.?\d*$"',
+            '--blast_regexp', '"' + self.re + '"',
             '--b_type', 'plain',
             '--prediction_method', 'rnafold',
             '--html', self.html,
@@ -363,23 +322,13 @@ class TestDirectExecution(unittest.TestCase):
             ref_seqs_file=os.path.join(fwd, test_data_dir, 'locarna.json')
         )
         self.assertEqual(t, True)
-
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
 
     def test_BA_shell_relative_path(self):
         a = base_script + [
             '--blast_in', os.path.join(test_dir, test_data_dir, 'RF00001_short.blastout'),
             '--blast_query', os.path.join(test_dir, test_data_dir, 'RF00001.fasta'),
             '--blast_db', os.path.join(test_dir, test_data_dir, 'blastdb', 'RF00001-art.blastdb'),
-            '--blast_regexp', '"(?<=\|)[A-Z0-9]*\.?\d*$"',
+            '--blast_regexp', '"' + self.re + '"',
             '--b_type', 'plain',
             '--prediction_method', 'rnafold',
             '--html', self.html,
@@ -398,16 +347,6 @@ class TestDirectExecution(unittest.TestCase):
             ref_seqs_file=os.path.join(fwd, test_data_dir, 'locarna.json')
         )
         self.assertEqual(t, True)
-
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
 
     def test_BA_rfam_simple(self):
         a = base_script + [
@@ -415,7 +354,7 @@ class TestDirectExecution(unittest.TestCase):
             '--blast_query', blast_query,
             '--blast_db', blast_db,
             '--mode', 'simple',
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
             '--html', self.html,
             '--json', self.json,
@@ -435,16 +374,6 @@ class TestDirectExecution(unittest.TestCase):
             ref_seqs_file=os.path.join(fwd, test_data_dir, 'simple.json')
         )
         self.assertTrue(t)
-
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
 
     def test_BA_rfam_locarna(self):
         a = base_script + [
@@ -452,7 +381,7 @@ class TestDirectExecution(unittest.TestCase):
             '--blast_query', blast_query,
             '--blast_db', blast_db,
             '--mode', 'locarna',
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
             '--html', self.html,
             '--json', self.json,
@@ -473,23 +402,13 @@ class TestDirectExecution(unittest.TestCase):
         )
         self.assertTrue(t)
 
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
-
     def test_BA_rfam_joined(self):
         a = base_script + [
             '--blast_in', blast_in,
             '--blast_query', blast_query,
             '--blast_db', blast_db,
             '--mode', 'meta',
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
             '--html', self.html,
             '--json', self.json,
@@ -510,23 +429,13 @@ class TestDirectExecution(unittest.TestCase):
         )
         self.assertTrue(t)
 
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
-
     def test_BA_cm_file_simple(self):
         a = base_script + [
             '--blast_in', blast_in,
             '--blast_query', blast_query,
             '--blast_db', blast_db,
             '--mode', 'simple',
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
             '--html', self.html,
             '--json', self.json,
@@ -548,23 +457,13 @@ class TestDirectExecution(unittest.TestCase):
         )
         self.assertTrue(t)
 
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
-
     def test_BA_cm_file_locarna(self):
         a = base_script + [
             '--blast_in', blast_in,
             '--blast_query', blast_query,
             '--blast_db', blast_db,
             '--mode', 'locarna',
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
             '--html', self.html,
             '--json', self.json,
@@ -586,23 +485,13 @@ class TestDirectExecution(unittest.TestCase):
         )
         self.assertTrue(t)
 
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
-
     def test_BA_cm_file_joined(self):
         a = base_script + [
             '--blast_in', blast_in,
             '--blast_query', blast_query,
             '--blast_db', blast_db,
             '--mode', 'meta',
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
             '--html', self.html,
             '--json', self.json,
@@ -623,16 +512,6 @@ class TestDirectExecution(unittest.TestCase):
             ref_seqs_file=os.path.join(fwd, test_data_dir, 'joined.json')
         )
         self.assertTrue(t)
-
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
 
     def test_BA_fasta_db(self):
         a = base_script + [
@@ -641,7 +520,7 @@ class TestDirectExecution(unittest.TestCase):
             '--blast_db', blast_db_fasta,
             '--db_type', 'fasta',
             '--mode', 'simple',
-            '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+            '--blast_regexp', self.re,
             '--b_type', 'plain',
             '--html', self.html,
             '--json', self.json,
@@ -660,16 +539,6 @@ class TestDirectExecution(unittest.TestCase):
             ref_seqs_file=os.path.join(fwd, test_data_dir, 'simple.json')
         )
         self.assertTrue(t)
-
-        remove_files_with_try(
-            [
-                self.csv,
-                self.json,
-                self.pandas_dump,
-                self.html
-            ],
-            ''
-        )
 
 
 def tab_output_equal(csvfile=None, jsonfile=None, pdfile=None, fastafile=None, fastastructures=None, ref_seqs_file=None):
@@ -786,3 +655,17 @@ def tab_output_equal_structures(csvfile=None, jsonfile=None, pdfile=None, fastas
 
 if __name__ == '__main__':
     unittest.main()
+
+
+def parse_named_structure_file(file):
+    with open(file, 'r') as f:
+        for sr in parse_one_rec_in_multiline_structure(f):
+            cf = sr.strip().splitlines()
+            cfr = SeqRecord(Seq(cf[1]), id=cf[0])
+            cfr.annotations['sss'] = []
+            for i, ll in enumerate(cf[2:]):
+                structure, str_name = ll.split()
+                cfr.letter_annotations[str_name] = structure
+                cfr.annotations['sss'].append(str_name)
+
+            yield cfr

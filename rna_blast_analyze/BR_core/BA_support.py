@@ -1,15 +1,13 @@
-import datetime
 import locale
 import logging
 import os
 import re
-import shutil
 from io import StringIO
 from random import choice
-from subprocess import call, check_output, CalledProcessError
-from tempfile import mkstemp, gettempdir, TemporaryFile
-from warnings import warn
+from subprocess import call, check_output
+from tempfile import mkstemp, TemporaryFile
 import shlex
+import sys
 
 import numpy as np
 from Bio import SeqIO, AlignIO
@@ -24,15 +22,10 @@ from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt as bla
 from rna_blast_analyze.BR_core import exceptions
 
 # idiotic matplotlib
+
 locale.setlocale(locale.LC_ALL, 'C')
 
 ml = logging.getLogger('rboAnalyzer')
-
-
-def write_fasta_from_list_of_seqrecords(f, seq_list):
-    for seq in seq_list:
-        f.write('>{}\n{}\n'.format(seq.id,
-                                   str(seq.seq)))
 
 
 def rc_hits_2_rna(seqs, strand=None):
@@ -52,26 +45,15 @@ def rc_hits_2_rna(seqs, strand=None):
             assert 'strand' in seq.annotations
             strand.append(seq.annotations['strand'])
 
-    try:
-        strand = tuple(strand)
-    except:
-        print('Unrecognized type of strand, recommended are list and tuple')
-        raise
+    if not isinstance(strand, (list, tuple)):
+        raise AssertionError('Unrecognized type of strand, recommended are list and tuple')
 
-    # determine type of strand
-    if strand[0] == 1 or strand[0] == -1:
-        p_type = 1
-    elif strand[0] == 'Plus' or strand[0] == 'Minus':
-        p_type = 'Plus'
-    elif strand[0] == '+' or strand[0] == '-':
-        p_type = '-'
-    else:
-        raise RuntimeError('Unrecognized designation of strand, allowed entries are +1 / -1 // "Plus" / "Minus" // "+" '
-                           '/ "-"')
+    plus_strands = {1, '+', 'Plus'}
+    minus_strands = {-1, '-', 'Minus'}
 
     out = []
     for i, seq in enumerate(seqs):
-        if strand[i] == p_type:
+        if strand[i] in plus_strands:
             out.append(
                 SeqRecord(
                     seq.seq.transcribe(),
@@ -81,7 +63,7 @@ def rc_hits_2_rna(seqs, strand=None):
                     description=seq.description
                 )
             )
-        else:
+        elif strand[i] in minus_strands:
             out.append(
                 SeqRecord(
                     seq.seq.reverse_complement().transcribe(),
@@ -90,6 +72,10 @@ def rc_hits_2_rna(seqs, strand=None):
                     annotations=seq.annotations,
                     description=seq.description
                 )
+            )
+        else:
+            raise AssertionError(
+                'Unrecognized designation of strand, allowed entries are +1 / -1 // "Plus" / "Minus" // "+" / "-"'
             )
     return out
 
@@ -114,8 +100,6 @@ def parse_seq_str(fid):
     :param fid: open file handle
     :return:
     """
-    if not hasattr(fid, 'readline'):
-        raise Exception('cannot read from file')
     c = 0
     while True:
         c += 1
@@ -145,24 +129,6 @@ def parse_seq_str(fid):
 def read_seq_str(fasta_like_file):
     with open(fasta_like_file, 'r') as flf:
         return [rec for rec in parse_seq_str(flf)]
-
-
-def print_parameters(args, f):
-    """
-    print all input parameters to a file so it is ascertainable what where the commands which produced the data
-    :param args:
-    :param f:
-    :return:
-    """
-
-    A = vars(args)
-
-    for ar in A.keys():
-        f.write('{}: {}\n'.format(ar, A[ar]))
-
-
-def print_time():
-    return '{:%Y-%m-%d %H:%M}'.format(datetime.datetime.now())
 
 
 def prevent_mem_in_fasta_name(func):
@@ -320,27 +286,31 @@ def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
 
 def RNAfold(sequence):
     ml.debug(fname())
-    r = check_output(
-        [
-            '{}RNAfold'.format(CONFIG.viennarna_path),
-            '--noPS',
-        ],
-        input=sequence.encode()
-    )
+    with TemporaryFile(mode='w+') as tmp:
+        r = check_output(
+            [
+                '{}RNAfold'.format(CONFIG.viennarna_path),
+                '--noPS',
+            ],
+            input=sequence.encode(),
+            stderr=tmp
+        )
 
-    if isinstance(r, CalledProcessError):
-        print('RNAfold failed')
-        raise ChildProcessError
+        if isinstance(r, Exception):
+            msgfail = 'RNAfold failed.'
+            ml.error(msgfail)
+            tmp.seek(0)
+            raise exceptions.RNAfoldException(msgfail, tmp.read())
 
-    # more robust decode
-    out_str = r.decode()
-    spl = out_str.split('\n')
-    seq = spl[0]
-    structure = spl[1][:len(seq)]
-    energy = float(spl[1][len(seq)+2:-1])
-    # seq, structure, energy = r.decode().split()
-    # return seq, structure, float(energy[1:-1])
-    return seq, structure, energy
+        # more robust decode
+        out_str = r.decode()
+        spl = out_str.split('\n')
+        seq = spl[0]
+        structure = spl[1][:len(seq)]
+        energy = float(spl[1][len(seq)+2:-1])
+        # seq, structure, energy = r.decode().split()
+        # return seq, structure, float(energy[1:-1])
+        return seq, structure, energy
 
 
 def select_analyzed_aligned_hit(one_alig, exp_hit_id):
@@ -392,17 +362,17 @@ def blast_in(blast_input_file, b='guess'):
             # gues the format
             l = f.readline()
             f.seek(0, 0)     # seek to begining
-            if re.search('^BLASTN \d+\.\d+\.\d+', l):
+            if re.search(r'^BLASTN \d+\.\d+\.\d+', l):
                 # blast object prob plaintext
                 b_type = 'plain'
-                ml.info('Infered BLAST format: txt.')
-            elif re.search('<\?xml version', l):
+                ml.info('Inferred BLAST format: txt.')
+            elif re.search(r'<\?xml version', l):
                 # run xml parser
                 b_type = 'xml'
-                ml.info('Infered BLAST format: xml.')
+                ml.info('Inferred BLAST format: xml.')
             else:
-                print('could not guess the blast format, preferred format is NCBI xml')
-                raise AssertionError
+                ml.error('Could not guess the BLAST format, preferred format is NCBI xml.')
+                sys.exit(1)
         else:
             b_type = b
 
@@ -410,81 +380,28 @@ def blast_in(blast_input_file, b='guess'):
             try:
                 for p in blast_minimal_parser(f):
                     multiq.append(p)
-            except:
-                raise IOError('Failed to parse provided file {} as text blast output'.format(blast_input_file))
+            except Exception as e:
+                msgfail = 'Failed to parse provided file {} as text blast output'.format(blast_input_file)
+                ml.error(msgfail)
+                ml.error(str(e))
+                sys.exit(1)
+
         elif b_type == 'xml':
             try:
                 for p in NCBIXML.parse(f):
                     multiq.append(p)
-            except:
-                raise IOError('Failed to parse provided file {} as xml'.format(blast_input_file))
+            except Exception as e:
+                msgfail = 'Failed to parse provided file {} as xml'.format(blast_input_file)
+                ml.error(msgfail)
+                ml.error(str(e))
+                sys.exit(1)
+
         else:
-            raise AttributeError('Type not known: allowed types: plain, xml, guess')
+            ml.error('BLAST type not known: allowed types: plain, xml, guess')
+            sys.exit(1)
 
         # todo from SearchIO add remaining functionality
     return multiq
-
-
-def run_rnaplot(seq, structure=None, format='svg', outfile=None):
-    """
-    run rnaplot in desired format
-    if seq
-    :param seq:
-    :param structure:
-    :return:
-    """
-    ml.debug(fname())
-    if structure is None:
-        sequence = str(seq.seq)
-        structure = seq.letter_annotations['ss0']
-    else:
-        sequence = seq
-
-    assert len(sequence) == len(structure)
-
-    allowed_formats = {'ps', 'svg', 'gml', 'xrna'}
-    if format not in allowed_formats:
-        raise TypeError('Format can be only from {}.'.format(allowed_formats))
-
-    fd, tempfile = mkstemp(prefix='rba_', suffix='_08', dir=CONFIG.tmpdir)
-
-    rnaname = tempfile.split('/')[-1].split('\\')[-1]
-
-    currdirr = os.getcwd()
-    tmpdir = gettempdir()
-    os.chdir(tmpdir)
-
-    with os.fdopen(fd, 'w') as fh:
-        fh.write('>{}\n{}\n{}\n'.format(
-            rnaname,
-            sequence,
-            structure
-        ))
-
-    cmd = '{} --output-format={} < {}'.format(
-        shlex.quote('{}RNAplot'.format(CONFIG.viennarna_path)),
-        shlex.quote(format),
-        shlex.quote(tempfile)
-    )
-    ml.debug(cmd)
-    r = call(cmd, shell=True)
-    if r:
-        msgfail = 'Call to RNAplot failed'
-        ml.error(msgfail)
-        ml.error(cmd)
-        os.chdir(currdirr)
-        raise ChildProcessError(msgfail)
-
-    # output file is name of the sequence (in this case name of the file) + "_ss." + chosen format
-    os.remove(tempfile)
-
-    plot_output_file = os.path.join(tmpdir, rnaname + '_ss.' + format)
-    os.chdir(currdirr)
-    if outfile is None:
-        return plot_output_file
-    else:
-        shutil.move(os.path.join(tmpdir, plot_output_file), outfile)
-        return outfile
 
 
 class Subsequences(object):
@@ -505,72 +422,6 @@ class Subsequences(object):
         self.best_start = None
         self.best_end = None
         self.templates = {}
-
-
-def format_blast_hit(hit, linelength=90, delim='_'):
-    """
-    format blast hit for printing
-    :param hit: blast hit hsp data structure
-    :param linelength: limit for line length for printing
-    :param delim: char to use as a fill (whitespace sometimes gets wrapped and behaves incorrectly)
-    :return:
-    """
-    qs = hit.query_start
-    qe = hit.query_end
-    ss = hit.sbjct_start
-    se = hit.sbjct_end
-    max_l = max([len(i) for i in [str(qs), str(qe), str(ss), str(se)]])
-    ad = linelength - (2 * max_l + 10 + 4)
-    qq = StringIO(hit.query)
-    mm = StringIO(hit.match)
-    sss = StringIO(hit.sbjct)
-    try:
-        f_string = ''
-        q = qq.read(ad)
-        m = mm.read(ad)
-        s = sss.read(ad)
-        while True:
-            l = len(q)
-            if l == 0:
-                break
-            if len(m) < len(q):
-                m = '{:{width}}'.format(m, width=len(q))
-
-            qe = qs + l - 1 - q.count('-')
-            if hit.sbjct_start < hit.sbjct_end:
-                se = ss + l - 1 - s.count('-')
-            else:
-                se = ss - l + s.count('-') + 1
-
-            f_string = f_string + 'Query' + delim + delim * (max_l - len(str(qs))) + str(qs) + \
-                       ' ' + q + ' ' + \
-                       str(qe) + delim * (max_l - len(str(qe))) + '\n' + \
-                       delim * (max_l + 6) + \
-                       ' ' + m + ' ' + \
-                       delim * max_l + '\n' + \
-                       'Sbjct' + delim + delim * (max_l - len(str(ss))) + str(ss) + \
-                       ' ' + s + ' ' + \
-                       str(se) + delim * (max_l - len(str(se))) + '\n\n'
-
-            qs = qe + 1
-            if hit.sbjct_start < hit.sbjct_end:
-                ss = se + 1
-            else:
-                ss = se - 1
-
-            if l < ad:
-                break
-
-            q = qq.read(ad)
-            m = mm.read(ad)
-            s = sss.read(ad)
-    finally:
-        qq.close()
-        mm.close()
-        sss.close()
-    if not (qe == hit.query_end and se == hit.sbjct_end):
-        raise Exception('blast write fail')
-    return f_string
 
 
 def blasthsp2pre(bhsp):
@@ -598,13 +449,15 @@ def blasthsp2pre(bhsp):
     elif isinstance(bhsp.identities, int):
         idd = bhsp.identities
     else:
-        raise ValueError
+        ml.warning('Format HSP: identities in unexpected format')
+        idd = 0
     if isinstance(bhsp.gaps, (tuple, list)):
         gap = bhsp.gaps[0]
     elif isinstance(bhsp.gaps, int):
         gap = bhsp.gaps
     else:
-        raise ValueError
+        ml.warning('Format HSP: gaps in unexpected format')
+        gap = 0
 
     myf = score_template.format(
         score=bhsp.score,
@@ -619,27 +472,31 @@ def blasthsp2pre(bhsp):
         mystrand=strand,
     )
 
-    if hasattr(bhsp, 'features') and bhsp.features:
-        if isinstance(bhsp.features, str):
-            fk = 'in'
-            features_string = bhsp.features
-        elif isinstance(bhsp.features, (list, tuple)):
-            fk = 'flanking'
-            features_string = ''.join(bhsp.features)
-        else:
-            raise Exception("unknown features type")
-        features_template = ''.join(
-            (
-                " Features {in_or_flank:} this part of subject sequence:\n",
-                "{features:}\n",
-            )
-        )
-        features = features_template.format(
-            in_or_flank=fk,
-            features=features_string,
-        )
+    try:
+        if hasattr(bhsp, 'features') and bhsp.features:
+            if isinstance(bhsp.features, str):
+                fk = 'in'
+                features_string = bhsp.features
+            elif isinstance(bhsp.features, (list, tuple)):
+                fk = 'flanking'
+                features_string = ''.join(bhsp.features)
+            else:
+                raise exceptions.BlastFormatException("Format HSP: unknown features type")
 
-        myf += '\n' + features
+            features_template = ''.join(
+                (
+                    " Features {in_or_flank:} this part of subject sequence:\n",
+                    "{features:}\n",
+                )
+            )
+            features = features_template.format(
+                in_or_flank=fk,
+                features=features_string,
+            )
+
+            myf += '\n' + features
+    except exceptions.BlastFormatException as e:
+        ml.warning(str(e))
 
     blast_text_hit_body = format_blast_hit(bhsp, linelength=90, delim=' ')
     return myf + blast_text_hit_body
@@ -655,13 +512,13 @@ def remove_one_file_with_try(file, msg_template=''):
     try:
         os.remove(file)
     except FileNotFoundError:
-        print('{} File: {} Not Found.'.format(msg_template, file))
+        ml.debug('{} File: {} Not Found.'.format(msg_template, file))
     except OSError:
-        print('{} File: {} is a directory.'.format(msg_template, file))
+        ml.debug('{} File: {} is a directory.'.format(msg_template, file))
     return
 
 
-def remove_files_with_try(files, msg_template):
+def remove_files_with_try(files, msg_template=''):
     for fi in files:
         remove_one_file_with_try(fi, msg_template)
     return
@@ -684,20 +541,6 @@ def non_redundant_seqs(sequences: list) -> list:
             nr_seqs.add(str_seq)
 
     return out
-
-
-def parse_named_structure_file(file):
-    with open(file, 'r') as f:
-        for sr in parse_one_rec_in_multiline_structure(f):
-            cf = sr.strip().splitlines()
-            cfr = SeqRecord(Seq(cf[1]), id=cf[0])
-            cfr.annotations['sss'] = []
-            for i, ll in enumerate(cf[2:]):
-                structure, str_name = ll.split()
-                cfr.letter_annotations[str_name] = structure
-                cfr.annotations['sss'].append(str_name)
-
-            yield cfr
 
 
 def parse_one_rec_in_multiline_structure(fh):
@@ -850,19 +693,17 @@ def ct2db(f, energy_txt='dG'):
         the list of keys to letter_annotations is in annotations under the key 'sss'
     """
     ml.debug(fname())
-    # if not isinstance(f, 'file'):
-    #     print('accepts open handle to a file')
-    #     raise FileNotFoundError
+
     txt = f.readline()
     out = []    # list of seq record objects
     prev_seq = ''
     prev_name = ''
 
     # sl_re = '\d+\s*(?=dG)'
-    sl_re = '\d+\s*(?=' + energy_txt + ')'
+    sl_re = r'\d+\s*(?=' + energy_txt + ')'
 
     # q_re = '(?<=dG\s=)\s*-?\d+\.?\d*'
-    q_re = '(?<=' + energy_txt + '\s=)\s*-?\d+\.?\d*'
+    q_re = '(?<=' + energy_txt + r'\s=)\s*-?\d+\.?\d*'
 
     while txt:
         seq_len = int(re.search(sl_re, txt).group().lstrip().rstrip())
@@ -929,3 +770,80 @@ def ct2db(f, energy_txt='dG'):
                 out.append(curr_record)
 
     return out
+
+
+def get_hit_n(x):
+    return int(re.split('[|:]', x.source.id)[1])
+
+
+def format_blast_hit(hit, linelength=90, delim='_'):
+    """
+    format blast hit for printing
+    :param hit: blast hit hsp data structure
+    :param linelength: limit for line length for printing
+    :param delim: char to use as a fill (whitespace sometimes gets wrapped and behaves incorrectly)
+    :return:
+    """
+    qs = hit.query_start
+    qe = hit.query_end
+    ss = hit.sbjct_start
+    se = hit.sbjct_end
+    max_l = max([len(i) for i in [str(qs), str(qe), str(ss), str(se)]])
+    ad = linelength - (2 * max_l + 10 + 4)
+    qq = StringIO(hit.query)
+    mm = StringIO(hit.match)
+    sss = StringIO(hit.sbjct)
+    try:
+        f_string = ''
+        q = qq.read(ad)
+        m = mm.read(ad)
+        s = sss.read(ad)
+        while True:
+            l = len(q)
+            if l == 0:
+                break
+            if len(m) < len(q):
+                m = '{:{width}}'.format(m, width=len(q))
+
+            qe = qs + l - 1 - q.count('-')
+            if hit.sbjct_start < hit.sbjct_end:
+                se = ss + l - 1 - s.count('-')
+            else:
+                se = ss - l + s.count('-') + 1
+
+            f_string = f_string + 'Query' + delim + delim * (max_l - len(str(qs))) + str(qs) + \
+                       ' ' + q + ' ' + \
+                       str(qe) + delim * (max_l - len(str(qe))) + '\n' + \
+                       delim * (max_l + 6) + \
+                       ' ' + m + ' ' + \
+                       delim * max_l + '\n' + \
+                       'Sbjct' + delim + delim * (max_l - len(str(ss))) + str(ss) + \
+                       ' ' + s + ' ' + \
+                       str(se) + delim * (max_l - len(str(se))) + '\n\n'
+
+            qs = qe + 1
+            if hit.sbjct_start < hit.sbjct_end:
+                ss = se + 1
+            else:
+                ss = se - 1
+
+            if l < ad:
+                break
+
+            q = qq.read(ad)
+            m = mm.read(ad)
+            s = sss.read(ad)
+    finally:
+        qq.close()
+        mm.close()
+        sss.close()
+    if not (qe == hit.query_end and se == hit.sbjct_end):
+        raise exceptions.BlastFormatException('Failed to format BLAST HSP properly.')
+    return f_string
+
+
+def add_loc_to_description(analyzed_hits):
+    for hit in analyzed_hits.hits:
+        d2a = '{}-{}'.format(hit.best_start, hit.best_end)
+        # hit.source.description += d2a
+        hit.extension.description += d2a

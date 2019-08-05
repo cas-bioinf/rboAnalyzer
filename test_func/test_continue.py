@@ -3,14 +3,17 @@ import os
 import tempfile
 import unittest
 from copy import copy
+import glob
 
-from unittest.mock import patch
-
+from rna_blast_analyze.BR_core.config import CONFIG, tools_paths
 from rna_blast_analyze.BR_core.BA_support import remove_files_with_try
-from rna_blast_analyze.BR_core.convert_classes import blastsearchrecomputefromdict, blastsearchrecompute2dict, seqrecord2dict
+from rna_blast_analyze.BR_core.convert_classes import blastsearchrecomputefromdict, blastsearchrecompute2dict
 from test_func.pseudoargs_class import Pseudoargs
 from test_func.test_execution import tab_output_equal, tab_output_equal_structures
 from rna_blast_analyze.BA import lunch_with_args
+from rna_blast_analyze.BR_core.validate_args import compute_args_hash
+from rna_blast_analyze.BR_core.cmalign import RfamInfo
+
 
 fwd = os.path.dirname(__file__)
 test_dir = 'test_func'
@@ -20,7 +23,6 @@ blast_query = os.path.join(fwd, test_data_dir, 'RF00001.fasta')
 blast_db = os.path.join(fwd, test_data_dir, 'blastdb', 'RF00001-art.blastdb')
 blast_db_fasta = os.path.join(fwd, test_data_dir, 'blastdb')
 blast_output = os.path.join(fwd, test_data_dir, 'RF00001_output.json')
-backup_file = blast_in + '.tmp_rboAnalyzer'
 test_output_file = os.path.join(fwd, test_data_dir, 'test_output.html')
 root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 base_script = ['python3', '-m', 'rna_blast_analyze.BA']
@@ -38,7 +40,7 @@ class TestContinuation(unittest.TestCase):
             blast_db,
             b_type='plain',
             prediction_method=['rnafold',],
-            blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
+            blast_regexp=r'(?<=\|)[A-Z0-9]*\.?\d*$',
             enable_overwrite=True,
             mode='simple',
             html=test_output_file,
@@ -60,18 +62,38 @@ class TestContinuation(unittest.TestCase):
         os.close(ff)
         self.fasta_structures = fasta_structures
 
-    @patch('builtins.input', return_value='yes')
-    def test_continuation(self, mock_input):
+        CONFIG.override(tools_paths(
+            os.path.join(os.path.dirname(__file__), 'rna_blast_analyze', 'BR_core', 'config.txt'))
+        )
 
-        with open(blast_output, 'r') as f, open(backup_file, 'w') as ff:
+        rfam = RfamInfo()
+        self.sha1 = compute_args_hash(self.args, os.path.join(rfam.rfam_dir, rfam.gzname))
+        self.test_backup_file = blast_in + '.r-' + self.sha1[:10]
+
+    def tearDown(self):
+        files = glob.glob(blast_in + '.r-*')
+        remove_files_with_try(
+            [
+                test_output_file,
+                self.csv,
+                self.json,
+                self.fasta,
+                self.fasta_structures,
+                self.test_backup_file
+            ] + files
+        )
+
+    def test_continuation(self):
+        with open(blast_output, 'r') as f, open(self.test_backup_file, 'w') as ff:
             data = blastsearchrecomputefromdict(json.load(f))
             data.args.blast_in = blast_in
             data.args.json = None
             data.args.html = test_output_file
+            data.args.sha1 = self.sha1
             for hit in data.hits:
                 del hit.extension.letter_annotations['rnafold']
 
-            json.dump([blastsearchrecompute2dict(data), {}, {}], ff, indent=2)
+            json.dump([blastsearchrecompute2dict(data)], ff, indent=2)
 
         out = lunch_with_args(self.args)
         self.assertEqual(1, 1)
@@ -101,25 +123,13 @@ class TestContinuation(unittest.TestCase):
             )
             self.assertTrue(ts)
 
-            remove_files_with_try(
-                [
-                    self.csv,
-                    self.json,
-                    self.fasta_structures,
-                    self.fasta,
-                    test_output_file,
-                ],
-                'failed to delete: '
-            )
-
-    @patch('builtins.input', return_value='yes')
-    def test_continuation2(self, mock_input):
-
-        with open(blast_output, 'r') as f, open(backup_file, 'w') as ff:
+    def test_continuation2(self):
+        with open(blast_output, 'r') as f, open(self.test_backup_file, 'w') as ff:
             data = blastsearchrecomputefromdict(json.load(f))
             data.args.blast_in = blast_in
             data.args.json = None
             data.args.html = test_output_file
+            data.args.sha1 = self.sha1
             data.args.prediction_method += ['centroid']
 
             new_structures = {'rnafold': []}
@@ -130,7 +140,7 @@ class TestContinuation(unittest.TestCase):
 
                 new_structures['rnafold'].append(n)
 
-            json.dump([blastsearchrecompute2dict(data), {k: [seqrecord2dict(s) for s in v] for k, v in new_structures.items()}, {}], ff, indent=2)
+            json.dump([blastsearchrecompute2dict(data)], ff, indent=2)
 
         out = lunch_with_args(self.args)
         self.assertEqual(1, 1)
@@ -152,14 +162,3 @@ class TestContinuation(unittest.TestCase):
                 ref_seqs_file=os.path.join(fwd, test_data_dir, 'simple.json')
             )
             self.assertEqual(t, True)
-
-            remove_files_with_try(
-                [
-                    self.csv,
-                    self.json,
-                    self.fasta_structures,
-                    self.fasta,
-                    test_output_file
-                ],
-                'failed to delete: '
-            )

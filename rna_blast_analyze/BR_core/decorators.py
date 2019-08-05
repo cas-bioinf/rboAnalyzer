@@ -10,14 +10,3 @@ def timeit_decorator(func):
         exec_time = t2 - t1
         return res, exec_time
     return wrapper
-
-
-def tryit_decorator(func):
-    def wrapper(*arg, **kwargs):
-        try:
-            res = func(*arg, **kwargs)
-            return res
-        except:
-            print('problem in prediction {}'.format(str(func)))
-            raise
-    return wrapper

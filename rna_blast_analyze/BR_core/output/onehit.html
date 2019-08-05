@@ -87,7 +87,7 @@ The score for aligning estimated full-length sequence to CM model
                                     <pre class="tooltiptext">
 Quick homology estimate:
   Not homologous: bit score < 0
-  Homologous: bit score > 20 and bit score > 0.5 * query bit score
+  Homologous: bit score > 20 and bit score > 0.5 * query length
   Uncertain otherwise</pre>
                                 </div>
                             </td>
@@ -132,15 +132,14 @@ To save the image:
             {% endif %}
 
         {% if show_gene_browser %}
-
             <div id="sv{{data.intid}}" data-sv_params="{{data.seqviewurl}}" class="sv">
                 <button class= "seqviewbtn" onclick="viewRegion(this)" title="View selected Regions">Load Sequence viewer</button>
             </div>
-
         {% endif %}
+            <a class="small_font" target="_blank" rel="noopener noreferrer" href="{{data.seqviewlink}}">link to genome</a>
         {% if len(data.msgs) != 0 %}
             <div class="warnmsgs">
-                <p class="warn">
+                <p class="warn small_font">
                 {% for msg in data.msgs %}
                    {{msg}}<br>
                 {% endfor %}
@@ -164,7 +163,7 @@ To save the image:
         Command and parameters
     {% endif %}
 </h3>
-<div class="footerwrap">
+<div class="footerwrap small_font">
     <p class="header-command"><u>executed command:</u></p>
     <textarea readonly="true" rows="3" cols="65">{{foo.command}}</textarea>
     <p>
@@ -179,7 +178,7 @@ To save the image:
         {% if len(foo.logdup) != 0 %}
             <p><u>program log:</u></p>
             {% for s in foo.logdup %}
-                <p class="warn">
+                <p class="warn small_font">
                 {% set texts = s.split('\n') %}
                 {% for t in texts %}
                     {{t}}<br>
@@ -195,4 +194,15 @@ To save the image:
     </pre>
 </div>
 <div class="bottom-space"></div>
+{% endblock %}
+
+{% block controls %}
+<button onclick="selectAllseqs(this)" id="selectSeqsBtn" title="Select All Sequences">Select all Seqs.</button>
+<button onclick="selectAllstrs(this)" id="selectStrsBtn" title="Select All Structures">Select all Structs.</button>
+<button onclick="writeSelectionFasta()" id="exportSeqsBtn" title="Export Selected Sequences">Export Sequences</button>
+<button onclick="writeSelectionStructures()" id="exportStrBtn" title="Export Selected Structures">Export Structures</button>
+<button onclick="sortByEval(this)" id="sortEvalBtn" title="Sort by e-value">Sort Eval desc.</button>
+{% if show_gene_browser %}
+<button onclick="viewAllRegions()" id="viewAllRegionsBtn" title="View all Regions">View all Regions</button>
+{% endif %}
 {% endblock %}

@@ -188,7 +188,7 @@ if __name__ == '__main__':
     if args.bench:
         # compute db2shape
         # read the file first is header, second is structure sequence in Vienna dot bracket format
-        fp, filename = mkstemp(prefix='rba_', suffix='_16', dir=CONFIG.tmpdir)
+        fp, filename = mkstemp(prefix='rba_', suffix='_16')
         ss = []
         with open(args.bench, 'r') as f, os.fdopen(fp, 'w') as fw:
             txt = f.readline()
@@ -201,7 +201,7 @@ if __name__ == '__main__':
                     txt2 = f.readline()
                     if '(' and ')' and '.' not in txt2:
                         txt2 = f.readline()
-                    structure = re.search('[\(\.\)]+', txt2).group()
+                    structure = re.search(r'[\(\.\)]+', txt2).group()
                     ss.append([txt, structure])
                     # write for safety
                     fw.write(txt + '\n' + structure + '\n')

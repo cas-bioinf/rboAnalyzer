@@ -43,13 +43,9 @@ def the_main(fp):
     #     d = vypocet(i)
     #     dd.append(d)
 
-    pool = Pool()
-    if round(len(fp)/pool._processes) == 0:
+    with Pool() as pool:
         distances = pool.map(vypocet, fp)
-    else:
-        distances = pool.map(vypocet, fp, round(len(fp)/pool._processes))
-    pool.close()
-    return distances
+        return distances
 
 
 def compute_distances(fp, threads=1):

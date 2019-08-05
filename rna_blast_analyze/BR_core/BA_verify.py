@@ -15,34 +15,6 @@ from rna_blast_analyze.BR_core.tools_versions import blast_minimal_version, loca
 ml = logging.getLogger('rboAnalyzer')
 
 
-def verify_query_blast(blast, query):
-    """
-    verify if query from fasta file matches query sequence described in BLAST.
-    :param blast:
-    :param query:
-    :return:
-    """
-    if not (query.id == blast.query or query.description == blast.query):
-        ml.warning(
-            'Provided query id ({}) do not match query id in BLAST output ({})'.format(
-                query.id,
-                blast.query
-            )
-        )
-    if len(query) != blast.query_length:
-        ml.error(
-            'Provided query lenght ({}: {}) do not match BLAST query length ({}: {}).\n'
-            'Please provide correct query sequence.'.format(
-                query.id,
-                len(query),
-                blast.query,
-                blast.query_length
-            )
-        )
-        sys.exit(1)
-    return
-
-
 def verify_blastdbcmd(minimal_version, maximal_version):
     """verify if blastdbcmd is present in supported version
     """
@@ -414,7 +386,7 @@ def check_necessery_tools(methods):
                 status = 'STATUS: refold.pl not found in PATH. Trying to find refold.pl in "CONDA_ROOT/share"'
                 ml.info(status)
                 print(status)
-                out = check_output('find {}/share -type f -name "refold\.pl"'.format(sys.prefix), shell=True)
+                out = check_output(r'find {}/share -type f -name "refold\.pl"'.format(sys.prefix), shell=True)
                 op = out.decode().strip()
                 if op != '':
                     op = os.path.dirname(op.split('/n')[0]) + os.sep
@@ -443,7 +415,7 @@ def check_necessery_tools(methods):
         if needed:
             msgfail = 'Missing {} (needed for {}).'.format(' '.join(needed), met)
             ml.error(msgfail)
-            raise EnvironmentError(msgfail)
+            sys.exit(1)
 
     if 'TurboFold' in methods or 'Turbo-fast' in methods:
         msgfail = 'Please provide DATAPATH for TurboFold from RNAstructure package. Either as DATAPATH ' \
@@ -483,3 +455,5 @@ def check_necessery_tools(methods):
 if __name__ == '__main__':
     print(check_3rd_party_tools())
     print(check_3rd_party_prediction_tools())
+
+

@@ -20,19 +20,39 @@ class TestFilterBlastHits(unittest.TestCase):
             self.res = blastsearchrecomputefromdict(json.load(j))
 
     def test_filter_by_eval_hits(self):
-        filtered = filter_by_eval(self.blast, blast_hit_getter_from_hits, '<', 5)
-        self.assertEqual(len(filtered), 12)
+        filtered = filter_by_eval(self.blast, blast_hit_getter_from_hits, [('<', 5)])
+        for f in filtered:
+            self.assertTrue(f[1].expect < 5)
 
     def test_filter_by_bits_hits(self):
-        filtered = filter_by_bits(self.blast, blast_hit_getter_from_hits, '>', 30)
-        self.assertEqual(len(filtered), 12)
+        filtered = filter_by_bits(self.blast, blast_hit_getter_from_hits, [('>', 30)])
+        for f in filtered:
+            self.assertTrue(f[1].bits > 30)
 
     def test_filter_by_eval_subseq(self):
-        filtered = filter_by_eval(self.res.hits, blast_hit_getter_from_subseq, '<', 10**-30)
-        self.assertEqual(len(filtered), 4)
+        filtered = filter_by_eval(self.res.hits, blast_hit_getter_from_subseq, [('<', 10**-30)])
+        for f in filtered:
+            self.assertTrue(_get_eval(f) < 10**-30)
 
     def test_filter_by_bits_subseq(self):
-        filtered = filter_by_bits(self.res.hits, blast_hit_getter_from_subseq, '>', 50)
-        self.assertEqual(len(filtered), 4)
+        filtered = filter_by_bits(self.res.hits, blast_hit_getter_from_subseq, [('>', 50)])
+        for f in filtered:
+            self.assertTrue(_get_bits(f) > 50)
+
+    def test_filter_by_2_bits(self):
+        filtered = filter_by_bits(self.res.hits, blast_hit_getter_from_subseq, [('>', 30), ('<', 50)])
+        for f in filtered:
+            self.assertTrue(30 < _get_bits(f) < 50)
+
+    def test_filter_by_2_eval(self):
+        filtered = filter_by_eval(self.res.hits, blast_hit_getter_from_subseq, [('>', 10**-30), ('<', 5)])
+        for f in filtered:
+            self.assertTrue(10**-30 < _get_eval(f) < 5)
 
 
+def _get_bits(f):
+    return f.source.annotations['blast'][1].bits
+
+
+def _get_eval(f):
+    return f.source.annotations['blast'][1].expect

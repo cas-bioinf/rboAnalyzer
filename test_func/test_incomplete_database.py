@@ -1,7 +1,7 @@
 import os
 import unittest
 from test_func.pseudoargs_class import Pseudoargs
-from rna_blast_analyze.BR_core.expand_by_LOCARNA import locarna_anchored_wrapper_inner
+from rna_blast_analyze.BA import lunch_with_args
 
 fwd = os.path.dirname(__file__)
 test_dir = 'test_data'
@@ -15,9 +15,10 @@ class TestIncompleteDatabase(unittest.TestCase):
             blast_db=os.path.join(fwd, test_dir, 'blastdb', 'RF00001-art.blastdb'),
             b_type='plain',
             prediction_method=['rnafold'],
-            blast_regexp='(?<=\|)[A-Z0-9]*\.?\d*$',
-            enable_overwrite=True
+            blast_regexp=r'(?<=\|)[A-Z0-9]*\.?\d*$',
+            enable_overwrite=True,
+            mode='locarna'
         )
 
-        with self.assertRaises(LookupError):
-            locarna_anchored_wrapper_inner(aa)
+        with self.assertRaises(SystemExit):
+            lunch_with_args(aa)

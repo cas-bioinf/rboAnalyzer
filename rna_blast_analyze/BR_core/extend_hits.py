@@ -3,11 +3,13 @@ import re
 import logging
 from subprocess import Popen, PIPE
 from tempfile import mkstemp
+import sys
 
 from Bio import SeqIO
 
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
+from rna_blast_analyze.BR_core.BA_support import remove_files_with_try
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -19,7 +21,7 @@ def load_genome(root_dir, accession, start, end):
     return next(SeqIO.parse(ff, format='fasta'))[start:end]
 
 
-def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=None, skip_missing=False, msgs=None):
+def expand_hits(hits, blast_db, query_length, extra=0, blast_regexp=None, skip_missing=False, msgs=None):
     """takes list of blast.HSP objects as first argument and
     path to local blast database as second argument
     then it uses blastdbcmd from blast+ installation to obtain desired sequence
@@ -35,64 +37,65 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
     exp_hits = []
     strand = []
     loc = []
-    temp_file = os.fdopen(fd, 'w')
-    for index, hit in enumerate(hits):
-        # +1 here because blastdbcmd counts sequences from 1
-        if hit[1].sbjct_end < hit[1].sbjct_start:
-            # this is hit to minus strand
-            start = hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end) - extra
-            end = hit[1].sbjct_start + hit[1].query_start + extra - 1
-            strand.append(-1)
-            d = {'query_start': hit[1].sbjct_end, 'query_end': hit[1].sbjct_start,
-                 'extended_start': hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end),
-                 'extended_end': hit[1].sbjct_start + hit[1].query_start - 1,
-                 'strand': -1}
-        else:
-            # this is hit to plus strand
-            start = hit[1].sbjct_start - hit[1].query_start + 1 - extra
-            end = hit[1].sbjct_end + _positive_index(query_length - hit[1].query_end) + extra
-            strand.append(1)
-            d = {'query_start': hit[1].sbjct_start, 'query_end': hit[1].sbjct_end,
-                 'extended_start': hit[1].sbjct_start - hit[1].query_start + 1,
-                 'extended_end': hit[1].sbjct_end + _positive_index(query_length - hit[1].query_end),
-                 'strand': 1}
+    try:
+        with os.fdopen(fd, 'w') as temp_file:
+            for index, hit in enumerate(hits):
+                # +1 here because blastdbcmd counts sequences from 1
+                if hit[1].sbjct_end < hit[1].sbjct_start:
+                    # this is hit to minus strand
+                    start = hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end) - extra
+                    end = hit[1].sbjct_start + hit[1].query_start + extra - 1
+                    strand.append(-1)
+                    d = {'query_start': hit[1].sbjct_end, 'query_end': hit[1].sbjct_start,
+                         'extended_start': hit[1].sbjct_end - _positive_index(query_length - hit[1].query_end),
+                         'extended_end': hit[1].sbjct_start + hit[1].query_start - 1,
+                         'strand': -1}
+                else:
+                    # this is hit to plus strand
+                    start = hit[1].sbjct_start - hit[1].query_start + 1 - extra
+                    end = hit[1].sbjct_end + _positive_index(query_length - hit[1].query_end) + extra
+                    strand.append(1)
+                    d = {'query_start': hit[1].sbjct_start, 'query_end': hit[1].sbjct_end,
+                         'extended_start': hit[1].sbjct_start - hit[1].query_start + 1,
+                         'extended_end': hit[1].sbjct_end + _positive_index(query_length - hit[1].query_end),
+                         'strand': 1}
 
-        # ====== information about possible trim ======
-        # assume ok
-        d['trimmed_ss'] = False
-        d['trimmed_se'] = False
-        d['trimmed_es'] = False
-        d['trimmed_ee'] = False
+                # ====== information about possible trim ======
+                # assume ok
+                d['trimmed_ss'] = False
+                d['trimmed_se'] = False
+                d['trimmed_es'] = False
+                d['trimmed_ee'] = False
 
-        d['super_start'] = start
-        d['super_end'] = end
+                d['super_start'] = start
+                d['super_end'] = end
 
-        if start < 1:
-            start = 1                    # index from which sequence should be retrieved from the db
-            d['trimmed_ss'] = True
+                if start < 1:
+                    start = 1                    # index from which sequence should be retrieved from the db
+                    d['trimmed_ss'] = True
 
-        # repair possible extended start violation
-        if d['extended_start'] < 1:
-            d['trimmed_es'] = True
+                # repair possible extended start violation
+                if d['extended_start'] < 1:
+                    d['trimmed_es'] = True
 
-        # add blast record
-        d['blast'] = hit
+                # add blast record
+                d['blast'] = hit
 
-        # get a index name to the blastdb
-        hname = re.search(blast_regexp, hit[0])
-        if not hname:
-            print(blast_regexp)
-            os.remove(temp_filename)
-            os.remove(blast_tempfile)
-            raise RuntimeError('provided regexp returned no result for %s,'
-                               ' please provide regexp valid even for this name', hit[0])
-        bdb_accession = hname.group()
-        d['blast'][0] = bdb_accession
-        loc.append(d)
+                # get a index name to the blastdb
+                hname = re.search(blast_regexp, hit[0])
+                if not hname:
+                    remove_files_with_try([temp_filename, blast_tempfile])
+                    msg = 'Provided regexp returned no result for {}.\n' \
+                          'Please provide regular expression capturing sequence id.'.format(hit[0])
+                    raise RuntimeError(msg)
+                bdb_accession = hname.group()
+                d['blast'][0] = bdb_accession
+                loc.append(d)
 
-        temp_file.write(bdb_accession + ' ' + '-region ' + str(start) + '-' + str(end) + '\n')
-
-    temp_file.close()
+                temp_file.write(bdb_accession + ' ' + '-region ' + str(start) + '-' + str(end) + '\n')
+    except RuntimeError as e:
+        ml.error(str(e))
+        sys.exit(1)
 
     cmd = [
         '{}blastdbcmd'.format(CONFIG.blast_path),
@@ -118,22 +121,18 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
     except FileNotFoundError:
         msgfail = 'Unable to run blastdbcmd command, please check its availability.'
         ml.error(msgfail)
-        ml.error(cmd)
-        os.remove(temp_filename)
-        os.remove(blast_tempfile)
-        raise ChildProcessError(msgfail)
+        remove_files_with_try([temp_filename, blast_tempfile])
+        sys.exit(1)
 
     # inspect the stdout (the blastdbcmd returns exit code 1 even if only one sequence is missing)
-
     msgfail = 'Incomplete database. Some sequences not found in database.'
-    if ml.getEffectiveLevel() == 10:
-        msgfail += ' Details: ' + errs
+    msgfail += ' Details: ' + errs
 
     if errs and not skip_missing:
         ml.error(msgfail)
-        os.remove(temp_filename)
-        os.remove(blast_tempfile)
-        raise LookupError(msgfail)
+        remove_files_with_try([temp_filename, blast_tempfile])
+        sys.exit(1)
+
     elif errs and skip_missing:
         ml.warning(msgfail)
 
@@ -189,9 +188,9 @@ def expand_hits(hits, blast_db, query_length, extra=0, keep_all=0, blast_regexp=
             exp_hits.append(parsed_record)
             index += 1
 
-    if not keep_all:
-        os.remove(temp_filename)
-        os.remove(blast_tempfile)
+    remove_files_with_try(
+        [temp_filename, blast_tempfile]
+    )
 
     if len(requested_ids - obtained_ids) != 0:
         msgs.append('Incomplete database. Sequences with following ids were not found:')

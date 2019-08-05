@@ -11,8 +11,8 @@ from Bio.Phylo.TreeConstruction import DistanceCalculator
 from Bio.SeqRecord import SeqRecord
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
-from rna_blast_analyze.BR_core.BA_methods import add_loc_to_description, HitList
-from rna_blast_analyze.BR_core.BA_support import iter2file_name
+from rna_blast_analyze.BR_core.BA_methods import HitList
+from rna_blast_analyze.BR_core.BA_support import iter2file_name, add_loc_to_description
 from rna_blast_analyze.BR_core.centroid_homfold import me_centroid_homfold, centroid_homfold_fast
 from rna_blast_analyze.BR_core.cmalign import RfamInfo, run_cmfetch, extract_ref_from_cm, run_cmemit
 from rna_blast_analyze.BR_core.fname import fname
@@ -23,10 +23,11 @@ from rna_blast_analyze.BR_core.predict_structures import alifold_refold_predicti
 from rna_blast_analyze.BR_core.predict_structures import find_nc_and_remove, check_lonely_bp
 from rna_blast_analyze.BR_core.turbofold import turbofold_fast, turbofold_with_homologous
 from rna_blast_analyze.BR_core.output.htmloutput import write_html_output
-from rna_blast_analyze.BR_core.convert_classes import blastsearchrecompute2dict, seqrecord2dict
+from rna_blast_analyze.BR_core.convert_classes import blastsearchrecompute2dict
 from rna_blast_analyze.BR_core.filter_blast import filter_by_eval, filter_by_bits
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core import exceptions
+from hashlib import sha1
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -41,7 +42,6 @@ safe_prediction_method = [
 
 def wrapped_ending_with_prediction(
     args_inner, analyzed_hits, pred_method=None, method_params=None, used_cm_file=None, multi_query=False, iteration=0,
-    new_structures=None, exec_time=None
 ):
     """
     wrapper for prediction of secondary structures
@@ -55,12 +55,7 @@ def wrapped_ending_with_prediction(
     :return:
     """
     ml.debug(fname())
-
-    if new_structures is None:
-        new_structures = dict()
-    if exec_time is None:
-        exec_time = dict()
-
+    exec_time = {}
     msg = 'Entering structure prediction..'
     if ml.level < 21:
         ml.info(msg)
@@ -83,15 +78,13 @@ def wrapped_ending_with_prediction(
 
     # annotate ambiguous bases
     query = BA_support.annotate_ambiguos_base(analyzed_hits.query)
-    for hit in analyzed_hits.hits:
-        BA_support.annotate_ambiguos_base(hit.extension)
 
     # copy the list before filtering
-    all_hits_list = [i.extension for i in analyzed_hits.hits]
+    all_hits_list = [i.extension for i in analyzed_hits.get_all_hits()]
 
     if args_inner.filter_by_eval is not None:
         hits2predict = filter_by_eval(
-            analyzed_hits.hits, BA_support.blast_hit_getter_from_subseq, *args_inner.filter_by_eval
+            analyzed_hits.get_all_hits(), BA_support.blast_hit_getter_from_subseq, args_inner.filter_by_eval
         )
         _hits = HitList()
         for h in hits2predict:
@@ -99,12 +92,14 @@ def wrapped_ending_with_prediction(
         analyzed_hits.hits = _hits
     elif args_inner.filter_by_bitscore is not None:
         hits2predict = filter_by_bits(
-            analyzed_hits.hits, BA_support.blast_hit_getter_from_subseq, *args_inner.filter_by_bitscore
+            analyzed_hits.get_all_hits(), BA_support.blast_hit_getter_from_subseq, args_inner.filter_by_bitscore
         )
         _hits = HitList()
         for h in hits2predict:
             _hits.append(h)
         analyzed_hits.hits = _hits
+    else:
+        analyzed_hits.hits = analyzed_hits.get_all_hits()
 
     # if used_cm_file is provided do not override it with CM from RFAM
     # if use_rfam flag was given, then used_cm_file is already the best_matching model
@@ -129,23 +124,32 @@ def wrapped_ending_with_prediction(
     if not isinstance(method_params, dict):
         raise Exception('prediction method parameters must be python dict')
 
-    # create intermediate backup data
-    backup_file = args_inner.blast_in + '.tmp_rboAnalyzer'
-    backup_base_obj = blastsearchrecompute2dict(analyzed_hits)
-    with open(backup_file, 'w') as ff:
-        json.dump(
-            [backup_base_obj, {k: [seqrecord2dict(s) for s in v] for k, v in new_structures.items()}, exec_time],
-            ff,
-            indent=2
-        )
-
     # prediction methods present in analyzed_hits
     #  which might be loaded from intermediate file
-    seen_methods = set(new_structures.keys())
+
+    # check if structures of a method are predicted for all required hit
+    # check if the prediction parameters of such method were same
 
     prediction_msgs = []
     # compute prediction methods which were not computed
-    for pkey in set(pred_method) - seen_methods:
+    for pkey in set(pred_method):
+        # add sha1 hashes
+        nh = sha1()
+        nh.update(str(sorted(method_params.get(pkey, {}).items())).encode())
+        current_hash = nh.hexdigest()
+
+        if all(pkey in h.extension.letter_annotations for h in analyzed_hits.hits) and \
+                len(
+                    {
+                        h.extension.annotations.get('sha1', {}).get(pkey, None) for h in analyzed_hits.hits
+                    } | {current_hash, }
+                ) == 1:
+            msg_skip = 'All structures already computed for {}. Skipping...'.format(pkey)
+            ml.info(msg_skip)
+            if ml.level > 20:
+                print(msg_skip, flush=True)
+            continue
+
         msg_run = 'Running: {}...'.format(pkey)
         ml.info(msg_run)
 
@@ -162,64 +166,70 @@ def wrapped_ending_with_prediction(
             seqs2predict_list=[i.extension for i in analyzed_hits.hits],
             use_cm_file=used_cm_file,
             )
-        if structures is not None:
-            new_structures[pkey] = structures
-            exec_time[pkey] = etime
-        else:
+
+        exec_time[pkey] = etime
+
+        if structures is None:
             msg = 'Structures not predicted with {} method'.format(pkey)
             ml.info(msg)
             if ml.level > 20:
                 print('STATUS: ' + msg)
 
-        with open(backup_file, 'w') as ff:
-            ser_structures = {k: [seqrecord2dict(s) for s in v] for k, v in new_structures.items()}
-            json.dump([backup_base_obj, ser_structures, exec_time], ff, indent=2)
+        else:
+            for i, hit in enumerate(analyzed_hits.hits):
+                assert str(hit.extension.seq) == str(structures[i].seq)
+                hit.extension.annotations['sss'] += [pkey]
+
+                hit.extension.annotations['msgs'] += structures[i].annotations.get('msgs', [])
+
+                # expects "predicted" in annotations - for now, if not given, default is True, as not all prediction
+                #  methods implement "predicted" in their output
+                if structures[i].annotations.get('predicted', True):
+                    hit.extension.letter_annotations[pkey] = structures[i].letter_annotations['ss0']
+
+                if 'sha1' not in hit.extension.annotations:
+                    hit.extension.annotations['sha1'] = dict()
+                hit.extension.annotations['sha1'][pkey] = current_hash
+
+                try:
+                    del hit.extension.letter_annotations['ss0']
+                except KeyError:
+                    pass
+                try:
+                    hit.extension.annotations['sss'].remove('ss0')
+                except ValueError:
+                    pass
+
+            analyzed_hits.update_hit_stuctures()
 
         # check if msgs are not empty
         if msgs:
             prediction_msgs.append('{}: {}'.format(pkey, '\n'.join(msgs)))
 
-    os.remove(seqs2predict_fasta)
+        analyzed_hits.msgs = prediction_msgs
 
-    analyzed_hits.msgs = prediction_msgs
+        with open(args_inner.blast_in + '.r-' + args_inner.sha1[:10], 'r+') as f:
+            all_saved_data = json.load(f)
+            all_saved_data[iteration] = blastsearchrecompute2dict(analyzed_hits)
+            f.seek(0)
+            f.truncate()
+            json.dump(all_saved_data, f, indent=2)
+
+    # remove structures predicted by different methods (which might be saved from previous computation)
+    for hit in analyzed_hits.hits:
+        for pkey in set(hit.extension.letter_annotations.keys()):
+            if pkey not in pred_method:
+                del hit.extension.letter_annotations[pkey]
+                try:
+                    hit.extension.annotations['sss'].remove(pkey)
+                except ValueError:
+                    pass
+
+    BA_support.remove_one_file_with_try(seqs2predict_fasta)
 
     if delete_cm:
-        try:
-            os.remove(used_cm_file)
-        except OSError:
-            pass
+        BA_support.remove_one_file_with_try(used_cm_file)
 
-    if 'default' in pred_method:
-        for i, hit in enumerate(analyzed_hits.hits):
-            # assert str(hit.extension.seq) == str(new_structures[key][i].seq)
-            hit.extension.annotations['sss'].remove('ss0')
-            hit.extension.annotations['sss'] += ['default']
-            hit.extension.letter_annotations['default'] = hit.extension.letter_annotations.pop(
-                'ss0'
-            )
-
-    for i, hit in enumerate(analyzed_hits.hits):
-        for key in new_structures.keys():
-            assert str(hit.extension.seq) == str(new_structures[key][i].seq)
-            hit.extension.annotations['sss'] += [key]
-
-            hit.extension.annotations['msgs'] += new_structures[key][i].annotations.get('msgs', [])
-
-            # expects "predicted" in annotations - for now, if not given, default is True, as not all prediction
-            #  methods implement "predicted" in their output
-            if new_structures[key][i].annotations.get('predicted', True):
-                hit.extension.letter_annotations[key] = new_structures[key][i].letter_annotations['ss0']
-
-        try:
-            del hit.extension.letter_annotations['ss0']
-        except KeyError:
-            pass
-        try:
-            hit.extension.annotations['sss'].remove('ss0')
-        except ValueError:
-            pass
-
-    # remove uid from file descriptor
     add_loc_to_description(analyzed_hits)
 
     # write html if requested
@@ -263,8 +273,7 @@ def wrapped_ending_with_prediction(
         with open(dump_file + '.time_dump', 'wb') as pp:
             pickle.dump(exec_time, pp, pickle.HIGHEST_PROTOCOL)
 
-    os.remove(backup_file)
-    return
+    return analyzed_hits
 
 
 def create_nr_trusted_hits_file_MSA_safe(
@@ -369,7 +378,7 @@ def create_nr_trusted_hits_file_MSA_safe(
 
     fd_h, nr_homo_hits_file = mkstemp(prefix='rba_', suffix='_58', dir=CONFIG.tmpdir)
     with os.fdopen(fd_h, 'w') as f:
-        BA_support.write_fasta_from_list_of_seqrecords(f, nr_homolog_hits)
+        SeqIO.write(nr_homolog_hits, f, 'fasta')
 
     return nr_homo_hits_file, homologous_seqs, msgs
 
@@ -399,7 +408,7 @@ def create_nr_homolog_hits_file_MSA_unsafe(sim_threshold_percent=None, all_hits=
 
     fd_h, nr_homo_hits_file = mkstemp(prefix='rba_', suffix='_59', dir=CONFIG.tmpdir)
     with os.fdopen(fd_h, 'w') as f:
-        BA_support.write_fasta_from_list_of_seqrecords(f, nr_homolog_hits)
+        SeqIO.write(nr_homolog_hits, f, 'fasta')
 
     return nr_homo_hits_file, homologous_seqs, msgs
 
@@ -496,7 +505,7 @@ def _trusted_hits_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold
 
     c_fd, trusted_sequence_file_ = mkstemp(prefix='rba_', suffix='_60', dir=CONFIG.tmpdir)
     with os.fdopen(c_fd, 'w') as f:
-        BA_support.write_fasta_from_list_of_seqrecords(f, san_hom_seqs)
+        SeqIO.write(san_hom_seqs, f, 'fasta')
 
     align_file = BA_support.run_muscle(trusted_sequence_file_, reorder=True)
     alig = AlignIO.read(align_file, format='clustal')
@@ -507,8 +516,7 @@ def _trusted_hits_selection_wrapper(all_hits_, query_, cmscore_tr_, cm_threshold
     dist_mat_pd = pandas.DataFrame.from_records(dist_mat.matrix, index=orig_index)
     dist_table_ = (1 - dist_mat_pd.values) * 100
 
-    os.remove(align_file)
-    os.remove(trusted_sequence_file_)
+    BA_support.remove_files_with_try([align_file, trusted_sequence_file_])
     return dist_table_, trusted_seqs_query, msgs
 
 
@@ -544,12 +552,12 @@ def repredict_structures_for_homol_seqs(
     default_score_tr = 0.0
     query_max_len_diff = 0.1
 
-    if 'default' == prediction_method:
-        # do nothing
-        return None, None, []
+    try:
+        if 'default' == prediction_method:
+            # do nothing
+            return None, None, []
 
-    elif 'rfam-Rc' == prediction_method:
-        try:
+        elif 'rfam-Rc' == prediction_method:
             if use_cm_file is None:
                 msg = "No CM model. Can't use {}.".format(prediction_method)
                 ml.warning(msg)
@@ -562,28 +570,14 @@ def repredict_structures_for_homol_seqs(
                     params=pred_method_params.get(prediction_method, {})
                 )
                 return structures, exec_time, []
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'rfam-centroid' == prediction_method:
-        # run cmscan if needed
-        # run cmfetch
-        # run cmemit -> homologous seqs
-        # run centroid_homfold
+        elif 'rfam-centroid' == prediction_method:
+            # run cmscan if needed
+            # run cmfetch
+            # run cmemit -> homologous seqs
+            # run centroid_homfold
 
-        method_parameters = pred_method_params.get(prediction_method, {})
-        try:
+            method_parameters = pred_method_params.get(prediction_method, {})
             if use_cm_file is None:
                 msg = "No CM model. Can't use {}.".format(prediction_method)
                 ml.warning(msg)
@@ -599,25 +593,10 @@ def repredict_structures_for_homol_seqs(
 
                 structures, exec_time = me_centroid_homfold(seqs2predict_fasta, hf_file, params=method_parameters)
 
-                os.remove(hf_file)
+                BA_support.remove_one_file_with_try(hf_file)
                 return structures, exec_time, []
 
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
-
-    elif 'rfam-sub' == prediction_method:
-        try:
+        elif 'rfam-sub' == prediction_method:
             if use_cm_file is None:
                 msg = "No CM model. Can't use {}.".format(prediction_method)
                 ml.warning(msg)
@@ -633,43 +612,14 @@ def repredict_structures_for_homol_seqs(
                 )
                 return structures, exec_time, []
 
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
-
-    elif 'rnafold' == prediction_method:
-        try:
+        elif 'rnafold' == prediction_method:
             structures, exec_time = rnafold_wrap_for_predict(
                 seqs2predict_fasta,
                 params=pred_method_params.get(prediction_method, {}).get('RNAfold', '')
             )
             return structures, exec_time, []
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'fq-sub' == prediction_method:
-        try:
+        elif 'fq-sub' == prediction_method:
             a, qf = mkstemp(prefix='rba_', suffix='_55', dir=CONFIG.tmpdir)
             with os.fdopen(a, 'w') as fd:
                 fd.write('>query\n{}\n'.format(str(query.seq)))
@@ -680,24 +630,10 @@ def repredict_structures_for_homol_seqs(
                 params=pred_method_params.get(prediction_method, None),
                 threads=threads
             )
-            os.remove(qf)
+            BA_support.remove_one_file_with_try(qf)
             return structures, exec_time, []
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'C-A-sub' == prediction_method:
-        try:
+        elif 'C-A-sub' == prediction_method:
             method_parameters = pred_method_params.get(prediction_method, {})
 
             nr_homo_hits_file, homologous_seqs, msgs = create_nr_trusted_hits_file_MSA_safe(
@@ -709,12 +645,12 @@ def repredict_structures_for_homol_seqs(
                 len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
             )
 
-            os.remove(nr_homo_hits_file)
+            BA_support.remove_one_file_with_try(nr_homo_hits_file)
             del nr_homo_hits_file
 
             f, homologous_sequence_file = mkstemp(prefix='rba_', suffix='_64', dir=CONFIG.tmpdir)
             with os.fdopen(f, 'w') as fh:
-                BA_support.write_fasta_from_list_of_seqrecords(fh, homologous_seqs)
+                SeqIO.write(homologous_seqs, fh, 'fasta')
 
             structures, exec_time = subopt_fold_alifold(
                 seqs2predict_fasta,
@@ -723,30 +659,12 @@ def repredict_structures_for_homol_seqs(
                 params=method_parameters,
                 threads=threads
             )
-
-            os.remove(homologous_sequence_file)
+            BA_support.remove_one_file_with_try(homologous_sequence_file)
             del homologous_sequence_file
             del homologous_seqs
             return structures, exec_time, msgs
-        except exceptions.NoHomologousSequenceException:
-            msg = nonhomseqwarn(prediction_method)
-            return None, None, [msg]
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'M-A-sub' == prediction_method:
-        try:
+        elif 'M-A-sub' == prediction_method:
             method_parameters = pred_method_params.get(prediction_method, {})
 
             nr_homo_hits_file, homologous_seqs, msgs = create_nr_trusted_hits_file_MSA_safe(
@@ -758,12 +676,12 @@ def repredict_structures_for_homol_seqs(
                 len_diff=method_parameters.get('query_max_len_diff', query_max_len_diff),
             )
 
-            os.remove(nr_homo_hits_file)
+            BA_support.remove_one_file_with_try(nr_homo_hits_file)
             del nr_homo_hits_file
 
             f, homologous_sequence_file = mkstemp(prefix='rba_', suffix='_65', dir=CONFIG.tmpdir)
             with os.fdopen(f, 'w') as fh:
-                BA_support.write_fasta_from_list_of_seqrecords(fh, homologous_seqs)
+                SeqIO.write(homologous_seqs, fh, 'fasta')
 
             structures, exec_time = subopt_fold_alifold(
                 seqs2predict_fasta,
@@ -773,29 +691,12 @@ def repredict_structures_for_homol_seqs(
                 threads=threads,
             )
 
-            os.remove(homologous_sequence_file)
+            BA_support.remove_one_file_with_try(homologous_sequence_file)
             del homologous_sequence_file
             del homologous_seqs
             return structures, exec_time, msgs
-        except exceptions.NoHomologousSequenceException:
-            msg = nonhomseqwarn(prediction_method)
-            return None, None, [msg]
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'C-A-r-Rc' == prediction_method:
-        try:
+        elif 'C-A-r-Rc' == prediction_method:
             method_parameters = pred_method_params.get(prediction_method, {})
 
             nr_homo_hits_file, _, msgs = create_nr_trusted_hits_file_MSA_safe(
@@ -816,28 +717,11 @@ def repredict_structures_for_homol_seqs(
                 msa_alg='clustalo'
             )
 
-            os.remove(nr_homo_hits_file)
+            BA_support.remove_one_file_with_try(nr_homo_hits_file)
             del nr_homo_hits_file
             return structures, exec_time, msgs
-        except exceptions.NoHomologousSequenceException:
-            msg = nonhomseqwarn(prediction_method)
-            return None, None, [msg]
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'M-A-r-Rc' == prediction_method:
-        try:
+        elif 'M-A-r-Rc' == prediction_method:
             method_parameters = pred_method_params.get(prediction_method, {})
 
             nr_homo_hits_file, _, msgs = create_nr_trusted_hits_file_MSA_safe(
@@ -857,28 +741,11 @@ def repredict_structures_for_homol_seqs(
                 msa_alg='muscle'
             )
 
-            os.remove(nr_homo_hits_file)
+            BA_support.remove_one_file_with_try(nr_homo_hits_file)
             del nr_homo_hits_file
             return structures, exec_time, msgs
-        except exceptions.NoHomologousSequenceException:
-            msg = nonhomseqwarn(prediction_method)
-            return None, None, [msg]
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'C-A-U-r-Rc' == prediction_method:
-        try:
+        elif 'C-A-U-r-Rc' == prediction_method:
             method_parameters = pred_method_params.get(prediction_method, {})
 
             nr_homo_hits_file, _, msgs = create_nr_trusted_hits_file_MSA_safe(
@@ -898,28 +765,11 @@ def repredict_structures_for_homol_seqs(
                 msa_alg='clustalo'
             )
 
-            os.remove(nr_homo_hits_file)
+            BA_support.remove_one_file_with_try(nr_homo_hits_file)
             del nr_homo_hits_file
             return structures, exec_time, msgs
-        except exceptions.NoHomologousSequenceException:
-            msg = nonhomseqwarn(prediction_method)
-            return None, None, [msg]
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'M-A-U-r-Rc' == prediction_method:
-        try:
+        elif 'M-A-U-r-Rc' == prediction_method:
             method_parameters = pred_method_params.get(prediction_method, {})
 
             nr_homo_hits_file, _, msgs = create_nr_trusted_hits_file_MSA_safe(
@@ -939,29 +789,12 @@ def repredict_structures_for_homol_seqs(
                 msa_alg='muscle'
             )
 
-            os.remove(nr_homo_hits_file)
+            BA_support.remove_one_file_with_try(nr_homo_hits_file)
             del nr_homo_hits_file
             return structures, exec_time, msgs
-        except exceptions.NoHomologousSequenceException:
-            msg = nonhomseqwarn(prediction_method)
-            return None, None, [msg]
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'centroid' == prediction_method:
-        method_parameters = pred_method_params.get(prediction_method, {})
-        try:
+        elif 'centroid' == prediction_method:
+            method_parameters = pred_method_params.get(prediction_method, {})
 
             nr_homo_hits_file, _, msgs = create_nr_homolog_hits_file_MSA_unsafe(
                 all_hits=all_hits_list,
@@ -995,26 +828,12 @@ def repredict_structures_for_homol_seqs(
                     repstr = check_lonely_bp(seq.letter_annotations['ss0'])
                     seq.letter_annotations['ss0'] = repstr
 
-            os.remove(nr_homo_hits_file)
+            BA_support.remove_one_file_with_try(nr_homo_hits_file)
             del nr_homo_hits_file
             return raw_structures, exec_time, msgs
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'centroid-fast' == prediction_method:
-        method_parameters = pred_method_params.get(prediction_method, {})
-        try:
+        elif 'centroid-fast' == prediction_method:
+            method_parameters = pred_method_params.get(prediction_method, {})
             if query.annotations['ambiguous']:
                 raise exceptions.AmbiguousQuerySequenceException
 
@@ -1046,33 +865,14 @@ def repredict_structures_for_homol_seqs(
                     seq.letter_annotations['ss0'] = repstr
 
             return raw_structures, exec_time, []
-        except exceptions.AmbiguousQuerySequenceException:
-            msgfail = "Query sequence contains ambiguous characters. Can't use {}.".format(prediction_method)
-            ml.warning(msgfail)
-            if ml.level > 30:
-                print(msgfail)
-            return None, None, [msgfail]
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'TurboFold' == prediction_method:
-        # set arbitrary sim_threshold_percent to 100, because we want to remove only identical sequences from prediction
-        #  with TurboFold. The structure of redundant sequences will be set according to the one in prediction
-
-        try:
+        elif 'TurboFold' == prediction_method:
+            # set arbitrary sim_threshold_percent to 100, because we want to remove only identical sequences from prediction
+            #  with TurboFold. The structure of redundant sequences will be set according to the one in prediction
             all_hits_filtered = BA_support.filter_ambiguous_seqs_from_list(all_hits_list)
             seqs2predict_filtered = BA_support.filter_ambiguous_seqs_from_list(seqs2predict_list)
+            if len(seqs2predict_list) != len(seqs2predict_filtered):
+                ml.warning('Some sequences contain ambiguous bases - they will not be predicted.')
 
             if query.annotations['ambiguous']:
                 raise exceptions.AmbiguousQuerySequenceException()
@@ -1091,12 +891,18 @@ def repredict_structures_for_homol_seqs(
             with open(nr_homo_hits_file, 'r') as nrf:
                 nr_homo_hits = [seq for seq in SeqIO.parse(nrf, format='fasta')]
 
+            nh = sha1()
+            nh.update(str(sorted(method_parameters.items())).encode())
+            nh_str = nh.hexdigest()
+
             structures_t, exec_time = turbofold_with_homologous(
                 all_sequences=seqs2predict_filtered,
                 nr_homologous=nr_homo_hits,
                 params=method_parameters.get('TurboFold', {}),
                 n=method_parameters.get('max_seqs_in_prediction', 3),
-                cpu=threads
+                cpu=threads,
+                pkey=prediction_method,
+                sha1val=nh_str,
             )
 
             structures = BA_support.rebuild_structures_output_from_pred(
@@ -1104,45 +910,30 @@ def repredict_structures_for_homol_seqs(
                 structures_t
             )
 
-            os.remove(nr_homo_hits_file)
+            BA_support.remove_one_file_with_try(nr_homo_hits_file)
             del structures_t
             del nr_homo_hits
             del nr_homo_hits_file
             return structures, exec_time, msgs
-        except exceptions.NoHomologousSequenceException:
-            msg = nonhomseqwarn(prediction_method)
-            return None, None, [msg]
-        except exceptions.AmbiguousQuerySequenceException:
-            msgfail = "Query sequence contains ambiguous characters. Can't use {}.".format(prediction_method)
-            ml.warning(msgfail)
-            return None, None, [msgfail]
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
 
-    elif 'Turbo-fast' == prediction_method:
-        try:
+        elif 'Turbo-fast' == prediction_method:
             if query.annotations['ambiguous']:
                 raise exceptions.AmbiguousQuerySequenceException()
+
+            nh = sha1()
+            nh.update(str(sorted(pred_method_params.get(prediction_method, {}).items())).encode())
+            nh_str = nh.hexdigest()
 
             structures_t, exec_time = turbofold_fast(
                 all_seqs=all_hits_list,
                 seqs2predict=seqs2predict_list,
                 query=query,
                 cpu=threads,
-                n=pred_method_params[prediction_method].get('max_seqs_in_prediction', 3),
+                n=pred_method_params.get(prediction_method, {}).get('max_seqs_in_prediction', 3),
                 turbofold_params=pred_method_params.get(prediction_method, {}).get('TurboFold', {}),
-                len_diff=pred_method_params[prediction_method].get('query_max_len_diff', query_max_len_diff)
+                len_diff=pred_method_params.get(prediction_method, {}).get('query_max_len_diff', query_max_len_diff),
+                pkey=prediction_method,
+                sha1val=nh_str,
             )
 
             structures = BA_support.rebuild_structures_output_from_pred(
@@ -1152,25 +943,26 @@ def repredict_structures_for_homol_seqs(
 
             del structures_t
             return structures, exec_time, []
-        except exceptions.NoHomologousSequenceException:
-            msg = nonhomseqwarn(prediction_method)
-            return None, None, [msg]
-        except exceptions.AmbiguousQuerySequenceException:
-            msgfail = "Query sequence contains ambiguous characters. Can't use {}.".format(prediction_method)
-            ml.warning(msgfail)
-            return None, None, [msgfail]
-        except exceptions.SubprocessException as e:
-            msg = "{} can't be used. Error message follows: {} \n{}".format(
-                prediction_method,
-                str(e),
-                e.errors
-            )
-            ml.error(msg)
-            return None, None, [str(e)]
-        except Exception as e:
-            ml.error("{} can't be used. Error message follows: \n{}.".format(
-                prediction_method, str(e))
-            )
-            return None, None, [str(e)]
+
+    except exceptions.NoHomologousSequenceException:
+        msg = nonhomseqwarn(prediction_method)
+        return None, None, [msg]
+    except exceptions.AmbiguousQuerySequenceException:
+        msgfail = "Query sequence contains ambiguous characters. Can't use {}.".format(prediction_method)
+        ml.warning(msgfail)
+        return None, None, [msgfail]
+    except exceptions.SubprocessException as e:
+        msg = "{} can't be used. Error message follows: {} \n{}".format(
+            prediction_method,
+            str(e),
+            e.errors
+        )
+        ml.error(msg)
+        return None, None, [str(e)]
+    except Exception as e:
+        ml.error("{} can't be used. Error message follows: \n{}.".format(
+            prediction_method, str(e))
+        )
+        return None, None, [str(e)]
 
     assert False, "Should not reach here (bad prediction method name)."

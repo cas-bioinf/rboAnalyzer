@@ -24,7 +24,7 @@ r = call(
         '--blast_query', blast_query,
         '--blast_db', blast_db,
         '--mode', 'simple',
-        '--blast_regexp', '(?<=\|)[A-Z0-9]*\.?\d*$',
+        '--blast_regexp', r'(?<=\|)[A-Z0-9]*\.?\d*$',
         '--b_type', 'plain',
         '--json', json_output,
         '--prediction_method', 'rnafold'
