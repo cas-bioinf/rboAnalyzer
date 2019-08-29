@@ -160,7 +160,7 @@ function viewRegion(button) {
   var svapp = SeqView.App.findAppByDivId(parent.id);
   if (!svapp)
     svapp = new SeqView.App(parent.id);
-  svapp.load(parent.dataset.sv_params);
+  svapp.reload(parent.dataset.sv_params);
 }
 
 function viewRegionCallback(button) {
@@ -210,6 +210,4 @@ function viewAllRegions() {
     viewRegionCallback(rem_sv_btns[i]);
   }
 }
-
-console.log("script loaded correctly");
 </script>

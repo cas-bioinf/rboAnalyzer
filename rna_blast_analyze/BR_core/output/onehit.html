@@ -132,11 +132,12 @@ To save the image:
             {% endif %}
 
         {% if show_gene_browser %}
-            <div id="sv{{data.intid}}" data-sv_params="{{data.seqviewurl}}" class="sv">
+            <div id="sv{{data.intid}}" data-sv_params="{{ data.seqviewurl | safe }}" class="sv">
                 <button class= "seqviewbtn" onclick="viewRegion(this)" title="View selected Regions">Load Sequence viewer</button>
             </div>
+        {% else %}
+            <a class="small_font" target="_blank" rel="noopener noreferrer" href="{{ data.seqviewlink }}">link to genome</a>
         {% endif %}
-            <a class="small_font" target="_blank" rel="noopener noreferrer" href="{{data.seqviewlink}}">link to genome</a>
         {% if len(data.msgs) != 0 %}
             <div class="warnmsgs">
                 <p class="warn small_font">

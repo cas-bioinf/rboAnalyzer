@@ -110,7 +110,7 @@ def _prepare_body(data):
         lx = len(data.query.seq)
 
         seqview = [
-            '?embeded=true',
+            'embedded=true',
             '&noviewheader=true',
             '&id={}'.format(onehit.source.annotations['blast'][0]),
             '&appname=rboAnalyzer',
