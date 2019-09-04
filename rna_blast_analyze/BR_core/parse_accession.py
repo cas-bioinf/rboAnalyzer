@@ -70,7 +70,7 @@ refseq = [
 ]
 refseq_re = [prefix + r"[0-9A-Z]+\.[0-9]+" for prefix in refseq]
 
-pdb = ["[0-9A-Z]{4}_[0-9A-Z]{1,2}",]
+pdb = ["[0-9A-Z]{4}[_|][0-9A-Z]{1,2}",]
 
 exceptions = [
     '1KPD',  # although it has chain, in the NCBI nt database it is listed without chain
