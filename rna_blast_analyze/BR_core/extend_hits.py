@@ -21,6 +21,23 @@ def load_genome(root_dir, accession, start, end):
     return next(SeqIO.parse(ff, format='fasta'))[start:end]
 
 
+def match_acc(hit_id, blast_regexp):
+    # get a index name to the blastdb
+    hname = re.search(blast_regexp, hit_id)
+
+    if hname and 'pdb|' in hit_id:
+        # case when sequence is from pdb e.g. gi|1276810701|pdb|5VT0|R
+        # but it is available in the database under 5VT0_R
+        bdb_accession = hname.group().replace('|', '_')
+    elif hname is not None:
+        bdb_accession = hname.group()
+    else:
+        msg = 'Provided regexp returned no result for {}.\n' \
+              'Please provide regular expression capturing sequence id.'.format(hit_id)
+        raise RuntimeError(msg)
+    return bdb_accession
+
+
 def expand_hits(hits, blast_db, query_length, extra=0, blast_regexp=None, skip_missing=False, msgs=None):
     """takes list of blast.HSP objects as first argument and
     path to local blast database as second argument
@@ -81,14 +98,12 @@ def expand_hits(hits, blast_db, query_length, extra=0, blast_regexp=None, skip_m
                 # add blast record
                 d['blast'] = hit
 
-                # get a index name to the blastdb
-                hname = re.search(blast_regexp, hit[0])
-                if not hname:
+                try:
+                    bdb_accession = match_acc(hit[0], blast_regexp)
+                except RuntimeError as e:
                     remove_files_with_try([temp_filename, blast_tempfile])
-                    msg = 'Provided regexp returned no result for {}.\n' \
-                          'Please provide regular expression capturing sequence id.'.format(hit[0])
-                    raise RuntimeError(msg)
-                bdb_accession = hname.group()
+                    raise e
+
                 d['blast'][0] = bdb_accession
                 loc.append(d)
 
@@ -251,13 +266,8 @@ def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=N
         # add blast record
         d['blast'] = hit
 
-        # get a index name to the blastdb
-        hname = re.search(blast_regexp, hit[0])
-        if not hname:
-            print(blast_regexp)
-            raise RuntimeError('provided regexp returned no result for %s,'
-                               ' please provide regexp valid even for this name', hit[0])
-        bdb_accession = hname.group()
+        bdb_accession = match_acc(hit[0], blast_regexp)
+
         d['blast'][0] = bdb_accession
 
         # read from file
