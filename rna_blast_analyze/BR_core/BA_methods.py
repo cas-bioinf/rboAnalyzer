@@ -78,7 +78,6 @@ class BlastSearchRecompute(object):
             'best_sequence',
             'estart',
             'eend',
-            'bstrand',
             'blast_eval',
             'query_start',
             'query_end',
@@ -148,10 +147,6 @@ class BlastSearchRecompute(object):
                 elif k == 'eend':
                     # extended end
                     data['eend'].append(hit.best_end)
-                    continue
-                elif k == 'bstrand':
-                    # blast strand
-                    data['bstrand'].append(hit.source.annotations['blast'][1].strand)
                     continue
                 elif k == 'best_sequence':
                     # selected sequence

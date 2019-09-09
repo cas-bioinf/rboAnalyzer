@@ -46,6 +46,9 @@ def locarna_worker(pack):
             to_rna(blast_entry.sbjct),
             anchor_length=anchor_length
         )
+
+        if anchors.too_many_anchors:
+            ml.info('Too many anchors for {}. Can handle up to 520 distinct anchors.'.format(one_expanded_hit.id))
         # extracted temp is my query
 
         # access the locarna aligner directly
@@ -312,13 +315,18 @@ def run_locarna(query_file, subject_file, locarna_params):
         return subject_file + '.loc_out'
 
 
-def write_locarna_anchors_with_min_length(match_line, min_anchor_length=1):
+def write_locarna_anchors_with_min_length(
+        match_line, min_anchor_length=1,
+        pa='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+        itr='0123456789'
+):
     ml.debug(fname())
     h1 = []
     h2 = []
-    pa = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-    part_desig = 0
+    max_l = len(pa)
+    part_desig = -1
 
+    to_many_anchors = False
     for match in re.finditer(r'\|+', match_line, flags=re.IGNORECASE):
         if len(match.group()) < min_anchor_length:
             # skip the iterations below minimum length
@@ -331,13 +339,15 @@ def write_locarna_anchors_with_min_length(match_line, min_anchor_length=1):
         c = 0
         part_desig += 1
         for _ in match.group():
-            if c == 9:
+            if c == 10:
                 c = 0
                 part_desig += 1
-            c += 1
-
+            if part_desig >= max_l:
+                to_many_anchors = True
+                continue
             h1.append(pa[part_desig])
-            h2.append(str(c))
+            h2.append(itr[c])
+            c += 1
 
     for i in range(len(match_line) - len(h1)):
         h1.append('.')
@@ -345,7 +355,38 @@ def write_locarna_anchors_with_min_length(match_line, min_anchor_length=1):
 
     anchor_l1 = ''.join(h1)
     anchor_l2 = ''.join(h2)
-    return anchor_l1, anchor_l2
+    return anchor_l1, anchor_l2, to_many_anchors
+
+
+def write_locarna_long_anchors(match_line, min_anchor_length=1):
+    a1f, a2f, _ = write_locarna_anchors_with_min_length(
+        match_line, min_anchor_length, pa='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    )
+
+    b1b, b2b, _ = write_locarna_anchors_with_min_length(
+        match_line[::-1], min_anchor_length, pa='abcdefghijklmnopqrstuvwxyz'[::-1], itr='0123456789'[::-1]
+    )
+
+    b1f = b1b[::-1]
+    b2f = b2b[::-1]
+
+    def _process_parts(fp, sp):
+        h = []
+        for a, b in zip(fp, sp):
+            if a != '.' and b != '.':
+                raise Exception
+            elif a != '.':
+                h.append(a)
+            elif b != '.':
+                h.append(b)
+            else:
+                h.append('.')
+        return ''.join(h)
+
+    anchor_l1 = _process_parts(a1f, b1f)
+    anchor_l2 = _process_parts(a2f, b2f)
+
+    return anchor_l1, anchor_l2, True
 
 
 def squeeze_locarna_anchors_to_aligned_seq(aligned_seq, anchor_line1, anchor_line2):
@@ -370,38 +411,34 @@ def squeeze_locarna_anchors_to_aligned_seq(aligned_seq, anchor_line1, anchor_lin
 class LocarnaAnchor(object):
     """
     while initiating LocarnaAnchor object U can specify minimal anchor length to be used
-    If default (-1) is kept, then minimal anchor length for succesfull usage for locarna is infered
-    and the number is returned in anchor_length parameter
     """
-    def __init__(self, query, match, subject, anchor_length=-1):
+    def __init__(self, query, match, subject, anchor_length=1):
         self.match = match
         self.query = query
         self.subject = subject
-        # self.anchor_l1, self.anchor_l2 = write_locarna_anchors(self.match)
-        # compute anchor length
-
+        self.too_many_anchors = False
         self.anchor_length = anchor_length
-        if anchor_length < 0:
-            while True:
-                self.anchor_l1, self.anchor_l2 = write_locarna_anchors_with_min_length(self.match, self.anchor_length)
-                if '[' in self.anchor_l1:
-                    self.anchor_length += 1
-                else:
-                    break
-        else:
-            self.anchor_l1, self.anchor_l2 = write_locarna_anchors_with_min_length(self.match, self.anchor_length)
+
+        self.anchor_l1, self.anchor_l2, self.too_many_anchors = write_locarna_anchors_with_min_length(
+            self.match, self.anchor_length)
+
+        if self.too_many_anchors:
+            self.anchor_l1, self.anchor_l2, self.too_many_anchors = write_locarna_long_anchors(
+                self.match, self.anchor_length
+            )
 
         assert len(self.anchor_l1) == len(self.anchor_l2) == len(self.query) == len(self.subject)
 
-        if anchor_length < 0:
-            print('inferred anchor length {}'.format(self.anchor_length))
-
-        self.squeezed_query, self.q_al1, self.q_al2 = squeeze_locarna_anchors_to_aligned_seq(self.query,
-                                                                                             self.anchor_l1,
-                                                                                             self.anchor_l2)
-        self.squeezed_subject, self.s_al1, self.s_al2 = squeeze_locarna_anchors_to_aligned_seq(self.subject,
-                                                                                               self.anchor_l1,
-                                                                                               self.anchor_l2)
+        self.squeezed_query, self.q_al1, self.q_al2 = squeeze_locarna_anchors_to_aligned_seq(
+            self.query,
+            self.anchor_l1,
+            self.anchor_l2
+        )
+        self.squeezed_subject, self.s_al1, self.s_al2 = squeeze_locarna_anchors_to_aligned_seq(
+            self.subject,
+            self.anchor_l1,
+            self.anchor_l2
+        )
 
     def anchor_whole_seq(self, seq, seq_line):
         """

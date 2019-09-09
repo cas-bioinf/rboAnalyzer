@@ -188,7 +188,7 @@
     .tooltip {
         /*position: relative;*/
         display: inline-block;
-        width: 1em;
+        /*width: 1em;*/
     }
 
     /* Tooltip text */
@@ -207,5 +207,8 @@
     }
     .rnapic {
         height: 300px;
+    }
+    .inf {
+        color: blue;
     }
 </style>
