@@ -1,5 +1,5 @@
 # rboAnalyzer
-A tool for analyzing BLAST search output for RNA sequences.
+A tool for characterizing HSPs in output of RNA BLAST search.
 
 ## Short description
 rboAnalyzer is a tool complementing the BLAST algorithm when searching for a query
