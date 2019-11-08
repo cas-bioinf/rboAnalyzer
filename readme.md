@@ -97,6 +97,9 @@ rboAnalyzer --version
 ```
 Which should return the version number.
 
+### Using Docker container
+The tool was also packed as docker image. For more information see [our docker instuctions](docs/docker.md)
+
 ## Preparation
 
 <a name="rfamdownload" id="rfamdownload"></a>
@@ -146,7 +149,7 @@ rboAnalyzer -h
 
 ### Usage
 ```shell
-rboAnalyzer -in BLAST_OUTPUT.txt -db USED_DATABASE_PATH -q BLAST_QUERY.fasta
+rboAnalyzer -in BLAST_OUTPUT.xml -db USED_DATABASE_PATH -q BLAST_QUERY.fasta
 ```
 
 ## Example
@@ -173,10 +176,12 @@ Analyzing subset of NCBI blast HITs for [6S RNA](https://doi.org/10.1038%2F22914
     ```shell
     genomes_from_blast -e YOUR_EMAIL_ADDRESS -in 6S_super_short.xml -o genomes.bdb
     ```
-    The `YOUR_EMAIL_ADDRESS` should be your valid email address on which NCBI staff could contact you
+    The parameter `-e` `YOUR_EMAIL_ADDRESS` should be your valid email address on which NCBI staff could contact you
     if they need to. It is not logged by the tool.
 
-    The BLAST database with name `genomes.bdb` was created for you if everything was successful.
+    The parameter `-in` is path to file (in this example `6S_super_short.xml`) contaning the BLAST output.
+
+    The parameter `-o` is output file path. In this command the BLAST database with name `genomes.bdb` was created for you if everything was successful.
     You will need it in the next step.
 
     The intermediate file `genomes.bdb.fasta` was also created and contains all sequences added to the BLAST database.
@@ -232,6 +237,8 @@ These are:
       Solution: Provide capturing regular expression (python 3 syntax) for capturing the sequence id from the fasta header (it must match the id to the BLAST database used)
     3. __the BLAST database was created without the `-parse_seqids` flag__   
       Solution: Create new database from the sequences used to create new one, this time with `-parse_seqids` flag.
+    4. __Could not guess the BLAST format, preferred format is NCBI xml.__   
+      Verify that you have either regular XML BLAST output file (`-outfmt 5`), or regular txt BLAST output file (`-outfmt 0` - should start with `BLASTN` declaration). When donwloading BLAST output from NCBI, use the xml option.
 
   Another option is to call pipeline with `--skip_missing` flag.
   This will skip the missing sequences.
