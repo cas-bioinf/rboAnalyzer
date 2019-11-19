@@ -406,7 +406,7 @@ def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=N
 
     # ==== Remove the entrez tempfile =====
     # here we have all the sequences and we can safely delete the tempfile
-    if database == 'entrez':
+    if format == 'entrez':
         remove_one_file_with_try(temp_entrez_file)
     return exp_hits, strand
 
