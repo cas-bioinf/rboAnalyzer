@@ -89,6 +89,13 @@ Quick homology estimate:
                             <td class="rigth">{{data.h_estimate}}</td>
                         </tr>
                     </table>
+                    {% if data.get("h_estimate", "") == "Uncertain" %}
+                    <div style="text-align:center;">⬇</div>
+                    <div style="max-width:300px;text-align:justify;">
+                        Check the <u>secondary structure</u> and <u>sequence viewer</u>
+                        for supporting information about possible homology.
+                    </div>
+                    {% endif %}
                 </div>
                 {% endif %}
                 {% if data.get("formated_seq", False) %}

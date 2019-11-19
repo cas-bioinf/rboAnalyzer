@@ -2,8 +2,9 @@ import os
 import shlex
 import logging
 import shutil
-from subprocess import call
+from subprocess import call, check_output
 from tempfile import TemporaryFile, mkstemp, gettempdir
+from multiprocessing import Pool
 
 from rna_blast_analyze.BR_core import exceptions
 from rna_blast_analyze.BR_core.config import CONFIG
@@ -13,7 +14,7 @@ from rna_blast_analyze.BR_core.BA_support import remove_one_file_with_try
 ml = logging.getLogger('rboAnalyzer')
 
 
-def rnafold(fastafile, outfile, parameters=''):
+def rnafold_fasta(fastafile, outfile, parameters=''):
     """Run RNAfold on commandline
 
     issue --noPS to prevent plotting of postscript structure
@@ -101,3 +102,40 @@ def run_rnaplot(seq, structure=None, format='svg', outfile=None):
         else:
             shutil.move(os.path.join(tmpdir, plot_output_file), outfile)
             return outfile
+
+
+def RNAfold(sequence):
+    ml.debug(fname())
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
+        r = check_output(
+            [
+                '{}RNAfold'.format(CONFIG.viennarna_path),
+                '--noPS',
+            ],
+            input=sequence.encode(),
+            stderr=tmp
+        )
+
+        if isinstance(r, Exception):
+            msgfail = 'RNAfold failed.'
+            ml.error(msgfail)
+            tmp.seek(0)
+            raise exceptions.RNAfoldException(msgfail, tmp.read())
+
+        # more robust decode
+        out_str = r.decode()
+        spl = out_str.split('\n')
+        seq = spl[0]
+        structure = spl[1][:len(seq)]
+        energy = float(spl[1][len(seq)+2:-1])
+        # seq, structure, energy = r.decode().split()
+        # return seq, structure, float(energy[1:-1])
+        return structure, energy
+
+
+def wrap_RNAfold(sequences, threads=1):
+    if threads == 1:
+        return [RNAfold(seq) for seq in sequences]
+    else:
+        with Pool(processes=threads) as pool:
+            return pool.map(RNAfold, sequences)

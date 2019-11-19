@@ -94,7 +94,7 @@ class TestExecution(unittest.TestCase):
             j_obj = json.dumps(blastsearchrecompute2dict(out[0]), indent=2)
             with open(self.json, 'w') as ff:
                 ff.write(j_obj)
-            with open(self.html, 'w') as h:
+            with open(self.html, 'wb') as h:
                 h.write(write_html_output(out[0]))
             out[0].to_pandas_dump(self.pandas_dump)
             out[0].write_results_fasta(self.fasta)
@@ -120,7 +120,7 @@ class TestExecution(unittest.TestCase):
             j_obj = json.dumps(blastsearchrecompute2dict(out[0]), indent=2)
             with open(self.json, 'w') as ff:
                 ff.write(j_obj)
-            with open(self.html, 'w') as h:
+            with open(self.html, 'wb') as h:
                 h.write(write_html_output(out[0]))
             out[0].to_pandas_dump(self.pandas_dump)
             out[0].write_results_fasta(self.fasta)
@@ -146,7 +146,7 @@ class TestExecution(unittest.TestCase):
             j_obj = json.dumps(blastsearchrecompute2dict(out[0]), indent=2)
             with open(self.json, 'w') as ff:
                 ff.write(j_obj)
-            with open(self.html, 'w') as h:
+            with open(self.html, 'wb') as h:
                 h.write(write_html_output(out[0]))
             out[0].to_pandas_dump(self.pandas_dump)
             out[0].write_results_fasta(self.fasta)

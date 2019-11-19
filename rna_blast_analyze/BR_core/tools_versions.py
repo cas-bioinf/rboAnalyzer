@@ -1,5 +1,5 @@
 blast_minimal_version = [2, 6, 0]
-blast_maximal_version = [2, 8, 0]
+blast_maximal_version = [3, 0, 0]
 locarna_minimal_version = [1, 9, 2]
 locarna_maximal_version = [1, 999, 999]
 infernal_minimal_version = [1, 1, 2]
@@ -9,25 +9,6 @@ muscle_minimal_version = [3, 8, 31]
 centroid_homfold_minimal_version = [0, 0, 15]
 turbofold_minimal_version = [6, 0]
 mfold_minimal_version = [3, 6]
-
-names2shortcuts = {
-    'clustalo_alifold_unpaired_conserved_refold_rnafoldc': 'C-A-U-r-Rc',
-    'clustalo_alifold_refold_rnafoldc': 'C-A-r-Rc',
-    'centroid_homfold': 'centroid',
-    'rnafold': 'rnafold',
-    'subopt_fold_query': 'fq-sub',
-    'subopt_fold_clustal_alifold': 'C-A-sub',
-    'subopt_fold_muscle_alifold': 'M-A-sub',
-    'muscle_alifold_refold_rnafoldc': 'M-A-r-Rc',
-    'muscle_alifold_unpaired_conserved_refold_rnafoldc': 'M-A-U-r-Rc',
-    'rfam_subopt': 'rfam-sub',
-    'rfam_rnafoldc': 'rfam-Rc',
-    'TurboFold': 'TurboFold',
-    'TurboFold_fast': 'Turbo-fast',
-    'centroid_homfold_fast': 'centroid-fast',
-    'rfam_centroid_homfold': 'rfam-centroid',
-}
-shortcuts2names = {v: k for k, v in names2shortcuts.items()}
 
 
 # ===== All possible prediction methods =====
@@ -53,7 +34,7 @@ method_required_tools = {
     'rfam-centroid': {'centroid_homfold', 'rfam'}
 }
 
-prediction_methods = set(shortcuts2names.keys())
+prediction_methods = set(method_required_tools.keys()) - {'simple', 'locarna', 'meta'}
 
 pred_params = {
     'cmscore_percent',
@@ -104,12 +85,6 @@ allowed_params = {
     },
     'M-A-U-r-Rc': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "repred_unpaired_tr", "conseq_conserved", "muscle", "alifold", "RNAfold"
-    },
-    'dh_clustal_alifold_refold_rnafoldc': {
-        "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "clustalo", "alifold", "RNAfold"
-    },
-    'dh_clustal_alifold_unpaired_conserved_rnafoldc': {
-        "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "repred_unpaired_tr", "conseq_conserved", "clustalo", "alifold", "RNAfold"
     },
     'centroid': {
         "cmscore_percent", "pred_sim_threshold", "query_max_len_diff", "centroid_homfold"

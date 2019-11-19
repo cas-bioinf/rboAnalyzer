@@ -101,15 +101,24 @@ def f_parser():
         metavar='PATH',
         help='The Blast query fasta file.'
     )
-    input_group.add_argument(
+    blastdb_group = parser.add_mutually_exclusive_group(required=True)
+    blastdb_group.add_argument(
         '-db',
         '--blast_db',
-        required=True,
         metavar='path',
         type=str,
         help='Provide path to blast database, '
-             'that is the complete path with na name without any extensions '
+             'that is the complete path with blast db name without any extension '
              '(*.nin, nsd, nog, nsi, nhr, nsq, nal).'
+    )
+    blastdb_group.add_argument(
+        '--entrez',
+        type=str,
+        default=None,
+        help='EMAIL - '
+             'Indicate that you want to use NCBI Entrez service to download required regions of sequences at runtime. '
+             'To comply with NCBI service rules you are required to provide valid email address '
+             'at which the NCBI staff could contact you if they need to.'
     )
     misc_group.add_argument(
         '--db_type',

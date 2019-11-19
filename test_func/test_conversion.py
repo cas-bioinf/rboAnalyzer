@@ -239,7 +239,8 @@ class TestHitList(unittest.TestCase):
 
 class TestBlastRecompute(unittest.TestCase):
     def test_blastrecompute(self):
-        s = BlastSearchRecompute(None, None, 0)
+        q = SeqRecord(Seq('ACGUTGU'), id='qq')
+        s = BlastSearchRecompute(None, q, 0)
         h = HitList()
         a = Subsequences(SeqRecord(Seq('ACGUTGU'), id='aa'))
         b = Subsequences(SeqRecord(Seq('ACGAUCGUGAC'), id='bb'))
@@ -261,7 +262,8 @@ class TestBlastRecompute(unittest.TestCase):
             for r in blast_parse_txt(f):
                 blast_outputs.append(r)
 
-        s = BlastSearchRecompute(None, None, 0)
+        q = SeqRecord(Seq('ACGUTGU'), id='qq')
+        s = BlastSearchRecompute(None, q, 0)
         h = HitList()
         a = Subsequences(
             SeqRecord(

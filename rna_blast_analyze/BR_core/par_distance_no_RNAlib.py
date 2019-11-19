@@ -3,6 +3,7 @@ from multiprocessing import Pool
 from subprocess import check_output
 
 from rna_blast_analyze.BR_core.config import CONFIG
+from rna_blast_analyze.BR_core import exceptions
 
 
 def f_parser():
@@ -34,8 +35,7 @@ def vypocet(oi):
 
         return dist
     except ChildProcessError as e:
-        print('RNAdistance failed. Returning large number ({})'.format(10**10))
-        return 10**10
+        raise exceptions.RNAdistanceException('RNAdistance failed.', 'RNAdistance failed.')
 
 
 def the_main(fp):

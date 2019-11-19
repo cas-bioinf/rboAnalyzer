@@ -5,6 +5,7 @@ from copy import deepcopy
 import logging
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
+import rna_blast_analyze.BR_core.viennaRNA
 from rna_blast_analyze.BR_core.cmalign import run_cmalign_on_fasta, read_cmalign_sfile, run_cmbuild, run_cmfetch, \
     RfamInfo, get_cm_model_table, select_best_matching_model_from_cmscan
 from rna_blast_analyze.BR_core.stockholm_alig import StockholmAlig
@@ -17,8 +18,10 @@ from rna_blast_analyze.BR_core import exceptions
 ml = logging.getLogger('rboAnalyzer')
 
 
-def find_and_extract_cm_model(args, analyzed_hits):
-    rfam = RfamInfo()
+def find_and_extract_cm_model(args, analyzed_hits, rfam=None):
+    if rfam is None:
+        rfam = RfamInfo()
+
     ml.info('Infer homology - searching RFAM for best matching model.')
     cmscan_results = get_cm_model_table(args.blast_query, threads=args.threads)
     best_matching_cm_model = select_best_matching_model_from_cmscan(cmscan_results)
@@ -82,27 +85,7 @@ def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iterat
                 str(seq.seq))
             )
 
-    fd_sfile, cm_sfile_path = mkstemp(prefix='rba_', suffix='_29', dir=CONFIG.tmpdir)
-    os.close(fd_sfile)
-    if args.threads:
-        cm_params = '--notrunc --cpu {} --sfile {}'.format(args.threads, cm_sfile_path)
-    else:
-        cm_params = '--notrunc --sfile {}'.format(cm_sfile_path)
-    cm_msa_file = run_cmalign_on_fasta(fd_fasta, cm_model_file, cmalign_params=cm_params)
-
-    cm_msa = read_st(cm_msa_file)
-    # note that the first score is for the query and act as a benchmark here
-    cm_msa_conservation = alignment_sequence_conservation(cm_msa, gap_chars='-.')
-
-    # combine the eval and cm_msa_conservation_score
-    # the cmalign scores somehow, look into the scoring if those scores are accessible, maybe they are far better then
-    # my made up msa_conservation
-    # there is - by option --sfile
-    cm_align_scores = read_cmalign_sfile(cm_sfile_path)
-    # the bit score can be probably directly comparable with blast bit score
-    # i can also leverage the fact, that the badly aligned sequences with cmalign have negative bitscore
-    # so my score can be
-    cm_align_scores.index = range(len(cm_align_scores.index))
+    cm_msa, cm_align_scores = run_cmalign_with_scores(fd_fasta, cm_model_file, threads=args.threads)
 
     _add_rsearch_align_scores2anal_hits(analyzed_hits, cm_align_scores)
 
@@ -110,8 +93,10 @@ def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iterat
     prediction = infer_hits_cm(cm_align_scores[1:].bit_sc)
 
     # write scores to a table, compute it for all data and run some correlation statistics
-
     if args.repredict_file:
+        # note that the first score is for the query and act as a benchmark here
+        cm_msa_conservation = alignment_sequence_conservation(cm_msa, gap_chars='-.')
+
         repredict_file = BA_support.iter2file_name(args.repredict_file, multi_query, iteration)
         with open(repredict_file, 'w') as f:
             _print_table_for_corelation(
@@ -127,11 +112,7 @@ def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iterat
                 cm_align_scores.bit_sc[0]
             )
 
-    BA_support.remove_files_with_try([
-        fd_fasta,
-        cm_sfile_path,
-        cm_msa_file
-    ])
+    BA_support.remove_one_file_with_try(fd_fasta)
 
     selected_hits = [hit.extension for b, hit in zip(prediction, analyzed_hits.hits) if b]
 
@@ -144,9 +125,35 @@ def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iterat
     return prediction, selected_hits, r_cm_file
 
 
+def run_cmalign_with_scores(fasta_file, cm_file, threads=None):
+    fd_sfile, cm_sfile_path = mkstemp(prefix='rba_', suffix='_29', dir=CONFIG.tmpdir)
+    os.close(fd_sfile)
+    if threads:
+        cm_params = '--notrunc --cpu {} --sfile {}'.format(threads, cm_sfile_path)
+    else:
+        cm_params = '--notrunc --sfile {}'.format(cm_sfile_path)
+    cm_msa_file = run_cmalign_on_fasta(fasta_file, cm_file, cmalign_params=cm_params)
+
+    cm_msa = read_st(cm_msa_file)
+
+    # combine the eval and cm_msa_conservation_score
+    # the cmalign scores somehow, look into the scoring if those scores are accessible, maybe they are far better then
+    # my made up msa_conservation
+    # there is - by option --sfile
+    cm_align_scores = read_cmalign_sfile(cm_sfile_path)
+    # the bit score can be probably directly comparable with blast bit score
+    # i can also leverage the fact, that the badly aligned sequences with cmalign have negative bitscore
+    # so my score can be
+    cm_align_scores.index = range(len(cm_align_scores.index))
+
+    BA_support.remove_files_with_try([cm_sfile_path, cm_msa_file])
+
+    return cm_msa, cm_align_scores
+
+
 def build_cm_model_rsearch(query_seq, path2selected_sim_array):
     ml.debug(fname())
-    query_structure = BA_support.RNAfold(str(query_seq.seq))[1]
+    query_structure = rna_blast_analyze.BR_core.viennaRNA.RNAfold(str(query_seq.seq))[0]
 
     # remove any annotations from query:
     qs_clean = deepcopy(query_seq)
@@ -183,11 +190,23 @@ def _add_rsearch_align_scores2anal_hits(ahits, s_table):
     ml.debug(fname())
     # add result for query to the query
     ahits.query.annotations['cmstat'] = s_table.iloc[0]
+    query_len = len(ahits.query)
 
     for hit, (i, row) in zip(ahits.hits, s_table[1:].iterrows()):
         assert hit.extension.id == row.seq_name
         hit.extension.annotations['cmstat'] = row
+        hit.extension.annotations['homology_estimate'] = compute_homology(query_len, row.bit_sc)
     return
+
+
+def compute_homology(lx, h_bit_sc):
+    if h_bit_sc < 0:
+        h_estimate = 'Not homologous'
+    elif h_bit_sc / lx >= 0.5 and h_bit_sc >= 20:
+        h_estimate = 'Homologous'
+    else:
+        h_estimate = 'Uncertain'
+    return h_estimate
 
 
 def infer_hits_cm(bit_sc, tr=0):

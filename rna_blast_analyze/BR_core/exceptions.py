@@ -20,7 +20,7 @@ class UnknownStrand(Exception):
 
 class IncorrectDatabaseChoice(Exception):
     def __init__(self):
-        super.__init__("Incorrect database choice. This should never be reached.")
+        super().__init__("Incorrect database choice. This should never be reached.")
 
 
 class SubprocessException(Exception):
@@ -65,6 +65,10 @@ class RNAplotException(SubprocessException):
     pass
 
 
+class RNAdistanceException(SubprocessException):
+    pass
+
+
 class HybridssminException(SubprocessException):
     pass
 
@@ -94,4 +98,8 @@ class CmfetchException(SubprocessException):
 
 
 class BlastFormatException(Exception):
+    pass
+
+
+class AccessionMatchException(Exception):
     pass

@@ -47,8 +47,6 @@ def wrapped_ending_with_prediction(
     wrapper for prediction of secondary structures
     :param args_inner: Namespace of input arguments
     :param analyzed_hits: BlastSearchRecompute object
-    :param all_hits_fasta: fasta file with all extended sequences
-    :param query: query sequence
     :param pred_method:
     :param method_params:
     :param used_cm_file: cmfile if cmfile is known (user given or computed)
@@ -236,7 +234,7 @@ def wrapped_ending_with_prediction(
     if args_inner.html:
         html_file = iter2file_name(args_inner.html, multi_query, iteration)
         ml.info('Writing html to {}.'.format(html_file))
-        with open(html_file, 'w') as h:
+        with open(html_file, 'wb') as h:
             h.write(write_html_output(analyzed_hits))
 
     # write csv file if requested

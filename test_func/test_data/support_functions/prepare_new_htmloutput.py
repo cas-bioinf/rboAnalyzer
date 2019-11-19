@@ -14,7 +14,7 @@ def prepare_new_htmlout():
     fd, html_file = tempfile.mkstemp(prefix='rba_', suffix='_t30')
     os.close(fd)
 
-    with open(html_file, 'w') as h:
+    with open(html_file, 'wb') as h:
         h.write(write_html_output(bb))
 
     target = os.path.abspath(os.path.dirname(__file__) + '/../RF00001_reference_output.html.md5')

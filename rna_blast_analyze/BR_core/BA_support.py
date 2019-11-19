@@ -4,7 +4,7 @@ import os
 import re
 from io import StringIO
 from random import choice
-from subprocess import call, check_output
+from subprocess import call
 from tempfile import mkstemp, TemporaryFile
 import shlex
 import sys
@@ -20,6 +20,7 @@ from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt as blast_minimal_parser
 from rna_blast_analyze.BR_core import exceptions
+from rna_blast_analyze.BR_core.parse_accession import compiled_accession_regex
 
 # idiotic matplotlib
 
@@ -284,35 +285,6 @@ def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
         return cl_file
 
 
-def RNAfold(sequence):
-    ml.debug(fname())
-    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
-        r = check_output(
-            [
-                '{}RNAfold'.format(CONFIG.viennarna_path),
-                '--noPS',
-            ],
-            input=sequence.encode(),
-            stderr=tmp
-        )
-
-        if isinstance(r, Exception):
-            msgfail = 'RNAfold failed.'
-            ml.error(msgfail)
-            tmp.seek(0)
-            raise exceptions.RNAfoldException(msgfail, tmp.read())
-
-        # more robust decode
-        out_str = r.decode()
-        spl = out_str.split('\n')
-        seq = spl[0]
-        structure = spl[1][:len(seq)]
-        energy = float(spl[1][len(seq)+2:-1])
-        # seq, structure, energy = r.decode().split()
-        # return seq, structure, float(energy[1:-1])
-        return seq, structure, energy
-
-
 def select_analyzed_aligned_hit(one_alig, exp_hit_id):
     # select analyzed hit, drop query
     for seq_in_alig in one_alig.get_unalined_seqs(keep_letter_ann=True):
@@ -356,52 +328,59 @@ def blast_in(blast_input_file, b='guess'):
     :returns list of SearchIO objects, one set of hits per per query sequence per field
     """
     ml.debug(fname())
+
+    try:
+        with open(blast_input_file, 'r') as f:
+            multiq = blast_in_handle(f, b)
+            if multiq is None:
+                raise Exception
+            return multiq
+    except Exception as e:
+        msgfail = 'Failed to parse provided file {}'.format(blast_input_file)
+        ml.error(msgfail)
+        ml.error(str(e))
+        sys.exit(1)
+
+
+def blast_in_handle(handle, b='guess'):
+    """
+    gueses blast format
+    :returns list of SearchIO objects, one set of hits per per query sequence per field
+    """
+    ml.debug(fname())
     multiq = []
-    with open(blast_input_file, 'r') as f:
-        if b == 'guess':
-            # gues the format
-            l = f.readline()
-            f.seek(0, 0)     # seek to begining
-            if re.search(r'^BLASTN \d+\.\d+\.\d+', l):
-                # blast object prob plaintext
-                b_type = 'plain'
-                ml.info('Inferred BLAST format: txt.')
-            elif re.search(r'<\?xml version', l):
-                # run xml parser
-                b_type = 'xml'
-                ml.info('Inferred BLAST format: xml.')
-            else:
-                ml.error('Could not guess the BLAST format, preferred format is NCBI xml.')
-                sys.exit(1)
+    if b == 'guess':
+        # gues the format
+        l = handle.readline()
+        handle.seek(0, 0)     # seek to begining
+        if re.search(r'^BLASTN \d+\.\d+\.\d+', l):
+            # blast object prob plaintext
+            b_type = 'plain'
+            ml.info('Inferred BLAST format: txt.')
+        elif re.search(r'<\?xml version', l):
+            # run xml parser
+            b_type = 'xml'
+            ml.info('Inferred BLAST format: xml.')
         else:
-            b_type = b
+            ml.error('Could not guess the BLAST format, preferred format is NCBI xml.')
+            return None
+    else:
+        b_type = b
 
-        if b_type == 'plain':
-            try:
-                for p in blast_minimal_parser(f):
-                    multiq.append(p)
-            except Exception as e:
-                msgfail = 'Failed to parse provided file {} as text blast output'.format(blast_input_file)
-                ml.error(msgfail)
-                ml.error(str(e))
-                sys.exit(1)
+    if b_type == 'plain':
+        for p in blast_minimal_parser(handle):
+            multiq.append(p)
 
-        elif b_type == 'xml':
-            try:
-                for p in NCBIXML.parse(f):
-                    multiq.append(p)
-            except Exception as e:
-                msgfail = 'Failed to parse provided file {} as xml'.format(blast_input_file)
-                ml.error(msgfail)
-                ml.error(str(e))
-                sys.exit(1)
+        return multiq
 
-        else:
-            ml.error('BLAST type not known: allowed types: plain, xml, guess')
-            sys.exit(1)
+    elif b_type == 'xml':
+        for p in NCBIXML.parse(handle):
+            multiq.append(p)
 
-        # todo from SearchIO add remaining functionality
-    return multiq
+        return multiq
+    else:
+        ml.error('BLAST type not known: allowed types: plain, xml, guess')
+        return None
 
 
 class Subsequences(object):
@@ -596,6 +575,8 @@ def annotate_ambiguos_bases(seqlist):
 
 
 def annotate_ambiguos_base(seq, iupac=None, reg=None):
+    if 'ambiguous' in seq.annotations:
+        return seq
     if iupac is None:
         iupac = IUPACmapping()
     if reg is None:
@@ -847,3 +828,20 @@ def add_loc_to_description(analyzed_hits):
         d2a = '{}-{}'.format(hit.best_start, hit.best_end)
         # hit.source.description += d2a
         hit.extension.description += d2a
+
+
+def match_acc(hit_id, blast_regexp):
+    # get a index name to the blastdb
+    hname = re.search(blast_regexp, hit_id)
+
+    if hname and 'pdb|' in hit_id:
+        # case when sequence is from pdb e.g. gi|1276810701|pdb|5VT0|R
+        # but it is available in the database under 5VT0_R
+        bdb_accession = hname.group().replace('|', '_')
+    elif hname is not None:
+        bdb_accession = hname.group()
+    else:
+        msg = 'Provided regexp returned no result for {}.\n' \
+              'Please provide regular expression capturing sequence id.'.format(hit_id)
+        raise exceptions.AccessionMatchException(msg)
+    return bdb_accession

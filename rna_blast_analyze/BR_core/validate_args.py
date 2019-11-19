@@ -64,7 +64,7 @@ def validate_args(args):
     # check if file appears to be correct fasta file
     check_fasta(args.blast_query)
 
-    dbtype = ["blastdb", "fasta", "gb", "server"]
+    dbtype = ["blastdb", "fasta", "gb", "server", "entrez"]
     if args.db_type not in dbtype:
         ml.error("'db_type' can only be {}".format(dbtype))
         return False
@@ -80,6 +80,10 @@ def validate_args(args):
                 if not os.path.isfile(args.blast_db + '.' + ext):
                     ml.error('Expected file : "' + args.blast_db + '.' + ext + '" NOT found.')
                     return False
+    elif args.db_type == 'entrez':
+        if not re.fullmatch(r'[^@]+@[^@ ]+\.[^@ ]+', args.entrez):
+            ml.error('The provided email appears to be invalid.')
+            return False
     else:
         if not os.path.isdir(args.blast_db):
             return False

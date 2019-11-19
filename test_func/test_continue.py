@@ -62,12 +62,17 @@ class TestContinuation(unittest.TestCase):
         os.close(ff)
         self.fasta_structures = fasta_structures
 
-        CONFIG.override(tools_paths(
-            os.path.join(os.path.dirname(__file__), 'rna_blast_analyze', 'BR_core', 'config.txt'))
+        tp = tools_paths(
+            os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                'rna_blast_analyze', 'BR_core', 'config.txt'
+            )
         )
 
+        CONFIG.override(tp)
+
         rfam = RfamInfo()
-        self.sha1 = compute_args_hash(self.args, os.path.join(rfam.rfam_dir, rfam.gzname))
+        self.sha1 = compute_args_hash(self.args, os.path.join(CONFIG.rfam_dir, rfam.gzname))
         self.test_backup_file = blast_in + '.r-' + self.sha1[:10]
 
     def tearDown(self):
