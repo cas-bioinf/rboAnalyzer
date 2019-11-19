@@ -410,6 +410,9 @@ def f_parser():
     if 'all' in args.prediction_method:
         args.prediction_method = list(prediction_methods)
 
+    if args.entrez is not None:
+        args.db_type = 'entrez'
+
     # check if prediction method params are valid
     check_params(params)
 

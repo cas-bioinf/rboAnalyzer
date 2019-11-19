@@ -150,7 +150,7 @@ def expand_hits(hits, blast_db, query_length, extra=0, blast_regexp=None, skip_m
                 parsed_record.description = parsed_record.description[len(parsed_record.id):].strip()
 
             obtained_ids.add(record_id)
-            index = _get_correct_blast_hit(parsed_record, loc, index, skip=skip_missing)
+            index = _get_correct_blast_hit(record_id, loc, index, skip=skip_missing)
 
             parsed_record.annotations = loc[index]
             parsed_record.annotations['msgs'] = []
@@ -425,13 +425,13 @@ def _positive_index(o):
     return o
 
 
-def _get_correct_blast_hit(db_rec, loc, index, skip):
-    if loc[index]['blast'][0] == db_rec.id:
+def _get_correct_blast_hit(id, loc, index, skip):
+    if loc[index]['blast'][0] == id:
         return index
-    elif loc[index]['blast'][0] != db_rec.id and skip:
+    elif loc[index]['blast'][0] != id and skip:
         msgwarn = 'Sequence {} not found in provided db. Skipping.'.format(loc[index]['blast'][0])
         ml.warning(msgwarn)
-        return _get_correct_blast_hit(db_rec, loc, index + 1, skip)
+        return _get_correct_blast_hit(id, loc, index + 1, skip)
     else:
         msgerror = 'Sequence {} not found in provided db. ' \
                    'Please provide correct database or give "--skip_missing" flag.'.format(
