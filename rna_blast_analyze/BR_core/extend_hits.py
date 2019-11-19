@@ -9,7 +9,6 @@ from Bio import SeqIO
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.BA_support import remove_files_with_try, match_acc, remove_one_file_with_try
-from rna_blast_analyze.BR_core.load_from_bgzip import load_genome
 from rna_blast_analyze.BR_core import exceptions
 from Bio import Entrez
 from http.client import HTTPException
@@ -214,6 +213,10 @@ def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=N
     """
     ml.info('Retrieving sequence neighborhoods for blast hits.')
     ml.debug(fname())
+
+    if format == 'server':
+        # conditional import so we don't need pysam for normal usage
+        from rna_blast_analyze.BR_core.load_from_bgzip import load_genome
 
     if CONFIG.tmpdir is None:
         temp_entrez_file = os.path.join(
