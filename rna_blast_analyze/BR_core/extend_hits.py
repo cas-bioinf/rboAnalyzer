@@ -316,12 +316,14 @@ def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=N
         elif format == 'server':
             # only used when server
             parsed_record = load_genome(database, bdb_accession, start - 1, end)
+
         elif format == 'entrez':
+            prnt_line = '{:3d}% {}'.format(floor(index * 100 / len(hits)), bdb_accession)
             if index == 0:
                 sys.stdout.write('STATUS: Downloading required sequences from NCBI with entrez.\n')
-                sys.stdout.write('{:3d}% {}'.format(index, bdb_accession))
+                sys.stdout.write('{:50}'.format(prnt_line))
             else:
-                sys.stdout.write('\r{:3d}% {}'.format(floor(index * 100 / len(hits)), bdb_accession))
+                sys.stdout.write('\r{:50}'.format(prnt_line))
 
             seq_id = '{}:{}-{}'.format(bdb_accession, start, end)
             if seq_id not in known_seq_index:
@@ -333,7 +335,7 @@ def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=N
                         SeqIO.write([parsed_record], tmpf, format='fasta')
 
                     if index == len(hits) - 1:
-                        sys.stdout.write('\r Done.\n')
+                        sys.stdout.write('\r{:50}\n'.format(' Done.'))
                 except HTTPException as e:
                     msg = 'HTTP exception encountered: {}' \
                           'Please check your internet connection and availability of NCBI ENTREZ web services.\n ' \

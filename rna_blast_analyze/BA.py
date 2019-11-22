@@ -379,6 +379,12 @@ def f_parser():
         # help="Output will overwrite existing file. (default False)"
         help=argparse.SUPPRESS
     )
+    misc_group.add_argument(
+        '--show_HSP',
+        action='store_true',
+        default=False,
+        help='Show HSP marker in NCBI sequence viewer.'
+    )
 
     argcomplete.autocomplete(parser)
     args = parser.parse_args()

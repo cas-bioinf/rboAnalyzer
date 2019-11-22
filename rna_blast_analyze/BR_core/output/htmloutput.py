@@ -54,7 +54,6 @@ def write_html_output(datain, template_path=''):
             hea=my_header,
             show_gene_browser=datain.args.show_gene_browser,
             len=len,
-            utf1=u'⬇',
         )
         return html_str.encode('utf8')
     except TemplateError:
@@ -83,8 +82,8 @@ def _prep_hit_name(id, desc):
 
 
 def _prepare_body(data):
-    rog = rog_cmap(['#9E9414', '#83Cb48'])
-    norm = colors.Normalize(vmin=0, vmax=len(data.query.seq), clip=True)
+    rog = rog_cmap(['#9E9414', reference_colors['Homologous']])
+    norm = colors.Normalize(vmin=0, vmax=len(data.query.seq)*0.7, clip=True)
     mm = cm.ScalarMappable(norm=norm, cmap=rog)
 
     # rebuild original order of hits in case there was missing one:
@@ -140,13 +139,29 @@ def _prepare_body(data):
 
             if ext.annotations['homology_estimate'] == 'Uncertain':
                 rr['h_color'] = colors.rgb2hex(mm.to_rgba(h_bit_sc))
+                rr['estimate_pointer'] = u' ↴'
             else:
                 rr['h_color'] = reference_colors[ext.annotations['homology_estimate']]
 
-            marker = ['&mk={}:{}|BestMatch!'.format(onehit.best_start, onehit.best_end)]
+            # ==== markers ====
+            extended_marker = ['&mk={}:{}|BestMatch!'.format(onehit.best_start, onehit.best_end)]
 
-            seqview += marker
-            sviewlink += marker
+            seqview += extended_marker
+            sviewlink += extended_marker
+
+            if data.args.show_HSP:
+                br = onehit.source.annotations['blast'][1]
+                if br.sbjct_start < br.sbjct_end:
+                    bs = br.sbjct_start
+                    be = br.sbjct_end
+                else:
+                    bs = br.sbjct_end
+                    be = br.sbjct_start
+                hsp_marker = ['&mk={}:{}|HSP!'.format(bs, be)]
+
+                seqview += hsp_marker
+                sviewlink += hsp_marker
+
         else:
             rr['h_color'] = reference_colors['Not homologous']
 

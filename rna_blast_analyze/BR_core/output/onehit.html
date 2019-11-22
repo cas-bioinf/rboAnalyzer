@@ -86,13 +86,12 @@ Quick homology estimate:
   Uncertain otherwise</pre>
                                 </div>:
                             </th>
-                            <td class="rigth">{{data.h_estimate}}</td>
+                            <td class="right">{{data.h_estimate}}<b>{{data.estimate_pointer}}</b></td>
                         </tr>
                     </table>
                     {% if data.get("h_estimate", "") == "Uncertain" %}
-                    <div style="text-align:center;">⬇</div>
                     <div style="max-width:300px;text-align:justify;">
-                        Check the <u>secondary structure</u> and <u>sequence viewer</u>
+                        Check the secondary structure and sequence viewer
                         for supporting information about possible homology.
                     </div>
                     {% endif %}
