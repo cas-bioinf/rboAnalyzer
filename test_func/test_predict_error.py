@@ -102,7 +102,7 @@ class TestPredictExceptions(unittest.TestCase):
             ''
         )
 
-    @mock.patch("rna_blast_analyze.BR_core.predict_structures.rnafold", side_effect=exceptions.RNAfoldException('expected_error_rnafold', 'b'))
+    @mock.patch("rna_blast_analyze.BR_core.predict_structures.rnafold_fasta", side_effect=exceptions.RNAfoldException('expected_error_rnafold', 'b'))
     def test_rnafold(self, callMock):
         self.func_args['prediction_method'] = 'rnafold'
         a, b, c = repredict_structures_for_homol_seqs(**self.func_args)
@@ -161,14 +161,14 @@ class TestPredictExceptions(unittest.TestCase):
         self.assertEqual(c, ["expected_error_clustalo"])
 
     @mock.patch("rna_blast_analyze.BR_core.predict_structures.compute_alifold", side_effect=exceptions.RNAalifoldException('expected_error_alifold', 'b'))
-    def test_clustalo(self, callMock):
+    def test_clustalo2(self, callMock):
         self.func_args['prediction_method'] = 'C-A-sub'
         a, b, c = repredict_structures_for_homol_seqs(**self.func_args)
         self.assertIsNone(a)
         self.assertIsNone(b)
         self.assertEqual(c, ["expected_error_alifold"])
 
-    @mock.patch("rna_blast_analyze.BR_core.predict_structures.rnafold", side_effect=exceptions.NoHomologousSequenceException())
+    @mock.patch("rna_blast_analyze.BR_core.predict_structures.rnafold_fasta", side_effect=exceptions.NoHomologousSequenceException())
     def test_nh_ext(self, callMock):
         self.func_args['prediction_method'] = 'rnafold'
         a, b, c = repredict_structures_for_homol_seqs(**self.func_args)
@@ -176,8 +176,8 @@ class TestPredictExceptions(unittest.TestCase):
         self.assertIsNone(b)
         self.assertTrue(c[0].startswith('No sequence was inferred homologous'))
 
-    @mock.patch("rna_blast_analyze.BR_core.predict_structures.rnafold", side_effect=exceptions.AmbiguousQuerySequenceException())
-    def test_nh_ext(self, callMock):
+    @mock.patch("rna_blast_analyze.BR_core.predict_structures.rnafold_fasta", side_effect=exceptions.AmbiguousQuerySequenceException())
+    def test_nh_ext2(self, callMock):
         self.func_args['prediction_method'] = 'rnafold'
         a, b, c = repredict_structures_for_homol_seqs(**self.func_args)
         self.assertIsNone(a)

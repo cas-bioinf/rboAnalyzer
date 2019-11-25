@@ -6,7 +6,6 @@ import rna_blast_analyze.BR_core.BA_support as BA_support
 import rna_blast_analyze.BR_core.extend_hits
 from rna_blast_analyze.BR_core.infer_homology import infer_homology
 from rna_blast_analyze.BR_core import exceptions
-import rna_blast_analyze.BR_core.luncher
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -147,7 +146,7 @@ def extend_simple_core(analyzed_hits, query, args_inner, all_short, multi_query,
             skip_missing=args_inner.skip_missing,
             msgs=analyzed_hits.msgs,
         )
-    elif args_inner.db_type in ["fasta", "gb", "server"]:
+    elif args_inner.db_type in ["fasta", "gb", "server", "entrez"]:
         shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits_from_fasta(
             all_short,
             args_inner.blast_db,
@@ -157,6 +156,8 @@ def extend_simple_core(analyzed_hits, query, args_inner, all_short, multi_query,
             skip_missing=args_inner.skip_missing,
             msgs=analyzed_hits.msgs,
             format=args_inner.db_type,
+            entrez_email=args_inner.entrez,
+            blast_input_file=args_inner.blast_in,
         )
     else:
         raise exceptions.IncorrectDatabaseChoice()
@@ -178,13 +179,14 @@ def extend_simple_core(analyzed_hits, query, args_inner, all_short, multi_query,
             analyzed_hits.hits.append(_out)
         except AssertionError as e:
             exp_hit.annotations['msgs'] += [str(e)]
-            analyzed_hits.hits_failed.append(exp_hit)
+            analyzed_hits.hits_failed.append(BA_support.Subsequences(exp_hit))
         except exceptions.UnknownStrand as e:
             exp_hit.annotations['msgs'] += [str(e)]
-            analyzed_hits.hits_failed.append(exp_hit)
+            analyzed_hits.hits_failed.append(BA_support.Subsequences(exp_hit))
         except Exception as e:
             ml.error("Unexpected error when extending with 'simple'.")
             exp_hit.annotations['msgs'] += [str(e)]
+            analyzed_hits.hits_failed.append(BA_support.Subsequences(exp_hit))
 
     if len(analyzed_hits.hits) == 0:
         ml.error(

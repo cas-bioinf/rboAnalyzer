@@ -120,7 +120,7 @@ def extend_locarna_core(analyzed_hits, query, args_inner, all_short, multi_query
             skip_missing=args_inner.skip_missing,
             msgs=analyzed_hits.msgs,
         )
-    elif args_inner.db_type in ["fasta", "gb", "server"]:
+    elif args_inner.db_type in ["fasta", "gb", "server", "entrez"]:
         shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits_from_fasta(
             all_short,
             args_inner.blast_db,
@@ -130,6 +130,8 @@ def extend_locarna_core(analyzed_hits, query, args_inner, all_short, multi_query
             skip_missing=args_inner.skip_missing,
             msgs=analyzed_hits.msgs,
             format=args_inner.db_type,
+            entrez_email=args_inner.entrez,
+            blast_input_file=args_inner.blast_in,
         )
     else:
         raise exceptions.IncorrectDatabaseChoice()

@@ -560,7 +560,6 @@ def _parse_features(f, txt):
 
     in both cases, they may be multiline
 
-    :param file_handle:
     :param txt: str
     :return:
     """

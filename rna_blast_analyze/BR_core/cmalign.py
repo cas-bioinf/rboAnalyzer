@@ -1,7 +1,7 @@
 import os
 import re
 from io import StringIO
-from subprocess import call, check_output
+from subprocess import call
 from tempfile import mkstemp, TemporaryFile
 import logging
 import gzip
@@ -195,10 +195,18 @@ def cm_strucutre2br(seq):
 
 
 class RfamInfo(object):
-    def __init__(self):
-        self.rfam_dir = CONFIG.rfam_dir
+    def __init__(self, rfamdir=None, rfamurl=None):
+        if rfamdir is None:
+            self.rfam_dir = CONFIG.rfam_dir
+        else:
+            self.rfam_dir = rfamdir
+
+        if rfamurl is None:
+            self.url = CONFIG.rfam_url
+        else:
+            self.url = rfamurl
+
         self.rfam_file_name = 'Rfam.cm'
-        self.url = CONFIG.rfam_url
         self.gzname = 'Rfam.cm.gz'
         self.file_path = os.path.join(self.rfam_dir, self.rfam_file_name)
 

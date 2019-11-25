@@ -81,7 +81,11 @@ def me_centroid_homfold(fasta2predict, fasta_homologous_seqs, params=None):
 def centroid_homfold_fast(all_seqs, query, all_seqs_fasta, n, centroid_homfold_params, len_diff):
     ml.debug(fname())
 
-    homologous_file = centroid_homfold_fast_prep(all_seqs, query, n, len_diff)
+    selected_seqs = centroid_homfold_fast_prep(all_seqs, query, n, len_diff)
+
+    ch, homologous_file = mkstemp(prefix='rba_', suffix='_74', dir=CONFIG.tmpdir)
+    with os.fdopen(ch, 'w') as h:
+        SeqIO.write(selected_seqs, h, 'fasta')
 
     structures, _ = me_centroid_homfold(all_seqs_fasta, homologous_file, params=centroid_homfold_params)
     BA_support.remove_one_file_with_try(homologous_file)
@@ -100,12 +104,7 @@ def centroid_homfold_fast_prep(all_seqs, query, n, len_diff):
 
     nr_na_ld = BA_support.sel_seq_simple(all_seqs, query, len_diff)
     nr_na_ld_n = nr_na_ld[:int(n)]
-
-    ch, ch_hom = mkstemp(prefix='rba_', suffix='_74', dir=CONFIG.tmpdir)
-    with os.fdopen(ch, 'w') as h:
-        SeqIO.write(nr_na_ld_n, h, 'fasta')
-
-    return ch_hom
+    return nr_na_ld_n
 
 
 def centroid_homfold_select_best(first_structures):

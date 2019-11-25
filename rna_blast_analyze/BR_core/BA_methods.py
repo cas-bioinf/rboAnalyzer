@@ -28,6 +28,8 @@ class BlastSearchRecompute(object):
         self.multi_query = False
         self.msgs = []
 
+        annotate_ambiguos_base(self.query)
+
     def copy_hits(self):
         hits = deepcopy(self.hits)
         for hit in hits:
@@ -215,6 +217,9 @@ class HitList(list):
     def append(self, p_object):
         if not isinstance(p_object, Subsequences):
             raise Exception('passed object is not of expected class (Subsequences)')
+        if p_object.extension is not None and 'ambiguous' not in p_object.extension.annotations:
+            annotate_ambiguos_base(p_object.extension)
+
         super(HitList, self).append(p_object)
 
 

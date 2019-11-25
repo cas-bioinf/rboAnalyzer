@@ -97,6 +97,18 @@ def two_files_input(fasta_structures, fasta_reference):
     return distances
 
 
+def RNAfold(seq):
+    return RNA.fold(seq)
+
+
+def compute_RNAfold(sequences, threads=1):
+    if threads == 1:
+        return [RNAfold(seq) for seq in sequences]
+    else:
+        with Pool(processes=threads) as pool:
+            return pool.map(RNAfold, sequences)
+
+
 if __name__ == '__main__':
     """
     begin computation and print structures

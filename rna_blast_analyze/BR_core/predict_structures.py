@@ -24,7 +24,7 @@ from rna_blast_analyze.BR_core.infer_homology import alignment_column_conservati
 from rna_blast_analyze.BR_core.par_distance import compute_distances
 from rna_blast_analyze.BR_core.stockholm_parser import read_st, trim_cmalign_sequence_by_refseq_one_seq
 from rna_blast_analyze.BR_core import exceptions
-from rna_blast_analyze.BR_core.viennaRNA import rnafold
+from rna_blast_analyze.BR_core.viennaRNA import rnafold_fasta
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -666,7 +666,7 @@ def rnafold_prediction(fasta2predict, params=''):
     fd, structure_output_file = mkstemp(prefix='rba_', suffix='_54', dir=CONFIG.tmpdir)
     os.close(fd)
 
-    structure_output_file = rnafold(fasta2predict, structure_output_file, params)
+    structure_output_file = rnafold_fasta(fasta2predict, structure_output_file, params)
 
     structures = read_seq_str(structure_output_file)
     remove_one_file_with_try(structure_output_file)

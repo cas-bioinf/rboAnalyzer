@@ -16,18 +16,19 @@ from matplotlib import colors, cm
 ml = logging.getLogger(__name__)
 
 
-def rog_cmap():
-    my_colors = [
-        '#E24B2D',
-        '#FFB916',
-        '#7AD84B'
-    ]
+def rog_cmap(colcodes):
     cmap_rog = colors.LinearSegmentedColormap.from_list(
         name='rog',
-        colors=[colors.hex2color(c) for c in my_colors],
+        colors=[colors.hex2color(c) for c in colcodes],
         N=1024
     )
     return cmap_rog
+
+
+reference_colors = {
+    'Homologous': '#7AD84B',
+    'Not homologous': '#E24B2D'
+}
 
 
 def write_html_output(datain, template_path=''):
@@ -54,7 +55,7 @@ def write_html_output(datain, template_path=''):
             show_gene_browser=datain.args.show_gene_browser,
             len=len,
         )
-        return html_str
+        return html_str.encode('utf8')
     except TemplateError:
         ml.error("Jinja rendering error. Please check if the template is available and correct.")
         raise
@@ -81,8 +82,8 @@ def _prep_hit_name(id, desc):
 
 
 def _prepare_body(data):
-    rog = rog_cmap()
-    norm = colors.Normalize(vmin=0, vmax=data.query.annotations['cmstat']['bit_sc']/2, clip=True)
+    rog = rog_cmap(['#9E9414', reference_colors['Homologous']])
+    norm = colors.Normalize(vmin=0, vmax=len(data.query.seq)*0.7, clip=True)
     mm = cm.ScalarMappable(norm=norm, cmap=rog)
 
     # rebuild original order of hits in case there was missing one:
@@ -134,25 +135,35 @@ def _prepare_body(data):
             rr['ext_start'] = onehit.best_start
             rr['ext_end'] = onehit.best_end
             rr['pictures'] = _prepare_pictures(ext)
+            rr['h_estimate'] = ext.annotations['homology_estimate']
 
-            # estimate the homology
-            # q_sc = data.query.annotations['cmstat']['bit_sc']
-            if h_bit_sc < 0:
-                h_estimate = 'Not homologous'
-            elif h_bit_sc/lx >= 0.5 and h_bit_sc >= 20:
-                h_estimate = 'Homologous'
+            if ext.annotations['homology_estimate'] == 'Uncertain':
+                rr['h_color'] = colors.rgb2hex(mm.to_rgba(h_bit_sc))
+                rr['estimate_pointer'] = u' ↴'
             else:
-                h_estimate = 'Uncertain'
+                rr['h_color'] = reference_colors[ext.annotations['homology_estimate']]
 
-            rr['h_estimate'] = h_estimate
-            rr['h_color'] = colors.rgb2hex(mm.to_rgba(h_bit_sc))
+            # ==== markers ====
+            extended_marker = ['&mk={}:{}|BestMatch!'.format(onehit.best_start, onehit.best_end)]
 
-            marker = ['&mk={}:{}|BestMatch!'.format(onehit.best_start, onehit.best_end)]
+            seqview += extended_marker
+            sviewlink += extended_marker
 
-            seqview += marker
-            sviewlink += marker
+            if data.args.show_HSP:
+                br = onehit.source.annotations['blast'][1]
+                if br.sbjct_start < br.sbjct_end:
+                    bs = br.sbjct_start
+                    be = br.sbjct_end
+                else:
+                    bs = br.sbjct_end
+                    be = br.sbjct_start
+                hsp_marker = ['&mk={}:{}|HSP!'.format(bs, be)]
+
+                seqview += hsp_marker
+                sviewlink += hsp_marker
+
         else:
-            rr['h_color'] = colors.rgb2hex(mm.to_rgba(0))
+            rr['h_color'] = reference_colors['Not homologous']
 
         # create seqviewurl here
         es = onehit.source.annotations['extended_start']

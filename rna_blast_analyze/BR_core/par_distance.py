@@ -9,3 +9,4 @@ try:
 except ImportError:
     ml.info('Import of RNAdistance from RNAlib failed. Using commandline version.')
     from rna_blast_analyze.BR_core.par_distance_no_RNAlib import *
+    from rna_blast_analyze.BR_core.viennaRNA import RNAfold, wrap_RNAfold

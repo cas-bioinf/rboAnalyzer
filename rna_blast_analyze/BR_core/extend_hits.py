@@ -1,41 +1,28 @@
 import os
-import re
 import logging
 from subprocess import Popen, PIPE
-from tempfile import mkstemp
+from tempfile import mkstemp, TemporaryFile, gettempdir
 import sys
 
 from Bio import SeqIO
 
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
-from rna_blast_analyze.BR_core.BA_support import remove_files_with_try
+from rna_blast_analyze.BR_core.BA_support import remove_files_with_try, match_acc, remove_one_file_with_try
+from rna_blast_analyze.BR_core import exceptions
+from Bio import Entrez
+from http.client import HTTPException
+from math import floor
 
 ml = logging.getLogger('rboAnalyzer')
 
 
-def load_genome(root_dir, accession, start, end):
-    ac = accession.split('.')[0]
-    dp = os.path.join(root_dir, *list(ac[-4:]))
-    ff = os.path.join(dp, accession + '.fasta')
-    return next(SeqIO.parse(ff, format='fasta'))[start:end]
-
-
-def match_acc(hit_id, blast_regexp):
-    # get a index name to the blastdb
-    hname = re.search(blast_regexp, hit_id)
-
-    if hname and 'pdb|' in hit_id:
-        # case when sequence is from pdb e.g. gi|1276810701|pdb|5VT0|R
-        # but it is available in the database under 5VT0_R
-        bdb_accession = hname.group().replace('|', '_')
-    elif hname is not None:
-        bdb_accession = hname.group()
-    else:
-        msg = 'Provided regexp returned no result for {}.\n' \
-              'Please provide regular expression capturing sequence id.'.format(hit_id)
-        raise RuntimeError(msg)
-    return bdb_accession
+def fetch_accession_range(acc: str, start: int, stop: int):
+    with Entrez.efetch(db='nucleotide', id=acc, rettype='fasta', retmode='text', seq_start=start, seq_stop=stop) as h, \
+            TemporaryFile(mode='w+') as temp:
+        temp.write(h.read())
+        temp.seek(0)
+        return SeqIO.read(temp, format='fasta')
 
 
 def expand_hits(hits, blast_db, query_length, extra=0, blast_regexp=None, skip_missing=False, msgs=None):
@@ -100,7 +87,7 @@ def expand_hits(hits, blast_db, query_length, extra=0, blast_regexp=None, skip_m
 
                 try:
                     bdb_accession = match_acc(hit[0], blast_regexp)
-                except RuntimeError as e:
+                except exceptions.AccessionMatchException as e:
                     remove_files_with_try([temp_filename, blast_tempfile])
                     raise e
 
@@ -157,13 +144,18 @@ def expand_hits(hits, blast_db, query_length, extra=0, blast_regexp=None, skip_m
     with open(blast_tempfile, 'r') as bf:
         index = 0
         for parsed_record in SeqIO.parse(bf, 'fasta'):
-            obtained_ids.add(parsed_record.id)
-            index = _get_correct_blast_hit(parsed_record, loc, index, skip=skip_missing)
+            record_id = parsed_record.id.split(':')[0]
+
+            if parsed_record.description.startswith(parsed_record.id):
+                parsed_record.description = parsed_record.description[len(parsed_record.id):].strip()
+
+            obtained_ids.add(record_id)
+            index = _get_correct_blast_hit(record_id, loc, index, skip=skip_missing)
 
             parsed_record.annotations = loc[index]
             parsed_record.annotations['msgs'] = []
             # add uid to ensure that all hits are unique
-            parsed_record.id = 'uid:' + str(index) + '|' + parsed_record.id
+            parsed_record.id = 'uid:' + str(index) + '|' + record_id
 
             if loc[index]['trimmed_ss']:
                 if loc[index]['super_start'] + len(parsed_record.seq) < loc[index]['super_end'] + loc[index]['super_start']:
@@ -180,13 +172,13 @@ def expand_hits(hits, blast_db, query_length, extra=0, blast_regexp=None, skip_m
                     if loc[index]['super_start'] + len(parsed_record.seq) - 1 < loc[index]['extended_end']:
                         parsed_record.annotations['trimmed_ee'] = True
 
-            msgsub = '{}: Sequence cannot be extended sufficiently'.format(parsed_record.id)
+            msgsub = '{}: Sequence cannot be extended sufficiently'.format(record_id)
             if parsed_record.annotations['trimmed_ss']:
                 msgwarn = msgsub + '. Missing {} nt upstream in the genome.'.format(parsed_record.annotations['super_start'])
                 parsed_record.annotations['msgs'].append(msgwarn)
                 ml.warning(msgwarn)
             if parsed_record.annotations['trimmed_se']:
-                msgwarn = msgsub + '. Missing nt downstream in the genome.'.format(parsed_record.id)
+                msgwarn = msgsub + '. Missing nt downstream in the genome.'.format(record_id)
                 parsed_record.annotations['msgs'].append(msgwarn)
                 ml.warning(msgwarn)
             if parsed_record.annotations['trimmed_es']:
@@ -215,12 +207,40 @@ def expand_hits(hits, blast_db, query_length, extra=0, blast_regexp=None, skip_m
     return exp_hits, strand
 
 
-def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=None, skip_missing=False, msgs=None, format='fasta'):
+def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=None, skip_missing=False, msgs=None, format='fasta', entrez_email=None, blast_input_file=None):
     """takes list of blast.HSP objects and return extended sequences
     :return list of SeqRecord objects (parsed fasta file)
     """
     ml.info('Retrieving sequence neighborhoods for blast hits.')
     ml.debug(fname())
+
+    if format == 'server':
+        # conditional import so we don't need pysam for normal usage
+        from rna_blast_analyze.BR_core.load_from_bgzip import load_genome
+
+    if CONFIG.tmpdir is None:
+        temp_entrez_file = os.path.join(
+            gettempdir(), os.path.basename(blast_input_file + '.r-temp_entrez')
+        )
+    else:
+        temp_entrez_file = os.path.join(
+            CONFIG.tmpdir, os.path.basename(blast_input_file + '.r-temp_entrez')
+        )
+
+    if format == 'entrez':
+        try:
+            known_seq_index = SeqIO.index(temp_entrez_file, format='fasta')
+            ml.info("File {} loaded.".format(temp_entrez_file))
+            if len(known_seq_index) == 0:
+                remove_one_file_with_try(temp_entrez_file)
+        except FileNotFoundError:
+            # ignore that we don't have that file (usual)
+            known_seq_index = {}
+        except Exception as e:
+            ml.info("Could not load the temporary file {}.".format(temp_entrez_file))
+            known_seq_index = {}
+    else:
+        known_seq_index = {}
 
     exp_hits = []
     strand = []
@@ -266,7 +286,10 @@ def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=N
         # add blast record
         d['blast'] = hit
 
-        bdb_accession = match_acc(hit[0], blast_regexp)
+        try:
+            bdb_accession = match_acc(hit[0], blast_regexp)
+        except exceptions.AccessionMatchException as e:
+            raise e
 
         d['blast'][0] = bdb_accession
 
@@ -293,13 +316,61 @@ def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=N
         elif format == 'server':
             # only used when server
             parsed_record = load_genome(database, bdb_accession, start - 1, end)
+
+        elif format == 'entrez':
+            prnt_line = '{:3d}% {}'.format(floor(index * 100 / len(hits)), bdb_accession)
+            if index == 0:
+                sys.stdout.write('STATUS: Downloading required sequences from NCBI with entrez.\n')
+                sys.stdout.write('{:50}'.format(prnt_line))
+            else:
+                sys.stdout.write('\r{:50}'.format(prnt_line))
+
+            seq_id = '{}:{}-{}'.format(bdb_accession, start, end)
+            if seq_id not in known_seq_index:
+                try:
+                    Entrez.email = entrez_email
+                    parsed_record = fetch_accession_range(bdb_accession, start, end)
+
+                    with open(temp_entrez_file, 'a') as tmpf:
+                        SeqIO.write([parsed_record], tmpf, format='fasta')
+
+                    if index == len(hits) - 1:
+                        sys.stdout.write('\r{:50}\n'.format(' Done.'))
+                except HTTPException as e:
+                    msg = 'HTTP exception encountered: {}' \
+                          'Please check your internet connection and availability of NCBI ENTREZ web services.\n ' \
+                          'Also check that the requested accession number "{}" is available in NCBI "nucleotide" database.'.format(
+                        e, bdb_accession)
+                    if skip_missing:
+                        ml.warning(msg)
+                        continue
+                    else:
+                        ml.error(msg)
+                        sys.exit(1)
+                except ValueError:
+                    msg = 'Received malformed fasta file. ' \
+                          'Please check that requested accession number "{}" is available in NCBI nucleotide database.'.format(
+                        bdb_accession)
+                    if skip_missing:
+                        ml.warning(msg)
+                        continue
+                    else:
+                        ml.error(msg)
+                        sys.exit(1)
+            else:
+                parsed_record = known_seq_index[seq_id]
         else:
             raise NotImplementedError
+
+        record_id = parsed_record.id.split(':')[0]
+
+        if parsed_record.description.startswith(parsed_record.id):
+            parsed_record.description = parsed_record.description[len(parsed_record.id):].strip()
 
         parsed_record.annotations = d
         parsed_record.annotations['msgs'] = []
         # add uid to ensure that all hits are unique
-        parsed_record.id = 'uid:' + str(index) + '|' + parsed_record.id
+        parsed_record.id = 'uid:' + str(index) + '|' + record_id
 
         if d['trimmed_ss']:
             if d['super_start'] + len(parsed_record.seq) < d['super_end'] + d['super_start']:
@@ -338,6 +409,10 @@ def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=N
 
         exp_hits.append(parsed_record)
 
+    # ==== Remove the entrez tempfile =====
+    # here we have all the sequences and we can safely delete the tempfile
+    if format == 'entrez':
+        remove_one_file_with_try(temp_entrez_file)
     return exp_hits, strand
 
 
@@ -352,13 +427,13 @@ def _positive_index(o):
     return o
 
 
-def _get_correct_blast_hit(db_rec, loc, index, skip):
-    if loc[index]['blast'][0] == db_rec.id:
+def _get_correct_blast_hit(id, loc, index, skip):
+    if loc[index]['blast'][0] == id:
         return index
-    elif loc[index]['blast'][0] != db_rec.id and skip:
+    elif loc[index]['blast'][0] != id and skip:
         msgwarn = 'Sequence {} not found in provided db. Skipping.'.format(loc[index]['blast'][0])
         ml.warning(msgwarn)
-        return _get_correct_blast_hit(db_rec, loc, index + 1, skip)
+        return _get_correct_blast_hit(id, loc, index + 1, skip)
     else:
         msgerror = 'Sequence {} not found in provided db. ' \
                    'Please provide correct database or give "--skip_missing" flag.'.format(

@@ -43,7 +43,7 @@ def _run_hybrid_ss_min_single(file_path, P, W, M):
 
         rt = call(
             cmd3,
-            cwd=''.join(os.path.join(os.path.split(file_path)[:-1])),
+            cwd=os.path.dirname(file_path),
             stdout=tmp,
             stderr=tmp
         )
