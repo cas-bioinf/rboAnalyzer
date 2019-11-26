@@ -67,7 +67,8 @@ conda install -c conda-forge -c bioconda -c schwarz.marek rboanalyzer
   # or
   pip3 install --upgrade pip --user
   ```
-- ncbi-blast+ >= 2.6, < 2.8.1 [link](http://ftp.ncbi.nih.gov/blast/executables/blast+/2.7.1/)
+- ncbi-blast+ >= 2.8.1 [link](http://ftp.ncbi.nih.gov/blast/executables/blast+/2.9.0/)
+  (The pipeline can use blast from version 2.6.0, however this version is not compatible with blast dbv5)
 - locarna >= 1.9.2, <2 [link](https://github.com/s-will/LocARNA/releases/tag/v1.9.2.2)
 - infernal >= 1.1, <2 [link](http://eddylab.org/infernal/)
 - clustalo >= 1.2.4, <2 [link](http://www.clustal.org/omega/)

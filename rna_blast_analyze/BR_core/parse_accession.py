@@ -73,25 +73,20 @@ refseq_re = [prefix + r"[0-9A-Z]+\.[0-9]+" for prefix in refseq]
 
 old = [r'ZP_[0-9]{8}\.[0-9]+', r'NS_[0-9]{6}\.[0-9]+']
 
-pdb = ["[0-9A-Z]{4}[_|][0-9A-Z]{1,2}",]
+# accommodate up to 4 characters chain id (https://www.wwpdb.org/deposition/preparing-pdbx-mmcif-files)
+pdb_on_steroids = [r"(gi\|\d+\|)?(?(1))((?<=\|pdb\|)[0-9A-Z]{4}[_|][0-9A-Za-z]{1,4}|^[0-9A-Z]{4}[_|][0-9A-Za-z]{1,4})"]
 
 exceptions = [
     '1KPD',  # although it has chain, in the NCBI nt database it is listed without chain
     r'GPS_[0-9]{9}\.[0-9]+',  # from refseq
 ]
 
-known_acc_formats = genbank_nucl + genbank_wgs + refseq_re + genbank_mga + genbank_prot + pdb + genbank_wgs_scafolds + exceptions + old
+known_acc_formats = genbank_nucl + genbank_wgs + refseq_re + genbank_mga + genbank_prot + genbank_wgs_scafolds + exceptions + old + pdb_on_steroids
 accession_regex = '|'.join(known_acc_formats)
 compiled_accession_regex = re.compile(accession_regex)
 
 
 if __name__ == '__main__':
-
-    _javascript_xml_re = '(' + accession_regex + ')(?=\|?</Hit_id>)'
-    _javascript_txt_re = '^>(' + accession_regex
-
-    print(_javascript_xml_re.__repr__())
-    print(_javascript_txt_re.__repr__())
 
     import sys
     import gzip
