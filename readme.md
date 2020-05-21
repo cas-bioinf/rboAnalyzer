@@ -67,7 +67,7 @@ conda install -c conda-forge -c bioconda -c schwarz.marek rboanalyzer
   # or
   pip3 install --upgrade pip --user
   ```
-- ncbi-blast+ >= 2.8.1 [link](http://ftp.ncbi.nih.gov/blast/executables/blast+/2.9.0/)
+- ncbi-blast+ >= 2.8.1, <2.10 [link](http://ftp.ncbi.nih.gov/blast/executables/blast+/2.9.0/)
   (The pipeline can use blast from version 2.6.0, however this version is not compatible with blast dbv5)
 - locarna >= 1.9.2, <2 [link](https://github.com/s-will/LocARNA/releases/tag/v1.9.2.2)
 - infernal >= 1.1, <2 [link](http://eddylab.org/infernal/)
@@ -228,6 +228,9 @@ These are:
 
 
 ### Solving issues:
+- __BLAST txt output from WEB not recognized__    
+  Reason: the NCBI changed the `txt` output for the WEB BLAST when they switched to new design. Our txt parser is compatible with commandline `txt` output (`-outfmt 0`) which was also the `txt` output for the WEB BLAST.   
+  Solution: Download the `xml` output or switch to the "Traditional result page" and download `txt` there.
 - __One or more records not found__   
   Reason: the blastdbcmd was not able to find sequence(s) with respective id(s) in provided database.
   This is due to inconsistency between the sequence accessions and the BLAST database.
