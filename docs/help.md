@@ -37,7 +37,7 @@ The pipeline has 3 methods for estimating the full-length sequences from BLAST H
      the query sequence with Locarna algorithm. The sequence
      aligned to the query is considered to be the estimated full-length sequence.
 
-3) __joined__
+3) __meta__
 
     Here the two aforementioned methods are combined and estimated full-length sequences
      are scored with covariance model. The better scoring sequence is chosen.
@@ -80,7 +80,7 @@ This way the alignment is anchored and the Locarna algorithm can align
 The estimated full-length sequence is the continuous part of _supersequence_ aligned to the query sequence
  (i.e. the subject sequence between the bases, inclusive, on subject sequence matching to the 5' terminal and 3' terminal bases).
 
-#### add joined)
+#### add meta)
 This approach combines the __simple__ and __locarna__. It computes both and 
  for each HSPs it chooses the estimated full-length sequence with higher score to covariance model.
 
