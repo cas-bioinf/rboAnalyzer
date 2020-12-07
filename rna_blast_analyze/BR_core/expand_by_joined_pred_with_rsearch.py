@@ -12,7 +12,7 @@ from rna_blast_analyze.BR_core.fname import fname
 ml = logging.getLogger('rboAnalyzer')
 
 
-def extend_meta_core(analyzed_hits, query, args_inner, all_short, multi_query, iteration, ih_model):
+def extend_meta_core(analyzed_hits, query, args_inner, all_short, multi_query, iteration, ih_model, timeout=None):
     ml.debug(fname())
     # update params if different config is requested
     CONFIG.override(tools_paths(args_inner.config_file))
@@ -45,7 +45,7 @@ def extend_meta_core(analyzed_hits, query, args_inner, all_short, multi_query, i
     analyzed_hits_locarna = deepcopy(analyzed_hits)
 
     analyzed_hits_simple, _, _, _ = extend_simple_core(analyzed_hits_simple, query, blast_args, b_all_short, multi_query, iteration, ih_model)
-    analyzed_hits_locarna, _, _, _ = extend_locarna_core(analyzed_hits_locarna, query, locarna_args, l_all_short, multi_query, iteration, ih_model)
+    analyzed_hits_locarna, _, _, _ = extend_locarna_core(analyzed_hits_locarna, query, locarna_args, l_all_short, multi_query, iteration, ih_model, timeout=timeout)
 
     # add cmstat to query
     analyzed_hits.query = analyzed_hits_simple.query

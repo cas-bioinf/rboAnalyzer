@@ -35,45 +35,12 @@ genbank_wgs_scafolds = [
 
 # ===== RefSeq format =====
 # refseq from: https://www.ncbi.nlm.nih.gov/books/NBK21091/table/ch18.T.refseq_accession_numbers_and_mole/?report=objectonly
-# they have unrerscore(underbar)
-# AC_	Genomic	Complete genomic molecule, usually alternate assembly
-# NC_	Genomic	Complete genomic molecule, usually reference assembly
-# NG_	Genomic	Incomplete genomic region
-# NT_	Genomic	Contig or scaffold, clone-based or WGSa
-# NW_	Genomic	Contig or scaffold, primarily WGSa
-# NZ_b	Genomic	Complete genomes and unfinished WGS data
-# NM_	mRNA	Protein-coding transcripts (usually curated)
-# NR_	RNA	Non-protein-coding transcripts
-# XM_c	mRNA	Predicted model protein-coding transcript
-# XR_c	RNA	Predicted model non-protein-coding transcript
-# AP_	Protein	Annotated on AC_ alternate assembly
-# NP_	Protein	Associated with an NM_ or NC_ accession
-# YP_c	Protein	Annotated on genomic molecules without an instantiated
-# transcript record
-# XP_c	Protein	Predicted model, associated with an XM_ accession
-# WP_	Protein	Non-redundant across multiple strains and species
-refseq = [
-    'AC_',
-    'NC_',
-    'NG_',
-    'NT_',
-    'NW_',
-    'NZ_',
-    'NM_',
-    'NR_',
-    'XM_',
-    'XR_',
-    'AP_',
-    'NP_',
-    'YP_',
-    'XP_',
-    'WP_',
-]
-refseq_re = [prefix + r"[0-9A-Z]+\.[0-9]+" for prefix in refseq]
+# they have underscore in thrid position
+
+refseq_re = [r"[A-Z]{2}_[0-9A-Z]+\.[0-9]+"]
 
 old = [r'ZP_[0-9]{8}\.[0-9]+', r'NS_[0-9]{6}\.[0-9]+']
 
-# accommodate up to 4 characters chain id (https://www.wwpdb.org/deposition/preparing-pdbx-mmcif-files)
 pdb_on_steroids = [r"(gi\|\d+\|)?(?(1))((?<=\|pdb\|)[0-9A-Z]{4}[_|][0-9A-Za-z]{1,4}|^[0-9A-Z]{4}[_|][0-9A-Za-z]{1,4})"]
 
 exceptions = [
@@ -87,6 +54,16 @@ compiled_accession_regex = re.compile(accession_regex)
 
 
 if __name__ == '__main__':
+    jxre = genbank_nucl + genbank_wgs + refseq_re + genbank_mga + genbank_prot + genbank_wgs_scafolds + exceptions + old + [r"[0-9A-Z]{4}\|[0-9A-Za-z]{1,4}"]
+    jxre_txt = '|'.join(jxre)
+    _javascript_xml_re = '(' + jxre_txt + ')(?=\|[A-Z0-9_]*</Hit_id>)'
+
+    tre = genbank_nucl + genbank_wgs + refseq_re + genbank_mga + genbank_prot + genbank_wgs_scafolds + exceptions + old + [r"[0-9A-Z]{4}_[0-9A-Za-z]{1,4}"]
+    tre_txt = '|'.join(tre)
+    _javascript_txt_re = '^>(' + tre_txt + ')'
+
+    print(_javascript_xml_re.__repr__())
+    print(_javascript_txt_re.__repr__())
 
     import sys
     import gzip

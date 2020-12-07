@@ -29,6 +29,10 @@ class SubprocessException(Exception):
         self.errors = errors
 
 
+class MissingCMexception(Exception):
+    pass
+
+
 class RNAfoldException(SubprocessException):
     pass
 

@@ -9,7 +9,6 @@ from tempfile import mkstemp, TemporaryFile
 import shlex
 import sys
 
-import numpy as np
 from Bio import SeqIO, AlignIO
 from Bio.Alphabet import IUPAC
 from Bio.Blast import NCBIXML
@@ -18,9 +17,8 @@ from Bio.SeqRecord import SeqRecord
 
 from rna_blast_analyze.BR_core.config import CONFIG
 from rna_blast_analyze.BR_core.fname import fname
-from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt as blast_minimal_parser
+from rna_blast_analyze.BR_core.parser_to_bio_blast import blast_parse_txt
 from rna_blast_analyze.BR_core import exceptions
-from rna_blast_analyze.BR_core.parse_accession import compiled_accession_regex
 
 # idiotic matplotlib
 
@@ -112,16 +110,21 @@ def parse_seq_str(fid):
         k = k.rstrip('\n')
 
         if '>' == k[0]:
-            name = k[1:].strip()
+            name = k[1:].strip().split(' ')
+            id = name[0]
+            description = ' '.join(name[1:])
             seq = fid.readline().rstrip('\n')
             structure = fid.readline().rstrip('\n').rsplit(' ')[0]
         else:
-            name = str(c)
+            id = str(c)
             seq = k
+            description = ''
             structure = fid.readline().rstrip('\n').rsplit(' ')[0]
-        oi = SeqRecord(Seq(seq, IUPAC.IUPACAmbiguousRNA),
-                       id=name,
-                       name=name)
+        oi = SeqRecord(
+            Seq(seq),
+            id=id,
+            description=description
+        )
         oi.annotations['sss'] = ['ss0']
         oi.letter_annotations['ss0'] = structure
         yield oi
@@ -193,37 +196,6 @@ def desanitize_fasta_names_in_seqrec_list(seqrec_list, used_dict):
 
         reverted.append(ns)
     return reverted
-
-
-def select_sequences_from_similarity_rec(dist_mat: np.ndarray, sim_threshold_percent=90) -> list:
-    """
-    :param dist_mat: distmat table, by default obtained from read_clustal_distmat_file, values in percent
-    :param sim_threshold_percent: threshold for similarity in percent
-    :return:
-    """
-    ml.debug(fname())
-    # dists = np.triu(dist_mat.as_matrix(), 1)          # removes unwanted similarities
-    if dist_mat is None:
-        return [0]
-    dists = dist_mat.transpose()
-    # row, col = where(dists > sim_threshold_percent) # determine where the similarities are
-    include = set()
-    exclude = set()
-    a = np.array(range(len(dists)))
-    for i, r in enumerate(dists):
-        pr = r[~np.isnan(r)]
-        pa = a[~np.isnan(r)]
-        if (i in exclude) | (any(pr >= sim_threshold_percent)):
-            pu = np.where(pr >= sim_threshold_percent)
-            u = pa[pu]
-            if i not in exclude:
-                include |= {i}
-            to_ex = set(u.tolist()) - include
-            exclude |= to_ex                         # union operation
-        else:
-            include |= {i}
-
-    return sorted(include)
 
 
 def run_muscle(fasta_file, out_file=None, muscle_params='', reorder=True):
@@ -342,12 +314,13 @@ def blast_in(blast_input_file, b='guess'):
         sys.exit(1)
 
 
-def blast_in_handle(handle, b='guess'):
+def blast_in_handle(handle, b='guess', log=True):
     """
     gueses blast format
     :returns list of SearchIO objects, one set of hits per per query sequence per field
     """
-    ml.debug(fname())
+    if log:
+        ml.debug(fname())
     multiq = []
     if b == 'guess':
         # gues the format
@@ -356,19 +329,22 @@ def blast_in_handle(handle, b='guess'):
         if re.search(r'^BLASTN \d+\.\d+\.\d+', l):
             # blast object prob plaintext
             b_type = 'plain'
-            ml.info('Inferred BLAST format: txt.')
+            if log:
+                ml.info('Inferred BLAST format: txt.')
         elif re.search(r'<\?xml version', l):
             # run xml parser
             b_type = 'xml'
-            ml.info('Inferred BLAST format: xml.')
+            if log:
+                ml.info('Inferred BLAST format: xml.')
         else:
-            ml.error('Could not guess the BLAST format, preferred format is NCBI xml.')
+            if log:
+                ml.error('Could not guess the BLAST format, preferred format is NCBI xml.')
             return None
     else:
         b_type = b
 
     if b_type == 'plain':
-        for p in blast_minimal_parser(handle):
+        for p in blast_parse_txt(handle):
             multiq.append(p)
 
         return multiq
@@ -379,7 +355,8 @@ def blast_in_handle(handle, b='guess'):
 
         return multiq
     else:
-        ml.error('BLAST type not known: allowed types: plain, xml, guess')
+        if log:
+            ml.error('BLAST type not known: allowed types: plain, xml, guess')
         return None
 
 

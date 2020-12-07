@@ -1,6 +1,6 @@
 import logging
 import os
-from subprocess import call
+import subprocess
 from tempfile import mkstemp, TemporaryFile
 import shlex
 
@@ -27,7 +27,7 @@ def compute_clustalo_clasic(file, clustalo_params=''):
             '-o', out_path
         ]
         ml.debug(cmd)
-        r = call(cmd, stdout=tmp, stderr=tmp)
+        r = subprocess.call(cmd, stdout=tmp, stderr=tmp)
 
         if r:
             msgfail = 'Call to clustalo failed.'
@@ -43,19 +43,25 @@ def compute_alifold(msa_file, alifold_params=''):
     ml.info('Running RNAalifold.')
     ml.debug(fname())
     fd, out_path = mkstemp(prefix='rba_', suffix='_02', dir=CONFIG.tmpdir)
-    os.close(fd)
 
-    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
-        cmd = '{} --noPS -f C {} < {} > {}'.format(
-            shlex.quote('{}RNAalifold'.format(CONFIG.viennarna_path)),
-            ' '.join([shlex.quote(i) for i in shlex.split(alifold_params)]),
-            shlex.quote(msa_file),
-            shlex.quote(out_path)
-        )
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp, os.fdopen(fd, 'w') as output, open(msa_file, 'r') as inp:
+        cmd = [
+            '{}RNAalifold'.format(CONFIG.viennarna_path),
+            '--noPS',
+            '-f', 'C',
+        ] + shlex.split(alifold_params)
         ml.debug(cmd)
-        r = call(cmd, shell=True, stderr=tmp, stdout=tmp)
 
-        if r:
+        p = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=output,
+            stderr=tmp,
+            universal_newlines=True
+        )
+        p.communicate(input=inp.read())
+
+        if p.returncode:
             msgfail = 'RNAalifold failed.'
             ml.error(msgfail)
             tmp.seek(0)
@@ -64,7 +70,7 @@ def compute_alifold(msa_file, alifold_params=''):
         return out_path
 
 
-def compute_refold(alig_file, cons_file):
+def compute_refold(alig_file, cons_file, timeout=None):
     """
     runs refold program
     :param alig_file: MSA alignment file in clustal format
@@ -73,20 +79,24 @@ def compute_refold(alig_file, cons_file):
     """
     ml.debug(fname())
     fd, out_path = mkstemp(prefix='rba_', suffix='_03', dir=CONFIG.tmpdir)
-    os.close(fd)
-    cmd = '{} {} {} > {}'.format(
-        shlex.quote('{}refold.pl'.format(CONFIG.refold_path)),
-        shlex.quote(alig_file),
-        shlex.quote(cons_file),
-        shlex.quote(out_path)
-    )
+    cmd = [
+        '{}refold.pl'.format(CONFIG.refold_path),
+        alig_file,
+        cons_file
+    ]
     ml.debug(cmd)
-    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
-        r = call(cmd, shell=True, stdout=tmp, stderr=tmp)
-        if r:
-            msgfail = 'Call to refold.pl failed.'
-            ml.error(msgfail)
-            tmp.seek(0)
-            raise exceptions.RefoldException(msgfail, tmp.read())
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp, os.fdopen(fd, 'w') as output:
+        with subprocess.Popen(cmd, stdout=output, stderr=tmp) as p:
+            try:
+                p.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                p.kill()
+                p.wait()
+                raise
+            if p.returncode:
+                msgfail = 'Call to refold.pl failed.'
+                ml.error(msgfail)
+                tmp.seek(0)
+                raise exceptions.RefoldException(msgfail, tmp.read())
 
         return out_path

@@ -29,7 +29,7 @@ def _run_hybrid_ss_min_wrapper(seq, P, W, M):
         remove_one_file_with_try(tmp_fasta)
 
 
-def _run_hybrid_ss_min_single(file_path, P, W, M):
+def _run_hybrid_ss_min_single(file_path, P, W, M, timeout=None):
     with TemporaryFile(mode='w', encoding='utf-8') as tmp:
         cmd3 = [
             '{}hybrid-ss-min'.format(CONFIG.mfold_path),
@@ -45,7 +45,8 @@ def _run_hybrid_ss_min_single(file_path, P, W, M):
             cmd3,
             cwd=os.path.dirname(file_path),
             stdout=tmp,
-            stderr=tmp
+            stderr=tmp,
+            timeout=timeout
         )
 
         if rt:
@@ -73,7 +74,7 @@ def _run_hybrid_ss_min_single(file_path, P, W, M):
         return pred_structures
 
 
-def run_hybrid_ss_min(in_path, mfold=(10, 2, 20), threads=1):
+def run_hybrid_ss_min(in_path, mfold=(10, 2, 20), threads=1, timeout=None):
     """
     forbid lonely pairs when calling hybrid-ss-min, rnashapes cannot work with them
 
@@ -92,7 +93,7 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20), threads=1):
 
     if threads == 1:
         try:
-            suboptimals = _run_hybrid_ss_min_single(in_path, P, W, M)
+            suboptimals = _run_hybrid_ss_min_single(in_path, P, W, M, timeout=timeout)
         except exceptions.HybridssminException as e:
             suboptimals = []
             for seq in SeqIO.parse(in_path, format='fasta'):
@@ -102,7 +103,7 @@ def run_hybrid_ss_min(in_path, mfold=(10, 2, 20), threads=1):
     else:
 
         tuples = [(seq, P, W, M) for seq in SeqIO.parse(in_path, format='fasta')]
-
+        # timeout not used with multiprocessing
         with multiprocessing.Pool(processes=threads) as pool:
             suboptimals = pool.starmap(_run_hybrid_ss_min_wrapper, tuples)
 

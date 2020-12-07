@@ -16,7 +16,7 @@ def f_parser():
     return args
 
 
-def vypocet(oi):
+def run_RNAdistance(oi, timeout=None):
     """
     accepts list or tuple with two structures in dot bracket notation e.g. "(((...)).).."
     """
@@ -44,19 +44,19 @@ def the_main(fp):
     #     dd.append(d)
 
     with Pool() as pool:
-        distances = pool.map(vypocet, fp)
+        distances = pool.map(run_RNAdistance, fp)
         return distances
 
 
-def compute_distances(fp, threads=1):
+def compute_distances(fp, threads=1, timeout=None):
     if threads == 1:
         dist = []
         for pair in fp:
-            dist.append(vypocet(pair))
+            dist.append(run_RNAdistance(pair))
         return dist
     else:
         with Pool(processes=threads) as pool:
-            return pool.map(vypocet, fp)
+            return pool.map(run_RNAdistance, fp)
 
 
 def two_files_input(fasta_structures, fasta_reference):

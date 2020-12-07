@@ -1,18 +1,17 @@
-import copy
 import logging
 import os
 import re
-import unicodedata
 from subprocess import call
 from tempfile import mkstemp, TemporaryFile
 import multiprocessing
 
+import numpy as np
 from Bio import AlignIO, SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from rna_blast_analyze.BR_core.BA_support import read_seq_str, sanitize_fasta_names_in_seqrec_list, \
-    desanitize_fasta_names_in_seqrec_list, run_muscle, remove_one_file_with_try, remove_files_with_try
+    desanitize_fasta_names_in_seqrec_list, run_muscle, remove_one_file_with_try, remove_files_with_try, ml
 from rna_blast_analyze.BR_core.hybrid_ss_min import run_hybrid_ss_min
 from rna_blast_analyze.BR_core.alifold4all import compute_refold, compute_clustalo_clasic, compute_alifold
 from rna_blast_analyze.BR_core.cmalign import build_stockholm_from_clustal_alig, run_cmalign_on_fasta, cm_strucutre2br
@@ -22,7 +21,7 @@ from rna_blast_analyze.BR_core.decorators import timeit_decorator
 from rna_blast_analyze.BR_core.fname import fname
 from rna_blast_analyze.BR_core.infer_homology import alignment_column_conservation
 from rna_blast_analyze.BR_core.par_distance import compute_distances
-from rna_blast_analyze.BR_core.stockholm_parser import read_st, trim_cmalign_sequence_by_refseq_one_seq
+from rna_blast_analyze.BR_core.stockholm_parser import read_st
 from rna_blast_analyze.BR_core import exceptions
 from rna_blast_analyze.BR_core.viennaRNA import rnafold_fasta
 
@@ -38,7 +37,7 @@ def _parse_first_record_only(file):
 def _repair_consensus_structure_by_maping(consensus_str, mapping, expected_str_len, gap_char=49):
     # provided lengths must be always the same
     # add . in added regions
-    new_consensus = chr(gap_char) * expected_str_len
+    new_consensus = [gap_char] * expected_str_len
     # add_origin
     for i, ((j, k), (l, m)) in enumerate(mapping):
         new_consensus = new_consensus[:l] + consensus_str[j:k] + new_consensus[m:]
@@ -226,33 +225,27 @@ def repair_structure_any_variant(structure, gap_mark=49, rep_mark=48):
     """
     needs special structure encoding
     """
-    gm = chr(gap_mark)
     ns = []
     for n in structure:
         c = structure.count(n)
-        if c == 1 & c != gm:
-            ns.append(chr(rep_mark))
+        if c == 1 & c != gap_mark:
+            ns.append(rep_mark)
         elif c == 2:
             ns.append(n)
         else:
             ns.append(n)
-    return ''.join(ns)
+    return ns
 
 
-def encode_structure_unicode(structure, br=('(', ')'), gap_mark=49, warn=True):
+def encode_structure_unicode(structure, br=('(', ')'), gap_mark=49):
     """
-    encode structure to unicode characters so every basepair is unique so it is possible to know which where sliced
+    encode structure to unicode characters so every base-pair is unique so it is possible to know which where sliced
     in the alignment
     :param structure:
-    :param br: tuple of chars dennoting a pairing bases
-    :param gap_mark: char number dennoting gap, default 49 (1)
-    :param warn: bool wherther warning should be raised if gapmark was set nondefault -> this must be reflected in
-    calls to related functions
+    :param br: tuple of chars denoting a pairing bases
+    :param gap_mark: char number denoting gap, default 49 (1)
     :return:
     """
-    if (gap_mark != 49) & warn:
-        print('Warning: gap mark was set to {}, it is mandatory, that it is provided'
-              'in calls to decode_structure_unicode and repair_structure_any_variant'.format(gap_mark))
 
     _, structure_nest = nesting(structure, br=br, gap_mark=gap_mark, initial_val=gap_mark + 1)
 
@@ -271,23 +264,7 @@ def encode_structure_unicode(structure, br=('(', ')'), gap_mark=49, warn=True):
             structure_nest[f] = max_structure + shift
             shift += 1
 
-    # this is to ensure that all chars returned are printable
-    mut_str = copy.deepcopy(structure_nest)
-    mx = max(structure_nest)
-    for i, j in enumerate(structure_nest):
-        if unicodedata.category(chr(j)) == 'Cc':
-            # get possitions of matching nest
-            pos = [q for q, o in enumerate(structure_nest) if o == j]
-
-            # choose shift
-            shift = j + mx
-            while shift in mut_str:
-                shift += 1
-
-            mut_str[pos[0]] = shift
-            mut_str[pos[1]] = shift
-
-    return ''.join([chr(i) for i in mut_str])
+    return structure_nest
 
 
 def decode_structure_unicode(structure, br=('(', ')'), gap_char='.', gap_mark=49, rep_mark=48):
@@ -300,14 +277,12 @@ def decode_structure_unicode(structure, br=('(', ')'), gap_char='.', gap_mark=49
     :param rep_mark: used when repairing structure - default 48
     :return:
     """
-    original_gap_mark = chr(gap_mark)
-    original_rep_mark = chr(rep_mark)
     encoded_str = [i for i in structure]
     un = set(structure)
     out = encoded_str.copy()
     for n in un:
         idxs = [i for i, j in enumerate(encoded_str) if j == n]
-        if n in (original_gap_mark, original_rep_mark):
+        if n in (gap_mark, rep_mark):
             for idx in idxs:
                 out[idx] = gap_char
         else:
@@ -409,12 +384,13 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
 
     new_consensus_structure = decode_structure_unicode(new_consensus_structure_repaired)
 
-    new_consensus_sequence = _repair_consensus_structure_by_maping(
-        str(consensus_record.seq),
+    new_consensus_sequence_list = _repair_consensus_structure_by_maping(
+        [ord(i) for i in consensus_record.seq],
         mapping,
         len(match_original_seq_in_new_alig.seq),
         gap_char=ord('_')
     )
+    new_consensus_sequence = ''.join(chr(i) for i in new_consensus_sequence_list)
 
     # write new consensus to a file
     a_fd, new_alifold_consensus_file = mkstemp(prefix='rba_', suffix='_33', dir=CONFIG.tmpdir)
@@ -471,7 +447,7 @@ def alifold_refold_prediction(nr_homologs_hits_fasta, all_hits_fasta, refold='re
 
 
 @timeit_decorator
-def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
+def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None, timeout=None):
     ml.debug(fname())
     if params is None:
         params = dict()
@@ -495,7 +471,7 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
         # some parameters given but -C not present
         rnafold_params += ' -C'
 
-    alig_file = run_cmalign_on_fasta(allhits_fasta_file, cmmodel_file, cmalign_params=cmalign_params)
+    alig_file = run_cmalign_on_fasta(allhits_fasta_file, cmmodel_file, cmalign_params=cmalign_params, timeout=timeout)
     # multiple sequence cm align
     # split by sequence, then run the rest
     cm_alig = read_st(alig_file)
@@ -505,65 +481,29 @@ def cmmodel_rnafold_c(allhits_fasta, cmmodel_file, threads=None, params=None):
         alig_file
     ])
 
-    structures = []
-    for single_alig in trim_cmalign_sequence_by_refseq_one_seq(cm_alig, rs='SS_cons', convert2uppercase=True):
-        out_alig, trimmed_seq = trim_and_repair_single_cm_alignment(single_alig)
-        conserved_structure_pairs = find_nc_and_remove(str(trimmed_seq.seq), trimmed_seq.letter_annotations['dec_str'])
-        trimmed_seq.letter_annotations['constrains'] = conserved_structure_pairs
+    # ===== use refold.pl directly ====
+    cm_alig_upper = cm_alig.to_upper()
+    fd, temp_mock_consensus = mkstemp(prefix='rba_', suffix='_41', dir=CONFIG.tmpdir)
+    f, temp_clustal_aln = mkstemp(prefix='rba_', suffix='_42', dir=CONFIG.tmpdir)
+    with os.fdopen(f, 'w') as h_clustal, os.fdopen(fd, 'w') as h_constraints:
+        cm_alig_upper.write_clustal(h_clustal)
 
-        # constraint prediction
-        # write constraint file
-        fd, temp_constraint_file = mkstemp(prefix='rba_', suffix='_41', dir=CONFIG.tmpdir)
-        with os.fdopen(fd, 'w') as tmpf:
-            tmpf.write('>{}\n{}\n{}\n'.format(
-                trimmed_seq.id,
-                str(trimmed_seq.seq),
-                trimmed_seq.letter_annotations['constrains']
-            ))
+        h_constraints.write('{}\n{}\n'.format(
+            re.sub('[^ACTGU]', '_',  cm_alig_upper.column_annotations['RF'], flags=re.IGNORECASE),
+            cm_strucutre2br(cm_alig_upper.column_annotations['SS_cons'])
+        ))
 
-        single_structure = rnafold_prediction(temp_constraint_file, params=rnafold_params)
-
-        remove_one_file_with_try(temp_constraint_file)
-
-        # trimmed_seq.letter_annotations['final'] = single_structure[0].letter_annotations['ss0']
-        structures.append(single_structure[0])
-
+    temp_constraint_file = compute_refold(temp_clustal_aln, temp_mock_consensus, timeout=timeout)
+    structures = rnafold_prediction(temp_constraint_file, params=rnafold_params, timeout=timeout)
     str_out = desanitize_fasta_names_in_seqrec_list(structures, san_dict)
 
+    remove_files_with_try([
+        temp_constraint_file,
+        temp_clustal_aln,
+        temp_mock_consensus
+    ])
+
     return str_out
-
-
-def trim_and_repair_single_cm_alignment(cmalig):
-    """
-    trim and repair single! cm alignment
-    build specificaly for run_rsearch script
-    :param cmalig:
-    :return:
-    """
-    ml.debug(fname())
-    if len(cmalig) != 1:
-        raise Exception('This function is build specificaly for alignment of single sequence to cm model.'
-                        'Using it for more sequences would require addition of cm msa trimming module.')
-
-    # recode structure to br
-    br_model_structure = cm_strucutre2br(cmalig.column_annotations['SS_cons'])
-    encoded_whole_structure = encode_structure_unicode(br_model_structure)
-
-    # add consensus structure to letter_ann
-    cmalig[0].letter_annotations['SS_cons'] = cmalig.column_annotations['SS_cons']
-    cmalig[0].letter_annotations['en_cons'] = encoded_whole_structure
-
-    # trimming is based on presence of - (dashes) in target sequence
-    # essentialy, they are mapped to consensus structure
-    unaligned_seq = [i for i in cmalig.get_unalined_seqs(keep_letter_ann=True)][0]
-
-    repaired_structure = repair_structure_any_variant(unaligned_seq.letter_annotations['en_cons'])
-    unaligned_seq.letter_annotations['rep_str'] = repaired_structure
-
-    dec_structure = decode_structure_unicode(repaired_structure, gap_char='.')
-    unaligned_seq.letter_annotations['dec_str'] = dec_structure
-
-    return cmalig, unaligned_seq
 
 
 def find_nc_and_remove(sequence, structure, allowed_bp=('AT', 'GC', 'GU', 'AU'), mismatch_char='.'):
@@ -583,7 +523,7 @@ def find_nc_and_remove(sequence, structure, allowed_bp=('AT', 'GC', 'GU', 'AU'),
 
     mutable_str = list(structure)
 
-    for e in set(en_str) - set(chr(49)):
+    for e in set(en_str) - {49}:
         assert en_str.count(e) == 2
         match_pos = [i for i, j in enumerate(en_str) if j == e]
 
@@ -631,7 +571,7 @@ def _aligner_block(nr_homolog_hits_file, params, msa_alg, threads=None):
 
 
 @timeit_decorator
-def rfam_subopt_pred(all_sequence_fasta, cm_ref_str, params=None, threads=1):
+def rfam_subopt_pred(all_sequence_fasta, cm_ref_str, params=None, threads=1, timeout=None):
     ml.debug(fname())
     if params is None:
         params = dict()
@@ -639,15 +579,15 @@ def rfam_subopt_pred(all_sequence_fasta, cm_ref_str, params=None, threads=1):
     if params and ('mfold' in params) and params['mfold']:
         assert isinstance(params['mfold'], (tuple, list)) and 3 == len(params['mfold']), \
             "Incorrect parameters for hybrid_ss_min given. Need tuple of 3 numbers."
-        subs = run_hybrid_ss_min(all_sequence_fasta, mfold=params['mfold'], threads=threads)
+        subs = run_hybrid_ss_min(all_sequence_fasta, mfold=params['mfold'], threads=threads, timeout=timeout)
     else:
-        subs = run_hybrid_ss_min(all_sequence_fasta, threads=threads)
+        subs = run_hybrid_ss_min(all_sequence_fasta, threads=threads, timeout=timeout)
 
     # now compute rna distance score
     if threads == 1:
         new_structures = []
         for seq in subs:
-            new_structures.append(_helper_subopt(seq, cm_ref_str))
+            new_structures.append(_helper_subopt(seq, cm_ref_str, timeout=timeout))
     else:
         with multiprocessing.Pool(processes=threads) as pool:
             tuples = [(seq, cm_ref_str) for seq in subs]
@@ -661,12 +601,12 @@ def rnafold_wrap_for_predict(*args, **kwargs):
     return rnafold_prediction(*args, **kwargs)
 
 
-def rnafold_prediction(fasta2predict, params=''):
+def rnafold_prediction(fasta2predict, params='', timeout=None):
     ml.debug(fname())
     fd, structure_output_file = mkstemp(prefix='rba_', suffix='_54', dir=CONFIG.tmpdir)
     os.close(fd)
 
-    structure_output_file = rnafold_fasta(fasta2predict, structure_output_file, params)
+    structure_output_file = rnafold_fasta(fasta2predict, structure_output_file, params, timeout=timeout)
 
     structures = read_seq_str(structure_output_file)
     remove_one_file_with_try(structure_output_file)
@@ -674,7 +614,7 @@ def rnafold_prediction(fasta2predict, params=''):
 
 
 @timeit_decorator
-def subopt_fold_query(all_fasta_hits_file, query_file, params=None, threads=1):
+def subopt_fold_query(all_fasta_hits_file, query_file, params=None, threads=1, timeout=None):
     """
     use folded query sequence as a reference,
     fold all sequences by Unafold, then select structure most similar to query
@@ -690,13 +630,13 @@ def subopt_fold_query(all_fasta_hits_file, query_file, params=None, threads=1):
         params = dict()
 
     # get single query structure
-    query_structure = rnafold_prediction(query_file, params.get('RNAfold', ''))
+    query_structure = rnafold_prediction(query_file, params.get('RNAfold', ''), timeout=timeout)
 
     if params and ('mfold' in params) and params['mfold']:
         assert isinstance(params['mfold'], (tuple, list)) and 3 == len(params['mfold'])
-        subs = run_hybrid_ss_min(all_fasta_hits_file, mfold=params['mfold'], threads=threads)
+        subs = run_hybrid_ss_min(all_fasta_hits_file, mfold=params['mfold'], threads=threads, timeout=timeout)
     else:
-        subs = run_hybrid_ss_min(all_fasta_hits_file, threads=threads)
+        subs = run_hybrid_ss_min(all_fasta_hits_file, threads=threads, timeout=timeout)
 
     qs_string = query_structure[0].letter_annotations[query_structure[0].annotations['sss'][0]]
 
@@ -704,7 +644,7 @@ def subopt_fold_query(all_fasta_hits_file, query_file, params=None, threads=1):
     if threads == 1:
         new_structures = []
         for seq in subs:
-            new_structures.append(_helper_subopt(seq, qs_string))
+            new_structures.append(_helper_subopt(seq, qs_string, timeout=timeout))
     else:
         with multiprocessing.Pool(processes=threads) as pool:
             tuples = [(seq, qs_string) for seq in subs]
@@ -762,14 +702,14 @@ def subopt_fold_alifold(all_fasta_hits_file, homologs_file, aligner='muscle', pa
     return new_structures
 
 
-def _helper_subopt(seq, consensus_structure):
+def _helper_subopt(seq, consensus_structure, timeout=None):
     if seq.annotations['predicted']:
         str2compare = []
         key_list = []
         for key in seq.annotations['sss']:
             str2compare.append((seq.letter_annotations[key], consensus_structure))
             key_list.append(key)
-        rnadist_score = compute_distances(str2compare)
+        rnadist_score = compute_distances(str2compare, timeout=timeout)
 
         # select best ie lowes score
         mindisti = rnadist_score.index(min(rnadist_score))
@@ -795,8 +735,7 @@ def check_lonely_bp(structure, gap_char='.'):
     gapmark = 49
     encoded = encode_structure_unicode(structure, gap_mark=gapmark)
     violating = encoded[s]
-    repaired = encoded.replace(violating, chr(gapmark))
-
+    repaired = [i if i != violating else gapmark for i in encoded]
     repaired_structure = decode_structure_unicode(repaired, gap_char=gap_char, gap_mark=gapmark)
     # go into another round
     return check_lonely_bp(repaired_structure)
@@ -878,3 +817,34 @@ def run_clustal_profile2seqs_align(msa_file, fasta_seq_file, clustalo_params='',
                 ml.error(cmd2)
                 raise exceptions.ClustaloException(msgfail, tmp.read())
     return clustalo_file
+
+
+def select_sequences_from_similarity_rec(dist_mat: np.ndarray, sim_threshold_percent=90) -> list:
+    """
+    :param dist_mat: distmat table, by default obtained from read_clustal_distmat_file, values in percent
+    :param sim_threshold_percent: threshold for similarity in percent
+    :return:
+    """
+    ml.debug(fname())
+    # dists = np.triu(dist_mat.as_matrix(), 1)          # removes unwanted similarities
+    if dist_mat is None:
+        return [0]
+    dists = dist_mat.transpose()
+    # row, col = where(dists > sim_threshold_percent) # determine where the similarities are
+    include = set()
+    exclude = set()
+    a = np.array(range(len(dists)))
+    for i, r in enumerate(dists):
+        pr = r[~np.isnan(r)]
+        pa = a[~np.isnan(r)]
+        if (i in exclude) | (any(pr >= sim_threshold_percent)):
+            pu = np.where(pr >= sim_threshold_percent)
+            u = pa[pu]
+            if i not in exclude:
+                include |= {i}
+            to_ex = set(u.tolist()) - include
+            exclude |= to_ex                         # union operation
+        else:
+            include |= {i}
+
+    return sorted(include)

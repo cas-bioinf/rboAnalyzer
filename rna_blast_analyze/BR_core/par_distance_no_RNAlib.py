@@ -19,7 +19,7 @@ def f_parser():
     return args
 
 
-def vypocet(oi):
+def run_RNAdistance(oi, timeout=None):
     """
     runs RNAdistance without need for RNAlib
     """
@@ -28,7 +28,8 @@ def vypocet(oi):
             [
                 '{}RNAdistance'.format(CONFIG.viennarna_path)
             ],
-            input='{}\n{}'.format(oi[0], oi[1]).encode()
+            input='{}\n{}'.format(oi[0], oi[1]).encode(),
+            timeout=timeout
         )
 
         dist = int(ret.decode().strip().split(':')[1])
@@ -48,19 +49,19 @@ def the_main(fp):
     #     dd.append(d)
 
     with Pool() as pool:
-        distances = pool.map(vypocet, fp)
+        distances = pool.map(run_RNAdistance, fp)
         return distances
 
 
-def compute_distances(fp, threads=1):
+def compute_distances(fp, threads=1, timeout=None):
     if threads == 1:
         dist = []
         for pair in fp:
-            dist.append(vypocet(pair))
+            dist.append(run_RNAdistance(pair, timeout=timeout))
         return dist
     else:
         with Pool(processes=threads) as pool:
-            return pool.map(vypocet, fp)
+            return pool.map(run_RNAdistance, fp)
 
 
 def two_files_input(fasta_structures, fasta_reference):

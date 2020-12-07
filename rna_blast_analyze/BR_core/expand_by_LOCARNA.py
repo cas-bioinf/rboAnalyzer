@@ -1,7 +1,7 @@
 import os
 import re
 from multiprocessing import Pool
-from subprocess import call
+import subprocess
 from tempfile import mkstemp, TemporaryFile
 import logging
 import shlex
@@ -28,7 +28,7 @@ def write_clustal_like_file_with_anchors(fid, seq_name, cseq, my_anchors):
         fid.write('{} {}\n'.format(anch[0], anch[1]))
 
 
-def locarna_worker(pack):
+def locarna_worker(pack, timeout=None):
     ml.debug(fname())
     one_expanded_hit, query_seq, locarna_params, anchor_length = pack
 
@@ -77,7 +77,8 @@ def locarna_worker(pack):
         loc_out_file = run_locarna(
             locarna_file1,
             locarna_file2,
-            locarna_params
+            locarna_params,
+            timeout=timeout
         )
 
         # read locarna alignment
@@ -108,7 +109,7 @@ def locarna_worker(pack):
                 BA_support.remove_one_file_with_try(f)
 
 
-def extend_locarna_core(analyzed_hits, query, args_inner, all_short, multi_query, iteration, ih_model):
+def extend_locarna_core(analyzed_hits, query, args_inner, all_short, multi_query, iteration, ih_model, timeout=None):
     # expand hits according to query + 10 nucleotides +-
     if args_inner.db_type == "blastdb":
         shorts_expanded, _ = rna_blast_analyze.BR_core.extend_hits.expand_hits(
@@ -152,7 +153,7 @@ def extend_locarna_core(analyzed_hits, query, args_inner, all_short, multi_query
                         query_seq,
                         args_inner.locarna_params,
                         args_inner.locarna_anchor_length
-                    )
+                    ), timeout=timeout
                 )
             )
     else:
@@ -166,6 +167,7 @@ def extend_locarna_core(analyzed_hits, query, args_inner, all_short, multi_query
                     args_inner.locarna_anchor_length
                 )
             )
+        # timeout is not used with multiprocessing
         pool = Pool(processes=args_inner.threads)
         result = pool.map(locarna_worker, pack)
         pool.close()
@@ -276,7 +278,7 @@ def to_rna(seq):
     return rna_seq.upper()
 
 
-def run_locarna(query_file, subject_file, locarna_params):
+def run_locarna(query_file, subject_file, locarna_params, timeout=None):
     """
     possible settings:
     struct_local : seq_local
@@ -296,25 +298,34 @@ def run_locarna(query_file, subject_file, locarna_params):
     if not os.path.isfile(subject_file):
         raise FileNotFoundError('Provided file {} was not found'.format(subject_file))
 
-    cmd = '{} {} {} {} > {}'.format(
-        shlex.quote('{}locarna'.format(CONFIG.locarna_path)),
-        ' '.join([shlex.quote(i) for i in shlex.split(locarna_params)]),
-        shlex.quote(query_file),
-        shlex.quote(subject_file),
-        shlex.quote(subject_file + '.loc_out'),
-    )
-    ml.debug(cmd)
-    with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
-        r = call(cmd, shell=True, stdout=tmp, stderr=tmp)
-        if r:
-            msgfail = 'Call to locarna failed for files in1:{} in2:{} out:{}'.format(
-                query_file, subject_file, subject_file + '.loc_out'
-            )
-            ml.error(msgfail)
-            tmp.seek(0)
-            raise exceptions.LocarnaException(msgfail, tmp.read())
+    cmd = [
+        '{}locarna'.format(CONFIG.locarna_path),
+    ] + shlex.split(locarna_params) + [
+        query_file,
+        subject_file
+    ]
 
-        return subject_file + '.loc_out'
+    output_file = subject_file + '.loc_out'
+    ml.debug(cmd)
+    with TemporaryFile(mode='w+', encoding='utf-8') as tmp, open(output_file, 'w') as output:
+
+        with subprocess.Popen(cmd, stdout=output, stderr=tmp, universal_newlines=True) as p:
+            try:
+                p.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                p.kill()
+                p.wait()
+                raise
+
+            if p.returncode:
+                msgfail = 'Call to locarna failed for files in1:{} in2:{} out:{}'.format(
+                    query_file, subject_file, subject_file + '.loc_out'
+                )
+                ml.error(msgfail)
+                tmp.seek(0)
+                raise exceptions.LocarnaException(msgfail, tmp.read())
+
+        return output_file
 
 
 def write_locarna_anchors_with_min_length(

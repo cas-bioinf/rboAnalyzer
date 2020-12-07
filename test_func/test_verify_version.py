@@ -10,8 +10,13 @@ class TestBlastParser(unittest.TestCase):
         )
 
     def test_greater(self):
+        self.assertFalse(
+            version_check([2, 0, 0], [2, 1, 0], '', '')
+        )
+
+    def test_less_maxv(self):
         self.assertTrue(
-            version_check([2, 0, 0], [2, 1, 0], '', '', op=operator.le)
+            version_check([2, 0, 0], [2, 1, 0], '', '', op=operator.lt)
         )
 
     def test_equal(self):
@@ -21,5 +26,5 @@ class TestBlastParser(unittest.TestCase):
 
     def test_equal2(self):
         self.assertTrue(
-            version_check([1, 1, 1], [1, 1, 1], '', '', op=operator.le)
+            version_check([1, 1, 1], [1, 1, 1], '', '', op=operator.lt)
         )

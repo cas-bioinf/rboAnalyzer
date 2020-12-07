@@ -40,6 +40,7 @@ class Pseudoargs(Namespace):
             mode='locarna',
             verbose=0,
             show_HSP=False,
+            entrez=None,
             **kwargs):
         super().__init__(**kwargs)
         self.blast_in = blast_in
@@ -74,6 +75,7 @@ class Pseudoargs(Namespace):
         self.mode = mode
         self.verbose = verbose
         self.show_HSP = show_HSP
+        self.entrez = entrez
 
         if self.filter_by_eval is not None and self.filter_by_bitscore is not None:
             raise AttributeError('filter_by_eval is not allowed with filter_by_bitscore')

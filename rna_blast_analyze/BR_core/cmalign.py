@@ -21,14 +21,15 @@ ml = logging.getLogger('rboAnalyzer')
 # this file holds files needed for running and parsing infernal tools
 
 
-def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads=None):
+def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads=None, rfam=None, timeout=None):
     """
     run cmscan program for finding suitable known CM model for a sequence
     :return:
     """
     ml.info('Runing cmscan.')
     ml.debug(fname())
-    rfam = RfamInfo()
+    if rfam is None:
+        rfam = RfamInfo()
 
     if outfile:
         out = outfile
@@ -55,7 +56,7 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
             cm_file, fastafile
         ]
         ml.debug(cmd)
-        r = call(cmd, stdout=tmp, stderr=tmp)
+        r = call(cmd, stdout=tmp, stderr=tmp, timeout=timeout)
 
         if r:
             msgfail = 'Call to cmscan failed.'
@@ -68,7 +69,7 @@ def run_cmscan(fastafile, cmmodels_file=None, params=None, outfile=None, threads
     return out
 
 
-def run_cmfetch(cmfile, modelid, outfile=None):
+def run_cmfetch(cmfile, modelid, outfile=None, timeout=None):
     """
 
     :param cmfile:
@@ -91,7 +92,7 @@ def run_cmfetch(cmfile, modelid, outfile=None):
             modelid
         ]
         ml.debug(cmd)
-        r = call(cmd, stdout=tmp, stderr=tmp)
+        r = call(cmd, stdout=tmp, stderr=tmp, timeout=timeout)
 
         if r:
             msgfail = 'Call to cmfetch failed.'
@@ -101,7 +102,7 @@ def run_cmfetch(cmfile, modelid, outfile=None):
         return out
 
 
-def run_cmemit(model, params='', out_file=None):
+def run_cmemit(model, params='', out_file=None, timeout=None):
     """
 
     :param model:
@@ -124,7 +125,7 @@ def run_cmemit(model, params='', out_file=None):
         cmd += ['-o', out, model]
 
         ml.debug(cmd)
-        r = call(cmd, stdout=tmp, stderr=tmp)
+        r = call(cmd, stdout=tmp, stderr=tmp, timeout=timeout)
 
         if r:
             msgfail = 'Call to cmemit failed.'
@@ -150,9 +151,9 @@ def extract_ref_structure_fromRFAM_CM(model_name):
     return ref_structure
 
 
-def extract_ref_from_cm(cm_file):
+def extract_ref_from_cm(cm_file, timeout=None):
     ml.debug(fname())
-    single_alig_file = run_cmemit(cm_file, params='-a -N 1')
+    single_alig_file = run_cmemit(cm_file, params='-a -N 1', timeout=timeout)
     o = open(single_alig_file, 'r')
     salig = stockholm_read(o)
     o.close()
@@ -326,7 +327,7 @@ def run_cmpress(file2process):
             raise exceptions.CmpressException(msgfail, tmp.read())
 
 
-def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
+def run_cmbuild(cmbuild_input_file, cmbuild_params='', timeout=None):
     """
     run cmbuild procedure
     input must be MSA in stockholm format with secondary structure prediction
@@ -348,7 +349,7 @@ def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
             cmd += cmbuild_params.split()
         cmd += [cm_file, cmbuild_input_file]
         ml.debug(cmd)
-        r = call(cmd, stdout=tmp, stderr=tmp)
+        r = call(cmd, stdout=tmp, stderr=tmp, timeout=timeout)
 
         if r:
             msgfail = 'Call to cmbuild failed.'
@@ -359,7 +360,7 @@ def run_cmbuild(cmbuild_input_file, cmbuild_params=''):
     return cm_file
 
 
-def run_cmalign_on_fasta(fasta_file, model_file, cmalign_params='--notrunc', alig_format='stockholm'):
+def run_cmalign_on_fasta(fasta_file, model_file, cmalign_params='--notrunc', alig_format='stockholm', timeout=None):
     """
     run cmalign program with provided CM model file
     :param fasta_file: input fasta to be aligned to cm model
@@ -383,7 +384,7 @@ def run_cmalign_on_fasta(fasta_file, model_file, cmalign_params='--notrunc', ali
         cmd += ['-o', cma_file, model_file, fasta_file]
 
         ml.debug(cmd)
-        r = call(cmd, stdout=tmp, stderr=tmp)
+        r = call(cmd, stdout=tmp, stderr=tmp, timeout=timeout)
 
         if r:
             msgfail = 'Call to cmalign failed.'
@@ -531,7 +532,7 @@ def get_cm_model(query_file, params=None, threads=None):
     return best_model
 
 
-def get_cm_model_table(query_file, params=None, threads=None):
+def get_cm_model_table(query_file, params=None, threads=None, rfam=None, timeout=None):
     ml.debug(fname())
     if params is None:
         params = dict()
@@ -540,7 +541,7 @@ def get_cm_model_table(query_file, params=None, threads=None):
     if params and ('cmscan' in params) and params['cmscan']:
         cmscan_params += params['cmscan']
     try:
-        out_table = run_cmscan(query_file, params=cmscan_params, threads=threads)
+        out_table = run_cmscan(query_file, params=cmscan_params, threads=threads, rfam=rfam, timeout=timeout)
         f = open(out_table, 'r')
         cmscan_data = parse_cmalign_infernal_table(f)
         f.close()
@@ -553,7 +554,7 @@ def get_cm_model_table(query_file, params=None, threads=None):
 def select_best_matching_model_from_cmscan(cmscan_data):
     msg = 'rboAnalyzer was not able to determine covariance model for the query sequence from RFAM automatically. ' \
           'You can extract covariance model manualy and provide it to rboAnalyzer with "--cm_file" argument.'
-    if cmscan_data is None:
+    if cmscan_data is None or cmscan_data.empty:
         ml.info(msg)
         if ml.getEffectiveLevel() < 20:
             print('STATUS: ' + msg)
@@ -561,7 +562,6 @@ def select_best_matching_model_from_cmscan(cmscan_data):
 
     ei = cmscan_data['E-value'].idxmin()
     si = cmscan_data['score'].idxmax()
-
 
     if ei != si:
         ml.info(msg)

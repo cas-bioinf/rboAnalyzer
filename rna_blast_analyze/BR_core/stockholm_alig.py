@@ -2,6 +2,7 @@ import re
 from Bio.AlignIO.ClustalIO import ClustalWriter
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from copy import deepcopy
 
 
 class StockholmFeatureStock(object):
@@ -161,13 +162,16 @@ class StockholmAlig(object):
                 seq_without_gaps += seq[m_start:m_end]
 
             if keep_letter_ann:
-                seq_letter_annotatitons = dict.fromkeys(aligned_seq.letter_annotations.keys(), '')
+                seq_letter_annotatitons = {k: None for k in aligned_seq.letter_annotations.keys()}
                 allins = re.finditer('[^-.]+', seq)
                 for match in allins:
                     m_start = match.span()[0]
                     m_end = match.span()[1]
                     for key in seq_letter_annotatitons.keys():
-                        seq_letter_annotatitons[key] += aligned_seq.letter_annotations[key][m_start:m_end]
+                        if seq_letter_annotatitons[key] is None:
+                            seq_letter_annotatitons[key] = aligned_seq.letter_annotations[key][m_start:m_end]
+                        else:
+                            seq_letter_annotatitons[key] += aligned_seq.letter_annotations[key][m_start:m_end]
 
                 gapless = SeqRecord(Seq(seq_without_gaps, aligned_seq.seq.alphabet),
                                     id=aligned_seq.id,
@@ -213,10 +217,6 @@ class StockholmAlig(object):
         else:
             sub_align = StockholmAlig()
             sub_align._records = [rec[col_index] for rec in self._records[row_index]]
-            # for rec in self._records[row_index]:
-            #     nr = rec[col_index]
-            #     for la in rec.letter_annotations.keys():
-            #         nr.letter_annotations[la] = rec.letter_annotations[la][col_index]
             sub_col_ann = dict()
             for key in self.column_annotations.keys():
                 sub_col_ann[key] = self.column_annotations[key][col_index]
@@ -229,7 +229,7 @@ class StockholmAlig(object):
         bluntly define add on st_alig for alig concatation
         preserve id from left alig only
 
-        consider this to be part of new class, because of id throaway
+        consider this to be part of new class, because of id throwaway
 
         :param other:
         :return:
@@ -297,7 +297,7 @@ class StockholmAlig(object):
         :return:
         """
         # transform possible unclustal gap characters to dashes
-        clustalized_alig = _clustalize_alignment(self)
+        clustalized_alig = self._clustalize_alignment(self)
         writer = ClustalWriter(f)
         writer.write_alignment(clustalized_alig)
 
@@ -366,11 +366,22 @@ class StockholmAlig(object):
         """
         return max([len(align.seq) for align in self.__iter__()])
 
+    def to_upper(self):
+        """Convert alignment sequences to upper case
+        :return:
+        """
+        na = deepcopy(self)
+        nr = []
+        for r in self._records:
+            nr.append(r.upper())
+        na._records = nr
+        return na
 
-def _clustalize_alignment(alig):
-    new_alig = StockholmAlig()
-    for al in alig:
-        ns = SeqRecord(Seq(re.sub('[.~]', '-', str(al.seq))),
-                       id=al.id)
-        new_alig.append(ns)
-    return new_alig
+    @staticmethod
+    def _clustalize_alignment(alig):
+        new_alig = StockholmAlig()
+        for al in alig:
+            ns = SeqRecord(Seq(re.sub('[.~]', '-', str(al.seq))),
+                           id=al.id)
+            new_alig.append(ns)
+        return new_alig

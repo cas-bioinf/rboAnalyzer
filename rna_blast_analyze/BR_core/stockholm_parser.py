@@ -3,7 +3,6 @@ from warnings import warn
 
 from rna_blast_analyze.BR_core.db2shape import nesting
 from Bio.AlignIO import read as clustal_read
-from Bio.Alphabet import SingleLetterAlphabet
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
@@ -171,7 +170,7 @@ def process_parsed_data(sequences, seq_letter_ann, alignment_annotations,
             appendable_annotations = seq_annotation[seqid]
         else:
             appendable_annotations = {}
-        seq_alig_line = SeqRecord(Seq(sequences[seqid], SingleLetterAlphabet),
+        seq_alig_line = SeqRecord(Seq(sequences[seqid]),
                                   id=seqid,
                                   letter_annotations=appendable_letter_annotations,
                                   annotations=appendable_annotations)

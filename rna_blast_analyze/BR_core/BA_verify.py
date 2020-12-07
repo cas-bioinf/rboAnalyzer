@@ -34,7 +34,7 @@ def verify_blastdbcmd(minimal_version, maximal_version):
             ver = r.group().split('.')
             ver = [int(i) for i in ver]
             bb_min = version_check(ver, minimal_version, msgsuccess, msgversion)
-            bb_max = version_check(ver, maximal_version, msgsuccess, msgversion, op=operator.le)
+            bb_max = version_check(ver, maximal_version, msgsuccess, msgversion, op=operator.lt)
             if bb_min and bb_max:
                 return True
             else:
@@ -62,7 +62,7 @@ def verify_locarna(minimal_version, maximal_version):
         if a.startswith('LocARNA'):
             r = [int(m.group()) for m in re.finditer('[0-9]+', a)]
             bb_min = version_check(r, minimal_version, msgsuccess, msgversion)
-            bb_max = version_check(r, maximal_version, msgsuccess, msgversion, operator.le)
+            bb_max = version_check(r, maximal_version, msgsuccess, msgversion, operator.lt)
             if bb_min and bb_max:
                 return True
             else:
@@ -301,16 +301,39 @@ def verify_mfold(minimal_version):
         return False
 
 
-def version_check(r, minimal_version, msgsuccess, msgversion, op=operator.ge):
+def version_check(r, minimal_version, msgsuccess, msgversion, op=operator.gt):
+    """Function for minimal or maximal version checking
+
+    On version match returns True
+
+    :param r: iterable of version descriptors
+    :param minimal_version: iterable of version descriptors
+    :param msgsuccess: msg to report on success
+    :param msgversion: msg to report on fail
+    :param op: operator.gt or operator.lt
+    :return: bool
+    """
+
+    if op not in (operator.gt, operator.lt):
+        raise ValueError('Invalid operator, accepting only operator.gt or operator.lt')
+
+    # handle versions with different length
+    rv = []
+    mv = []
     for v, minv in zip(r, minimal_version):
+        rv.append(v)
+        mv.append(minv)
+
         if op(v, minv):
             ml.info(msgsuccess)
             return True
-        elif op(minv, v):
-            ml.warning(msgversion)
-            return False
-    ml.info(msgsuccess)
-    return True
+
+    if rv == mv:
+        ml.info(msgsuccess)
+        return True
+
+    ml.warning(msgversion)
+    return False
 
 
 def check_3rd_party_tools():
@@ -373,6 +396,22 @@ def check_3rd_party_prediction_tools():
     return installed
 
 
+def find_file(top, file):
+    for root, dirs, files in os.walk(top):
+        if file in files:
+            # exit early
+            return root
+    return None
+
+
+def find_dir(top, directory):
+    for root, dirs, files in os.walk(top):
+        if directory in dirs:
+            # exit early
+            return root
+    return None
+
+
 def check_necessery_tools(methods):
     avalible_tools = check_3rd_party_tools()
     avalible_tools |= check_3rd_party_data()
@@ -391,10 +430,10 @@ def check_necessery_tools(methods):
                 status = 'STATUS: refold.pl not found in PATH. Trying to find refold.pl in "CONDA_ROOT/share"'
                 ml.info(status)
                 print(status)
-                out = check_output(r'find {}/share -type f -name "refold\.pl"'.format(sys.prefix), shell=True)
-                op = out.decode().strip()
-                if op != '':
-                    op = os.path.dirname(op.split('/n')[0]) + os.sep
+
+                out = find_file(os.path.join(sys.prefix, 'share'), 'refold.pl')
+                if out is not None:
+                    op = out + os.sep
 
                     msg_found = 'STATUS: Found refold.pl in {}\n' \
                                 'writing configuration to {}'.format(op, CONFIG.conf_file)
@@ -434,10 +473,10 @@ def check_necessery_tools(methods):
                     'STATUS: The DATAPATH environment variable for TurboFold is not set. '
                     'Trying to find required data in "CONDA_ROOT/share".'
                 )
-                out = check_output('find {}/share -type d -name data_tables'.format(sys.prefix), shell=True)
-                op = out.decode().strip()
-                if op != '':
-                    op = op.split('/n')[0]
+                out = find_dir(os.path.join(sys.prefix, 'share'), 'data_tables')
+
+                if out is not None:
+                    op = os.path.join(out, 'data_tables')
                     msg_found = 'STATUS: Inferred datapath in {}. writing configuration to {}'.format(op, CONFIG.conf_file)
                     ml.info(msg_found)
                     print(msg_found)

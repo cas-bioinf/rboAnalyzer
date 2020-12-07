@@ -17,7 +17,8 @@ class TestIncompleteDatabase(unittest.TestCase):
             prediction_method=['rnafold'],
             blast_regexp=r'(?<=\|)[A-Z0-9]*\.?\d*$',
             enable_overwrite=True,
-            mode='locarna'
+            mode='locarna',
+            html="dummy_html.html"
         )
 
         with self.assertRaises(SystemExit):

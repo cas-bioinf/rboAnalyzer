@@ -74,12 +74,10 @@ def validate_args(args):
             ml.error('Blastdb must be PATH (string).')
             return False
 
-        ext_try = ['nsd', 'nhr', 'nog', 'nsi', 'nin']
-        if not os.path.isfile(args.blast_db + '.nal'):
-            for ext in ext_try:
-                if not os.path.isfile(args.blast_db + '.' + ext):
-                    ml.error('Expected file : "' + args.blast_db + '.' + ext + '" NOT found.')
-                    return False
+        p, n = os.path.split(args.blast_db)
+        if not any([f for f in os.listdir(p) if f.startswith(n)]):
+            return False
+
     elif args.db_type == 'entrez':
         if not re.fullmatch(r'[^@]+@[^@ ]+\.[^@ ]+', args.entrez):
             ml.error('The provided email appears to be invalid.')
@@ -225,8 +223,8 @@ def check_fasta(file):
                     status = True
 
                 # check fasta id
-                # we allow A-Za-z0-9_|[]- apart form control ">"
-                if not re.fullmatch(r'[A-Za-z0-9_\|\[\]\-\.]*', s.id):
+                # we allow A-Za-z0-9_|[]- apart from control ">"
+                if not re.fullmatch(r'[A-Za-z0-9_|\[\]\-.:]*', s.id):
                     ml.error(
                         'Sequence id contains disallowed characters. '
                         'Please check the sequence id. '

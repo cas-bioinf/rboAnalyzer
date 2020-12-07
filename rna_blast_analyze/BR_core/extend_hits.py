@@ -216,7 +216,8 @@ def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=N
 
     if format == 'server':
         # conditional import so we don't need pysam for normal usage
-        from rna_blast_analyze.BR_core.load_from_bgzip import load_genome
+        from rna_blast_analyze.BR_core.load_from_bgzip import GenomeDB
+        seqdb = GenomeDB(database)
 
     if CONFIG.tmpdir is None:
         temp_entrez_file = os.path.join(
@@ -315,7 +316,7 @@ def expand_hits_from_fasta(hits, database, query_length, extra=0, blast_regexp=N
 
         elif format == 'server':
             # only used when server
-            parsed_record = load_genome(database, bdb_accession, start - 1, end)
+            parsed_record = seqdb.load_genome(bdb_accession, start - 1, end)
 
         elif format == 'entrez':
             prnt_line = '{:3d}% {}'.format(floor(index * 100 / len(hits)), bdb_accession)

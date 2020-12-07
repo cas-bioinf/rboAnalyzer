@@ -1,5 +1,5 @@
 # rboAnalyzer
-A tool for characterizing HSPs in output of RNA BLAST search.
+A tool for analyzing BLAST search output for RNA sequences.
 
 ## Short description
 rboAnalyzer is a tool complementing the BLAST algorithm when searching for a query
@@ -22,6 +22,7 @@ To achive this, rboAnalyzer takes as input:
 - the BLAST output
 - the BLAST database containing sequences within the output
 
+The paper for this tool is available [here](https://doi.org/10.3389/fgene.2020.00675).
 
 ## Installation
 This tool was tested on 64-bit linux (Ubuntu 14, 18 and Centos 7). 
@@ -82,9 +83,9 @@ For prediction:
   Don't forget to set the `DATAPATH` environment variable [link](http://rna.urmc.rochester.edu/Text/Thermodynamics.html).
 
 Optional (some prediction methods are not available without):
-- UNAFold >= 3.8, <4 [link](http://unafold.rna.albany.edu/?q=DINAMelt/software)
+- UNAFold >= 3.8, <4 [link](http://www.unafold.org/)
 
-Clone or download this repository, unpack it if needed. Go to directory with the source code for the rboAnalyzer and run
+Download this repository (or release), unpack it if needed. Go to directory with the source code for the rboAnalyzer and run
 
 ```shell
 python3 setup.py install --user
@@ -97,9 +98,6 @@ To test it, restart terminal (close and open new) and run
 rboAnalyzer --version
 ```
 Which should return the version number.
-
-### Using Docker container
-The tool was also packed as docker image. For more information see [our docker instuctions](docs/docker.md)
 
 ## Preparation
 
@@ -123,7 +121,7 @@ Note that running rboAnalyzer with `--download_rfam` will overwrite this manuall
 
 ### Installing UNAFold (optional)
 Prediction methods using suboptimal structures need UNAFold software to work.
- It is available here <http://unafold.rna.albany.edu/>.
+ It is available here [http://www.unafold.org](http://www.unafold.org).
  Follow installation instructions. The pipeline uses the `hybrid-ss-min` program.
  Either add it to PATH or add path to directory containing the executable to `config.txt` file.
 
@@ -241,8 +239,6 @@ These are:
       Solution: Provide capturing regular expression (python 3 syntax) for capturing the sequence id from the fasta header (it must match the id to the BLAST database used)
     3. __the BLAST database was created without the `-parse_seqids` flag__   
       Solution: Create new database from the sequences used to create new one, this time with `-parse_seqids` flag.
-    4. __Could not guess the BLAST format, preferred format is NCBI xml.__   
-      Verify that you have either regular XML BLAST output file (`-outfmt 5`), or regular txt BLAST output file (`-outfmt 0` - should start with `BLASTN` declaration). When donwloading BLAST output from NCBI, use the xml option.
 
   Another option is to call pipeline with `--skip_missing` flag.
   This will skip the missing sequences.
@@ -256,18 +252,6 @@ These are:
   you might get better results by setting the `--retry` to some larger number.
   Also check if NCBI entrez services are functional.
 
-<!--
-3. WARNING - refold.pl could not be located (not in PATH)
-  Issued when refold.pl executable could not be found.
-  If everything was installed with conda to same environment, this will be resolved automatically.
-  If not, you must add refold.pl to PATH or add path to refold.pl to config.txt (see docs/config_how_to.md)
-
-4. WARNING - The TurboFold is installed but the DATAPATH environment variable is not set nor present in config.txt
-  Issued when TurboFold's DATAPATH env variable is not set.
-  If everything was installed with conda to same environment, this will be resolved automatically.
-  If not, you must set the `DATAPATH` enviroment variable to path pointing to `RNAstructure/data_tables` directory.
-  Alternatively you can add path to `RNAstructure/data_tables` to config.txt (see docs/config_how_to.md).
--->
 
 <a name="blastdatabase" id="blastdatabase"></a>
 
@@ -307,9 +291,6 @@ If custom database was used for the BLAST search you need to ensure multiple thi
 1. custom database is nucleotide and it was created with `-parse_seqids` (this makes sequences retrievable by their ids).
 2. provide regular expression capturing the sequence ids. By default the rboAnalyzer captures the Accession.Version as documented [here](https://www.ncbi.nlm.nih.gov/Sequin/acc.html).
 
-## Notes
-This is Beta version. Especially the default parameters for prediction can change.
-
 ## References
 - ViennaRNA: Lorenz, Ronny and Bernhart, Stephan H. and Höner zu Siederdissen, Christian and Tafer, Hakim and Flamm, Christoph and Stadler, Peter F. and Hofacker, Ivo L.
  ViennaRNA Package 2.0. <https://doi.org/10.1186/1748-7188-6-26>.
@@ -336,13 +317,20 @@ RNA, 18 no. 5, pp. 900-14, 2012. <https://doi.org/10.1261/rna.029041.111>, [webs
  TurboFold II: RNA structural alignment and secondary structure prediction informed by multiple homologs.
   Nucleic Acids Research. 45: 11570-11581. <https://doi.org/10.1093/nar/gkx815>, [website](http://rna.urmc.rochester.edu/RNAstructure.html)
 - UNAFold: Markham N.R., Zuker M. (2008) UNAFold. In: Keith J.M. (eds) Bioinformatics.
- Methods in Molecular Biology™, vol 453. Humana Press. <https://doi.org/10.1007/978-1-60327-429-6_1>, [website](http://unafold.rna.albany.edu/)
+ Methods in Molecular Biology™, vol 453. Humana Press. <https://doi.org/10.1007/978-1-60327-429-6_1>, [website](http://www.unafold.org)
 - Biopython: Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics.
  Bioinformatics 2009 Jun 1; 25(11) 1422-3. <http://dx.doi.org/10.1093/bioinformatics/btp163>, [website](https://biopython.org/)
 - NumPy [website](www.numpy.org)
 - Pandas [website](pandas.pydata.org)
 - Jinja2 [website](jinja.pocoo.org)
 - Matplotlib [website](www.matplotlib.org)
+
+## Citation
+If you find this software useful please cite this [paper](https://doi.org/10.3389/fgene.2020.00675).
+
+Schwarz, M., Vohradský, J., Modrák, M. and Pánek, J., 2020. rboAnalyzer: A Software to Improve Characterization of Non-coding RNAs From Sequence Database Search Output. Frontiers in genetics, 11, p.675.
+
+The rboAnalyzer version used for the paper is `0.1.4`.
 
 ## Funding
 

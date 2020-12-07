@@ -7,17 +7,12 @@ from rna_blast_analyze.BR_core.BA_support import remove_files_with_try
 from test_func.test_execution import tab_output_equal
 import glob
 
-# test SE
-# test locarna
-# test LoSe
-
 fwd = os.path.dirname(__file__)
 test_dir = 'test_func'
 test_data_dir = 'test_data'
 blast_in = os.path.join(fwd, test_data_dir, 'Alig_long.xml')
 blast_query = os.path.join(fwd, test_data_dir, 'Alig_long_query.fasta')
 blast_db = os.path.join(fwd, test_data_dir, 'blastdb', 'Alig_long.blastdb')
-# blast_db_fasta = os.path.join(fwd, test_data_dir, 'blastdb')
 root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 base_script = ['python3', '-m', 'rna_blast_analyze.BA']
 download_base = ['python3', '-m', 'rna_blast_analyze.download_blast_genomes']

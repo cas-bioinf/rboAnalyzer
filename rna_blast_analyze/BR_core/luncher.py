@@ -22,6 +22,7 @@ from rna_blast_analyze.BR_core.expand_by_BLAST import extend_simple_core
 from rna_blast_analyze.BR_core.expand_by_LOCARNA import extend_locarna_core
 from rna_blast_analyze.BR_core.expand_by_joined_pred_with_rsearch import extend_meta_core
 from rna_blast_analyze.BR_core.convert_classes import blastsearchrecompute2dict, blastsearchrecomputefromdict
+from rna_blast_analyze.BR_core import exceptions
 
 ml = logging.getLogger('rboAnalyzer')
 
@@ -93,7 +94,10 @@ def lunch_computation(args_inner, shared_list=None):
 
             # run cm model build
             # allows to fail fast if rfam was selected and we dont find the model
-            ih_model, analyzed_hits = find_and_extract_cm_model(args_inner, analyzed_hits)
+            try:
+                ih_model, analyzed_hits = find_and_extract_cm_model(args_inner, analyzed_hits)
+            except (exceptions.MissingCMexception, exceptions.SubprocessException):
+                sys.exit(1)
 
             # select all
             all_blast_hits = BA_support.blast_hsps2list(bhp)

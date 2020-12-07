@@ -11,6 +11,7 @@ from Bio.Phylo.TreeConstruction import DistanceCalculator
 from Bio.SeqRecord import SeqRecord
 
 import rna_blast_analyze.BR_core.BA_support as BA_support
+import rna_blast_analyze.BR_core.predict_structures
 from rna_blast_analyze.BR_core.BA_methods import HitList
 from rna_blast_analyze.BR_core.BA_support import iter2file_name, add_loc_to_description
 from rna_blast_analyze.BR_core.centroid_homfold import me_centroid_homfold, centroid_homfold_fast
@@ -316,7 +317,7 @@ def create_nr_trusted_hits_file_MSA_safe(
     if dist_table.size == 0:
         raise exceptions.NoHomologousSequenceException
 
-    to_include = BA_support.select_sequences_from_similarity_rec(
+    to_include = rna_blast_analyze.BR_core.predict_structures.select_sequences_from_similarity_rec(
         dist_table,
         sim_threshold_percent=sim_threshold_percent
     )
@@ -398,7 +399,7 @@ def create_nr_homolog_hits_file_MSA_unsafe(sim_threshold_percent=None, all_hits=
         nr_homolog_hits = [query]
     else:
         # normal execution
-        to_include = BA_support.select_sequences_from_similarity_rec(
+        to_include = rna_blast_analyze.BR_core.predict_structures.select_sequences_from_similarity_rec(
             dist_table,
             sim_threshold_percent=sim_threshold_percent
         )

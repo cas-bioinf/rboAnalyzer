@@ -18,12 +18,12 @@ from rna_blast_analyze.BR_core import exceptions
 ml = logging.getLogger('rboAnalyzer')
 
 
-def find_and_extract_cm_model(args, analyzed_hits, rfam=None):
+def find_and_extract_cm_model(args, analyzed_hits, rfam=None, timeout=None):
     if rfam is None:
         rfam = RfamInfo()
 
     ml.info('Infer homology - searching RFAM for best matching model.')
-    cmscan_results = get_cm_model_table(args.blast_query, threads=args.threads)
+    cmscan_results = get_cm_model_table(args.blast_query, threads=args.threads, rfam=rfam, timeout=timeout)
     best_matching_cm_model = select_best_matching_model_from_cmscan(cmscan_results)
     analyzed_hits.best_matching_model = best_matching_cm_model
 
@@ -43,22 +43,22 @@ def find_and_extract_cm_model(args, analyzed_hits, rfam=None):
             ml.info('Infer homology - using RFAM CM file as reference model.')
             if analyzed_hits.best_matching_model is None:
                 ml.error('No RFAM model was matched with score > 0. Nothing to build homology to.')
-                sys.exit(1)
+                raise exceptions.MissingCMexception
 
-            cm_model_file = run_cmfetch(rfam.file_path, analyzed_hits.best_matching_model['target_name'])
+            cm_model_file = run_cmfetch(rfam.file_path, analyzed_hits.best_matching_model['target_name'], timeout=timeout)
         else:
             ml.info('Infer homology - using RSEARCH to build model')
             # default to using RSEARCH
-            cm_model_file = build_cm_model_rsearch(analyzed_hits.query, CONFIG.rsearch_ribosum)
+            cm_model_file = build_cm_model_rsearch(analyzed_hits.query, CONFIG.rsearch_ribosum, timeout=timeout)
 
         return cm_model_file, analyzed_hits
     except exceptions.SubprocessException as e:
         ml.error("Can't obtain covariance model.")
         ml.error(str(e))
-        sys.exit(1)
+        raise e
 
 
-def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iteration=0):
+def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iteration=0, timeout=None):
     """
     This is wrapper for infer homology methods. It deals with different options for generating CM.
     :return:
@@ -85,7 +85,7 @@ def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iterat
                 str(seq.seq))
             )
 
-    cm_msa, cm_align_scores = run_cmalign_with_scores(fd_fasta, cm_model_file, threads=args.threads)
+    cm_msa, cm_align_scores = run_cmalign_with_scores(fd_fasta, cm_model_file, threads=args.threads, timeout=timeout)
 
     _add_rsearch_align_scores2anal_hits(analyzed_hits, cm_align_scores)
 
@@ -125,14 +125,14 @@ def infer_homology(analyzed_hits, args, cm_model_file, multi_query=False, iterat
     return prediction, selected_hits, r_cm_file
 
 
-def run_cmalign_with_scores(fasta_file, cm_file, threads=None):
+def run_cmalign_with_scores(fasta_file, cm_file, threads=None, timeout=None):
     fd_sfile, cm_sfile_path = mkstemp(prefix='rba_', suffix='_29', dir=CONFIG.tmpdir)
     os.close(fd_sfile)
     if threads:
         cm_params = '--notrunc --cpu {} --sfile {}'.format(threads, cm_sfile_path)
     else:
         cm_params = '--notrunc --sfile {}'.format(cm_sfile_path)
-    cm_msa_file = run_cmalign_on_fasta(fasta_file, cm_file, cmalign_params=cm_params)
+    cm_msa_file = run_cmalign_on_fasta(fasta_file, cm_file, cmalign_params=cm_params, timeout=timeout)
 
     cm_msa = read_st(cm_msa_file)
 
@@ -151,9 +151,9 @@ def run_cmalign_with_scores(fasta_file, cm_file, threads=None):
     return cm_msa, cm_align_scores
 
 
-def build_cm_model_rsearch(query_seq, path2selected_sim_array):
+def build_cm_model_rsearch(query_seq, path2selected_sim_array, timeout=None):
     ml.debug(fname())
-    query_structure = rna_blast_analyze.BR_core.viennaRNA.RNAfold(str(query_seq.seq))[0]
+    query_structure = rna_blast_analyze.BR_core.viennaRNA.RNAfold(str(query_seq.seq), timeout=None)[0]
 
     # remove any annotations from query:
     qs_clean = deepcopy(query_seq)
@@ -171,9 +171,7 @@ def build_cm_model_rsearch(query_seq, path2selected_sim_array):
         st_like.write_stockholm(f)
 
     # run actual cmbuild
-    cm_model_file = run_cmbuild(stock_file, cmbuild_params='--rsearch {}'.format(
-        path2selected_sim_array
-    ))
+    cm_model_file = run_cmbuild(stock_file, cmbuild_params='--rsearch {}'.format(path2selected_sim_array), timeout=timeout)
 
     # cleanup
     BA_support.remove_one_file_with_try(stock_file)

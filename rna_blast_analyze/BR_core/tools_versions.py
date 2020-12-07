@@ -3,6 +3,7 @@ blast_maximal_version = [3, 0, 0]
 locarna_minimal_version = [1, 9, 2]
 locarna_maximal_version = [1, 999, 999]
 infernal_minimal_version = [1, 1, 2]
+cmfile_minimal_version = [1, 1]
 vrna_minimal_version = [2, 3, 5]
 clustalo_minimal_version = [1, 2, 4]
 muscle_minimal_version = [3, 8, 31]
@@ -104,5 +105,3 @@ allowed_params = {
 }
 
 commandline_params = {"alifold", "RNAfold", "cmscan", "cmemit", "TurboFold", "clustalo", "muscle"}
-
-allowed_pm_params_server = {k: allowed_params[k] - commandline_params for k in allowed_params.keys()}

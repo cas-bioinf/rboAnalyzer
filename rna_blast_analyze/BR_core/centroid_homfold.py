@@ -15,7 +15,7 @@ from rna_blast_analyze.BR_core.exceptions import AmbiguousQuerySequenceException
 ml = logging.getLogger('rboAnalyzer')
 
 
-def run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_params='', outfile=None):
+def run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_params='', outfile=None, timeout=None):
     if outfile:
         ch_outfile = outfile
     else:
@@ -34,7 +34,7 @@ def run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_
         fasta2predict
     ]
     with TemporaryFile(mode='w+', encoding='utf-8') as tmp:
-        r = call(cmd, stdout=tmp, stderr=tmp)
+        r = call(cmd, stdout=tmp, stderr=tmp, timeout=timeout)
         if r:
             tmp.seek(0)
             raise CentroidHomfoldException(
@@ -45,7 +45,7 @@ def run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_
 
 
 @timeit_decorator
-def me_centroid_homfold(fasta2predict, fasta_homologous_seqs, params=None):
+def me_centroid_homfold(fasta2predict, fasta_homologous_seqs, params=None, timeout=None):
     """
     run centroid_homefold several times and vary -g parameter, to predict the best possible structure
     :param fasta2predict:
@@ -71,7 +71,7 @@ def me_centroid_homfold(fasta2predict, fasta_homologous_seqs, params=None):
         raise AttributeError('Centroid homfold is not permitted to run with "-g" or "-t".')
     ch_params += ' -g -1'
 
-    first_structures = run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_params=ch_params)
+    first_structures = run_centroid_homfold(fasta2predict, fasta_homologous_seqs, centroid_homfold_params=ch_params, timeout=timeout)
     structures2return = [ch_struc for ch_struc in centroid_homfold_select_best(first_structures)]
     BA_support.remove_one_file_with_try(first_structures)
     return structures2return

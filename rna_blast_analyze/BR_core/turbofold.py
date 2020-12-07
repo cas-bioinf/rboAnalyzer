@@ -4,6 +4,7 @@ import os
 from shutil import rmtree
 from subprocess import call
 from tempfile import mkdtemp, TemporaryFile
+from itertools import chain
 
 from Bio.SeqRecord import SeqRecord
 
@@ -36,7 +37,7 @@ def turbofold_fast(all_seqs, seqs2predict, query, cpu, n, turbofold_params, len_
     return turbofold_ext_nr_fast(seqs2predict, nr_na_ld, cpu, n, turbofold_params, pkey, sha1val)
 
 
-def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params, pkey='Turbo-fast', sha1val=''):
+def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params, pkey='Turbo-fast', sha1val='', timeout=None):
     # ambiguos sequence cannot be predicted with turbofold
     # do not predict sequence twice
     ml.debug(fname())
@@ -51,6 +52,10 @@ def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params, pkey='Turbo
             msgfail += 'nr set contain non redundant sequence(s).'
         ml.error(msgfail)
         raise AssertionError(msgfail)
+
+    for seq in chain(all_seqs, nrset):
+        if 'msgs' not in seq.annotations:
+            seq.annotations['msgs'] = []
 
     list2predict = []
     for seq in all_seqs:
@@ -80,7 +85,7 @@ def turbofold_ext_nr_fast(all_seqs, nrset, cpu, n, turbofold_params, pkey='Turbo
     if cpu == 1:
         pred_list = []
         for oneseqset, tpar, _ in list2predict:
-            pred_list.append(run_turbofold(oneseqset, tpar))
+            pred_list.append(run_turbofold(oneseqset, tpar, timeout=timeout))
     else:
         pool = multiprocessing.Pool(processes=cpu)
         pred_list = pool.map(_rt_wrapper, list2predict)
@@ -171,18 +176,18 @@ def write_turbofold_confile(input_sequences, turbofold_params=None, cpus=None, o
     return tmpdir, conf_file, hom_out_paths
 
 
-def run_turbofold(sequences, params):
+def run_turbofold(sequences, params, timeout=None):
     ml.info('Running Turbofold.')
     ml.debug(fname())
     try:
-        return _turbofold_worker(sequences, params)
+        return _turbofold_worker(sequences, params, timeout=timeout)
     except exceptions.TurboFoldException as e:
         return e
     except AssertionError as e:
         return e
 
 
-def _turbofold_worker(sequences, params):
+def _turbofold_worker(sequences, params, timeout=None):
     env = os.environ.copy()
     if 'DATAPATH' not in env:
         env['DATAPATH'] = CONFIG.rnastructure_datapath
@@ -199,7 +204,7 @@ def _turbofold_worker(sequences, params):
             con_file
         ]
         ml.debug(cmd)
-        r = call(cmd, env=env, stdout=tmp, stderr=tmp)
+        r = call(cmd, env=env, stdout=tmp, stderr=tmp, timeout=timeout)
 
         if r:
             msgfail = 'Call to TurboFold failed, cmd below:'
