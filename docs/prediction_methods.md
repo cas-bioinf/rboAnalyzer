@@ -51,21 +51,21 @@ Default: No parameters specified.
 
 #### mfold: \[P, W, X\]
 specifies parameters for `hybrid-ss-min` program where P, W, and X are integers
-  see UNAFold [documenation](http://unafold.rna.albany.edu/?q=unafold-man-pages/hybrid-ss-min).
+  see UNAFold [documenation](http://www.unafold.org/).
   It must be specified without double quotes.
 
 The hybrid-ss-min is additionally used with `--suffix=DAT --NA=RNA --noisolate` parameters.
 
 #### clustalo: "CLUSTALO PARAMETERS"
 is string of commandline arguments for `clustalo`
-  (see clustal omega [documentation](www.clustal.org/omega))
+  (see clustal omega [documentation](http://www.clustal.org/omega/))
 
 Default: No parameters specified.
 
 #### clustalo_profile: "CLUSTALO_PROFILE"
 is string of commandline argument for `clustalo`. Allows specification
   of different `clustalo` parameters for the profile alignment stage.
-  (see clustal omega [documentation](www.clustal.org/omega))
+  (see clustal omega [documentation](http://www.clustal.org/omega/))
 
 Default: `clustalo` called with `--profile1` only profile align compatible option can be specified.
 

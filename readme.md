@@ -320,10 +320,10 @@ RNA, 18 no. 5, pp. 900-14, 2012. <https://doi.org/10.1261/rna.029041.111>, [webs
  Methods in Molecular Biology™, vol 453. Humana Press. <https://doi.org/10.1007/978-1-60327-429-6_1>, [website](http://www.unafold.org)
 - Biopython: Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics.
  Bioinformatics 2009 Jun 1; 25(11) 1422-3. <http://dx.doi.org/10.1093/bioinformatics/btp163>, [website](https://biopython.org/)
-- NumPy [website](www.numpy.org)
-- Pandas [website](pandas.pydata.org)
-- Jinja2 [website](jinja.pocoo.org)
-- Matplotlib [website](www.matplotlib.org)
+- NumPy [website](https://numpy.org)
+- Pandas [website](https://pandas.pydata.org)
+- Jinja2 [website](https://jinja.palletsprojects.com)
+- Matplotlib [website](https://matplotlib.org)
 
 ## Citation
 If you find this software useful please cite this [paper](https://doi.org/10.3389/fgene.2020.00675).
