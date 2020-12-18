@@ -45,15 +45,29 @@ The pipeline has 3 methods for estimating the full-length sequences from BLAST H
 #### ad simple)
 <img src="figure_blast_simple.svg" width="700px" />
 
-In this mode we compute the location of estimated full-length sequence by taking length of
- unaligned parts of query sequence in HSP (can be at start, end or both) and add or
- subtract it respectively from hit start/end index.
-In the toy example we have the Plus/Plus BLAST HSP with query sequence
- aligned from 10 to 21 to subject sequence 1000 to 1009.
-If query is 50 bases long, then length of unaligned query at start is 9
- and length of unaligned query at end is 29.
-Then start of the estimated full-length sequence in subject is 1000 - 9 = 991 and end is
- 1009 + 29 = 1038.
+In the __simple__ mode we compute the location of the extended subject sequence according 
+to the unaligned parts of the query sequence, i.e. those that were not aligned in HSP 
+and flank the HSP alignment at both 5’ and 3’ ends. In this toy example we have the Plus/Plus 
+BLAST HSP with a section of the query sequence between nucleotides 10 and 21 aligned 
+to a section of the subject sequence between nucleotides 1000 and 1009. 
+The task is to extend the partial HSP subject sequence between nucleotides 1000 and 1009 
+to the length of the query sequence.
+
+Suppose that the query sequence (the red bar in the figure of the example) is 50 bases long. 
+Then the length of the unaligned part of the query at 5’ end is 9 nucleotides 
+(subtract nucleotide positions 10 - 1) and the length of the unaligned part of 
+the query at 3’ end is 29 nucleotides (subtract positions 50 - 21). 
+The positions of the extended subject sequence at the whole subject sequence is computed by 
+adding/subtracting the lengths of the unaligned parts of the query sequence to/from 3’/5’ 
+ends of the partial HSP subject sequence, respectively. 
+Then, 5’ and 3’ ends of the extended HSP sequence lie at nucleotides 991 (1000 – 9) 
+and 1038 (1009 + 29), respectively. Because there are 2 gaps in HPS subject sequence, 
+the resulting extended subject sequence will be 2 nucleotides shorter than the query sequence. 
+
+Theoretically, the 2 extra nucleotides could be added at 3’ end of the extended subject 
+sequence to make it as long as the query sequence. 
+But this might not be biologically relevant as the gap could occur naturally instead 
+of being caused by the alignment.
 
 
 #### ad locarna)
