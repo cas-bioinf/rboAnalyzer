@@ -17,7 +17,7 @@ Score for similarity (as proxy to homology) between the estimated full-length se
  and query sequence is also computed.
 The BLAST output is combined with computed data and presented in form of an interactive HTML page.
 
-To achive this, rboAnalyzer takes as input:
+To achieve this, rboAnalyzer takes as input:
 - the query sequence
 - the BLAST output
 - the BLAST database containing sequences within the output
@@ -30,18 +30,18 @@ You can also try out the [rboanalyzer webserver](http://rboanalyzer.elixir-czech
 This tool was tested on 64-bit linux (Ubuntu 14, 18 and Centos 7). 
 
 ### Install via Conda
- The most convinient way to install this pipeline is to use Conda package manager. 
+ The most convenient way to install this pipeline is to use Conda package manager. 
  
- If you don't have Conda for `Python3`, install it. We recomend the [miniconda3](https://conda.io/en/latest/miniconda.html).
+ If you don't have Conda for `Python3`, install it. We recommend the [miniconda3](https://conda.io/en/latest/miniconda.html).
 
 The `rboanalyzer` package is available from `schwarz.marek` channel. You also need to include the `bioconda` and `conda-forge` channels when installing the `rboanalyzer`.
 
  
 __Installation to new virtual environment__
 
-The `rboAnalyzer` and its dependencies will be available only in the shell session for which the virtual environment was activated. You will need to `activate` the virtual enviroment for each session.
+The `rboAnalyzer` and its dependencies will be available only in the shell session for which the virtual environment was activated. You will need to `activate` the virtual environment for each session.
 
-Following commands will install the rboAnalyzer into new conda environment named "rbo". If you dont wish to install rboAnalyzer to new environment, ommit commands `1)` and `2)`.
+Following commands will install the rboAnalyzer into new conda environment named "rbo". If you don't wish to install rboAnalyzer to new environment, omit commands `1)` and `2)`.
 
 ```shell
 # 1) update conda
@@ -180,7 +180,7 @@ Analyzing subset of NCBI blast HITs for [6S RNA](https://doi.org/10.1038%2F22914
     The parameter `-e` `YOUR_EMAIL_ADDRESS` should be your valid email address on which NCBI staff could contact you
     if they need to. It is not logged by the tool.
 
-    The parameter `-in` is path to file (in this example `6S_super_short.xml`) contaning the BLAST output.
+    The parameter `-in` is path to file (in this example `6S_super_short.xml`) containing the BLAST output.
 
     The parameter `-o` is output file path. In this command the BLAST database with name `genomes.bdb` was created for you if everything was successful.
     You will need it in the next step.
@@ -217,7 +217,7 @@ Since the output BLAST database file is the same as before the `genomes_from_bla
  download only sequences which are not present.
 
 We can expect that the BLAST output contain many false positive HSPs,
-so we selected some of prediction methods which do not rely on information in the BLAST output itself.
+so we selected prediction methods from those, which do not rely on information in the BLAST output itself.
 These are:
 - rnafold
 - rfam-Rc
@@ -261,7 +261,7 @@ These are:
 
 #### BLAST on NCBI web
 
-If you used the BLAST using the NCBI web service against one of preformatted databased, you can download the whole database or use a `genomes_from_blast` script for download.
+If you used the BLAST using the NCBI web service against one of preformatted databased, you can download the whole database or use a `genomes_from_blast` script to download only the sequences in your blast output.
 
 1. downloading whole database (~50GB)   
 The latest databases are provided here [NCBI LATEST](ftp://ftp.ncbi.nih.gov/blast/db/cloud/LATEST).
@@ -283,7 +283,7 @@ This code snippet can be used to obtain and update the database:
   (those in the BLAST output) and build the blastdb from them.
   This command will download all needed genomes and create BLAST database for you.
     ```shell
-    # The `YOUR_EMAIL_ADDRESS` is needed so the NCBI would contact you in case of missuse of their resources.
+    # The `YOUR_EMAIL_ADDRESS` is needed so the NCBI would contact you in case of misuse of their resources.
 
     genomes_from_blast -e YOUR_EMAIL_ADDRESS -in BLAST_OUT_FILE -o BLAST_DATABASE_OUTFILE_NAME
     ```
