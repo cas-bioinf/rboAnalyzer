@@ -24,6 +24,8 @@ To achive this, rboAnalyzer takes as input:
 
 The paper for this tool is available [here](https://doi.org/10.3389/fgene.2020.00675).
 
+You can also try out the [rboanalyzer webserver](http://rboanalyzer.elixir-czech.cz) implementing interactive HSP analysis with selected secondary structure prediction methods.
+
 ## Installation
 This tool was tested on 64-bit linux (Ubuntu 14, 18 and Centos 7). 
 
