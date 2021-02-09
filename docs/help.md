@@ -1,13 +1,13 @@
 # rboAnalyzer
 ## Introduction
-rboAnalyzer is pipeline meant as a complementary step when BLAST algorithm
+rboAnalyzer is a pipeline meant as a complementary step when BLAST algorithm
  was used to search for query that is non-coding RNA (ncRNA) with secondary structure (does not have to be known).
 As the BLAST is general sequence alignment algorithm, it's results (output)
  is missing some very useful features in context of ncRNAs.
 
-Also the output apart from well scoring hits, usually contains sequence
+Also, the output apart from well scoring hits, usually contains sequence
  fragments (subject sequence only partially aligned to query).
-Such hit may bring valuable information by capturing distant homology or
+Such hit may bring valuable information by capturing distant homology, or
 it may be nothing.
 
 With our rboAnalyzer we add information to such BLAST search to help researcher
@@ -82,7 +82,7 @@ The Locarna algorithm utilises possible pairings in it's computations,
  thus it is better suited to align RNAs then BLAST algorithm.
 The Locarna is by default called with `struct-local=0`,
  `sequ-local=0` and `free-endgaps=++++` parameters.
-Additionally the information about matching nucleotides from BLAST HSPs
+Additionally, the information about matching nucleotides from BLAST HSPs
 is used to construct so called anchor for the Locarna algorithm.
 The anchor defines columns of alignment which are considered aligned.
 As the anchor we consider consecutive series of matches of length at
@@ -107,7 +107,7 @@ We've implemented 3 options on how to provide covariance model:
 
 1) build with RSEARCH (default)
 
-    By default we build the covariance model from the query sequence (secondary structure predicted by RNAfold) and RIBOSUM matrix.
+    By default, we build the covariance model from the query sequence (secondary structure predicted by RNAfold) and RIBOSUM matrix.
     The RIBOSUM is RIBOSUM65 by default and it can be changed in [alternative](config_how_to.md) `config.txt` file.
 
 2) supply your own model (the `--cm_file` option)
@@ -150,7 +150,7 @@ The prediction methods can be (roughly) divided to following groups:
 ## Output
 
 ### Output formats
-The rboAnalyzer is able to produce several output formats, most handy being
+The rboAnalyzer is able to produce several output formats, most handy
   being the `.html`.
 - html
     Stand-alone web page containing estimated full-length sequences and predicted secondary structures.
@@ -243,7 +243,7 @@ GAUUACCUGAGGUGUUUGCCAGUGGGUUAUGUCCCUGAGCCGAUACUUUUAUUUUAUGAAUCGGUUUCUAAUUGUUGGUG
 #### The NCBI sequence Viewer
 The NCBI sequence viewer works only if internet connection is available.
 It may take some time to load (especially with large genomes) and when the report
- contains many BLAST hits it may required more substantial amount of RAM.
+ contains many BLAST hits it may require more substantial amount of RAM.
 The data for the sequence viewer are not saved across browser sessions.
 
 ## Funding
