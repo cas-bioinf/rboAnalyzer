@@ -74,7 +74,7 @@ def validate_args(args):
             ml.error('Blastdb must be PATH (string).')
             return False
 
-        p, n = os.path.split(args.blast_db)
+        p, n = os.path.split(os.path.abspath(args.blast_db))
         if not any([f for f in os.listdir(p) if f.startswith(n)]):
             return False
 
