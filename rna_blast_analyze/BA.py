@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 # PYTHON_ARGCOMPLETE_OK
-import argcomplete
 import argparse
 import sys
 import json
 import os
+
+try:
+    import argcomplete
+    HAVE_ARGCOMPLETE = True
+except ImportError:
+    HAVE_ARGCOMPLETE = False
 
 # this must precede the CONFIG
 from rna_blast_analyze.BR_core.tools_versions import method_required_tools, prediction_methods, pred_params
@@ -386,7 +391,9 @@ def f_parser():
         help='Show HSP marker in NCBI sequence viewer.'
     )
 
-    argcomplete.autocomplete(parser)
+    if HAVE_ARGCOMPLETE:
+        argcomplete.autocomplete(parser)
+
     args = parser.parse_args()
     args.command = sys.argv
 
