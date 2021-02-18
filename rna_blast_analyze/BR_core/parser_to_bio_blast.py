@@ -394,7 +394,7 @@ def read_aligns(f, R):
         curr_alig = Record.Alignment()
 
         curr_alig.hit_id = c.group()
-        curr_alig.hit_def = txt[c.end() + 1:]
+        curr_alig.hit_def = txt[c.end() + 1:].strip()
         curr_alig.length = int(re.search(r'(?<=Length=)\d+', def_rem).group())
 
         # draw next line
