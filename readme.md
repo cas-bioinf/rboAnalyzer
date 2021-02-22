@@ -64,16 +64,12 @@ conda install -c conda-forge -c bioconda -c schwarz.marek rboanalyzer
 
  __Prerequisites__
 - python >= 3.4, <3.8 [link](https://www.python.org/downloads/)
-  Verify that you have working up-to date `pip3`.
-  ```
-  pip3 install --upgrade pip
-  # or
-  pip3 install --upgrade pip --user
-  ```
+  Verify that you have latest compatible `pip3`. If you try to use EOL python, please see the `setup.py` script on compatible `pip3` and `setuptools` versions and use them. 
+
 - ncbi-blast+ >= 2.8.1, <2.10 [link](http://ftp.ncbi.nih.gov/blast/executables/blast+/2.9.0/)
   (The pipeline can use blast from version 2.6.0, however this version is not compatible with blast dbv5)
 - locarna >= 1.9.2, <2 [link](https://github.com/s-will/LocARNA/releases/tag/v1.9.2.2)
-- infernal >= 1.1, <2 [link](http://eddylab.org/infernal/)
+- infernal >= 1.1, <1.2 [link](http://eddylab.org/infernal/)
 - clustalo >= 1.2.4, <2 [link](http://www.clustal.org/omega/)
 - muscle >= 3.8.31, <4 [link](https://www.drive5.com/muscle/downloads.htm)
 
@@ -92,6 +88,7 @@ Download this repository (or release), unpack it if needed. Go to directory with
 ```shell
 python3 setup.py install --user
 ```
+Note that the `--user` switch puts the executables in `$HOME/.local/bin` and you may need to add it to `PATH`. 
 
 The rboAnalyzer executable should be created.
 To test it, restart terminal (close and open new) and run
@@ -99,7 +96,7 @@ To test it, restart terminal (close and open new) and run
 ```shell
 rboAnalyzer --version
 ```
-Which should return the version number.
+which should return the version number.
 
 ## Preparation
 
@@ -129,12 +126,16 @@ Prediction methods using suboptimal structures need UNAFold software to work.
 
 ### Shell autocomplete (optional)
 The rboAnalyzer is equipped with argument completion for bash shell.
-To enable this feature you need to register the script (more info [here](https://pypi.org/project/argcomplete/)).
+To enable this feature you need to install `argcomplete` package (version >1.6, <2) and register the script to your shell (more info [here](https://pypi.org/project/argcomplete/)).
 
 To get the autocomplete working run:
 ```shell
+pip3 install --user "argcomplete>1.6, <2a0"
+
 register-python-argcomplete rboAnalyzer >> ~/.bashrc
 ```
+
+Note that the `--user` switch puts the executables in `$HOME/.local/bin` and you may need to add it to `PATH`. 
 
 ### BLAST database
 The rboAnalyzer needs to get relevant 5' and 3' regions of subject sequence of HSPs, for this we use the BLAST database used in the BLAST search.
