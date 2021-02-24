@@ -76,7 +76,7 @@ conda install -c conda-forge -c bioconda -c schwarz.marek rboanalyzer
 For prediction:
 - viennarna >=2.3.5, <3 (with refold.pl in PATH) [link](https://www.tbi.univie.ac.at/RNA/download/sourcecode/2_3_x/ViennaRNA-2.3.5.tar.gz)
   Don't forget to add `refold.pl` to your `PATH`. The `refold.pl` script is located in the `ViennaRNA-[version]/src/Utils/`.
-- centroid_homfold >= 0.0.15 [link](https://github.com/satoken/centroid-rna-package/releases/tag/v0.0.15)
+- centroid_homfold >= 0.0.15, <0.1 [link](https://github.com/satoken/centroid-rna-package/releases/tag/v0.0.15)
 - RNAstructure >= 6.0, <7 (TurboFold - Text (Command Line) Interfaces ) [link](https://rna.urmc.rochester.edu/RNAstructure.html)
   Don't forget to set the `DATAPATH` environment variable [link](http://rna.urmc.rochester.edu/Text/Thermodynamics.html).
 
@@ -126,16 +126,18 @@ Prediction methods using suboptimal structures need UNAFold software to work.
 
 ### Shell autocomplete (optional)
 The rboAnalyzer is equipped with argument completion for bash shell.
-To enable this feature you need to install `argcomplete` package (version >1.6, <2) and register the script to your shell (more info [here](https://pypi.org/project/argcomplete/)).
-
-To get the autocomplete working run:
+To enable this feature the `argcomplete` package needs to be installed (version >1.6, <2), and script registered with your shell.
+It is installed by default in conda package. To install it manually run
 ```shell
 pip3 install --user "argcomplete>1.6, <2a0"
+```
+Note that the `--user` switch puts the executables in `$HOME/.local/bin` and you may need to add it to `PATH`.
 
+To register the script to your shell (more info [here](https://pypi.org/project/argcomplete/)).
+```shell
 register-python-argcomplete rboAnalyzer >> ~/.bashrc
 ```
 
-Note that the `--user` switch puts the executables in `$HOME/.local/bin` and you may need to add it to `PATH`. 
 
 ### BLAST database
 The rboAnalyzer needs to get relevant 5' and 3' regions of subject sequence of HSPs, for this we use the BLAST database used in the BLAST search.

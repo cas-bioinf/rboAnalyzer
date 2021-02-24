@@ -10,6 +10,12 @@ from rna_blast_analyze.BR_core.BA_support import blast_in
 from rna_blast_analyze.BR_core.parse_accession import accession_regex
 from http.client import HTTPException
 
+try:
+    import argcomplete
+    HAVE_ARGCOMPLETE = True
+except ImportError:
+    HAVE_ARGCOMPLETE = False
+
 
 def parser():
     p = argparse.ArgumentParser(
@@ -61,6 +67,10 @@ def parser():
         type=int,
         help='Number of retries to download required sequences.'
     )
+
+    if HAVE_ARGCOMPLETE:
+        argcomplete.autocomplete(p)
+
     return p.parse_args()
 
 
