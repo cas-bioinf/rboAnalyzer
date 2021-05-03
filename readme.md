@@ -150,6 +150,136 @@ The procedure on how to get the BLAST databases for the examples is described in
 ```shell
 rboAnalyzer -h
 ```
+<details>
+<summary>help output</summary>
+
+```
+usage: rboAnalyzer [-h] -in PATH -q PATH (-db path | --entrez ENTREZ)
+                   [--db_type {blastdb,fasta,gb,server}]
+                   [--b_type {guess,xml,plain}] [--blast_regexp BLAST_REGEXP]
+                   [--mode {simple,locarna,meta}] [--turbo_fast_preset]
+                   [--centroid_fast_preset] [--html PATH] [--threads N]
+                   [--csv CSV] [--json PATH] [--cm_file CM_file | --use_rfam]
+                   [--download_rfam] [--version] [--config_file PATH]
+                   [-pm [prediction_method_name [prediction_method_name ...]]]
+                   [--pm_param_file PATH] [--logfile logfile]
+                   [--subseq_window_locarna SUBSEQ_WINDOW_LOCARNA]
+                   [--locarna_anchor_length LOCARNA_ANCHOR_LENGTH]
+                   [--filter_by_eval FILTER_BY_EVAL | --filter_by_bitscore FILTER_BY_BITSCORE]
+                   [-v] [--skip_missing] [--show_HSP]
+
+rboAnalyzer - tool for analyzing BLAST search output for RNA sequences
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -db path, --blast_db path
+                        Provide path to blast database, that is the complete
+                        path with blast db name without any extension (*.nin,
+                        nsd, nog, nsi, nhr, nsq, nal).
+  --entrez ENTREZ       EMAIL - Indicate that you want to use NCBI Entrez
+                        service to download required regions of sequences at
+                        runtime. To comply with NCBI service rules you are
+                        required to provide valid email address at which the
+                        NCBI staff could contact you if they need to.
+
+INPUT:
+  -in PATH, --blast_in PATH
+                        BLAST output file with hits to analyze.
+  -q PATH, --blast_query PATH
+                        The Blast query fasta file.
+
+OUTPUT:
+  --html PATH           Output html file with secondary structure pictures and
+                        other useful stuff.
+  --csv CSV             Output in csv table, infered sequence and structure
+                        present.
+  --json PATH           Dump all stored data to JSON (developer only - it is
+                        possible to convert to all other output formats).
+
+PARAMETERS:
+  --mode {simple,locarna,meta}
+                        Choose mode of hit elongation: simple (extend by
+                        unaligned parts of query) locarna (run locarna
+                        algorithm - uses secondary structure for better
+                        alignment) meta (uses both methods and chooses the
+                        alignment which has better RSEARCH score).
+  --turbo_fast_preset   Act's as parameter preset for Turbo-fast setting the
+                        max_seqs_in_prediction to 2. This means that only the
+                        query sequence is used as homologous sequence. It is
+                        useful if analyzing very distant BLAST HITs.
+  --centroid_fast_preset
+                        Parameter preset for centroid-fast. Set's the
+                        max_seqs_in_prediction to 1. This means that only the
+                        query sequence is used as homologous sequence for
+                        prediction. It is useful if analyzing very distant
+                        BLAST HITs.
+  --config_file PATH    Provide config file if tools and data are in non-
+                        default paths.
+  -pm [prediction_method_name [prediction_method_name ...]], --prediction_method [prediction_method_name [prediction_method_name ...]]
+                        Prediction method to use. Multiple prediction methods
+                        are allowed. Possible values: C-A-U-r-Rc centroid
+                        rnafold M-A-sub M-A-r-Rc fq-sub Turbo-fast TurboFold
+                        centroid-fast C-A-sub C-A-r-Rc M-A-U-r-Rc rfam-sub
+                        rfam-Rc rfam-centroid
+  --pm_param_file PATH  Path to file with parameters for prediction methods in
+                        JSON. Prediction methods not declared within provided
+                        file are used with default values. File is in json
+                        format. Default values (also example how to provide
+                        parameters) are stored in '[install location]/rna_blas
+                        t_analyze/BR_core/prediction_parameters.json'
+  --subseq_window_locarna SUBSEQ_WINDOW_LOCARNA
+                        N of nucleotides to add to expected start/end of
+                        sequence before realignement. The unaligned
+                        nucleotides are not included in reported sequence.
+  --locarna_anchor_length LOCARNA_ANCHOR_LENGTH
+                        Minimal number of adjacent matching bases in BLAST hit
+                        to create an anchor for Locarna.
+
+MISC:
+  --db_type {blastdb,fasta,gb,server}
+                        Type of a database provided. If 'fasta' or 'gb' then
+                        --blast_db must be directory containing files with
+                        names in accession.version format. Example '/home/my-
+                        best-db/' with files like 'CP000001.1'.
+  --b_type {guess,xml,plain}
+  --blast_regexp BLAST_REGEXP
+                        Provide python valid regular expression which capture
+                        the index key to blastdb (usualy the accession.version
+                        number).
+  --threads N           Number of threads to use (default = N of logical cores
+                        detected).
+  --cm_file CM_file     Provided covariance model will be used for homology
+                        inference instead of RSEARCH model.
+  --use_rfam            Search in rfam database for covariance model to infer
+                        homology with instead of RSEARCH model.
+  --download_rfam       Retrieve RFAM covariance models database. Will
+                        download only if new version avalible.
+  --version             show program's version number and exit
+  --logfile logfile     Path to where logfile should be written.
+  --filter_by_eval FILTER_BY_EVAL
+                        Filter the input blast by E-value. Only hits following
+                        the rule will be kept. Example ">10e-10" will keep
+                        only hits with eval greater then 10e-10. Interval can
+                        be specified with "," e.g. ">10e-100, <10e-1". The
+                        homologous sequences used with certain prediction
+                        methods are taken from all hits (regardless of the
+                        filtering).
+  --filter_by_bitscore FILTER_BY_BITSCORE
+                        Filter the input blast by bit score. Only hits
+                        following the rule will be kept. Example "<20" will
+                        keep only hits with bit score less then 20. Interval
+                        can be specified with "," e.g. ">30, <45". The
+                        homologous sequences used with certain prediction
+                        methods are taken from all hits (regardless of the
+                        filtering).
+  -v, --verbose         output verbosity -> most detailed -vv (lot of output)
+  --skip_missing        If given, the missing records in given blast database
+                        will be skipped. This may alter the results of
+                        bit_score computation (for homology prediction) and
+                        secondary structure prediction for several methods.
+  --show_HSP            Show HSP marker in NCBI sequence viewer.
+```
+</details>
 
 ### Usage
 ```shell
@@ -295,6 +425,13 @@ This code snippet can be used to obtain and update the database:
 If custom database was used for the BLAST search you need to ensure multiple things for the rboAnalyzer to find the sequences correctly.
 1. custom database is nucleotide and it was created with `-parse_seqids` (this makes sequences retrievable by their ids).
 2. provide regular expression capturing the sequence ids. By default the rboAnalyzer captures the Accession.Version as documented [here](https://www.ncbi.nlm.nih.gov/Sequin/acc.html).
+
+## Learn more
+Description of the pipeline logic is avialable in the [publication](https://doi.org/10.3389/fgene.2020.00675).
+
+Details can also be found [here](docs/help.md).
+
+This readme and documentation in `docs` are valid for latest release 0.1.4 and dev 0.1.5a1.
 
 ## References
 - ViennaRNA: Lorenz, Ronny and Bernhart, Stephan H. and Höner zu Siederdissen, Christian and Tafer, Hakim and Flamm, Christoph and Stadler, Peter F. and Hofacker, Ivo L.
