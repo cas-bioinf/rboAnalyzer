@@ -13,6 +13,15 @@ it may be nothing.
 With our rboAnalyzer we add information to such BLAST search to help researcher
  decide which hits are real ncRNAs and what their secondary structure might be.
 
+## Getting help
+Commandline reference can be viewed [here](../readme.md#help) (click on the dropdown) or accessed by
+```shell
+rboAnalyzer -h
+```
+
+In case of any questions, comments, bugreports or suggestions, create an issue or write to `marek.schwarz AT biomed.cas.cz`.
+
+
 ## Functionality overview
 <img src="RBA_pipeline_overview.svg" width="700px" />
 
@@ -138,6 +147,7 @@ The prediction methods can be (roughly) divided to following groups:
     - [centroid](prediction_methods.md#centroid)
     - [TurboFold](prediction_methods.md#TurboFold)
     - [Turbo-fast](prediction_methods.md#Turbo-fast)
+    - [centroid-fast](prediction_methods.md#centroid-fast)
 
 - Use of selected estimated full-length sequences to build consensus secondary structure
     - [C-A-r-Rc](prediction_methods.md#C-A-r-Rc)
