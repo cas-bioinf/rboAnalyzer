@@ -369,11 +369,17 @@ These are:
   This is due to inconsistency between the sequence accessions and the BLAST database.
   The inconsistency may rise from:
     1. __sequence is not in the database__   
-      Solution: Provide correct blast database (update current or create new with `genomes_from_blast`).
+      Solution: Provide correct BLAST database (update current or create new with `genomes_from_blast`).
     2. __capturing regexp does not capture the accession number__   
       Solution: Provide capturing regular expression (python 3 syntax) for capturing the sequence id from the fasta header (it must match the id to the BLAST database used)
     3. __the BLAST database was created without the `-parse_seqids` flag__   
       Solution: Create new database from the sequences used to create new one, this time with `-parse_seqids` flag.
+    4. __inconsistent accession mapping__
+      Detailed cause: In certain NCBI's BLAST databases there are some sequences with accession numbers for which ENTREZ 
+       return sequences with different accession numbers. (We observed this for several sequences with accession numbers starting with `GPS_`.) 
+       The `genomes_from_blast` script depends on matching accession numbers and can't handle the inconsistency.
+      Solution: We recommend obtaining the database from NCBI which was used to generate the BLAST output. 
+       Other option is to manually add the sequence in question to the blast database.  
 
   Another option is to call pipeline with `--skip_missing` flag.
   This will skip the missing sequences.
@@ -385,7 +391,7 @@ These are:
   The `genomes_from_blast` script has build in handling of failed downloads,
   but by default it tries only 10 times. If you are on unstable connection
   you might get better results by setting the `--retry` to some larger number.
-  Also check if NCBI entrez services are functional.
+  Also check if NCBI ENTREZ services are functional.
 
 
 <a name="blastdatabase" id="blastdatabase"></a>
