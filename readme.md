@@ -374,10 +374,10 @@ These are:
       Solution: Provide capturing regular expression (python 3 syntax) for capturing the sequence id from the fasta header (it must match the id to the BLAST database used)
     3. __the BLAST database was created without the `-parse_seqids` flag__   
       Solution: Create new database from the sequences used to create new one, this time with `-parse_seqids` flag.
-    4. __inconsistent accession mapping__
+    4. __inconsistent accession mapping__   
       Detailed cause: In certain NCBI's BLAST databases there are some sequences with accession numbers for which ENTREZ 
        return sequences with different accession numbers. (We observed this for several sequences with accession numbers starting with `GPS_`.) 
-       The `genomes_from_blast` script depends on matching accession numbers and can't handle the inconsistency.
+       The `genomes_from_blast` script depends on matching accession numbers and can't handle the inconsistency.   
       Solution: We recommend obtaining the database from NCBI which was used to generate the BLAST output. 
        Other option is to manually add the sequence in question to the blast database.  
 
