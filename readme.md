@@ -285,6 +285,7 @@ MISC:
 ```shell
 rboAnalyzer -in BLAST_OUTPUT.xml -db USED_DATABASE_PATH -q BLAST_QUERY.fasta
 ```
+Note that only __one__ query sequence in the query FASTA file is expected.
 
 ## Example
 Examples are provided in example directory.
@@ -393,6 +394,9 @@ These are:
   you might get better results by setting the `--retry` to some larger number.
   Also check if NCBI ENTREZ services are functional.
 
+- __ValueError: could not convert string to float__    
+  (raised with traceback containing `infer_homology.py ... dtypes/cast.py)    
+  Please check, that there is only one query sequence in the input FASTA file. 
 
 <a name="blastdatabase" id="blastdatabase"></a>
 
