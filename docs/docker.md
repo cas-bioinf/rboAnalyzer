@@ -8,7 +8,7 @@ Install compatible docker version from https://www.docker.com/.
 
 
 ## rboAnalyzer container structure
-- The container is at https://hub.docker.com/repository/docker/schwarzmarek/rboanalyzer
+- The container is at https://hub.docker.com/r/schwarzmarek/rboanalyzer
 - The working directory of the rboAnalyzer in the container is `/data`. You are expected to mount your data there.
 - The Rfam database is in the container and it's version is 14.1.
 - The container is ready to use - no other preparation should be necessary
