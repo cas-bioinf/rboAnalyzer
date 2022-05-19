@@ -478,12 +478,16 @@ RNA, 18 no. 5, pp. 900-14, 2012. <https://doi.org/10.1261/rna.029041.111>, [webs
 - Matplotlib [website](https://matplotlib.org)
 
 ## Citation
-If you find this software useful please cite this [paper](https://doi.org/10.3389/fgene.2020.00675).
+- If you find this software useful please cite this [paper](https://doi.org/10.3389/fgene.2020.00675).
 
-Schwarz, M., Vohradský, J., Modrák, M. and Pánek, J., 2020. rboAnalyzer: A Software to Improve Characterization of Non-coding RNAs From Sequence Database Search Output. Frontiers in genetics, 11, p.675.
+  Schwarz, M., Vohradský, J., Modrák, M. and Pánek, J., 2020. rboAnalyzer: A Software to Improve Characterization of Non-coding RNAs From Sequence Database Search Output. Frontiers in genetics, 11, p.675.
 
-The rboAnalyzer version used for the paper is `0.1.4`.
+  The rboAnalyzer version used for the paper is `0.1.4`.
 
+- If you find helpfull the webserver implementation, please cite this [paper](https://doi.org/10.1093/bioinformatics/btab073).
+                         
+  Marek Schwarz, Jiří Vohradský, Josef Pánek, rboAnalyzer webserver: web service for non-coding RNA characterization from NCBI BLAST output, Bioinformatics, Volume 37, Issue 17, 1 September 2021, Pages 2755–2756, https://doi.org/10.1093/bioinformatics/btab073
+                         
 ## Funding
 
 This work was supported by ELIXIR CZ research infrastructure project (MEYS Grant No: LM2015047) including access to computing and storage facilities.
