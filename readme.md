@@ -395,7 +395,7 @@ These are:
   Also check if NCBI ENTREZ services are functional.
 
 - __ValueError: could not convert string to float__    
-  (raised with traceback containing `infer_homology.py ... dtypes/cast.py)    
+  (raised with traceback containing `infer_homology.py ... dtypes/cast.py)`    
   Please check, that there is only one query sequence in the input FASTA file. 
 
 <a name="blastdatabase" id="blastdatabase"></a>

@@ -13,6 +13,20 @@ it may be nothing.
 With our rboAnalyzer we add information to such BLAST search to help researcher
  decide which hits are real ncRNAs and what their secondary structure might be.
 
+### Searching sequence database with BLAST
+
+Since BLAST scoring parameters can significantly influence the number and length of obtained HSPs we suggest to test out multiple BLAST parameter groups to find out which provides relevant results for your use-case. Analysis with rboAnalyzer is helpful by providing potential secondary structure and genomic context information to the HSPs of interest, especially for HSPs with partial alignment or alignment with many mismatches and/or gaps. Additionally it is possible to explore and combine multiple BLAST parameter settings in addition to the default ones, as no single ones are appropriate for all situations (ref. [1](#references)).
+
+Here we list scoring parameters that where used for ncRNA searches (ref. [2-4](#references)) and recommended for cross-species exploration and RNA search (ref. [5](#references)):
+
+| Parameter        | [ref. 2](#references) | [ref. 3](#references) | [ref. 4](#references) | [ref. 5](#references) |
+|------------------|-----------------------|-----------------------|-----------------------|-----------------------|
+| MatchReward      | 5                     | 5                     | 5                     | 1                     |
+| MismatchPenalty  | -4                    | -4                    | -4                    | -1                    |
+| GapOpeningCost   | 10                    | 8                     | 10                    | 1                     |
+| GapExtensionCost | 10                    | 6                     | 6                     | 2                     |
+| WordSize         | 7                     | 4                     | 7                     | 9                     |
+
 ## Getting help
 Commandline reference can be viewed [here](../readme.md#help) (click on the dropdown) or accessed by
 ```shell
@@ -255,6 +269,15 @@ The NCBI sequence viewer works only if internet connection is available.
 It may take some time to load (especially with large genomes) and when the report
  contains many BLAST hits it may require more substantial amount of RAM.
 The data for the sequence viewer are not saved across browser sessions.
+
+## References
+
+1. Velandia-Huerto, C. A., Gittenberger, A. A., Brown, F. D., Stadler, P. F., & Bermúdez-Santana, C. I. (2016). Automated detection of ncRNAs in the draft genome sequence of a colonial tunicate: the carpet sea squirt Didemnum vexillum. BMC genomics, 17(1), 1-15.   
+2. Freyhult, E. K., Bollback, J. P., & Gardner, P. P. (2007). Exploring genomic dark matter: a critical assessment of the performance of homology search methods on noncoding RNA. Genome research, 17(1), 117-125.   
+3. Roshan, U., Chikkagoudar, S., & Livesay, D. R. (2008). Searching for evolutionary distant RNA homologs within genomic sequences using partition function posterior probabilities. BMC bioinformatics, 9(1), 1-9.   
+4. Mount, S., & Nguyen, M.-C. (2006, December 14). BLASTN parameters for noncoding queries. Retrieved May 16, 2022, from http://stevemount.outfoxing.com/Posting0004.html  
+5. Korf, I., Yandell, M., & Bedell, J. (2003). Blast (1st ed.). O’Reilly Media.”  
+
 
 ## Funding
 
